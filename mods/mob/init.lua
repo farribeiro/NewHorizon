@@ -1308,7 +1308,7 @@ mobs:register_egg("nh_mob:visage", "Orbe com Vulto", "orbspawner.png", 0)
 mobs:register_mob("nh_mob:dopel", {
     type = "monster",
     passive = false,
-    reach = 1,
+    reach = 2,
     damage = 5,
     attack_type = "dogfight",
     
@@ -1373,6 +1373,16 @@ mobs:register_mob("nh_mob:dopel", {
         random = "vulto_som",
         damage = "vulto_hurt",
     },
+    
+    custom_attack = function(self, to_attack)
+	self.attack_count = (self.attack_count or 0) + 1
+	if self.attack_count < 3 then return end
+	self.attack_count = 0
+
+	self:set_animation("punch", false)
+
+	return true -- PARA CONTINUAR.
+	end,	
 })
 
 -- Spawn do vulto (fundo de cavernas escuras)
@@ -1397,7 +1407,7 @@ mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
 mobs:register_mob("nh_mob:octoskull", {
     type = "monster",
     passive = false,
-    reach = 1,
+    reach = 2,
     damage = 5,
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
@@ -1464,6 +1474,16 @@ mobs:register_mob("nh_mob:octoskull", {
         random = "vulto_som",
         damage = "vulto_hurt",
     },
+    
+    custom_attack = function(self, to_attack)
+	self.attack_count = (self.attack_count or 0) + 1
+	if self.attack_count < 3 then return end
+	self.attack_count = 0
+
+	self:set_animation("punch", false)
+
+	return true -- PARA CONTINUAR.
+	end,	
 })
 
 -- Spawn do vulto (fundo de cavernas escuras)
@@ -1488,8 +1508,8 @@ mobs:register_egg("nh_mob:octoskull", "Orbe com Exopolvo", "orbspawner.png", 0)
 mobs:register_mob("nh_mob:sirenia", {
     type = "monster",
     passive = false,
-    reach = 1,
-    damage = 5,
+    reach = 2,
+    damage = 1,
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
@@ -1555,6 +1575,17 @@ mobs:register_mob("nh_mob:sirenia", {
         random = "vulto_som",
         damage = "vulto_hurt",
     },
+    
+    	custom_attack = function(self, to_attack)
+  
+	self.attack_count = (self.attack_count or 0) + 1
+	if self.attack_count < 3 then return end
+	self.attack_count = 0
+
+	self:set_animation("punch", false)
+
+	return true -- PARA CONTINUAR.
+	end,	
 })
 
 -- Spawn do vulto (fundo de cavernas escuras)

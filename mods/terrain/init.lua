@@ -1886,7 +1886,7 @@ local function apply_decorations(area, data, decorations)
             spawn_tree(area, data, spawn_data, spawn_data.wx, spawn_data.wz)
             
             local rng_page = PseudoRandom(spawn_data.wx * 31337 + spawn_data.wz * 13337)
-            if rng_page:next(1, 5) == 1 then
+            if rng_page:next(1, 15) == 1 then
                 local dirs = {
                     {x=1,  y=0, z=0},
                     {x=-1, y=0, z=0},
