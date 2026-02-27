@@ -39,6 +39,7 @@ local c_oaktimber = core.get_content_id("nh_nodes:oaktimber")
 local c_fallenstick = core.get_content_id("nh_nodes:fallenstick")
 local c_appletimber = core.get_content_id("nh_nodes:appletimber")
 local c_pinetimber = core.get_content_id("nh_nodes:pinetimber")
+local c_pineleaves = core.get_content_id("nh_nodes:pineleaves")
 local c_oakwood = core.get_content_id("nh_nodes:oakwood")
 local c_oakplank = core.get_content_id("nh_nodes:oakplank")
 local c_oakdowel = core.get_content_id("nh_nodes:oakdowel")
@@ -822,7 +823,7 @@ local function spawn_pine_tree(area, data, pos, wx, wz)
         
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
-            if data[vi] == c_air or data[vi] == c_leaves then
+            if data[vi] == c_air or data[vi] == c_pineleaves then
                 data[vi] = c_pinetimber
             end
         end
@@ -865,7 +866,7 @@ local max_radius = 4
 		        if area:contains(check_pos.x, check_pos.y, check_pos.z) then
 		            local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
 		            if data[vi] == c_air then
-		                data[vi] = c_leaves
+		                data[vi] = c_pineleaves
 		            end
 		        end
 		    end

@@ -265,9 +265,9 @@ mobs:register_mob("nh_mob:galo", {
     floats = 1,               -- Não nadam bem
     
     visual = "mesh",
-    mesh = "rooster.obj",     -- Você precisa criar este modelo
+    mesh = "rooster.glb",     -- Você precisa criar este modelo
     textures = {"rooster.png"}, -- Você precisa criar esta textura
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 1,
@@ -279,11 +279,17 @@ mobs:register_mob("nh_mob:galo", {
     light_damage = 0,
     
     animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
+        speed_normal = 1,
+        stand_start = 0.25,
+        stand_end = 0.25,
+        walk_start = 0.5,
+        walk_end = 1.5,
+        
+    fly_up_start = 1.65,
+    fly_up_end = 1.85,
+
+    fly_down_start = 1.75,
+    fly_down_end = 1.75,
     },
     
     -- Galinhas podem ser alimentadas e seguir o jogador com sementes
@@ -309,6 +315,37 @@ mobs:register_mob("nh_mob:galo", {
         random = "galinha_cacarejo",
         damage = "galinha_hurt",
     },
+    
+    
+        -- Sistema de ovos
+do_custom = function(self, dtime)
+
+    local vel = self.object:get_velocity()
+
+    if not vel then return end
+
+    -- Subindo
+    if vel.y > 0.5 then
+        if self.state ~= "fly_up" then
+            self.state = "fly_up"
+            self:set_animation("fly_up")
+        end
+
+    -- Descendo
+    elseif vel.y < -0.5 then
+        if self.state ~= "fly_down" then
+            self.state = "fly_down"
+            self:set_animation("fly_down")
+        end
+
+    -- Movimento normal
+    else
+        if self.state ~= "walk" then
+            self.state = "walk"
+            self:set_animation("walk")
+        end
+    end
+end,
 })
 
 -- Spawn da Galinha (terra/dirt)
@@ -353,9 +390,9 @@ mobs:register_mob("nh_mob:galinha", {
     floats = 1,               -- Não nadam bem
     
     visual = "mesh",
-    mesh = "chicken.obj",     -- Você precisa criar este modelo
+    mesh = "chicken.glb",     -- Você precisa criar este modelo
     textures = {"chicken.png"}, -- Você precisa criar esta textura
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 1,
@@ -367,11 +404,17 @@ mobs:register_mob("nh_mob:galinha", {
     light_damage = 0,
     
     animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
+        speed_normal = 1,
+        stand_start = 0.25,
+        stand_end = 0.25,
+        walk_start = 0.5,
+        walk_end = 1.5,
+        
+    fly_up_start = 1.65,
+    fly_up_end = 1.85,
+
+    fly_down_start = 1.75,
+    fly_down_end = 1.75,
     },
     
     -- Galinhas podem ser alimentadas e seguir o jogador com sementes
@@ -384,7 +427,7 @@ mobs:register_mob("nh_mob:galinha", {
             local name = item:get_name()
             
             -- Se o jogador está segurando sementes, a galinha segue
-            if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" then
+            if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
                 core.chat_send_player(clicker:get_player_name(), "A galinha está interessada na comida!")
             else
                 core.chat_send_player(clicker:get_player_name(), "Pó pó! 🐔")
@@ -449,6 +492,35 @@ do_custom = function(self, dtime)
         -- Reset
         self.egg_timer = 0
         self.next_egg_time = math.random(60, 120)
+    end
+    
+
+
+
+    local vel = self.object:get_velocity()
+
+    if not vel then return end
+
+    -- Subindo
+    if vel.y > 0.5 then
+        if self.state ~= "fly_up" then
+            self.state = "fly_up"
+            self:set_animation("fly_up")
+        end
+
+    -- Descendo
+    elseif vel.y < -0.5 then
+        if self.state ~= "fly_down" then
+            self.state = "fly_down"
+            self:set_animation("fly_down")
+        end
+
+    -- Movimento normal
+    else
+        if self.state ~= "walk" then
+            self.state = "walk"
+            self:set_animation("walk")
+        end
     end
 end,
 })
@@ -856,7 +928,7 @@ mobs:register_egg("nh_mob:firefly", "Orbe com Vagalume", "orbspawner.png", 0)
 mobs:register_mob("nh_mob:bull", {
     type = "animal",
     passive = false,
-    reach = 7,
+    reach = 1,
     damage = 7,
     attack_type = "dogfight",
     drops = {
@@ -877,30 +949,22 @@ mobs:register_mob("nh_mob:bull", {
     floats = 1,
     
     visual = "mesh",
-    mesh = "bull.obj",
+    mesh = "bull.glb",
     textures = {"bull.png"},
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 7.5, y = 7.5},
     
     -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
     --fly = true,
     --fly_in = {"nh_nodes:air"},  -- Pode ser uma lista!
     
-    walk_velocity = 3,
+    walk_velocity = 1,
     run_velocity = 6,
     
     view_range = 8,
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
-    
-    animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
-    },
     
     follow = {"nh_nodes:grassleaves"},
 
@@ -921,6 +985,17 @@ mobs:register_mob("nh_mob:bull", {
    --     random = "rat_quick",
     --    damage = "rat_hurt",
     --},
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0.5,
+        stand_end = 0.5,
+        walk_start = 1,
+        walk_end = 5,
+        run_start = 5.25,
+        run_end = 6.25,
+    },
+    
 })
 
 -- Spawn do touro (folhas de grama)
@@ -938,6 +1013,381 @@ mobs:spawn({
 
 mobs:register_egg("nh_mob:bull", "Orbe com Touro", "orbspawner.png", 0)
 
+
+-------------------------------
+-- MOB 4: Aguia (Agressivo)
+-------------------------------
+mobs:register_mob("nh_mob:eagle", {
+    type = "animal",
+    passive = false,
+    reach = 1,
+    damage = 2,
+    attack_type = "dogfight",
+    --attack_chance = 8, -- entre 1-10
+    
+    hp_min = 10,
+    hp_max = 20,
+    armor = 100,
+    
+    collisionbox = {-0.5, 0, -0.2, 0.3, 2.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
+    physical = true,
+    stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -4,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "eagle.glb",
+    textures = {"eagle.png"},
+    --rotate = 180,
+    visual_size = {x = 15, y = 15}, -- visual_size = {x = 2.1, y = 2.1},
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    fly = true,               -- Permite "voar" na água
+    fly_in = "air",   -- Voa no ar
+    
+    walk_velocity = 1,
+    run_velocity = 4,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,         
+    
+    animation = {
+        speed_normal = 0.1,
+        stand_start = 0,
+        stand_end = 0.5,
+        walk_start = 0.7,
+        walk_end = 0.8,
+        
+    fly_up_start = 0.75,
+    fly_up_end = 0.75,
+
+    fly_down_start = 0.75,
+    fly_down_end = 0.75,
+        -- ANIMAÇÃO DE ATAQUE:
+        punch_start = 0.5,    -- Frame inicial do ataque
+        punch_end = 1,      -- Frame final do ataque
+        punch_speed = 1, -- vel 1-30
+    },
+    
+    follow = {"nh_nodes:torch2"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:torch2" then
+                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "...")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "vulto_som",
+        damage = "vulto_hurt",
+    },
+    
+    
+    
+    do_custom = function(self, dtime)
+
+    local vel = self.object:get_velocity()
+
+    if not vel then return end
+
+    -- Subindo
+    if vel.y > 0.5 then
+        if self.state ~= "fly_up" then
+            self.state = "fly_up"
+            self:set_animation("fly_up")
+        end
+
+    -- Descendo
+    elseif vel.y < -0.5 then
+        if self.state ~= "fly_down" then
+            self.state = "fly_down"
+            self:set_animation("fly_down")
+        end
+
+    -- Movimento normal
+    else
+        if self.state ~= "walk" then
+            self.state = "walk"
+            self:set_animation("walk")
+        end
+    end
+    
+
+
+    -- controla timer para não rodar todo tick
+    self.perch_timer = (self.perch_timer or 0) + dtime
+
+    if self.perch_timer < 3 then
+        return
+    end
+
+    self.perch_timer = 0
+
+    local time = minetest.get_timeofday()
+
+    -- Só tenta pousar de noite
+    if time > 0.75 or time < 0.2 then
+
+        if not self.is_perching then
+
+            local pos = self.object:get_pos()
+            local leaves = minetest.find_node_near(pos, 6, {"nh_nodes:oaktimber"})
+
+		if leaves then
+
+		    leaves.y = leaves.y + 1
+
+		    self.object:set_pos(leaves)
+		    self.object:set_velocity({x=0,y=0,z=0})
+		    self.object:set_acceleration({x=0,y=0,z=0})
+
+		    self.fly = false
+		    self.walk_velocity = 0
+		    self.run_velocity = 0
+
+		    self.is_perching = true
+		    self.eagle_anim_state = "perch"
+		    self:set_animation("stand")
+
+		end
+        end
+    else
+        -- Se amanheceu, volta a voar
+	if self.is_perching then
+	    self.is_perching = false
+
+	    self.fly = true
+	    self.walk_velocity = 1
+	    self.run_velocity = 4
+    -- restaura aceleração padrão de voo
+    self.object:set_acceleration({x=0, y=0, z=0})
+
+    -- impulso inicial
+    self.object:set_velocity({x=5,y=5,z=5})
+
+	    self:set_animation("walk")
+	end
+    end
+
+    
+end,
+
+})
+
+-- Spawn da aguia (copas de carvalhos)
+mobs:spawn({
+    name = "nh_mob:eagle",
+    nodes = {"air"}, -- nh_nodes = {"nh_nodes:water"},
+    neighbors = {"nh_nodes:leaves"}, --neighbors = {"nh_nodes:wet_sand"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 1,
+    min_height = 10,
+    max_height = 50                  
+})
+
+mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
+
+
+-------------------------------
+-- MOB 4: Fenix (Agressivo)
+-------------------------------
+mobs:register_mob("nh_mob:phoenix", {
+    type = "monster",
+    passive = false,
+    reach = 1,
+    damage = 2,
+    attack_type = "dogfight",
+    --attack_chance = 8, -- entre 1-10
+    
+    hp_min = 10,
+    hp_max = 20,
+    armor = 100,
+    
+    collisionbox = {-0.5, 0, -0.2, 0.3, 2.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
+    physical = true,
+    stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -4,
+    fall_damage = 0,
+    floats = 3,
+    
+    visual = "mesh",
+    mesh = "eagle.glb",
+    textures = {"phoenix.png"},
+    --rotate = 180,
+    visual_size = {x = 15, y = 15}, -- visual_size = {x = 2.1, y = 2.1},
+    
+    -- BRILHO 
+    glow = 14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    fly = true,               -- Permite "voar" na água
+    fly_in = "air",   -- Voa no ar
+    
+    walk_velocity = 1,
+    run_velocity = 4,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,         
+    
+    animation = {
+        speed_normal = 0.2,
+        stand_start = 0,
+        stand_end = 0.5,
+        walk_start = 0.7,
+        walk_end = 0.8,
+        
+    fly_up_start = 0.75,
+    fly_up_end = 0.75,
+
+    fly_down_start = 0.75,
+    fly_down_end = 0.75,
+        -- ANIMAÇÃO DE ATAQUE:
+        punch_start = 0.5,    -- Frame inicial do ataque
+        punch_end = 1,      -- Frame final do ataque
+        punch_speed = 1, -- vel 1-30
+    },
+    
+    follow = {"nh_nodes:torch2"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:torch2" then
+                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "...")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "vulto_som",
+        damage = "vulto_hurt",
+    },
+    
+    
+    
+        do_custom = function(self, dtime)
+
+    local vel = self.object:get_velocity()
+
+    if not vel then return end
+
+    -- Subindo
+    if vel.y > 0.5 then
+        if self.state ~= "fly_up" then
+            self.state = "fly_up"
+            self:set_animation("fly_up")
+        end
+
+    -- Descendo
+    elseif vel.y < -0.5 then
+        if self.state ~= "fly_down" then
+            self.state = "fly_down"
+            self:set_animation("fly_down")
+        end
+
+    -- Movimento normal
+    else
+        if self.state ~= "walk" then
+            self.state = "walk"
+            self:set_animation("walk")
+        end
+    end
+    
+
+
+    -- controla timer para não rodar todo tick
+    self.perch_timer = (self.perch_timer or 0) + dtime
+
+    if self.perch_timer < 3 then
+        return
+    end
+
+    self.perch_timer = 0
+
+    local time = minetest.get_timeofday()
+
+    -- Só tenta pousar de noite
+    if time > 0.75 or time < 0.2 then
+
+        if not self.is_perching then
+
+            local pos = self.object:get_pos()
+            local leaves = minetest.find_node_near(pos, 6, {"nh_nodes:magma"})
+
+		if leaves then
+
+		    leaves.y = leaves.y + 1
+
+		    self.object:set_pos(leaves)
+		    self.object:set_velocity({x=0,y=0,z=0})
+		    self.object:set_acceleration({x=0,y=0,z=0})
+
+		    self.fly = false
+		    self.walk_velocity = 0
+		    self.run_velocity = 0
+
+		    self.is_perching = true
+		    self.eagle_anim_state = "perch"
+		    self:set_animation("stand")
+
+		end
+        end
+    else
+        -- Se amanheceu, volta a voar
+	if self.is_perching then
+	    self.is_perching = false
+
+	    self.fly = true
+	    self.walk_velocity = 1
+	    self.run_velocity = 4
+    -- restaura aceleração padrão de voo
+    self.object:set_acceleration({x=0, y=0, z=0})
+
+    -- impulso inicial
+    self.object:set_velocity({x=5,y=5,z=5})
+
+	    self:set_animation("walk")
+	end
+    end
+end,
+})
+
+-- Spawn da aguia (copas de carvalhos)
+mobs:spawn({
+    name = "nh_mob:phoenix",
+    nodes = {"air"}, -- nh_nodes = {"nh_nodes:water"},
+    neighbors = {"nh_nodes:basalt"}, --neighbors = {"nh_nodes:wet_sand"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 1,
+    min_height = 15,
+    max_height = 50                  
+})
+
+mobs:register_egg("nh_mob:phoenix", "Orbe com Fênix", "orbspawner.png", 0)
 
 
 -------------------------------
@@ -1011,189 +1461,6 @@ mobs:register_mob("nh_mob:slime", {
         damage = "slime_hurt",
     },
 })
-
-
--------------------------------
--- MOB 4: Aguia (Agressivo)
--------------------------------
-mobs:register_mob("nh_mob:eagle", {
-    type = "monster",
-    passive = false,
-    reach = 1,
-    damage = 2,
-    attack_type = "dogfight",
-    --attack_chance = 8, -- entre 1-10
-    
-    hp_min = 10,
-    hp_max = 20,
-    armor = 100,
-    
-    collisionbox = {-0.25, 0, -0.2, 0.3, 2.4, 0.2},
-    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
-    physical = true,
-    stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
-    fall_speed = -4,
-    fall_damage = 0,
-    floats = 3,
-    
-    visual = "mesh",
-    mesh = "eagle.obj",
-    textures = {"eagle.png"},
-    rotate = 180,
-    visual_size = {x = 15, y = 15}, -- visual_size = {x = 2.1, y = 2.1},
-    
-    -- IMPORTANTE: Propriedades para manter na água
-    fly = true,               -- Permite "voar" na água
-    fly_in = "air",   -- Voa no ar
-    
-    walk_velocity = 1,
-    run_velocity = 4,
-    
-    view_range = 16,
-    water_damage = 0,
-    lava_damage = 5,
-    light_damage = 0,
-    air_damage = 0,         
-    
-    animation = {
-        speed_normal = 1,
-        stand_start = 0,
-        stand_end = 1,
-        walk_start = 1,
-        walk_end = 2,
-        -- ANIMAÇÃO DE ATAQUE:
-        punch_start = 11.54,    -- Frame inicial do ataque
-        punch_end = 16,      -- Frame final do ataque
-        --punch_speed = 20, -- vel 1-30
-    },
-    
-    follow = {"nh_nodes:torch2"},
-    
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            
-            if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
-            else
-                core.chat_send_player(clicker:get_player_name(), "...")
-            end
-        end
-    end,
-    
-    sounds = {
-        random = "vulto_som",
-        damage = "vulto_hurt",
-    },
-})
-
--- Spawn da aguia (copas de carvalhos)
-mobs:spawn({
-    name = "nh_mob:eagle",
-    nodes = {"air"}, -- nh_nodes = {"nh_nodes:water"},
-    neighbors = {"nh_nodes:leaves"}, --neighbors = {"nh_nodes:wet_sand"},
-    max_light = 15,
-    interval = 120,
-    chance = 2000,
-    active_object_count = 1,
-    min_height = 10,
-    max_height = 50                  
-})
-
-mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
-
-
--------------------------------
--- MOB 4: Fenix (Agressivo)
--------------------------------
-mobs:register_mob("nh_mob:phoenix", {
-    type = "monster",
-    passive = false,
-    reach = 1,
-    damage = 2,
-    attack_type = "dogfight",
-    --attack_chance = 8, -- entre 1-10
-    
-    hp_min = 10,
-    hp_max = 20,
-    armor = 100,
-    
-    collisionbox = {-0.25, 0, -0.2, 0.3, 2.4, 0.2},
-    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
-    physical = true,
-    stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
-    fall_speed = -4,
-    fall_damage = 0,
-    floats = 3,
-    
-    visual = "mesh",
-    mesh = "eagle.obj",
-    textures = {"phoenix.png"},
-    rotate = 180,
-    visual_size = {x = 15, y = 15}, -- visual_size = {x = 2.1, y = 2.1},
-    
-    -- IMPORTANTE: Propriedades para manter na água
-    fly = true,               -- Permite "voar" na água
-    fly_in = "air",   -- Voa no ar
-    
-    walk_velocity = 1,
-    run_velocity = 4,
-    
-    view_range = 16,
-    water_damage = 0,
-    lava_damage = 5,
-    light_damage = 0,
-    air_damage = 0,         
-    
-    animation = {
-        speed_normal = 1,
-        stand_start = 0,
-        stand_end = 1,
-        walk_start = 1,
-        walk_end = 2,
-        -- ANIMAÇÃO DE ATAQUE:
-        punch_start = 11.54,    -- Frame inicial do ataque
-        punch_end = 16,      -- Frame final do ataque
-        --punch_speed = 20, -- vel 1-30
-    },
-    
-    follow = {"nh_nodes:torch2"},
-    
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            
-            if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
-            else
-                core.chat_send_player(clicker:get_player_name(), "...")
-            end
-        end
-    end,
-    
-    sounds = {
-        random = "vulto_som",
-        damage = "vulto_hurt",
-    },
-})
-
--- Spawn da aguia (copas de carvalhos)
-mobs:spawn({
-    name = "nh_mob:phoenix",
-    nodes = {"air"}, -- nh_nodes = {"nh_nodes:water"},
-    neighbors = {"nh_nodes:basalt"}, --neighbors = {"nh_nodes:wet_sand"},
-    max_light = 15,
-    interval = 120,
-    chance = 2000,
-    active_object_count = 1,
-    min_height = 20,
-    max_height = 50                  
-})
-
-mobs:register_egg("nh_mob:phoenix", "Orbe com Fênix", "orbspawner.png", 0)
-
 
 -- Spawn da slime (cavernas)
 mobs:spawn({

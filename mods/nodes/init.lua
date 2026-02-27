@@ -2591,6 +2591,14 @@ register_craft_station("nh_nodes:craft_table", {
             output = "nh_nodes:backchest"
         }, 
         {
+            ingredients = {["nh_nodes:cowfur"] = 5},
+            output = "nh_nodes:likeglove"
+        },
+        {
+            ingredients = {["nh_nodes:cowfur"] = 6},
+            output = "nh_nodes:pointglove"
+        },
+        {
             ingredients = {["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2},
             output = "nh_nodes:oakdoor_closed"
         },         
@@ -2680,7 +2688,7 @@ register_craft_station("nh_nodes:furnace", {
         },
         {
             ingredients = {["nh_nodes:sand"] = 3},
-            output = "nh_items:bottle"
+            output = "nh_nodes:bottle"
         },
         {
             ingredients = {["default:steel_ingot"] = 9},
@@ -3309,6 +3317,33 @@ core.register_node("nh_nodes:leaves", {
     liquidtype = "source",
     liquid_alternative_flowing = "nh_nodes:leaves",
     liquid_alternative_source = "nh_nodes:leaves",
+    liquid_viscosity = 0,
+    liquid_renewable = false,
+    liquid_range = 0,
+    post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+
+})
+
+-- Folhas de carvalho
+core.register_node("nh_nodes:pineleaves", {
+    description = "Folhas de pinheiro",
+    drawtype = "mesh",
+    mesh = "pineleaves.obj", 
+    tiles = {"pineleaves.png"},
+    waving = 1,
+    groups = {snappy = 3, tree_leaves = 1},
+    drop =  {
+        items = {
+            {items = {"nh_nodes:stick"}},
+            {items = {"nh_nodes:oakresin"}},
+        }
+    },
+    walkable = false,
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    liquidtype = "source",
+    liquid_alternative_flowing = "nh_nodes:pineleaves",
+    liquid_alternative_source = "nh_nodes:pineleaves",
     liquid_viscosity = 0,
     liquid_renewable = false,
     liquid_range = 0,
@@ -4125,6 +4160,113 @@ core.register_node("nh_nodes:cowfur", {
         fixed = {-0.5, -0.5, -0.5, 0.5, -0.3, 0.5}
     },
 })
+
+core.register_node("nh_nodes:bottle", {
+    description = "Frasco",
+    inventory_image = "bottle.png",
+    drawtype = "mesh",
+    mesh = "emptybottle.obj",
+    tiles = {"bottletexture.png"},
+    
+    paramtype = "light",
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+})
+
+core.register_node("nh_nodes:inkbottle", {
+    description = "Frasco com Tinta",
+    inventory_image = "inkbottle.png",
+    drawtype = "mesh",
+    mesh = "bottle.obj",
+    tiles = {"inkbottletexture.png"},
+    
+    paramtype = "light",
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+})
+
+
+-- Função auxiliar para verificar se o jogador tem os itens necessários
+writing_utils = {}
+function writing_utils.player_has_writing_tools(player)
+    local inv = player:get_inventory()
+    local has_feather = false
+    local has_ink = false
+    
+    for i = 1, 8 do
+        local stack = inv:get_stack("main", i)
+        if stack:get_name() == "nh_items:feather" then
+            has_feather = true
+            break
+        end
+    end
+    
+    if inv:contains_item("main", "nh_nodes:inkbottle") then
+        has_ink = true
+    end
+    
+    return has_feather, has_ink
+end
+
+function writing_utils.consume_ink(player)
+    local inv = player:get_inventory()
+    inv:remove_item("main", "nh_nodes:inkbottle")
+    inv:add_item("main", "nh_nodes:bottle")
+end
+
+function player_has_writing_tools(player)
+    local inv = player:get_inventory()
+    local has_feather = false
+    local has_ink = false
+    
+    -- Verificar se tem pena na hotbar (slots 1-8)
+    for i = 1, 8 do
+        local stack = inv:get_stack("main", i)
+        if stack:get_name() == "nh_items:feather" then
+            has_feather = true
+            break
+        end
+    end
+    
+    -- Verificar se tem tinta em qualquer lugar do inventário
+    if inv:contains_item("main", "nh_nodes:inkbottle") then
+        has_ink = true
+    end
+    
+    return has_feather, has_ink
+end
+
+function consume_ink(player)
+    local inv = player:get_inventory()
+    -- Remover um frasco de tinta e devolver frasco vazio
+    inv:remove_item("main", "nh_nodes:inkbottle")
+    inv:add_item("main", "nh_nodes:bottle")
+end
+
 
 
 core.register_node("nh_nodes:coconut", {

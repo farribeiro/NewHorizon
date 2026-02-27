@@ -51,6 +51,7 @@ core.register_craftitem("nh_items:inkbottle", {
     wield_scale = {x = 0.3, y = 0.3, z = 0.5},
 })
 
+--[[
 -- Função auxiliar para verificar se o jogador tem os itens necessários
 writing_utils = {}
 
@@ -106,6 +107,7 @@ function consume_ink(player)
     -- Remover um frasco de tinta
     inv:remove_item("main", "nh_items:inkbottle")
 end
+]]--
 
 -- Registro do item Página (em branco)
 core.register_craftitem("nh_items:page", {
@@ -147,6 +149,7 @@ core.register_craftitem("nh_items:page", {
         return itemstack
     end,
 })
+
 
 -- Registro do item Página escrita
 core.register_craftitem("nh_items:writedpage", {
