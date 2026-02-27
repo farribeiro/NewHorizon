@@ -807,7 +807,7 @@ register_craft_station("nh_nodes:grass", {
         -- Se NÃO é ar, significa que está tampado
         if node_above ~= "air" then
             -- Verifica se a luz está muito baixa
-            local light = core.get_node_light(pos)
+            local light = core.get_node_light(above)
             --core.chat_send_all("   Luz: " .. tostring(light))
             
             if light and light <= 4 then
@@ -3931,7 +3931,7 @@ core.register_node("nh_nodes:chicken_egg", {
     
     paramtype = "light",
     walkable = false,
-    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
     --sounds = default.node_sound_wood_defaults(),
     
     collision_box = {

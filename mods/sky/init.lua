@@ -1,5 +1,4 @@
--- Define a velocidade do tempo (dia) ao carregar o mod
-minetest.settings:set("time_speed", "24")  -- Ciclo do dia em 1 hora, ao invés de 20 min
+minetest.log("action", "=== NH MOD DE CÉU CARREGADO ===")
 
 minetest.register_on_joinplayer(function(player)
     player:set_clouds({
