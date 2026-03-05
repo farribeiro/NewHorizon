@@ -2,7 +2,7 @@
 -----------------------------
 -- ITEMS
 -----------------------------
-print("[items] init.lua carregado")
+core.log("action", "[items] init.lua carregado")
 
 -- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}

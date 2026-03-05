@@ -27,7 +27,7 @@ sound_helper("node_sound_glass_defaults")
 
 -- helper function to add {eatable} group to food items
 
-function mobs.add_eatable(item, hp)
+function mobs.add_eatable(item, hp, ftype)
 
 	local def = core.registered_items[item]
 
@@ -35,7 +35,7 @@ function mobs.add_eatable(item, hp)
 
 		local groups = table.copy(def.groups) or {}
 
-		groups.eatable = hp ; groups.flammable = 2
+		groups.eatable = hp ; groups.flammable = 2 ; groups.food = ftype or 2
 
 		core.override_item(item, {groups = groups})
 	end
@@ -250,7 +250,7 @@ if mod_def and default.register_fence then
 	-- mob fence (looks like normal fence but collision is 2 high)
 	default.register_fence("mobs:fence_wood", {
 		description = S("Mob Fence"),
-		texture = "graveto.png",
+		texture = "oakwood.png",
 		material = "default:fence_wood",
 		groups = {choppy = 2, oddly_breakable_by_hand = 2, flammable = 2},
 		sounds = mobs.node_sound_wood_defaults(),
@@ -265,7 +265,7 @@ end
 core.register_node("mobs:fence_top", {
 	description = S("Mob Fence Top"),
 	drawtype = "nodebox",
-	tiles = {"graveto.png"},
+	tiles = {"oakwood.png"},
 	paramtype = "light",
 	is_ground_content = false,
 	groups = {choppy = 2, oddly_breakable_by_hand = 2, flammable = 2, axey = 1},
@@ -302,7 +302,7 @@ local tex_obj
 
 core.register_tool(":mobs:mob_reset_stick", {
 	description = S("Mob Reset Stick"),
-	inventory_image = "default_stick.png^[colorize:#ff000050",
+	inventory_image = "graveto.png^[colorize:#ff000050",
 	stack_max = 1,
 	groups = {not_in_creative_inventory = 1},
 

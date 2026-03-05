@@ -1,5 +1,5 @@
 -- Arquivo: player/init.lua
-print("[player] Mod carregado")
+minetest.log("action", "[player] Mod carregado")
 
 local health_hud = {}
 local hunger_data = {} -- Tabela para armazenar os dados de fome
@@ -472,8 +472,4 @@ core.register_on_dieplayer(function(player)
     end
 
     return true  -- mantém o comportamento padrão da morte
-end)    -- Se o nó não existe ou não é walkable, não é sólido
-    if not node_def or not node_def.walkable then
-        return false
-    end
-
+end)

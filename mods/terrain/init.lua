@@ -2305,9 +2305,9 @@ core.register_chatcommand("vulcao", {
         
         -- Teleporta para o topo do vulcão
         local tp_pos = {
-            x = volcano_pos.x,
+            x = volcano_pos.x - 2,
             y = VOLCANO_HEIGHT + 5,  -- Um pouco acima da cratera
-            z = volcano_pos.z
+            z = volcano_pos.z - 2
         }
         
         player:set_pos(tp_pos)

@@ -39,9 +39,9 @@ mobs:register_mob("nh_mob:ourico", {
     fall_damage = 2,
     
     visual = "mesh",
-    mesh = "ourico.obj",
+    mesh = "ourico.glb",
     textures = {"ouricoskin.png"},
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 1.5,
@@ -53,15 +53,15 @@ mobs:register_mob("nh_mob:ourico", {
     light_damage = 0,
     
     animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
-        run_start = 41,
-        run_end = 60,
-        jump_start = 61,
-        jump_end = 80
+        speed_normal = 1,
+        stand_start = 0.125,
+        stand_end = 0.625,
+        walk_start = 0.75,
+        walk_end = 1.25,
+        run_start = 0.75,
+        run_end = 1.25,
+        --jump_start = 61,
+        --jump_end = 80
     },
 
     on_rightclick = function(self, clicker)
@@ -107,9 +107,9 @@ mobs:register_mob("nh_mob:ouricoshadow", {
     fall_damage = 2,
     
     visual = "mesh",
-    mesh = "ourico.obj",
+    mesh = "ourico.glb",
     textures = {"ouricoshadow.png"},
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 3.5,
@@ -122,15 +122,15 @@ mobs:register_mob("nh_mob:ouricoshadow", {
     floats = 1,
     
     animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
-        run_start = 41,
-        run_end = 60,
-        jump_start = 61,
-        jump_end = 80
+        speed_normal = 1,
+        stand_start = 0.125,
+        stand_end = 0.625,
+        walk_start = 0.75,
+        walk_end = 1.25,
+        run_start = 0.75,
+        run_end = 1.25,
+        --jump_start = 61,
+        --jump_end = 80
     },
 
     on_rightclick = function(self, clicker)
@@ -175,9 +175,9 @@ mobs:register_mob("nh_mob:coelho", {
     fall_damage = 2,
     
     visual = "mesh",
-    mesh = "rabbit.obj",      -- Você precisa criar este modelo
-    textures = {"rabbit.png"}, -- Você precisa criar esta textura
-    rotate = 180,
+    mesh = "rabbit.glb",      
+    textures = {"rabbit.png"}, 
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 2,
@@ -193,13 +193,13 @@ mobs:register_mob("nh_mob:coelho", {
     runaway_from = {"player"},
     
     animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
-        run_start = 41,
-        run_end = 60,
+        speed_normal = 3,
+        stand_start = 0.5,
+        stand_end = 2.5,
+        walk_start = 3,
+        walk_end = 4.5,
+        run_start = 3,
+        run_end = 4.5,
     },
     
     -- Coelhos pulam ocasionalmente
@@ -216,8 +216,8 @@ mobs:register_mob("nh_mob:coelho", {
     
     -- Sons (se você tiver arquivos de som)
     sounds = {
-        random = "coelho_sound",
-        damage = "coelho_hurt",
+        random = "RabbitSound1",
+        damage = "RabbitSound2",
     },
 })
 
@@ -256,8 +256,8 @@ mobs:register_mob("nh_mob:galo", {
     hp_max = 8,
     armor = 100,
     
-    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
-    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    collisionbox = {-0.5, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    selectionbox = {-0.5, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
     physical = true,
     stepheight = 1.1,
     fall_speed = -3,          -- Galinhas caem devagar (batem asas)
@@ -381,8 +381,8 @@ mobs:register_mob("nh_mob:galinha", {
     hp_max = 8,
     armor = 100,
     
-    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
-    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    collisionbox = {0, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    selectionbox = {0, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
     physical = true,
     stepheight = 1.1,
     fall_speed = -3,          -- Galinhas caem devagar (batem asas)
@@ -437,7 +437,7 @@ mobs:register_mob("nh_mob:galinha", {
     
     -- Sons da galinha
     sounds = {
-        random = "galinha_cacarejo",
+        random = "ChickenSound",
         damage = "galinha_hurt",
     },
     
@@ -676,9 +676,9 @@ mobs:register_mob("nh_mob:rat", {
     floats = 1,
     
     visual = "mesh",
-    mesh = "rat.obj",
+    mesh = "rat.glb",
     textures = {"rat.png"},
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     -- PERMITIRIA "VOAR" DENTRO DAS FOLHAS se não retirasse a capacidade de andar...
@@ -694,11 +694,11 @@ mobs:register_mob("nh_mob:rat", {
     light_damage = 0,
     
     animation = {
-        speed_normal = 15,
-        stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
+        speed_normal = 1,
+        stand_start = 0.25,
+        stand_end = 1.25,
+        walk_start = 1.5,
+        walk_end = 2.5,
     },
     
     follow = {"nh_nodes:blueberry"},
@@ -802,10 +802,10 @@ mobs:register_mob("nh_mob:ladybug", {
         end
     end,
     
-    --sounds = {
-   --     random = "rat_quick",
-    --    damage = "rat_hurt",
-    --},
+    sounds = {
+        random = "LadybugSound",
+        damage = "LadybugSound",
+    },
 })
 
 
@@ -819,13 +819,185 @@ mobs:spawn({
     interval = 120,
     chance = 2000,
     active_object_count = 3,
-    min_height = -20,
+    min_height = 0,
     max_height = 30                  
 })
 
 mobs:register_egg("nh_mob:ladybug", "Orbe com Joaninha", "orbspawner.png", 0)
 
 
+-------------------------------
+-- MOB 5: Grilo 
+-------------------------------
+mobs:register_mob("nh_mob:cricket", {
+    type = "animal",
+    passive = false,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    hp_min = 1,
+    hp_max = 3,
+    armor = 100,
+    
+    collisionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1},
+    selectionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1},
+    physical = true,
+    stepheight = 3,
+    fall_speed = -8,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "cricket.obj",
+    textures = {"cricket.png"},
+    rotate = 180,
+    visual_size = {x = 15, y = 15},
+    
+    -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
+    --fly = true,
+    --fly_in = {"nh_nodes:air"},  -- Pode ser uma lista!
+    
+    walk_velocity = 1,
+    run_velocity = 3,
+    
+    view_range = 8,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    
+    animation = {
+        speed_normal = 15,
+        stand_start = 0,
+        stand_end = 20,
+        walk_start = 21,
+        walk_end = 40,
+    },
+    
+    follow = {"nh_nodes:grassleaves"},
+
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:grassleaves" then
+                core.chat_send_player(clicker:get_player_name(), "A joaninha quer folhas!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "CricketsSound",
+        damage = "CricketsSound",
+    },
+})
+
+
+
+-- Spawn da joaninha (grama perto de árvores)
+mobs:spawn({
+    name = "nh_mob:cricket",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:grassleaves"},
+    max_light = 10,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 3,
+    min_height = 0,
+    max_height = 30                  
+})
+
+mobs:register_egg("nh_mob:cricket", "Orbe com Grilo", "orbspawner.png", 0)
+
+
+-------------------------------
+-- MOB 5: Cigarra 
+-------------------------------
+mobs:register_mob("nh_mob:cicada", {
+    type = "animal",
+    passive = false,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    hp_min = 1,
+    hp_max = 3,
+    armor = 100,
+    
+    collisionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1},
+    selectionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1},
+    physical = true,
+    stepheight = 3,
+    fall_speed = -8,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "cicada.obj",
+    textures = {"cicada.png"},
+    rotate = 180,
+    visual_size = {x = 15, y = 15},
+    
+    -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
+    --fly = true,
+    --fly_in = {"nh_nodes:air"},  -- Pode ser uma lista!
+    
+    walk_velocity = 1,
+    run_velocity = 3,
+    
+    view_range = 8,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    
+    animation = {
+        speed_normal = 15,
+        stand_start = 0,
+        stand_end = 20,
+        walk_start = 21,
+        walk_end = 40,
+    },
+    
+    follow = {"nh_nodes:grassleaves"},
+
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:grassleaves" then
+                core.chat_send_player(clicker:get_player_name(), "A joaninha quer folhas!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "CicadaSound",
+        damage = "CicadaSound",
+    },
+})
+
+
+
+-- Spawn da joaninha (grama perto de árvores)
+mobs:spawn({
+    name = "nh_mob:cicada",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:grassleaves"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 3,
+    min_height = 0,
+    max_height = 30                  
+})
+
+mobs:register_egg("nh_mob:cicada", "Orbe com Cigarra", "orbspawner.png", 0)
 
 -------------------------------
 -- MOB 5: Vagalume 
@@ -940,8 +1112,8 @@ mobs:register_mob("nh_mob:bull", {
     hp_max = 35,
     armor = 100,
     
-    collisionbox = {-1.8, 0, -0.7, 0.9, 2.6, 0.7},
-    selectionbox = {-1.8, 0, -0.7, 0.9, 2.6, 0.7},
+    collisionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
+    selectionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
     physical = true,
     stepheight = 2,
     fall_speed = -8,
@@ -968,23 +1140,11 @@ mobs:register_mob("nh_mob:bull", {
     
     follow = {"nh_nodes:grassleaves"},
 
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            
-            if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), "Muuumm!")
-            else
-                core.chat_send_player(clicker:get_player_name(), "hff, hff...")
-            end
-        end
-    end,
     
-    --sounds = {
-   --     random = "rat_quick",
-    --    damage = "rat_hurt",
-    --},
+    sounds = {
+        random = "BullSound",
+        damage = "BullSound2",
+    },
     
     animation = {
         speed_normal = 1,
@@ -994,8 +1154,64 @@ mobs:register_mob("nh_mob:bull", {
         walk_end = 5,
         run_start = 5.25,
         run_end = 6.25,
+        -- Animação usada ao montar (pode usar a mesma de corrida)
+        ride_start = 5.25,
+        ride_end = 6.25,
     },
     
+    -- MONTARIA
+    saddle = "mobs:saddle",           -- item de sela necessário
+    ride_speed = 8,                   -- velocidade montado
+    ride_acceleration = 1.0,          -- aceleração montado
+    ride_friction = 0.8,              -- fricção ao parar
+    
+    -- Offset do jogador sobre o mob (ajuste conforme o visual do touro)
+    driver_attach_at = {x = 0, y = 30, z = -5},
+    driver_eye_offset = {x = 0, y = 3, z = 0},
+    driver_scale_factor = 1,
+
+on_rightclick = function(self, clicker)
+    if not clicker:is_player() then return end
+
+    if mobs:protect(self, clicker) then return end
+    if mobs:feed_tame(self, clicker, 1, false, false) then return end
+
+    -- Se já tem alguém montado, desmonta
+    if self.driver then
+        mobs:detach(self.driver, {x=1, y=0, z=0})
+        self.driver = nil
+        return
+    end
+
+    local item = clicker:get_wielded_item()
+    local name = item:get_name()
+
+    -- Coloca a sela E já monta
+    if name == "mobs:saddle" then
+        self.saddled = true  -- flag interna
+        item:take_item()
+        clicker:set_wielded_item(item)
+        core.chat_send_player(clicker:get_player_name(), "Sela colocada!")
+        mobs:attach(self, clicker)  -- já monta na hora
+        return
+    end
+
+    -- Clicou sem sela na mão: monta se já estiver selado
+    if self.saddled then
+        mobs:attach(self, clicker)
+        return
+    end
+
+	if name == "nh_nodes:grassleaves" or "nh_nodes:grassleavesmedium" then
+	    core.chat_send_player(clicker:get_player_name(), "Você alimentou o touro! Muuumm!")
+	elseif name == "" then
+	    -- mão vazia
+	    core.chat_send_player(clicker:get_player_name(), "Você alisou o touro. hff, hff...")
+	else
+	    -- item errado
+	    core.chat_send_player(clicker:get_player_name(), "O touro não se interessa por isso.")
+	end
+end,
 })
 
 -- Spawn do touro (folhas de grama)
@@ -1074,6 +1290,11 @@ mobs:register_mob("nh_mob:eagle", {
         punch_speed = 1, -- vel 1-30
     },
     
+    sounds = {
+        random = "EagleSound",
+        damage = "EagleSound",
+    },
+    
     follow = {"nh_nodes:torch2"},
     
     on_rightclick = function(self, clicker)
@@ -1088,11 +1309,6 @@ mobs:register_mob("nh_mob:eagle", {
             end
         end
     end,
-    
-    sounds = {
-        random = "vulto_som",
-        damage = "vulto_hurt",
-    },
     
     
     
@@ -1229,7 +1445,7 @@ mobs:register_mob("nh_mob:phoenix", {
     mesh = "eagle.glb",
     textures = {"phoenix.png"},
     --rotate = 180,
-    visual_size = {x = 15, y = 15}, -- visual_size = {x = 2.1, y = 2.1},
+    visual_size = {x = 30, y = 30}, -- visual_size = {x = 2.1, y = 2.1},
     
     -- BRILHO 
     glow = 14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
@@ -1265,6 +1481,11 @@ mobs:register_mob("nh_mob:phoenix", {
         punch_speed = 1, -- vel 1-30
     },
     
+    sounds = {
+        random = "EagleSound",
+        damage = "EagleSound",
+    },
+    
     follow = {"nh_nodes:torch2"},
     
     on_rightclick = function(self, clicker)
@@ -1279,11 +1500,6 @@ mobs:register_mob("nh_mob:phoenix", {
             end
         end
     end,
-    
-    sounds = {
-        random = "vulto_som",
-        damage = "vulto_hurt",
-    },
     
     
     

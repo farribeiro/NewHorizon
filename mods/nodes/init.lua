@@ -1,7 +1,7 @@
 -----------------------------
 -- NODES
 -----------------------------
-print("[nodes] init.lua carregado")
+core.log("action", "[nodes] init.lua carregado")
 
 -- ========================================
 -- SISTEMA GENÉRICO DE CRAFTING
@@ -5062,14 +5062,13 @@ core.override_item("nh_items:writedpage", {
     end,
 })
 
-nodes = nodes or {}
+if not nodes then nodes = {} end
 
 function nodes.place_written_page(pos, text, facedir)
     core.set_node(pos, {
         name = "nh_nodes:writedpage_node",
         param2 = facedir
     })
-
     local meta = core.get_meta(pos)
     meta:set_string("text", text)
 end
@@ -7600,4 +7599,33 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             return
         end
     end
+end)
+
+core.register_on_newplayer(function(player)
+    local inv = player:get_inventory()
+    
+    -- Cria a página escrita com o texto do tutorial
+    local page = ItemStack("nh_items:writedpage")
+    local meta = page:get_meta()
+    meta:set_string("text", 
+        "=== O NOVO HORIZONTE ===\n\n" ..
+        "Guia geral:\n\n" ..
+        "- Colete seixos no chão para produzir uma ferramenta\n" ..
+        "- Alguns seixos criam faíscas ao bater um no outro\n" ..
+        "- Tente produzir fogo espalhando faísca em algum material próximo\n" ..
+        "- Acenda tochas usando elas em algum fogo\n" ..
+        "- Ative a sua mente (Aux1 / E) e toque em blocos do chão para idealizar produções\n" ..
+        "- As produções não dependem da disposição dos materiais, só quantidades\n" .. 
+        "- Confira as outras páginas em caso de dúvida\n" .. 
+        "- Há baús escondidos pelo mundo, mas não espere grandes recompensas\n" ..
+        "- Dizem haver de um livro perdido chamado Archion que pode dar tudo o que esse mundo tem a oferecer\n" ..
+        "- Alguém teria invocado o livro usando o seu poder criativo ilimitado entoando: /grantme nh_nodes:archion\n" ..
+        "- Segundo a lenda, há também criaturas que só surgem em localidades específicas\n" ..
+        "- Alguns tentaram fugir, mas não conseguiram, esse mundo não parece ter limites.\n\n" ..
+        "Boa sorte...\n\n\n\n\n\n\n\n" ..
+        "                                                                                     9"
+    )
+    
+    -- Adiciona ao slot 1 da hotbar (slots 1-8 são a hotbar)
+    inv:set_stack("main", 2, page)
 end)
