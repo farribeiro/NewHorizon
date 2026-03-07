@@ -15,6 +15,8 @@ core.set_mapgen_setting("mg_name", "singlenode", true)
 -----------------------------
 -- REGISTRO DOS IDS
 -----------------------------
+local c_ignore = core.CONTENT_IGNORE
+
 local c_grass   = core.get_content_id("nh_nodes:grass")
 local c_topgrass = core.get_content_id("nh_nodes:top_grass")
 local c_grassleaves = core.get_content_id("nh_nodes:grassleaves")
@@ -1518,17 +1520,17 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                 elseif y <= height - 7 then
                     -- Verifica caverna primeiro
                     if is_cave then
-                        data[vi] = c_air
+                        data[vi] = c_ignore
                         if y <= -34 and rng_terrain:next(1, 1000) <= 50 then  -- 5%
                             data[vi] = c_obsidian
                         end
                     elseif is_cave_lava then
-                        data[vi] = c_air
+                        data[vi] = c_ignore
                         if y < -30 then --and rng_terrain:next(1, 1000) <= 900 then  -- 90%
                             data[vi] = c_lava
                         end
                     elseif is_cave_water then
-                        data[vi] = c_air
+                        data[vi] = c_ignore
                         if y < -28 then --and rng_terrain:next(1, 1000) <= 900 then  -- 90%
                             data[vi] = c_water2
                         end
@@ -1621,6 +1623,12 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     end
                 end
             end
+            for y = math.max(minp.y, -50), math.min(maxp.y, height) do
+		local vi = area:index(x, y, z)
+		if data[vi] == c_ignore then
+	            data[vi] = c_air  -- restaura o ar das cavernas
+		end
+	    end
             
             index_2d = index_2d + 1
         end

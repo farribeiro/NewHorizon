@@ -20,9 +20,9 @@ mobs = {
 	mod = "redo", version = "20260208",
 	spawning_mobs = {}, translate = S,
 	node_snow = has(core.registered_aliases["mapgen_snow"])
-			or has("mcl_core:snow") or has("default:snow") or "air",
+			or has("mcl_core:snow") or has("default:snow") or has("nh_nodes:snow") or "air",
 	node_dirt = has(core.registered_aliases["mapgen_dirt"])
-			or has("mcl_core:dirt") or has("default:dirt") or "mobs:fallback_node"
+			or has("mcl_core:dirt") or has("default:dirt") or "mobs:fallback_node" or has("nh_nodes:dirt")
 }
 mobs.fallback_node = mobs.node_dirt
 
@@ -3789,6 +3789,10 @@ function mobs:register_arrow(name, def)
 			textures = def.textures,
 			collisionbox = def.collisionbox or {-.1, -.1, -.1, .1, .1, .1},
 			glow = def.glow,
+			    -- ADICIONEI ISSO:
+                        use_texture_alpha = def.use_texture_alpha,
+                        backface_culling = def.backface_culling,
+                        
 			automatic_face_movement_dir = def.rotate
 					and (def.rotate - (pi / 180)) or false,
 		},
@@ -4052,6 +4056,7 @@ function mobs:register_egg(mob, desc, background, addegg, no_creative, can_spawn
 		groups = grp,
 
 		on_place = function(itemstack, placer, pointed_thing)
+		    core.log("action", "[DEBUG] ovo on_place chamado, under: " .. core.get_node(pointed_thing.under).name)
 
 			local pos = pointed_thing.above
 

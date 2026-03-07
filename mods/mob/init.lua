@@ -653,6 +653,227 @@ mobs:spawn({
 
 mobs:register_egg("nh_mob:shark", "Orbe com Tubarão", "orbspawner.png", 0)
 
+
+
+
+
+-------------------------------
+-- "MOB" item: Mensagem na garrafa
+-------------------------------
+mobs:register_mob("nh_mob:messagebottle", {
+    type = "animal",
+    passive = true,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    hp_min = 1,
+    hp_max = 1,
+    armor = 100,
+    
+    collisionbox = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18},
+    selectionbox = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18},
+    physical = true,
+    stepheight = 0,           -- NÃO consegue subir degraus (importante!)
+    fall_speed = -6,
+    fall_damage = 0,
+    floats = 4,
+    
+    visual = "mesh",
+    mesh = "emptybottle.obj",
+    textures = {"bottletexture.png"},
+    rotate = 180,
+    visual_size = {x = 15, y = 15},
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    fly = false,               -- Permite "voar" na água
+    --fly_in = "nh_nodes:water",   -- Só "voa" dentro de nodes:water
+    
+    --walk_chance = 0,
+    
+    walk_velocity = 1,
+    run_velocity = 1,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,           -- CRÍTICO: Recebe dano fora da água!
+    
+    --animation = {
+    --    speed_normal = 15,
+    --    stand_start = 0,
+    --    stand_end = 20,
+    --    walk_start = 21,
+    --    walk_end = 40,
+    --},
+    
+    --follow = {"nh_nodes:raw_chicken"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "" then
+                -- Remove uma garrafa do inventário
+                item:take_item()
+                clicker:set_wielded_item(item)
+            
+                -- Adiciona fireflybottle ao inventário
+                local inv = clicker:get_inventory()
+                inv:add_item("main", ItemStack("nh_nodes:bottle"))
+                inv:add_item("main", ItemStack("nh_items:writedpage"))
+            
+                -- Remove a garrafa
+                self.object:remove()
+            
+            elseif name == "nh_nodes:bottle" then
+                core.chat_send_player(clicker:get_player_name(), "Plim!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "Garrafa com mensagem")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "tubarao_som",
+        damage = "tubarao_hurt",
+    },
+    
+    drops = {
+        {name = "nh_nodes:bottle", chance = 1, min = 1, max = 1},  -- 1-1 frasco
+        {name = "nh_items:writedpage", chance = 1, min = 1, max = 1},  -- 1-1 mensagem (sempre)
+    },
+})
+
+-- Spawn da garrafa (somente na água)
+mobs:spawn({
+    name = "nh_mob:messagebottle",
+    nodes = {"nh_nodes:water"},           -- Spawna DENTRO da água
+    neighbors = {"nh_nodes:water"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 1,
+    min_height = 0,
+    max_height = -1                     -- spawna no nível do mar
+})
+
+mobs:register_egg("nh_mob:messagebottle", "Garrafa com Mensagem", "bottle.png", 0)
+
+
+-------------------------------
+-- "MOB" item: iceberg
+-------------------------------
+mobs:register_mob("nh_mob:iceberg", {
+    type = "animal",
+    passive = true,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    hp_min = 1,
+    hp_max = 1,
+    armor = 100,
+    
+    collisionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    selectionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    physical = true,
+    stepheight = 0,           -- NÃO consegue subir degraus (importante!)
+    fall_speed = -6,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "iceberg.obj",
+    textures = {"ice.png"},
+    rotate = 180,
+    visual_size = {x = 10, y = 10},
+    
+   after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            use_texture_alpha = true,
+        })
+    end,
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    --fly = false,               -- Permite "voar" na água
+    --fly_in = "nh_nodes:water",   -- Só "voa" dentro de nodes:water
+    
+    --walk_chance = 0,
+    
+    walk_velocity = 1,
+    run_velocity = 1,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,           -- CRÍTICO: Recebe dano fora da água!
+    
+    --animation = {
+    --    speed_normal = 15,
+    --    stand_start = 0,
+    --    stand_end = 20,
+    --    walk_start = 21,
+    --    walk_end = 40,
+    --},
+    
+    --follow = {"nh_nodes:raw_chicken"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "" then
+                -- Remove uma garrafa do inventário
+                item:take_item()
+                clicker:set_wielded_item(item)
+            
+                -- Adiciona fireflybottle ao inventário
+                local inv = clicker:get_inventory()
+                inv:add_item("main", ItemStack("nh_mob:iceberg"))
+            
+                -- Remove a garrafa
+                self.object:remove()
+            
+            elseif name == "nh_nodes:ice" then
+                core.chat_send_player(clicker:get_player_name(), "Plim!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "Iceberg")
+            end
+        end
+    end,
+    
+    --sounds = {
+    --    random = "tubarao_som",
+    --    damage = "tubarao_hurt",
+    --},
+    
+    drops = {
+        {name = "nh_nodes:ice", chance = 1, min = 1, max = 1},  -- 1-1 gelo
+    },
+    
+})
+
+-- Spawn do iceberg (somente na água)
+mobs:spawn({
+    name = "nh_mob:iceberg",
+    nodes = {"nh_nodes:water"},           -- Spawna DENTRO da água
+    neighbors = {"nh_nodes:ice"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 1,
+    min_height = 0,
+    max_height = -1                     -- spawna no nível do mar
+})
+
+mobs:register_egg("nh_mob:iceberg", "Iceberg", "ice.png", 0)
+
+
 -------------------------------
 -- MOB 4: RAT/RATAZANA (Agressivo)
 -------------------------------
@@ -818,7 +1039,7 @@ mobs:spawn({
     max_light = 15,
     interval = 120,
     chance = 2000,
-    active_object_count = 3,
+    active_object_count = 1,
     min_height = 0,
     max_height = 30                  
 })
@@ -849,10 +1070,16 @@ mobs:register_mob("nh_mob:cricket", {
     floats = 1,
     
     visual = "mesh",
-    mesh = "cricket.obj",
+    mesh = "cricket.glb",
     textures = {"cricket.png"},
-    rotate = 180,
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
+    
+    after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            backface_culling = false,
+        })
+    end,
     
     -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
     --fly = true,
@@ -867,11 +1094,11 @@ mobs:register_mob("nh_mob:cricket", {
     light_damage = 0,
     
     animation = {
-        speed_normal = 15,
+        speed_normal = 1,
         stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
+        stand_end = 0,
+        walk_start = 0,
+        walk_end = 0.5,
     },
     
     follow = {"nh_nodes:grassleaves"},
@@ -882,9 +1109,9 @@ mobs:register_mob("nh_mob:cricket", {
             local name = item:get_name()
             
             if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), "A joaninha quer folhas!")
+                core.chat_send_player(clicker:get_player_name(), "O grilo comeu as folhas!")
             else
-                core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+                core.chat_send_player(clicker:get_player_name(), "cri-cri, cri-cri...")
             end
         end
     end,
@@ -897,7 +1124,7 @@ mobs:register_mob("nh_mob:cricket", {
 
 
 
--- Spawn da joaninha (grama perto de árvores)
+-- Spawn da grilo (grama)
 mobs:spawn({
     name = "nh_mob:cricket",
     nodes = {"air"},
@@ -905,7 +1132,7 @@ mobs:spawn({
     max_light = 10,
     interval = 120,
     chance = 2000,
-    active_object_count = 3,
+    active_object_count = 1,
     min_height = 0,
     max_height = 30                  
 })
@@ -940,6 +1167,12 @@ mobs:register_mob("nh_mob:cicada", {
     textures = {"cicada.png"},
     rotate = 180,
     visual_size = {x = 15, y = 15},
+    
+    after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            backface_culling = false,
+        })
+    end,
     
     -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
     --fly = true,
@@ -988,11 +1221,11 @@ mobs:register_mob("nh_mob:cicada", {
 mobs:spawn({
     name = "nh_mob:cicada",
     nodes = {"air"},
-    neighbors = {"nh_nodes:grassleaves"},
+    neighbors = {"nh_nodes:leaves"},
     max_light = 15,
     interval = 120,
     chance = 2000,
-    active_object_count = 3,
+    active_object_count = 2,
     min_height = 0,
     max_height = 30                  
 })
@@ -1022,19 +1255,21 @@ mobs:register_mob("nh_mob:firefly", {
     floats = 1,
     
     visual = "mesh",
-    mesh = "firefly.obj",
+    mesh = "firefly.glb",
     textures = {"firefly.png"},
-        --textures = {"firefly.png^[opacity:200"},
-        --    textures = {
-        --{"firefly.png^[opacity:200"}  -- Note as chaves duplas!
-    --},
-    rotate = 180,
+
+    after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            backface_culling = false,
+            use_texture_alpha = true,
+        })
+    end,
+
+    --rotate = 180,
     visual_size = {x = 15, y = 15},
     
     -- BRILHO 
     glow = 14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
-
-use_texture_alpha = "blend",
     
     -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
     fly = true,
@@ -1051,22 +1286,34 @@ use_texture_alpha = "blend",
     animation = {
         speed_normal = 15,
         stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
+        stand_end = 0.5,
+        walk_start = 0,
+        walk_end = 0.5,
     },
     
-    follow = {"nh_nodes:grassleaves"},
+    follow = {"nh_nodes:fireflybottle"}, --"nh_nodes:apple", 
 
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             
-            if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), "A joaninha quer folhas!")
-            else
+            if name == "nh_nodes:bottle" then
+                -- Remove uma garrafa do inventário
+                item:take_item()
+                clicker:set_wielded_item(item)
+            
+                -- Adiciona fireflybottle ao inventário
+                local inv = clicker:get_inventory()
+                inv:add_item("main", ItemStack("nh_nodes:fireflybottle"))
+            
+                -- Remove o vagalume
+                self.object:remove()
+            
+            elseif name == "nh_nodes:apple" then
                 core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+            else
+                core.chat_send_player(clicker:get_player_name(), "O vagalume quer comer maçã!")
             end
         end
     end,
@@ -1082,16 +1329,16 @@ use_texture_alpha = "blend",
 mobs:spawn({
     name = "nh_mob:firefly",
     nodes = {"air"},
-    neighbors = {"nh_nodes:water2"},
+    neighbors = {"nh_nodes:water2", "nh_nodes:grassleaves"},
     max_light = 15,
     interval = 120,
     chance = 2000,
     active_object_count = 3,
-    min_height = -20,
+    min_height = -10,
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:firefly", "Orbe com Vagalume", "orbspawner.png", 0)
+mobs:register_egg("nh_mob:firefly", "Orbe com Vaga-lume", "orbspawner.png", 0)
 
 
 -------------------------------
@@ -1143,7 +1390,7 @@ mobs:register_mob("nh_mob:bull", {
     
     sounds = {
         random = "BullSound",
-        damage = "BullSound2",
+        damage = "BullAngrySound",
     },
     
     animation = {
@@ -1629,17 +1876,24 @@ mobs:register_mob("nh_mob:slime", {
     floats = 3,
     
     visual = "mesh",
-    mesh = "planaria_slime_small2.obj",
-    textures = {"planaria_slime2.png^[opacity:200"}, --{{"planaria_slime3.png","planaria_slime3.png"}}
-    rotate = 180,
+    mesh = "planslime.glb", --mesh = "planaria_slime_small2.obj",
+    textures = {"planaria_slime2.png"}, --^[opacity:200 --{{"planaria_slime3.png","planaria_slime3.png"}}
+    --rotate = 180,
     visual_size = {x = 10, y = 10},
     
     -- BRILHO NOS OLHOS
     glow = 5,  -- Intensidade de 0 a 14 (14 = mais brilhante)
-    -- TRANSPARENCIA
-    use_texture_alpha = "blend",  -- Tente "blend" em vez de true -> use_texture_alpha = true,  -- Habilita transparência
-    --backface_culling = true,   -- Renderiza ambos os lados das faces
     
+    after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            use_texture_alpha = true,
+        textures = {
+            "planaria_slime2.png",  -- camada externa semi-transparente
+            "planaria_slime2.png",                -- camada interna opaca
+        },
+        })
+    end,
+
     walk_velocity = 1,
     run_velocity = 2,
     
@@ -1650,11 +1904,11 @@ mobs:register_mob("nh_mob:slime", {
     air_damage = 0,         
     
     animation = {
-        speed_normal = 15,
+        speed_normal = 1,
         stand_start = 0,
-        stand_end = 20,
-        walk_start = 21,
-        walk_end = 40,
+        stand_end = 0,
+        walk_start = 0,
+        walk_end = 0.63,
     },
     
     follow = {"nh_nodes:raw_chicken"},
@@ -1682,17 +1936,209 @@ mobs:register_mob("nh_mob:slime", {
 mobs:spawn({
     name = "nh_mob:slime",
     nodes = {"air"},
-    neighbors = {"nh_nodes:gneiss", "nh_nodes:water"},
+    neighbors = {"nh_nodes:gneiss", "nh_nodes:water2"},
     max_light = 15,
     interval = 120,
     chance = 2000,
-    active_object_count = 5,
+    active_object_count = 4,
     min_height = -25,
     max_height = -5                 
 })
 
 mobs:register_egg("nh_mob:slime", "Orbe com Slime", "orbspawner.png", 0)
 
+
+-- MOB 4: PLANARIA SLIME2 (Agressivo)
+-------------------------------
+mobs:register_mob("nh_mob:slime2", {
+    type = "monster",
+    passive = false,
+    reach = 1,
+    damage = 3,
+    attack_type = "dogfight",
+    
+    hp_min = 10,
+    hp_max = 20,
+    armor = 100,
+    
+    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
+    physical = true,
+    stepheight = 4,           -- Consegue subir no player (importante!)
+    fall_speed = -4,
+    fall_damage = 0,
+    floats = 3,
+    
+    visual = "mesh",
+    mesh = "planslime.glb", --mesh = "planaria_slime_small2.obj",
+    textures = {"planaria_slime2.png"}, --^[opacity:200 --{{"planaria_slime3.png","planaria_slime3.png"}}
+    --rotate = 180,
+    visual_size = {x = 20, y = 20},
+    
+    -- BRILHO NOS OLHOS
+    glow = 5,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- TRANSPARENCIA
+    --use_texture_alpha = "blend",  -- Tente "blend" em vez de true -> use_texture_alpha = true,  -- Habilita transparência
+    --backface_culling = true,   -- Renderiza ambos os lados das faces
+    
+    after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            use_texture_alpha = true,
+        textures = {
+            "planaria_slime2.png",  -- camada externa semi-transparente
+            "planaria_slime2.png",                -- camada interna opaca
+        },
+        })
+    end,
+
+    walk_velocity = 1,
+    run_velocity = 2,
+    
+    view_range = 7,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,         
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0,
+        stand_end = 0,
+        walk_start = 0,
+        walk_end = 0.63,
+    },
+    
+    follow = {"nh_nodes:raw_chicken"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:raw_chicken" then
+                core.chat_send_player(clicker:get_player_name(), "O slime quer comida!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "O.O")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "slime_som",
+        damage = "slime_hurt",
+    },
+})
+
+-- Spawn da slime (cavernas)
+mobs:spawn({
+    name = "nh_mob:slime2",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:gneiss", "nh_nodes:water2"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 4,
+    min_height = -25,
+    max_height = -5                 
+})
+
+mobs:register_egg("nh_mob:slime2", "Orbe com Slime", "orbspawner.png", 0)
+
+-- MOB 4: PLANARIA SLIME3 (Agressivo)
+-------------------------------
+mobs:register_mob("nh_mob:slime3", {
+    type = "monster",
+    passive = false,
+    reach = 1,
+    damage = 3,
+    attack_type = "dogfight",
+    
+    hp_min = 10,
+    hp_max = 20,
+    armor = 100,
+    
+    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
+    physical = true,
+    stepheight = 4,           -- Consegue subir no player (importante!)
+    fall_speed = -4,
+    fall_damage = 0,
+    floats = 3,
+    
+    visual = "mesh",
+    mesh = "planslime.glb", --mesh = "planaria_slime_small2.obj",
+    textures = {"planaria_slime2.png"}, --^[opacity:200 --{{"planaria_slime3.png","planaria_slime3.png"}}
+    --rotate = 180,
+    visual_size = {x = 40, y = 40},
+    
+    -- BRILHO NOS OLHOS
+    glow = 5,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- TRANSPARENCIA
+    --use_texture_alpha = "blend",  -- Tente "blend" em vez de true -> use_texture_alpha = true,  -- Habilita transparência
+    --backface_culling = true,   -- Renderiza ambos os lados das faces
+    
+    after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            use_texture_alpha = true,
+        textures = {
+            "planaria_slime2.png",  -- camada externa semi-transparente
+            "planaria_slime2.png",                -- camada interna opaca
+        },
+        })
+    end,
+
+    walk_velocity = 1,
+    run_velocity = 2,
+    
+    view_range = 7,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,         
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0,
+        stand_end = 0,
+        walk_start = 0,
+        walk_end = 0.63,
+    },
+    
+    follow = {"nh_nodes:raw_chicken"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:raw_chicken" then
+                core.chat_send_player(clicker:get_player_name(), "O slime quer comida!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "O.O")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "slime_som",
+        damage = "slime_hurt",
+    },
+})
+
+-- Spawn da slime (cavernas)
+mobs:spawn({
+    name = "nh_mob:slime3",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:gneiss", "nh_nodes:water2"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 4,
+    min_height = -25,
+    max_height = -5                 
+})
+
+mobs:register_egg("nh_mob:slime3", "Orbe com Slime", "orbspawner.png", 0)
 
 -------------------------------
 -- MOB 4: VULTO / VISAGE (Agressivo)
@@ -1872,7 +2318,7 @@ mobs:register_mob("nh_mob:dopel", {
 mobs:spawn({
     name = "nh_mob:dopel",
     nodes = {"air"},
-    neighbors = {"nh_nodes:basalt", "nh_nodes:obsidian", "nh_nodes:snow"},
+    neighbors = {"nh_nodes:obsidian"},
     max_light = 15,
     interval = 120,
     chance = 2000,

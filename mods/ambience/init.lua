@@ -11,13 +11,13 @@ local water_handles = {}
 local GRASS_NODES = {
     --["nh_nodes:grass"]     = true,
     --["nh_nodes:top_grass"] = true,
-    ["nh_nodes:dirt"] = true,
+    --["nh_nodes:dirt"] = true,
     ["nh_nodes:sand"] = true,
+    ["nh_nodes:wet_sand"] = true,
 }
 local WATER_NODES = {
     ["nh_nodes:water"]    = true,
     --["nh_nodes:water2"]   = true,
-    ["nh_nodes:wet_sand"] = true,
 }
 
 local function count_nearby(pos, node_table, radius)

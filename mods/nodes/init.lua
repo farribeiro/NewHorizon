@@ -345,34 +345,36 @@ node_def.on_timer = function(pos, elapsed)
     return true
 end
     
-    -- Adiciona callbacks do crafting
+    -- Adiciona callbacks do crafting (alterado para não dar recursão [crash] com o mobsredo)
 node_def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
     local controls = clicker:get_player_control()
     
-    -- Se pressionar aux1, abre o formspec
     if controls.aux1 then
         ensure_inventory(pos)
         show_craft_grid(clicker, pos, config)
         return itemstack
     end
     
-    -- Se o jogador está segurando algo, tenta colocar
     if itemstack and not itemstack:is_empty() then
         local item_def = core.registered_items[itemstack:get_name()]
         
-        -- Se é um node, coloca diretamente SEM chamar on_rightclick recursivamente
         if item_def and item_def.type == "node" then
-            -- Usa item_place_node que NÃO chama on_rightclick do node colocado
             return core.item_place_node(itemstack, clicker, pointed_thing)
         end
         
-        -- Se tem on_place customizado e NÃO é este mesmo node, usa
-        if item_def and item_def.on_place and itemstack:get_name() ~= node_name then
-            return item_def.on_place(itemstack, clicker, pointed_thing)
+        -- Para spawn eggs e outros itens com on_place,
+        -- chama on_place mas com under substituído por "air"
+        -- para evitar recursão
+        if item_def and item_def.on_place then
+            local safe_pointed = {
+                type = pointed_thing.type,
+                under = pointed_thing.above, -- usa "above" como "under" falso
+                above = pointed_thing.above,
+            }
+            return item_def.on_place(itemstack, clicker, safe_pointed)
         end
     end
     
-    -- Se chegou aqui sem colocar nada, retorna itemstack sem mudanças
     return itemstack
 end
 	
@@ -2031,6 +2033,61 @@ core.register_node("nh_nodes:oakwood", {
     description = "Madeira de Carvalho",
     tiles = {"oakwood.png"},
     groups = {choppy = 3},
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+-- slime 
+core.register_node("nh_nodes:slime", {
+    description = "Slime colecionável",
+    drawtype = "mesh",
+    mesh = "planaria_slime_small2.obj",
+    tiles = {"planaria_slime2.png"},
+    groups = {snappy = 3},
+    
+    paramtype = "light",
+        -- BRILHO NOS OLHOS
+    glow = 5,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- TRANSPARENCIA
+    use_texture_alpha = "blend",
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        --pos = {x = 0, y = 0, z = 1.5},
+        rot = {x = 0, y = 90, z = -90}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0},
+        rot = {x = 0, y = 90, z = -90}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+-- grilo 
+core.register_node("nh_nodes:cricket", {
+    description = "Grilo colecionável",
+    drawtype = "mesh",
+    mesh = "cricket.obj",
+    tiles = {"cricket.png"},
+    groups = {snappy = 3},
+    
+    paramtype = "light",
+    use_texture_alpha = "clip",
     
         -- Configuração mão direita
     wielded_bone_position = {
@@ -4182,6 +4239,44 @@ core.register_node("nh_nodes:bottle", {
     selection_box = {
         type = "fixed",
         fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+})
+
+core.register_node("nh_nodes:fireflybottle", {
+    description = "Frasco com Vaga-lume",
+    inventory_image = "bottlefirefly.png",
+    drawtype = "mesh",
+    mesh = "bottlefirefly.obj",
+    tiles = {"bottlefireflytexture.png"},
+    
+    paramtype = "light",
+    light_source = 5,
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    backface_culling = false,
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+    
+            -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.6, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    offhand_bone_position = {
+        pos = {x = 1.6, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
     },
 })
 
