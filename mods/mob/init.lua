@@ -25,7 +25,7 @@ end
 mobs:register_mob("nh_mob:ourico", {
     type = "animal",
     passive = true,          -- Pode se defender quando atacado
-    damage = 2,
+    damage = 5,
     reach = 1,
     
     hp_min = 10,
@@ -44,11 +44,15 @@ mobs:register_mob("nh_mob:ourico", {
     --rotate = 180,
     visual_size = {x = 15, y = 15},
     
+    -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada",  "nh_mob:ladybug"},
+    
     walk_velocity = 1.5,
     run_velocity = 4.5,
     
     view_range = 10,
-    water_damage = 1,
+    water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
     
@@ -69,6 +73,42 @@ mobs:register_mob("nh_mob:ourico", {
             core.chat_send_player(clicker:get_player_name(), "O ouriço é amigável, mas cuidado ao atacá-lo!")
         end
     end,
+    
+do_punch = function(self, hitter, tflp, tool_caps, dir, damage)
+    -- só age se for jogador de mão vazia
+    if not hitter:is_player() then return end -- dano normal pra outros mobs
+
+    local item = hitter:get_wielded_item()
+    if item:get_name() == "" then
+        -- machuca o jogador
+        hitter:set_hp(hitter:get_hp() - 2)
+        core.chat_send_player(hitter:get_player_name(), "Os espinhos te machucaram!")
+        return false -- CANCELA o dano no ouriço
+    end
+    -- com ferramenta: dano normal (não retorna false)
+end,
+
+do_custom = function(self, dtime)
+    self._spike_timer = (self._spike_timer or 0) + dtime
+    if self._spike_timer < 1 then return end
+    self._spike_timer = 0
+
+    local pos = self.object:get_pos()
+    local objetos = core.get_objects_inside_radius(pos, 1)
+
+    for _, obj in ipairs(objetos) do
+        if obj ~= self.object then
+            local ent = obj:get_luaentity()
+            if ent and ent._cmi_is_mob and ent.name ~= "nh_mob:ourico" then
+                -- aplica dano de espinho no mob próximo (mas ainda sofre dano)
+                obj:punch(obj, 1.0, {
+                    full_punch_interval = 1.0,
+                    damage_groups = {fleshy = 5}
+                }, nil)
+            end
+        end
+    end
+end,
 })
 
 -- Spawn do Ouriço (grama)
@@ -112,6 +152,10 @@ mobs:register_mob("nh_mob:ouricoshadow", {
     --rotate = 180,
     visual_size = {x = 15, y = 15},
     
+        -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada",  "nh_mob:ladybug"},
+    
     walk_velocity = 3.5,
     run_velocity = 5.5,
     
@@ -138,6 +182,8 @@ mobs:register_mob("nh_mob:ouricoshadow", {
             core.chat_send_player(clicker:get_player_name(), "O ouriço é amigável, mas cuidado ao atacá-lo!")
         end
     end,
+    
+
 })
 
 -- Spawn do Ouriço (grama)
@@ -159,7 +205,7 @@ mobs:register_egg("nh_mob:ouricoshadow", "Orbe com Ouriço Raro", "orbspawner.pn
 -- MOB 2: COELHO (Passivo/Tímido)
 -------------------------------
 
-mobs:register_mob("nh_mob:coelho", {
+mobs:register_mob("nh_mob:rabbit", {
     type = "animal",
     passive = true,           -- Totalmente passivo
     damage = 0,               -- Não causa dano
@@ -223,7 +269,7 @@ mobs:register_mob("nh_mob:coelho", {
 
 -- Spawn do Coelho (neve)
 mobs:spawn({
-    name = "nh_mob:coelho",
+    name = "nh_mob:rabbit",
     nodes = {"air"},
     neighbors = {"nh_nodes:snow"},
     max_light = 15,
@@ -234,7 +280,7 @@ mobs:spawn({
     max_height = 100
 })
 
-mobs:register_egg("nh_mob:coelho", "Orbe com Coelho", "orbspawner.png", 0)
+mobs:register_egg("nh_mob:rabbit", "Orbe com Coelho", "orbspawner.png", 0)
 
 -------------------------------
 -- MOB 3: GALO (Agressivo)
@@ -246,6 +292,11 @@ mobs:register_mob("nh_mob:galo", {
     reach = 1,
     damage = 1,
     attack_type = "dogfight",
+    
+        -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
+    
     -- drop com a sintaxe correta
     drops = {
         {name = "items:feather", chance = 1, min = 1, max = 5},  -- 1-5 penas
@@ -371,7 +422,11 @@ mobs:register_mob("nh_mob:galinha", {
     type = "animal",
     passive = true,
     damage = 0,
-    -- drop com a sintaxe correta
+    
+    -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
+    
     drops = {
         {name = "items:feather", chance = 1, min = 1, max = 5},  -- 1-5 penas
         {name = "nh_nodes:raw_chicken", chance = 1, min = 1, max = 1},  -- 1 galinha crua (sempre)
@@ -451,7 +506,7 @@ do_custom = function(self, dtime)
 
     -- Inicializa tempo aleatório UMA VEZ
     if not self.next_egg_time then
-        self.next_egg_time = math.random(60, 120)
+        self.next_egg_time = math.random(120, 240)  -- 2 a 4 min
         self.egg_timer = 0
     end
 
@@ -491,7 +546,7 @@ do_custom = function(self, dtime)
 
         -- Reset
         self.egg_timer = 0
-        self.next_egg_time = math.random(60, 120)
+        self.next_egg_time = math.random(120, 240) -- 2 a 4 min
     end
     
 
@@ -533,7 +588,7 @@ mobs:spawn({
     max_light = 15,
     interval = 120,
     chance = 2000,            -- Spawn frequente
-    active_object_count = 6, -- 6 galinhas
+    active_object_count = 5, -- 5 galinhas
     min_height = -10,
     max_height = 50
 })
@@ -544,7 +599,7 @@ mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
 -- ITEM: OVO
 -------------------------------
 -- Você pode criar um item de ovo que as galinhas dropam
-core.register_craftitem("nh_mob:chicken_egg", { -- Você precisa criar este item nh_nodes:egg
+core.register_craftitem("nh_mob:chicken_egg", { -- Item precisou estar em nh_nodes:egg
     description = "Ovo de galinha",
     inventory_image = "chicken_egg.png",  -- Textura
     on_use = core.item_eat(2), -- Come o ovo cru (restaura 2 de fome)
@@ -559,6 +614,10 @@ mobs:register_mob("nh_mob:shark", {
     reach = 1,
     damage = 5,
     attack_type = "dogfight",
+    
+    -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:galinha", "nh_mob:galinha", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:ourico"},
     
     hp_min = 20,
     hp_max = 30,
@@ -680,8 +739,8 @@ mobs:register_mob("nh_mob:messagebottle", {
     floats = 4,
     
     visual = "mesh",
-    mesh = "emptybottle.obj",
-    textures = {"bottletexture.png"},
+    mesh = "bottlepage.obj",
+    textures = {"bottlepagetexture.png"},
     rotate = 180,
     visual_size = {x = 15, y = 15},
     
@@ -694,7 +753,7 @@ mobs:register_mob("nh_mob:messagebottle", {
     walk_velocity = 1,
     run_velocity = 1,
     
-    view_range = 16,
+    view_range = 1,
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
@@ -710,41 +769,53 @@ mobs:register_mob("nh_mob:messagebottle", {
     
     --follow = {"nh_nodes:raw_chicken"},
     
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            
-            if name == "" then
-                -- Remove uma garrafa do inventário
-                item:take_item()
-                clicker:set_wielded_item(item)
-            
-                -- Adiciona fireflybottle ao inventário
-                local inv = clicker:get_inventory()
-                inv:add_item("main", ItemStack("nh_nodes:bottle"))
-                inv:add_item("main", ItemStack("nh_items:writedpage"))
-            
-                -- Remove a garrafa
-                self.object:remove()
-            
-            elseif name == "nh_nodes:bottle" then
-                core.chat_send_player(clicker:get_player_name(), "Plim!")
-            else
-                core.chat_send_player(clicker:get_player_name(), "Garrafa com mensagem")
-            end
+on_rightclick = function(self, clicker)
+    if clicker:is_player() then
+        local item = clicker:get_wielded_item()
+        local name = item:get_name()
+        
+        if name == "" then
+            item:take_item()
+            clicker:set_wielded_item(item)
+
+            -- Sorteio
+            math.randomseed(os.time() + math.random(1000))
+            local recipes = page_texts.recipe
+            local random_text = recipes[math.random(#recipes)]
+            local written_page = items.create_page_with_text(random_text)
+
+            -- Define inv ANTES de usar
+            local inv = clicker:get_inventory()
+            inv:add_item("main", ItemStack("nh_nodes:bottle"))
+            inv:add_item("main", written_page)
+
+            self.object:remove()
+
+        elseif name == "nh_nodes:bottle" then
+            core.chat_send_player(clicker:get_player_name(), "Plim! Quase quebrou. Vou ter que esvaziar a mão para pegar...")
+        else
+            core.chat_send_player(clicker:get_player_name(), "Garrafa com mensagem. Vou ter que esvaziar a mão para pegar...")
         end
-    end,
+    end
+end,
     
-    sounds = {
-        random = "tubarao_som",
-        damage = "tubarao_hurt",
-    },
+    --sounds = {
+    --    random = "tubarao_som",
+    --    damage = "tubarao_hurt",
+    --},
     
-    drops = {
-        {name = "nh_nodes:bottle", chance = 1, min = 1, max = 1},  -- 1-1 frasco
-        {name = "nh_items:writedpage", chance = 1, min = 1, max = 1},  -- 1-1 mensagem (sempre)
-    },
+    drops = {},  -- deixa vazio
+
+on_die = function(self, pos)
+    -- Sorteio igual ao on_rightclick
+    math.randomseed(os.time() + math.random(1000))
+    local recipes = page_texts.recipe
+    local random_text = recipes[math.random(#recipes)]
+    local written_page = items.create_page_with_text(random_text)
+    
+    -- Dropa o item no chão
+    core.add_item(pos, written_page)
+end,
 })
 
 -- Spawn da garrafa (somente na água)
@@ -884,6 +955,12 @@ mobs:register_mob("nh_mob:rat", {
     damage = 2,
     attack_type = "dogfight",
     
+    -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
+    
+    follow = {"nh_nodes:chicken_egg", "nh_nodes:friedchickenegg", "nh_nodes:raw_chicken", "nh_nodes:blueberry"},
+    
     hp_min = 8,
     hp_max = 10,
     armor = 100,
@@ -921,8 +998,6 @@ mobs:register_mob("nh_mob:rat", {
         walk_start = 1.5,
         walk_end = 2.5,
     },
-    
-    follow = {"nh_nodes:blueberry"},
 
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
@@ -1488,6 +1563,10 @@ mobs:register_mob("nh_mob:eagle", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
+    -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:rat", "nh_mob:rabbit"},
+    
     hp_min = 10,
     hp_max = 20,
     armor = 100,
@@ -1664,6 +1743,198 @@ mobs:spawn({
 
 mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
 
+
+
+-------------------------------
+-- MOB 4: Milhafre (Agressivo)
+-------------------------------
+mobs:register_mob("nh_mob:blackkite", {
+    type = "animal",
+    passive = false,
+    reach = 1,
+    damage = 2,
+    attack_type = "dogfight",
+    --attack_chance = 8, -- entre 1-10
+    
+    -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:rat", "nh_mob:rabbit"},
+    
+    hp_min = 10,
+    hp_max = 20,
+    armor = 100,
+    
+    collisionbox = {-0.5, 0, -0.2, 0.3, 2.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
+    physical = true,
+    stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -4,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "eagle.glb",
+    textures = {"blackkite.png"},
+    --rotate = 180,
+    visual_size = {x = 15, y = 15}, -- visual_size = {x = 2.1, y = 2.1},
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    fly = true,               -- Permite "voar" na água
+    fly_in = "air",   -- Voa no ar
+    
+    walk_velocity = 1,
+    run_velocity = 4,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,         
+    
+    animation = {
+        speed_normal = 0.1,
+        stand_start = 0,
+        stand_end = 0.5,
+        walk_start = 0.7,
+        walk_end = 0.8,
+        
+    fly_up_start = 0.75,
+    fly_up_end = 0.75,
+
+    fly_down_start = 0.75,
+    fly_down_end = 0.75,
+        -- ANIMAÇÃO DE ATAQUE:
+        punch_start = 0.5,    -- Frame inicial do ataque
+        punch_end = 1,      -- Frame final do ataque
+        punch_speed = 1, -- vel 1-30
+    },
+    
+    sounds = {
+        random = "EagleSound",
+        damage = "EagleSound",
+    },
+    
+    follow = {"nh_nodes:torch2"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:torch2" then
+                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "...")
+            end
+        end
+    end,
+    
+    
+    
+    do_custom = function(self, dtime)
+
+    local vel = self.object:get_velocity()
+
+    if not vel then return end
+
+    -- Subindo
+    if vel.y > 0.5 then
+        if self.state ~= "fly_up" then
+            self.state = "fly_up"
+            self:set_animation("fly_up")
+        end
+
+    -- Descendo
+    elseif vel.y < -0.5 then
+        if self.state ~= "fly_down" then
+            self.state = "fly_down"
+            self:set_animation("fly_down")
+        end
+
+    -- Movimento normal
+    else
+        if self.state ~= "walk" then
+            self.state = "walk"
+            self:set_animation("walk")
+        end
+    end
+    
+
+
+    -- controla timer para não rodar todo tick
+    self.perch_timer = (self.perch_timer or 0) + dtime
+
+    if self.perch_timer < 3 then
+        return
+    end
+
+    self.perch_timer = 0
+
+    local time = minetest.get_timeofday()
+
+    -- Só tenta pousar de noite
+    if time > 0.75 or time < 0.2 then
+
+        if not self.is_perching then
+
+            local pos = self.object:get_pos()
+            local leaves = minetest.find_node_near(pos, 6, {"nh_nodes:oaktimber"})
+
+		if leaves then
+
+		    leaves.y = leaves.y + 1
+
+		    self.object:set_pos(leaves)
+		    self.object:set_velocity({x=0,y=0,z=0})
+		    self.object:set_acceleration({x=0,y=0,z=0})
+
+		    self.fly = false
+		    self.walk_velocity = 0
+		    self.run_velocity = 0
+
+		    self.is_perching = true
+		    self.eagle_anim_state = "perch"
+		    self:set_animation("stand")
+
+		end
+        end
+    else
+        -- Se amanheceu, volta a voar
+	if self.is_perching then
+	    self.is_perching = false
+
+	    self.fly = true
+	    self.walk_velocity = 1
+	    self.run_velocity = 4
+    -- restaura aceleração padrão de voo
+    self.object:set_acceleration({x=0, y=0, z=0})
+
+    -- impulso inicial
+    self.object:set_velocity({x=5,y=5,z=5})
+
+	    self:set_animation("walk")
+	end
+    end
+
+    
+end,
+
+})
+
+-- Spawn da aguia (copas de carvalhos)
+mobs:spawn({
+    name = "nh_mob:blackkite",
+    nodes = {"air"}, -- nh_nodes = {"nh_nodes:water"},
+    neighbors = {"nh_nodes:leaves"}, --neighbors = {"nh_nodes:wet_sand"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 1,
+    min_height = 10,
+    max_height = 50                  
+})
+
+mobs:register_egg("nh_mob:blackkite", "Orbe com Milhafre", "orbspawner.png", 0)
 
 -------------------------------
 -- MOB 4: Fenix (Agressivo)

@@ -252,9 +252,9 @@ page_texts = {
         "Os cristais brilham de forma estranha à noite.",
     },
     recipe = {
-        "Receita secreta: Misture 3 nozes com mel selvagem.",
-        "Para criar uma poção forte, combine ervas da montanha com água pura.",
-        "O segredo está na temperatura: nunca deixe ferver!",
+        "A goma de carvalho foi essencial para manter o fogo. Usei ela, a folha de coqueiro, grama e graveto para fazer tochas",
+        "Para criar uma Bancada de Produção, combinei dois tarugos e duas tabuas de carvalho na grade de produção.",
+        "Sobrevivi graças a ovos que encontrei, fiz uma fogueira com os troncos, palha de coqueiro e goma de carvalho, e fritei os ovos",
     },
     message = {
         "Se você está lendo isso, significa que eu não consegui voltar.",
