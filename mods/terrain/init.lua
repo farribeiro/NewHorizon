@@ -57,7 +57,7 @@ local c_leaves_nut3 = core.get_content_id("nh_nodes:leaves_nut3")
 local c_leavesapple  = core.get_content_id("nh_nodes:leaves_apple")
 local c_leavesapple2 = core.get_content_id("nh_nodes:leaves_apple2")
 local c_leavesapple3 = core.get_content_id("nh_nodes:leaves_apple3")
-local c_palmtrunk = core.get_content_id("nh_nodes:palm_trunk")
+local c_palmtimber = core.get_content_id("nh_nodes:palmtimber")
 local c_palmleafstalks = core.get_content_id("nh_nodes:palmleafstalks")
 local c_palmleaf = core.get_content_id("nh_nodes:palmleaf")
 local c_palmstraw = core.get_content_id("nh_nodes:palmstraw")
@@ -400,7 +400,7 @@ local function can_place_tree(area, data, pos, radius)
                 local vi = area:index(check_x, pos.y, check_z)
                 
                 -- Se já tem madeira ou folhas, não pode colocar
-                if data[vi] == c_oaktimber or data[vi] == c_leaves or data[vi] == c_palmtrunk or data[vi] == c_palmleaf then
+                if data[vi] == c_oaktimber or data[vi] == c_leaves or data[vi] == c_palmtimber or data[vi] == c_palmleaf then
                     return false
                 end
             end
@@ -443,7 +443,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
             if data[vi] == c_air then
-                data[vi] = c_palmtrunk
+                data[vi] = c_palmtimber
             end
         end
     end
@@ -1192,7 +1192,7 @@ local function spawn_tent(area, data, base_pos)
                 base_pos.x + c[1],
                 base_pos.y + y,
                 base_pos.z + c[2]
-            )] = c_palmtrunk
+            )] = c_palmtimber
         end
     end
 

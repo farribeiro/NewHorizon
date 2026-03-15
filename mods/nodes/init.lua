@@ -252,7 +252,7 @@ function register_craft_station(node_name, config)
         tiles = config.tiles,
         groups = config.groups or {choppy = 2, oddly_breakable_by_hand = 1},
         paramtype2 = "facedir",
-        
+        sounds = config.sounds,
         -- Se tiver mesh, usa drawtype mesh, senão usa normal
         drawtype = config.mesh and "mesh" or "normal",
     }
@@ -580,6 +580,11 @@ register_craft_station("nh_nodes:dirt", {
     tiles = {"terra.png"},
     groups = {crumbly = 2},
     
+    sounds = {
+	dug = {name = "punchtimber3", gain = 0.5},
+	dig  = {name = "punchtimber3", gain = 0.5},
+    },
+    
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
     
@@ -715,11 +720,15 @@ end,
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -746,11 +755,19 @@ end,
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 4},
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
+        },
+        {
+            ingredients = {["nh_nodes:oaklog"] = 4},
+            output = "nh_nodes:oaktimberslice 64"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 4},
             output = "nh_nodes:oaktimberslice 64"
         },
         {
@@ -852,11 +869,15 @@ register_craft_station("nh_nodes:grass", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -871,8 +892,12 @@ register_craft_station("nh_nodes:grass", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -978,11 +1003,15 @@ register_craft_station("nh_nodes:top_grass", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -997,8 +1026,12 @@ register_craft_station("nh_nodes:top_grass", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+                {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -1077,6 +1110,10 @@ register_craft_station("nh_nodes:sand", {
     grid_size = 4,
     groups = {crumbly = 2, falling_node = 1},
     
+    sounds = {
+	dug = {name = "punchtimber3", gain = 0.5},
+	dig  = {name = "punchtimber3", gain = 0.5},
+    },
     
         -- Configuração mão direita
     wielded_bone_position = {
@@ -1108,11 +1145,15 @@ register_craft_station("nh_nodes:sand", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -1127,8 +1168,12 @@ register_craft_station("nh_nodes:sand", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -1189,11 +1234,15 @@ register_craft_station("nh_nodes:wet_sand", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -1208,8 +1257,12 @@ register_craft_station("nh_nodes:wet_sand", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -1336,11 +1389,15 @@ register_craft_station("nh_nodes:gneiss", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -1355,8 +1412,12 @@ register_craft_station("nh_nodes:gneiss", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -1421,11 +1482,15 @@ register_craft_station("nh_nodes:cobblestone", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -1440,8 +1505,12 @@ register_craft_station("nh_nodes:cobblestone", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -1466,6 +1535,98 @@ register_craft_station("nh_nodes:cobblestone", {
     },
 })
 
+core.register_node("nh_nodes:charcoal", {
+    description = "Carvão Vegetal",
+    tiles = {
+        "topdowncharcoal.png",   -- topo
+        "topdowncharcoal.png",   -- base
+        "charcoal.png",       -- lados (direita, esquerda, frente, trás)
+    },
+    groups = {choppy = 3, armor_head = 1},
+    stack_max = 1,
+    drop = "nh_nodes:charcoalnugget 8",
+
+    paramtype = "light",
+    paramtype2 = "wallmounted",
+    
+    selection_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+    
+    node_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+
+    -- Som tocado ao bater no tronco
+    sounds = {
+        dug = {name = "punchtimber", gain = 0.5},
+        dig  = {name = "punchtimber", gain = 0.5},
+    },
+})
+
+core.register_node("nh_nodes:charcoal2", {
+    description = "Carvão Vegetal Menor",
+    drawtype = "mesh",
+    mesh = "palm_trunk.obj",
+    tiles = {"charcoal2.png"},
+    stack_max = 4,
+    drop = "nh_nodes:charcoalnugget 2",
+    
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {
+        snappy = 3,
+        oddly_breakable_by_hand = 1,
+    },
+    
+    paramtype = "light",
+    paramtype2 = "wallmounted",
+    
+        
+    selection_box = {
+        type = "wallmounted",
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.25, 0.5, 0.25, 0.25},
+    },
+    
+    node_box = {
+        type = "wallmounted",
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.5, 0.5, 0.25, 0.5},
+    },
+    
+    -- Som tocado ao bater no tronco medio (2)
+    sounds = {
+        dug = {name = "punchtimber2", gain = 0.5},
+        dig  = {name = "punchtimber2", gain = 0.5},
+    },
+})
+
+
+
 core.register_node("nh_nodes:coal", {
     description = "Hulha\nCarvão Mineral",
     drawtype = "mesh",
@@ -1486,6 +1647,56 @@ core.register_node("nh_nodes:coal", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    drop =  {
+        items = {
+            {items = {"nh_nodes:coalnugget 8"}},
+        }
+    },
+})
+
+core.register_node("nh_nodes:coalnugget", {
+    description = "Pedra de Carvão Mineral",
+    drawtype = "mesh",
+    mesh = "metalnugget.obj",
+    tiles = {"coalnugget.png"},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
+})
+
+core.register_node("nh_nodes:charcoalnugget", {
+    description = "Pedra de Carvão Vegetal",
+    drawtype = "mesh",
+    mesh = "metalnugget.obj",
+    tiles = {"charcoalnugget.png"},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
 })
 
 core.register_node("nh_nodes:copper", {
@@ -1522,6 +1733,20 @@ core.register_node("nh_nodes:coppernugget", {
     mesh = "metalnugget.obj",
     tiles = {"coppernugget.png"},
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
 })
 
 core.register_node("nh_nodes:copperingot", {
@@ -1530,6 +1755,8 @@ core.register_node("nh_nodes:copperingot", {
     mesh = "metalingot.obj",
     tiles = {"copperingot.png"},
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
 })
 
 core.register_node("nh_nodes:tin", {
@@ -1566,6 +1793,20 @@ core.register_node("nh_nodes:tinnugget", {
     mesh = "metalnugget.obj",
     tiles = {"tinnugget.png"},
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
 })
 
 core.register_node("nh_nodes:tiningot", {
@@ -1574,6 +1815,8 @@ core.register_node("nh_nodes:tiningot", {
     mesh = "metalingot.obj",
     tiles = {"tiningot.png"},
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
 })
 
 core.register_node("nh_nodes:iron", {
@@ -1610,6 +1853,20 @@ core.register_node("nh_nodes:ironnugget", {
     mesh = "metalnugget.obj",
     tiles = {"ironnugget.png"},
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
 })
 
 core.register_node("nh_nodes:ironingot", {
@@ -1618,6 +1875,8 @@ core.register_node("nh_nodes:ironingot", {
     mesh = "metalingot.obj",
     tiles = {"ironingot.png"},
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
 })
 
 core.register_node("nh_nodes:nickel", {
@@ -1859,19 +2118,12 @@ local function make_leaves_fall(pos)
     end
 end
 
--- Tronco
+-- Tronco 
 core.register_node("nh_nodes:oaktimber", {
     description = "Tronco de Carvalho",
-    tiles = {"tronco.png"},
+    tiles = {"oaktimber.png"},
     groups = {choppy = 3, falling_node = 1, armor_head = 1},
     stack_max = 1,
-    
-    -- Configuração mão direita
-    wielded_bone_position = {
-        pos = {x = 0.5, y = 0.5, z = 1.7}
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 
     -- Configuração mão direita
     wielded_bone_position = {
@@ -1886,7 +2138,12 @@ core.register_node("nh_nodes:oaktimber", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    
+
+    -- Som tocado ao bater no tronco
+    sounds = {
+        dug = {name = "punchtimber", gain = 0.5},
+        dig  = {name = "punchtimber", gain = 0.5},
+    },
     
     -- Detecta quando o tronco é quebrado ou vai cair
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
@@ -1918,6 +2175,57 @@ core.register_node("nh_nodes:oaktimber", {
         end
         return false
     end,
+        
+    drop = "nh_nodes:oaklog",
+})
+
+core.register_node("nh_nodes:oaklog", {
+    description = "Tora de Carvalho",
+    tiles = {
+        "topdownoaktimber.png",   -- topo
+        "topdownoaktimber.png",   -- base
+        "oaktimber.png",       -- lados (direita, esquerda, frente, trás)
+    },
+    groups = {choppy = 3, armor_head = 1},
+    stack_max = 1,
+
+    paramtype = "light",
+    paramtype2 = "wallmounted",
+    
+    selection_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+    
+    node_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+
+    -- Som tocado ao bater no tronco
+    sounds = {
+        dug = {name = "punchtimber", gain = 0.5},
+        dig  = {name = "punchtimber", gain = 0.5},
+    },
 })
 
 -- Tronco de macieira
@@ -1940,6 +2248,13 @@ core.register_node("nh_nodes:appletimber", {
         type = "fixed",
         fixed = {-0.095, -0.5, -0.095, 0.095, 0.5, 0.095},
     },
+    
+    sounds = {
+    dug = {name = "punchtimber3", gain = 0.5},
+    dig  = {name = "punchtimber3", gain = 0.5},
+},
+    
+
     
     -- Detecta quando o tronco é quebrado ou vai cair
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
@@ -1980,6 +2295,12 @@ core.register_node("nh_nodes:pinetimber", {
     tiles = {"pinetimber.png"},
     groups = {choppy = 3, falling_node = 1, armor_head = 1},
     stack_max = 1,
+    
+    -- Som tocado ao bater no tronco
+    sounds = {
+        dug = {name = "punchtimber", gain = 0.5},
+        dig  = {name = "punchtimber", gain = 0.5},
+    },
     
     -- Detecta quando o tronco é quebrado ou vai cair
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
@@ -2026,6 +2347,57 @@ core.register_node("nh_nodes:pinetimber", {
         end
         return false
     end,
+    
+        
+    drop = "nh_nodes:pinelog",
+})
+
+core.register_node("nh_nodes:pinelog", {
+    description = "Tora de Pinheiro",
+    tiles = {
+        "topdownpinetimber.png",   -- topo
+        "topdownpinetimber.png",   -- base
+        "pinetimber.png",       -- lados (direita, esquerda, frente, trás)
+    },
+    groups = {choppy = 3, armor_head = 1},
+    stack_max = 1,
+
+    paramtype = "light",
+    paramtype2 = "wallmounted",
+    
+    selection_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+    
+    node_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+
+    -- Som tocado ao bater no tronco
+    sounds = {
+        dug = {name = "punchtimber", gain = 0.5},
+        dig  = {name = "punchtimber", gain = 0.5},
+    },
 })
 
 -- Madeira
@@ -2048,6 +2420,74 @@ core.register_node("nh_nodes:oakwood", {
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
+
+-- Madeira
+core.register_node("nh_nodes:pinewood", {
+    description = "Madeira de Pinheiro",
+    tiles = {"pinewood.png"},
+    groups = {choppy = 3},
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+core.register_node("nh_nodes:bone", {
+    description = "Osso",
+    drawtype = "mesh",
+    mesh = "bone.obj",
+    tiles = {"bone.png"},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    stack_max = 8,
+
+    paramtype = "light",
+    paramtype2 = "wallmounted",
+    
+    selection_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+    
+    node_box = {
+        type = "wallmounted",
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    },
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.25, y = 0, z = 0},
+        rot = {x = 90, y = 90, z = 90},
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    --offhand_bone_position = {
+    --    pos = {x = 0, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    --},
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+
+    -- Som tocado ao bater no tronco
+    sounds = {
+        dug = {name = "punchtimber", gain = 0.5},
+        dig  = {name = "punchtimber", gain = 0.5},
+    },
+})
+
 
 -- slime 
 core.register_node("nh_nodes:slime", {
@@ -2133,7 +2573,7 @@ core.register_node("nh_nodes:oaktimberslice", {
     description = "Lenha de Carvalho",
     drawtype = "mesh",
     mesh = "oaktimberslice.obj",
-    tiles = {"tronco.png"},
+    tiles = {"oaktimber.png"},
     groups = {choppy = 3},
     stack_max = 16,
     
@@ -2549,6 +2989,190 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
     end,
 })     
 
+core.register_node("nh_nodes:spinningtop", {
+    description = "Pião de Carvalho",
+    drawtype = "mesh",
+    mesh = "piao.obj",
+    tiles = {"oakpiao.png"},
+    inventory_image = "oakpiaoinv.png",
+    
+    walkable = false,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = -0.25, y = 0.5, z = 0},
+        rot = {x = 0, y = 0, z = 45},
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Tornar comestível
+    --on_use = function(itemstack, user, pointed_thing)
+        --restore_hunger(user, 2)  -- Restaura 4 pontos
+        --itemstack:take_item()
+        --return itemstack
+    --end,
+    
+    -- Spawna o mob ao colocar o node no chão
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above  -- posição onde vai spawnar
+        
+        -- Spawna o mob
+        local mob = minetest.add_entity(pos, "nh_mob:spinningtop")
+        
+        if mob then
+            -- Aplica a rotação do jogador ao mob
+            if placer then
+                local yaw = placer:get_look_horizontal()
+                mob:set_yaw(yaw)
+            end
+            
+            -- Consome o item da mão
+            itemstack:take_item()
+        end
+        
+        return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:spinningtop2", {
+    description = "Pião de Coqueiro",
+    drawtype = "mesh",
+    mesh = "piao.obj",
+    tiles = {"palmpiao.png"},
+    inventory_image = "palmpiaoinv.png",
+    
+    walkable = false,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = -0.25, y = 0.5, z = 0},
+        rot = {x = 0, y = 0, z = 45},
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Tornar comestível
+    --on_use = function(itemstack, user, pointed_thing)
+        --restore_hunger(user, 2)  -- Restaura 4 pontos
+        --itemstack:take_item()
+        --return itemstack
+    --end,
+    
+    -- Spawna o mob ao colocar o node no chão
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above  -- posição onde vai spawnar
+        
+        -- Spawna o mob
+        local mob = minetest.add_entity(pos, "nh_mob:spinningtop2")
+        
+        if mob then
+            -- Aplica a rotação do jogador ao mob
+            if placer then
+                local yaw = placer:get_look_horizontal()
+                mob:set_yaw(yaw)
+            end
+            
+            -- Consome o item da mão
+            itemstack:take_item()
+        end
+        
+        return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:spinningtop3", {
+    description = "Pião de Pinheiro",
+    drawtype = "mesh",
+    mesh = "piao.obj",
+    tiles = {"pinepiao.png"},
+    inventory_image = "pinepiaoinv.png",
+    
+    walkable = false,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = -0.25, y = 0.5, z = 0},
+        rot = {x = 0, y = 0, z = 45},
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Tornar comestível
+    --on_use = function(itemstack, user, pointed_thing)
+        --restore_hunger(user, 2)  -- Restaura 4 pontos
+        --itemstack:take_item()
+        --return itemstack
+    --end,
+    
+    -- Spawna o mob ao colocar o node no chão
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above  -- posição onde vai spawnar
+        
+        -- Spawna o mob
+        local mob = minetest.add_entity(pos, "nh_mob:spinningtop3")
+        
+        if mob then
+            -- Aplica a rotação do jogador ao mob
+            if placer then
+                local yaw = placer:get_look_horizontal()
+                mob:set_yaw(yaw)
+            end
+            
+            -- Consome o item da mão
+            itemstack:take_item()
+        end
+        
+        return itemstack
+    end,
+})
+
+
 -- ========================================
 -- EXEMPLOS DE USO
 -- ========================================
@@ -2593,11 +3217,19 @@ register_craft_station("nh_nodes:craft_table", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
+        },
+        {
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
+        },
+        {
+            ingredients = {["nh_nodes:oakboard"] = 1, ["nh_nodes:obsidianblade"] = 7},
+            output = "nh_nodes:obsidiansword"
         },
         {
             ingredients = {["nh_nodes:pebble"] = 8},
@@ -2612,8 +3244,12 @@ register_craft_station("nh_nodes:craft_table", {
             output = "nh_nodes:campfiretinder"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -2659,6 +3295,18 @@ register_craft_station("nh_nodes:craft_table", {
             ingredients = {["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2},
             output = "nh_nodes:oakdoor_closed"
         },         
+        {
+            ingredients = {["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
+            output = "nh_nodes:spinningtop"
+        },   
+        {
+            ingredients = {["nh_nodes:palmlog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
+            output = "nh_nodes:spinningtop2"
+        },   
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
+            output = "nh_nodes:spinningtop3"
+        },   
     },
 })
 
@@ -2711,6 +3359,18 @@ register_craft_station("nh_nodes:furnace", {
     },
     
     recipes = {
+        {
+            ingredients = {["nh_nodes:oaklog"] = 1},
+            output = "nh_nodes:charcoal"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:charcoal"
+        },
+        {
+            ingredients = {["nh_nodes:palmlog"] = 1},
+            output = "nh_nodes:charcoal2"
+        },
         {
             ingredients = {["nh_nodes:chicken_egg"] = 1},
             output = "nh_nodes:friedchickenegg"
@@ -2776,15 +3436,23 @@ register_craft_station("nh_nodes:advanced_bench", {
     recipes = {
         {
             ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
             ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone 2"
+            output = "nh_nodes:chippedstone"
         },
         {
-            ingredients = {["nh_nodes:oaktimber"] = 1},
+            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+            output = "nh_nodes:obsidianblade"
+        },
+        {
+            ingredients = {["nh_nodes:oaklog"] = 1},
             output = "nh_nodes:oakwood"
+        },
+        {
+            ingredients = {["nh_nodes:pinelog"] = 1},
+            output = "nh_nodes:pinewood"
         },
         {
             ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -4082,9 +4750,17 @@ core.register_node("nh_nodes:raw_chicken", {
     --wield_scale = {x= 2, y= 2, z= 2},
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
-        restore_hunger(user, 4)  -- Restaura 4 ponto
+        restore_hunger(user, 4)
         itemstack:take_item()
-        return itemstack
+    
+        local bone = ItemStack("nh_nodes:bone 2")
+    
+        if itemstack:is_empty() then
+            return bone
+        else
+            add_item_to_visible_slots(user, bone)
+            return itemstack
+        end
     end,
 })
 
@@ -4110,9 +4786,17 @@ core.register_node("nh_nodes:roastchicken", {
     visual_size = {x = 15, y = 15},
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
-        restore_hunger(user, 7)  -- Restaura 7 ponto
+        restore_hunger(user, 7)
         itemstack:take_item()
-        return itemstack
+    
+        local bone = ItemStack("nh_nodes:bone 2")
+    
+        if itemstack:is_empty() then
+            return bone
+        else
+            add_item_to_visible_slots(user, bone)
+            return itemstack
+        end
     end,
 })
 
@@ -4394,12 +5078,13 @@ core.register_node("nh_nodes:coconut", {
 })
 
 
-core.register_node("nh_nodes:palm_trunk", {
+core.register_node("nh_nodes:palmtimber", {
     description = "Tronco de coqueiro",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
     tiles = {"coqueirotexture.png"},
     stack_max = 4, 
+    drop = "nh_nodes:palmlog",
     
     paramtype = "light",
     paramtype2 = "facedir",
@@ -4409,7 +5094,6 @@ core.register_node("nh_nodes:palm_trunk", {
         falling_node = 1,
         tree_trunk = 1
     },
-    --sounds = default.node_sound_wood_defaults(),
 
     collision_box = {
         type = "fixed",
@@ -4420,7 +5104,13 @@ core.register_node("nh_nodes:palm_trunk", {
         fixed = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25}
     },
     
-    after_dig_node = function(pos)
+    -- Som tocado ao bater no tronco medio (2)
+    sounds = {
+        dug = {name = "punchtimber2", gain = 0.5},
+        dig  = {name = "punchtimber2", gain = 0.5},
+    },
+    
+after_dig_node = function(pos)
     local below = {x = pos.x, y = pos.y - 1, z = pos.z}
     local below_node = core.get_node(below)
 
@@ -4442,6 +5132,43 @@ on_timer = function(pos)
     end
     return true
 end,
+})
+
+core.register_node("nh_nodes:palmlog", {
+    description = "Tora de coqueiro",
+    drawtype = "mesh",
+    mesh = "palm_trunk.obj",
+    tiles = {"coqueirotexture.png"},
+    stack_max = 4, 
+    
+    paramtype = "light",
+    paramtype2 = "wallmounted",
+    groups = {
+        snappy = 3,
+        oddly_breakable_by_hand = 1,
+        --falling_node = 1,
+        --tree_trunk = 1
+    },
+    
+    selection_box = {
+        type = "wallmounted",
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.25, 0.5, 0.25, 0.25},
+    },
+    
+    node_box = {
+        type = "wallmounted",
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.25, 0.5, 0.25, 0.25},
+    },
+    
+    -- Som tocado ao bater no tronco medio (2)
+    sounds = {
+        dug = {name = "punchtimber2", gain = 0.5},
+        dig  = {name = "punchtimber2", gain = 0.5},
+    },
 })
 
 core.register_node("nh_nodes:palmleafstalks", {
@@ -5549,7 +6276,7 @@ core.register_node("nh_nodes:oak_chest", {
         inv:set_stack("main", 8, ItemStack("nh_nodes:apple 2"))  -- 2 maças
         inv:set_stack("main", 9, ItemStack("nh_nodes:blueberry 2"))  -- 2 mitilos
         inv:set_stack("main", 10, ItemStack("nh_nodes:coconut 2"))  -- 2 cocos
-        inv:set_stack("main", 11, ItemStack("nh_nodes:palm_trunk 1"))
+        inv:set_stack("main", 11, ItemStack("nh_nodes:palmlog 1"))
         inv:set_stack("main", 12, ItemStack("nh_nodes:palmleaf 1"))
         
         -- Definir formspec do inventário
@@ -6131,11 +6858,11 @@ core.register_node("nh_nodes:branch", {
     range = 5, -- AUMENTA O ALCANCE
 
 	groups = {
-	    crumbly = 2,
-	    cracky  = 2,
-	    snappy  = 2,
-	    choppy  = 2,
-	    fleshy = 2
+	    crumbly = 3, -- terra, areia, argila
+	    --cracky  = 2, -- pedra, minério
+	    snappy  = 3, -- folhas, plantas
+	    --choppy  = 2, -- troncos, madeira
+	    fleshy = 3 -- mobs, carne
 	},
 })
 
@@ -6146,14 +6873,6 @@ core.register_node("nh_nodes:stick", {
     tiles = {"stick.png"},
 
     paramtype = "light",
-
-	groups = {
-	    crumbly = 2,
-	    cracky  = 2,
-	    snappy  = 2,
-	    choppy  = 2,
-	    fleshy = 2
-	},
 	
     collision_box = {
         type = "fixed",
@@ -6248,6 +6967,100 @@ core.register_node("nh_nodes:obsidianpebble", {
         core.check_for_falling(pos)
     end,
 })
+
+
+---------------------------
+-- NODE DO SEIXO DE OBSIDIANA
+---------------------------
+core.register_node("nh_nodes:obsidianblade", {
+    description = "Lâmina de Obsidiana",
+    drawtype = "mesh",
+    mesh = "obsidianblade.obj",  -- 
+    tiles = {"obsidiana.png"}, -- tiles = {"pedra.png"},
+    --inventory_image = "seixo.png",
+    --wield_image = "seixo.png",
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        snappy = 3,
+        oddly_breakable_by_hand = 3,
+        falling_node = 1,
+        attached_node = 1,
+    },
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+    },
+
+    -----------------------------
+    -- FAZ O SEIXO CAIR SOZINHO
+    -----------------------------
+    on_construct = function(pos)
+        core.check_for_falling(pos)
+    end,
+
+    after_place_node = function(pos)
+        core.check_for_falling(pos)
+    end,
+})
+
+---------------------------
+-- NODE DO SEIXO DE OBSIDIANA
+---------------------------
+core.register_node("nh_nodes:obsidiansword", {
+    description = "Espada de Obsidiana",
+    drawtype = "mesh",
+    mesh = "obsidiansword.obj",  -- 
+    tiles = {"obsidiansword.png"}, -- tiles = {"pedra.png"},
+    --inventory_image = "seixo.png",
+    --wield_image = "seixo.png",
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        --fleshy = 1, -- mobs, carne
+        --snappy  = 2, -- folhas, plantas
+        --crumbly = 3, -- terra, areia, argila
+        oddly_breakable_by_hand = 3,
+        falling_node = 1,
+    },
+ 
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
+    },
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 3, y = 0, z = 1.8},
+        rot = {x = 90, y = 0, z = -90},
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
 
 ---------------------------
 -- NODE DO SEIXO NO CHÃO
@@ -6346,6 +7159,52 @@ core.register_node("nh_nodes:chippedstone", {
         core.check_for_falling(pos)
     end,
 })
+
+---------------------------
+-- NODE DA ESPADA ENFERRUJADA (FERRAMENTA)
+---------------------------
+core.register_node("nh_nodes:rustironsword", {
+    description = "Espada de Ferro Enferrujado",
+    drawtype = "mesh",
+    mesh = "rustsword.obj",
+    tiles = {"rustsword.png"}, 
+    paramtype = "light",
+    use_texture_alpha = "clip",
+    backface_culling = false,
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        --snappy  = 2, -- folhas, plantas
+        --crumbly = 3, -- terra, areia, argila
+        --fleshy = 2, -- mobs, carne
+        oddly_breakable_by_hand = 3,
+    },
+    
+    --drop = "nh_items:rustironsword",
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.035, 0.08, 0.05, 0.035},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.03, -0.5, -0.115, 0.03, 0.5, 0.115},
+    },
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.3, y = 0, z = 0},
+        rot = {x = 270, y = -90, z = 0},
+    },
+     wielded_visual_size = {x = 0.325, y = 0.325, z = 0.325},
+})
+
 
 ---------------------------
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)

@@ -13,9 +13,9 @@ local GRASS_NODES = {
     --["nh_nodes:top_grass"] = true,
     --["nh_nodes:dirt"] = true,
     ["nh_nodes:sand"] = true,
-    ["nh_nodes:wet_sand"] = true,
 }
 local WATER_NODES = {
+    --["nh_nodes:wet_sand"] = true,
     ["nh_nodes:water"]    = true,
     --["nh_nodes:water2"]   = true,
 }

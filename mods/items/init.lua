@@ -8,6 +8,92 @@ core.log("action", "[items] init.lua carregado")
 items = {}
 
 
+--[[
+core.register_tool("nh_items:rustironsword", {
+    description = "Espada de Ferro Enferrujado",
+    --inventory_image = "blank.png",
+    --wield_image = "blank.png",
+    --inventory_image = "rustsword.png",
+    --mesh = "models/rustsword.obj",
+    --tiles = {"rustsword.png"},
+
+    --wield_scale = {x=0.3, y=0.3, z=0.3},
+    --wield_scale = {x = 0.325, y = 0.325, z = 0.325},
+
+    --wield_image = "blank.png", -- opcional, evita sprite aparecer
+    --wield_overlay = "rustsword.png",
+
+    tool_capabilities = {
+        full_punch_interval = 1.2,
+        max_drop_level = 0,
+
+        groupcaps = {
+            fleshy = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 30, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 30, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+    on_place = function(itemstack, placer, pointed_thing)
+
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above
+
+        core.set_node(pos, {name = "nh_nodes:rustironsword"})
+
+        itemstack:take_item()
+        return itemstack
+    end,
+})
+
+core.register_entity("nh_items:wield_sword", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "rustsword.obj",
+        textures = {"rustsword.png"},
+        visual_size = {x=5, y=5},
+        physical = false,
+        collide_with_objects = false,
+        pointable = false,
+        static_save = false,
+    }
+})
+
+local wield_entities = {}
+
+core.register_globalstep(function()
+
+    for _, player in ipairs(core.get_connected_players()) do
+
+        local name = player:get_player_name()
+        local item = player:get_wielded_item():get_name()
+
+        if item == "nh_items:rustironsword" then
+
+            if not wield_entities[name] then
+                local obj = core.add_entity(player:get_pos(), "nh_items:wield_sword")
+                obj:set_attach(player, "bone_RHand", {x=1.5,y=0,z=0}, {x=0,y=-90,z=270})
+                wield_entities[name] = obj
+            end
+
+        else
+
+            if wield_entities[name] then
+                wield_entities[name]:remove()
+                wield_entities[name] = nil
+            end
+
+        end
+
+    end
+
+end)
+]]--
+
 core.register_craftitem("nh_items:stick", {
     description = "Graveto",
     inventory_image = "graveto.png",
@@ -254,7 +340,7 @@ page_texts = {
     recipe = {
         "A goma de carvalho foi essencial para manter o fogo. Usei ela, a folha de coqueiro, grama e graveto para fazer tochas",
         "Para criar uma Bancada de Produção, combinei dois tarugos e duas tabuas de carvalho na grade de produção.",
-        "Sobrevivi graças a ovos que encontrei, fiz uma fogueira com os troncos, palha de coqueiro e goma de carvalho, e fritei os ovos",
+        "Sobrevivi graças a ovos que encontrei, mas não aguentava mais comer eles crus, fiz uma fogueira com a isca de fogueira feita de palha de coqueiro e goma de carvalho, então coloquei as lenhas de troncos de carvalho nela e fritei os ovos!",
     },
     message = {
         "Se você está lendo isso, significa que eu não consegui voltar.",
