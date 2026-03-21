@@ -123,19 +123,19 @@ core.register_craftitem("nh_items:feather", {
     wield_scale = {x = 0.2, y = 0.2, z = 0.01},
 })
 
-core.register_craftitem("nh_items:bottle", {
-    description = "Frasco",
-    inventory_image = "bottle.png",
-    wield_image = "bottle.png",
-    wield_scale = {x = 0.3, y = 0.3, z = 0.5},
-})
+--core.register_craftitem("nh_items:bottle", {
+--    description = "Frasco",
+--    inventory_image = "bottle.png",
+--    wield_image = "bottle.png",
+--    wield_scale = {x = 0.3, y = 0.3, z = 0.5},
+--})
 
-core.register_craftitem("nh_items:inkbottle", {
-    description = "Frasco com tinta",
-    inventory_image = "inkbottle.png",
-    wield_image = "inkbottle.png",
-    wield_scale = {x = 0.3, y = 0.3, z = 0.5},
-})
+--core.register_craftitem("nh_items:inkbottle", {
+--    description = "Frasco com tinta",
+--    inventory_image = "inkbottle.png",
+--    wield_image = "inkbottle.png",
+--    wield_scale = {x = 0.3, y = 0.3, z = 0.5},
+--})
 
 --[[
 -- Função auxiliar para verificar se o jogador tem os itens necessários

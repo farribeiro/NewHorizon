@@ -630,9 +630,10 @@ function mob_class:update_tag(newname)
 		end
 	end
 
-	self.infotext = S("Entity: @1", self.name) .. " | " .. S("Type: @1", self.type)
-		.. ("\n" .. S("Health: @1", self.health) .. " / " .. prop.hp_max)
-		.. (self.owner == "" and "" or "\n" .. S("Owner: @1", self.owner)) .. text
+	self.infotext = (self.description and (self.description .. "\n") or "")
+    		.. S("Entity: @1", self.name) .. " | " .. S("Type: @1", self.type)
+    		.. ("\n" .. S("Health: @1", self.health) .. " / " .. prop.hp_max)
+    		.. (self.owner == "" and "" or "\n" .. S("Owner: @1", self.owner)) .. text
 
 	-- apply infotext changes
 	if mob_infotext and self.infotext ~= prop.infotext then
@@ -3247,10 +3248,12 @@ function mobs:register_mob(name, def)
 			stepheight = def.stepheight or 1.1,
 			glow = def.glow,
 			damage_texture_modifier = def.damage_texture_modifier or "^[colorize:#c9900070",
+			description = def.description or name,  -- ← adicione aqui
 		},
 
 		name = name,
 		type = def.type,
+		description = def.description or name,  -- ← adicione aqui também
 		_nametag = def.nametag,
 		attack_type = def.attack_type,
 		fly = def.fly,

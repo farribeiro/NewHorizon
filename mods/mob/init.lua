@@ -28,6 +28,8 @@ mobs:register_mob("nh_mob:rat", {
     damage = 2,
     attack_type = "dogfight",
     
+    description = "Ratazana",
+    
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
     specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
@@ -118,6 +120,8 @@ mobs:register_mob("nh_mob:ladybug", {
     damage = 0,
     attack_type = "dogfight",
     
+    description = "Joaninha",
+    
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -204,6 +208,8 @@ mobs:register_mob("nh_mob:cricket", {
     reach = 1,
     damage = 0,
     attack_type = "dogfight",
+    
+    description = "Grilo",
     
     hp_min = 1,
     hp_max = 3,
@@ -298,6 +304,8 @@ mobs:register_mob("nh_mob:cicada", {
     damage = 0,
     attack_type = "dogfight",
     
+    description = "Cigarra",
+    
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -389,6 +397,8 @@ mobs:register_mob("nh_mob:firefly", {
     reach = 1,
     damage = 0,
     attack_type = "dogfight",
+    
+    description = "Vagalume",
     
     hp_min = 1,
     hp_max = 3,
@@ -500,6 +510,8 @@ mobs:register_mob("nh_mob:worm", {
     damage = 0,
     attack_type = "dogfight",
     
+    description = "Minhoca",
+    
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -541,7 +553,17 @@ mobs:register_mob("nh_mob:worm", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             
-            if name == "nh_nodes:dirt" then
+            if name == "" then
+                item:take_item()
+                clicker:set_wielded_item(item)
+
+                -- Define inv ANTES de usar
+                local inv = clicker:get_inventory()
+                inv:add_item("main", ItemStack("nh_nodes:worm"))
+
+                self.object:remove()
+                
+            elseif name == "nh_nodes:dirt" then
                 core.chat_send_player(clicker:get_player_name(), "A minhoca quer terra!")
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
@@ -586,6 +608,8 @@ mobs:register_mob("nh_mob:bull", {
         {name = "nh_nodes:cowmeat", chance = 1, min = 2, max = 5},  -- 2-7 carnes (sempre)
         {name = "nh_nodes:bone", chance = 1, min = 2, max = 5},  -- 2-7 ossos (sempre)
     },
+    
+    description = "Touro",
     
     hp_min = 25,
     hp_max = 35,
@@ -719,6 +743,8 @@ mobs:register_mob("nh_mob:eagle", {
     damage = 2,
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
+    
+    description = "Águia",
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -913,6 +939,8 @@ mobs:register_mob("nh_mob:blackkite", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
+    description = "Milhafre",
+    
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
     specific_attack = {"nh_mob:rat", "nh_mob:rabbit"},
@@ -1104,6 +1132,8 @@ mobs:register_mob("nh_mob:phoenix", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
+    description = "Fênix\n[Animal Alterado]",
+    
     hp_min = 10,
     hp_max = 20,
     armor = 100,
@@ -1291,6 +1321,8 @@ mobs:register_mob("nh_mob:ourico", {
     damage = 5,
     reach = 1,
     
+    description = "Ouriço",
+    
     hp_min = 10,
     hp_max = 15,
     armor = 100,
@@ -1399,6 +1431,8 @@ mobs:register_mob("nh_mob:ouricoshadow", {
     damage = 2,
     reach = 1,
     
+    description = "Ouriço Sombrio\n[Animal Modificado]",
+    
     hp_min = 10,
     hp_max = 15,
     armor = 100,
@@ -1472,6 +1506,8 @@ mobs:register_mob("nh_mob:rabbit", {
     type = "animal",
     passive = true,           -- Totalmente passivo
     damage = 0,               -- Não causa dano
+    
+    description = "Coelho Anão",
     
     hp_min = 5,
     hp_max = 8,
@@ -1555,6 +1591,8 @@ mobs:register_mob("nh_mob:galo", {
     reach = 1,
     damage = 1,
     attack_type = "dogfight",
+    
+    description = "Galo",
     
         -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -1685,6 +1723,8 @@ mobs:register_mob("nh_mob:galinha", {
     type = "animal",
     passive = true,
     damage = 0,
+    
+    description = "Galinha",
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -1878,6 +1918,8 @@ mobs:register_mob("nh_mob:shark", {
     damage = 5,
     attack_type = "dogfight",
     
+    description = "Tubarão",
+    
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
     specific_attack = {"nh_mob:galinha", "nh_mob:galinha", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:ourico"},
@@ -1989,6 +2031,8 @@ mobs:register_mob("nh_mob:messagebottle", {
     damage = 0,
     attack_type = "dogfight",
     
+    description = "Garrafa com Mensagem\n[Item]",
+    
     hp_min = 1,
     hp_max = 1,
     armor = 100,
@@ -2094,7 +2138,7 @@ mobs:spawn({
     max_height = -1                     -- spawna no nível do mar
 })
 
-mobs:register_egg("nh_mob:messagebottle", "Garrafa com Mensagem", "bottle.png", 0)
+--mobs:register_egg("nh_mob:messagebottle", "Garrafa com Mensagem", "bottle.png", 0)
 
 
 -------------------------------
@@ -2106,6 +2150,8 @@ mobs:register_mob("nh_mob:iceberg", {
     reach = 1,
     damage = 0,
     attack_type = "dogfight",
+    
+    description = "Iceberg\n[Plataforma]",
     
     hp_min = 1,
     hp_max = 1,
@@ -2217,6 +2263,8 @@ mobs:register_mob("nh_mob:spinningtop", {
     reach = 1,
     damage = 1,
     attack_type = "dogfight",
+    
+    description = "Pião de Carvalho\n[Item]",
     
     hp_min = 1,
     hp_max = 3,
@@ -2362,6 +2410,8 @@ mobs:register_mob("nh_mob:spinningtop2", {
     reach = 1,
     damage = 1,
     attack_type = "dogfight",
+    
+    description = "Pião de Coqueiro\n[Item]",
     
     hp_min = 1,
     hp_max = 3,
@@ -2517,6 +2567,8 @@ mobs:register_mob("nh_mob:spinningtop3", {
     damage = 1,
     attack_type = "dogfight",
     
+    description = "Pião de Pinheiro\n[Item]",
+    
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -2651,18 +2703,90 @@ end,
 --mobs:register_egg("nh_mob:spinningtop3", "Pião de Pinheiro", "pinepiaoinv.png", 0)
 
 
+-------------------------------
+-- MOB 1: polvo (Defensivo)
+-------------------------------
+
+mobs:register_mob("nh_mob:octopus", {
+    type = "animal",
+    passive = true,          -- Pode se defender quando atacado
+    damage = 3,
+    reach = 1,
+    
+    description = "Polvo Obscuro\n[Animal Alterado]",
+    
+    hp_min = 5,
+    hp_max = 10,
+    armor = 100,
+    
+    collisionbox = {-0.3, 0, -0.25, 0.25, 0.4, 0.25},
+    physical = true,
+    stepheight = 3.1,
+    fall_speed = -8,
+    fall_damage = 2,
+    
+    visual = "mesh",
+    mesh = "octopus.glb",
+    textures = {"octopus.png"},
+    --rotate = 180,
+    visual_size = {x = 15, y = 15},
+    
+    drops = {
+        {name = "nh_nodes:inksac", chance = 1, min = 1, max = 1},  -- bolsa de tinta
+    },
+    
+        -- IMPORTANTE: Propriedades para manter na água
+    fly = true,               -- Permite "voar" na água
+    fly_in = "nh_nodes:water",   -- Voa na agua
+    
+    -- lista de mobs que ele vai atacar ativamente
+    --attack_animals = true,        -- permite atacar outros mobs
+    --specific_attack = {"nh_mob:cricket", "nh_mob:cicada",  "nh_mob:ladybug"},
+    
+    walk_velocity = 0.5,
+    run_velocity = 2,
+    
+    view_range = 10,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0.38,
+        stand_end = 0.63,
+        walk_start = 0,
+        walk_end = 0.75,
+        run_start = 0,
+        run_end = 0.75,
+        --jump_start = 61,
+        --jump_end = 80
+    },
+
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            core.chat_send_player(clicker:get_player_name(), "O polvo é perigoso, cuidado ao atacar!")
+        end
+    end,
+  
+})
+
+
+mobs:register_egg("nh_mob:octopus", "Orbe com Polvo", "orbspawner.png", 0)
 
 
 -------------------------------
 -- MOB 4: Polvo esqueleto (Agressivo)
 -------------------------------
-mobs:register_mob("nh_mob:octoskull", {
+mobs:register_mob("nh_mob:exoskull", {
     type = "monster",
     passive = false,
     reach = 2,
     damage = 5,
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
+    
+    description = "Exausto\n[Animal Alterado]",
     
     hp_min = 20,
     hp_max = 30,
@@ -2720,7 +2844,7 @@ mobs:register_mob("nh_mob:octoskull", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+                core.chat_send_player(clicker:get_player_name(), "O exausto não quer luz!")
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -2741,6 +2865,17 @@ mobs:register_mob("nh_mob:octoskull", {
 
 	return true -- PARA CONTINUAR.
 	end,	
+	
+    on_die = function(self, pos)
+        minetest.after(0.1, function()
+            minetest.add_entity(pos, "nh_mob:octopus") -- exemplo
+        end)
+
+    -- Opcional: deixa o novo mob já em modo de ataque
+    -- if obj then
+    --     obj:get_luaentity().state = "attack"
+    -- end
+end,
 })
 
 -- Spawn do vulto (fundo de cavernas escuras)
@@ -2769,6 +2904,8 @@ mobs:register_mob("nh_mob:sirenia", {
     damage = 1,
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
+    
+    description = "Sirenia\n[Animal Fenômeno]",
     
     hp_min = 20,
     hp_max = 30,
@@ -2870,6 +3007,8 @@ mobs:register_mob("nh_mob:slime", {
     damage = 1,
     attack_type = "dogfight",
     
+    description = "Limu\n[Animal Alterado]",
+    
     hp_min = 10,
     hp_max = 20,
     armor = 100,
@@ -2963,6 +3102,8 @@ mobs:register_mob("nh_mob:slime2", {
     reach = 1,
     damage = 3,
     attack_type = "dogfight",
+    
+    description = "Limu Médio\n[Animal Alterado]",
     
     hp_min = 10,
     hp_max = 20,
@@ -3060,6 +3201,8 @@ mobs:register_mob("nh_mob:slime3", {
     damage = 3,
     attack_type = "dogfight",
     
+    description = "Limu Grande\n[Animal Alterado]",
+    
     hp_min = 10,
     hp_max = 20,
     armor = 100,
@@ -3156,6 +3299,8 @@ mobs:register_mob("nh_mob:visage", {
     reach = 1,
     damage = 5,
     attack_type = "dogfight",
+    
+    description = "Vulto\n[Fenômeno]",
     
     hp_min = 20,
     hp_max = 30,

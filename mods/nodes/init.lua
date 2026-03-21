@@ -3,6 +3,341 @@
 -----------------------------
 core.log("action", "[nodes] init.lua carregado")
 
+-----
+-- Receitas
+-----
+
+-- --------------------------------------------------
+-- RECEITAS BASICAS (2x2)
+-- Usada por: Nodes do chão
+-- Inclui crafts básicos
+-- --------------------------------------------------
+
+recipes_floor = {
+    {
+        ingredients = {["nh_nodes:pebble"] = 2},
+        output = "nh_nodes:chippedstone"
+    },
+    {
+        ingredients = {["nh_nodes:pebble_item"] = 2},
+        output = "nh_nodes:chippedstone"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1},
+        output = "nh_nodes:stoneaxehead"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1},
+        output = "nh_nodes:stonepickaxehead"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1},
+        output = "nh_nodes:stonehoehead"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1},
+        output = "nh_nodes:stoneadzehead"
+    },
+    {
+        ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stoneaxe"
+    },
+    {
+        ingredients = {["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stonepickaxe"
+    },
+    {
+        ingredients = {["nh_nodes:stonehoehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stonehoe"
+    },
+    {
+        ingredients = {["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stoneadze"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+        output = "nh_nodes:obsidianblade"
+    },
+    {
+        ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:chippedstoneknife"
+    },
+    {
+        ingredients = {["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:obsidianknife"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 8},
+        output = "nh_nodes:cobblestone"
+    },
+    {
+        ingredients = {["nh_nodes:pebble_item"] = 8},
+        output = "nh_nodes:cobblestone"
+    },
+    {
+        ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:campfiretinder"
+    },
+    {
+        ingredients = {["nh_nodes:oaklog"] = 1},
+        output = "nh_nodes:oakwood"
+    },
+    {
+        ingredients = {["nh_nodes:pinelog"] = 1},
+        output = "nh_nodes:pinewood"
+    },
+    {
+        ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
+        output = "nh_nodes:torch"
+    },
+    {
+        ingredients = {["nh_nodes:oakwood"] = 1},
+        output = "nh_nodes:oakboard 8"
+    },
+    {
+        ingredients = {["nh_nodes:oakwood"] = 2},
+        output = "nh_nodes:oakplank 4"
+    },
+    {
+        ingredients = {["nh_nodes:oakboard"] = 1},
+        output = "nh_nodes:oakdowel 8"
+    },
+    {
+        ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
+        output = "nh_nodes:craft_table"
+    },
+    {
+        ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
+        output = "nh_nodes:inkbottle"
+    },
+}
+
+-- --------------------------------------------------
+-- RECEITAS DA BANCADA DE PRODUÇÃO (2x2x2)
+-- Usada por: craft_table
+-- Inclui tudo do floor + itens avançados (espada, baú, porta, piões...)
+-- --------------------------------------------------
+
+recipes_table = {
+    {
+        ingredients = {["nh_nodes:pebble"] = 2},
+        output = "nh_nodes:chippedstone"
+    },
+    {
+        ingredients = {["nh_nodes:pebble_item"] = 2},
+        output = "nh_nodes:chippedstone"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1},
+        output = "nh_nodes:stoneaxehead"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1},
+        output = "nh_nodes:stonepickaxehead"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1},
+        output = "nh_nodes:stonehoehead"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1},
+        output = "nh_nodes:stoneadzehead"
+    },
+    {
+        ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stoneaxe"
+    },
+    {
+        ingredients = {["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stonepickaxe"
+    },
+    {
+        ingredients = {["nh_nodes:stonehoehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stonehoe"
+    },
+    {
+        ingredients = {["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:stoneadze"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+        output = "nh_nodes:obsidianblade"
+    },
+    {
+        ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:chippedstoneknife"
+    },
+    {
+        ingredients = {["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:obsidianknife"
+    },
+    {
+        ingredients = {["nh_nodes:oakboard"] = 1, ["nh_nodes:obsidianblade"] = 7},
+        output = "nh_nodes:obsidiansword"
+    },
+    {
+        ingredients = {["nh_nodes:pebble"] = 8},
+        output = "nh_nodes:cobblestone"
+    },
+    {
+        ingredients = {["nh_nodes:pebble_item"] = 8},
+        output = "nh_nodes:cobblestone"
+    },
+    {
+        ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+        output = "nh_nodes:campfiretinder"
+    },
+    {
+        ingredients = {["nh_nodes:oaklog"] = 1},
+        output = "nh_nodes:oakwood"
+    },
+    {
+        ingredients = {["nh_nodes:pinelog"] = 1},
+        output = "nh_nodes:pinewood"
+    },
+    {
+        ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
+        output = "nh_nodes:torch"
+    },
+    {
+        ingredients = {["nh_nodes:oakwood"] = 1},
+        output = "nh_nodes:oakboard 8"
+    },
+    {
+        ingredients = {["nh_nodes:oakwood"] = 2},
+        output = "nh_nodes:oakplank 4"
+    },
+    {
+        ingredients = {["nh_nodes:oakboard"] = 1},
+        output = "nh_nodes:oakdowel 8"
+    },
+    {
+        ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
+        output = "nh_nodes:craft_table"
+    },
+    {
+        ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
+        output = "nh_nodes:inkbottle"
+    },
+    {
+        ingredients = {["nh_nodes:oakboard"] = 6},
+        output = "nh_nodes:oakchest"
+    },
+    {
+        ingredients = {["nh_nodes:cowfur"] = 2, ["nh_nodes:oakdowel"] = 1},
+        output = "nh_nodes:belt"
+    },
+    {
+        ingredients = {["nh_nodes:cowfur"] = 2, ["nh_nodes:oakchest"] = 1},
+        output = "nh_nodes:backchest"
+    },
+    {
+        ingredients = {["nh_nodes:cowfur"] = 5},
+        output = "nh_nodes:likeglove"
+    },
+    {
+        ingredients = {["nh_nodes:cowfur"] = 6},
+        output = "nh_nodes:pointglove"
+    },
+    {
+        ingredients = {["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2},
+        output = "nh_nodes:oakdoor_closed"
+    },
+    {
+        ingredients = {["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
+        output = "nh_nodes:spinningtop"
+    },
+    {
+        ingredients = {["nh_nodes:palmlog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
+        output = "nh_nodes:spinningtop2"
+    },
+    {
+        ingredients = {["nh_nodes:pinelog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
+        output = "nh_nodes:spinningtop3"
+    },
+}
+
+
+-- --------------------------------------------------
+-- RECEITAS DA FORNALHA (3x3)
+-- Usada por: furnace
+-- Inclui: carvão, alimentos cozidos, fundição de metais, vidro
+-- --------------------------------------------------
+recipes_campfire = {
+        {
+            ingredients = {["nh_nodes:chicken_egg"] = 1},
+            output = "nh_nodes:friedchickenegg"
+        },
+        {
+            ingredients = {["nh_nodes:raw_chicken"] = 1},
+            output = "nh_nodes:roastchicken"
+        },
+        {
+            ingredients = {["nh_nodes:cowmeat"] = 1},
+            output = "nh_nodes:roastbeef"
+        },
+}
+
+-- --------------------------------------------------
+-- RECEITAS DA FORNALHA (3x3)
+-- Usada por: furnace
+-- Inclui: carvão, alimentos cozidos, fundição de metais, vidro
+-- --------------------------------------------------
+recipes_furnace = {
+    {
+        ingredients = {["nh_nodes:oaklog"] = 1},
+        output = "nh_nodes:charcoal"
+    },
+    {
+        ingredients = {["nh_nodes:pinelog"] = 1},
+        output = "nh_nodes:charcoal"
+    },
+    {
+        ingredients = {["nh_nodes:palmlog"] = 1},
+        output = "nh_nodes:charcoal2"
+    },
+    {
+        ingredients = {["nh_nodes:chicken_egg"] = 1},
+        output = "nh_nodes:friedchickenegg"
+    },
+    {
+        ingredients = {["nh_nodes:raw_chicken"] = 1},
+        output = "nh_nodes:roastchicken"
+    },
+    {
+        ingredients = {["nh_nodes:cowmeat"] = 1},
+        output = "nh_nodes:roastbeef"
+    },
+    {
+        ingredients = {["nh_nodes:coppernugget"] = 3},
+        output = "nh_nodes:copperingot"
+    },
+    {
+        ingredients = {["nh_nodes:copperingot"] = 3},
+        output = "nh_nodes:copperhelmet"
+    },
+    {
+        ingredients = {["nh_nodes:copperingot"] = 8},
+        output = "nh_nodes:copperchestplate"
+    },
+    {
+        ingredients = {["nh_nodes:tinnugget"] = 3},
+        output = "nh_nodes:tiningot"
+    },
+    {
+        ingredients = {["nh_nodes:ironnugget"] = 3},
+        output = "nh_nodes:ironingot"
+    },
+    {
+        ingredients = {["nh_nodes:sand"] = 3},
+        output = "nh_nodes:bottle"
+    },
+    {
+        ingredients = {["default:steel_ingot"] = 9},
+        output = "default:steel_block"
+    },
+}
+
 -- ========================================
 -- SISTEMA GENÉRICO DE CRAFTING
 -- ========================================
@@ -375,6 +710,14 @@ node_def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         end
     end
     
+    -- Mão vazia e sem (E/Aux1): mostra dica
+    if itemstack:is_empty() then
+        core.chat_send_player(
+            clicker:get_player_name(),
+            "Preciso observar (segurar 'E' ou 'Aux1') e alcançar o chão (clicar 'colocar' de mãos vazias) pra tentar produzir alguma coisa..."
+        )
+    end
+    
     return itemstack
 end
 	
@@ -610,7 +953,7 @@ on_construct = function(pos)
    -- core.chat_send_all("   Bloco acima: " .. node_above)
 
     if  light and light > 4 then
-        core.get_node_timer(pos):start(math.random(3, 6))
+        core.get_node_timer(pos):start(math.random(30, 60))
        -- core.chat_send_all("   ✅ Timer iniciado!")
     else
         --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
@@ -717,80 +1060,239 @@ end,
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1,  ["nh_nodes:palmleaf"] = 1},
-            output = "nh_nodes:chippedstoneknife"
-        },
-        {
-            ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1,  ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:chippedstoneknife"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 4},
-            output = "nh_nodes:oaktimberslice 64"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 4},
-            output = "nh_nodes:oaktimberslice 64"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
+    recipes = recipes_floor
+})
+
+core.register_node("nh_nodes:wetdirt", {
+    description = "Terra Molhada",
+    tiles = {"wetdirt.png"},
+    groups = {crumbly = 2},
+    
+    sounds = {
+	dug = {name = "punchtimber3", gain = 0.5},
+	dig  = {name = "punchtimber3", gain = 0.5},
     },
+    
+    -- Mecânica opcional: grama morrer na sombra
+    --paramtype = "light",
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+  
+on_construct = function(pos)
+    local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+    local node_above = core.get_node(above).name
+    local light = core.get_node_light(above)
+    
+    --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
+   -- core.chat_send_all("   Bloco acima: " .. node_above)
+
+    if  light and light > 4 then
+        core.get_node_timer(pos):start(math.random(30, 60))
+       -- core.chat_send_all("   ✅ Timer iniciado!")
+    else
+        --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
+    end
+end,
+
+on_timer = function(pos, elapsed)
+    --core.chat_send_all("⏰ TIMER disparou em " .. core.pos_to_string(pos))
+    
+    local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+    local node_above = core.get_node(above).name
+    local light = core.get_node_light(above)
+    
+    --core.chat_send_all("   Bloco acima: " .. node_above)
+    
+    if light and light <= 4 then
+        --core.chat_send_all("   ❌ Tem bloco em cima escurecendo, parando timer")
+        return false
+    end
+    
+    --local light = core.get_node_light(pos)
+    --core.chat_send_all("   Luz: " .. tostring(light))
+    
+    if light and light > 4 then
+        local neighbors = {
+                -- Laterais
+                {x = pos.x + 1, y = pos.y, z = pos.z},
+                {x = pos.x - 1, y = pos.y, z = pos.z},
+                {x = pos.x, y = pos.y, z = pos.z + 1},
+                {x = pos.x, y = pos.y, z = pos.z - 1},
+                -- Diagonais
+                {x = pos.x + 1, y = pos.y, z = pos.z + 1},
+                {x = pos.x + 1, y = pos.y, z = pos.z - 1},
+                {x = pos.x - 1, y = pos.y, z = pos.z + 1},
+                {x = pos.x - 1, y = pos.y, z = pos.z - 1},
+                -- Laterais abaixo
+                {x = pos.x + 1, y = pos.y - 1, z = pos.z},
+                {x = pos.x - 1, y = pos.y - 1, z = pos.z},
+                {x = pos.x, y = pos.y - 1, z = pos.z + 1},
+                {x = pos.x, y = pos.y - 1, z = pos.z - 1},
+                -- Diagonais abaixo
+                {x = pos.x + 1, y = pos.y - 1, z = pos.z + 1},
+                {x = pos.x + 1, y = pos.y - 1, z = pos.z - 1},
+                {x = pos.x - 1, y = pos.y - 1, z = pos.z + 1},
+                {x = pos.x - 1, y = pos.y - 1, z = pos.z - 1},
+                -- Laterais acima
+                {x = pos.x + 1, y = pos.y + 1, z = pos.z},
+                {x = pos.x - 1, y = pos.y + 1, z = pos.z},
+                {x = pos.x, y = pos.y + 1, z = pos.z + 1},
+                {x = pos.x, y = pos.y + 1, z = pos.z - 1},
+                -- Diagonais acima
+                {x = pos.x + 1, y = pos.y + 1, z = pos.z + 1},
+                {x = pos.x + 1, y = pos.y + 1, z = pos.z - 1},
+                {x = pos.x - 1, y = pos.y + 1, z = pos.z + 1},
+                {x = pos.x - 1, y = pos.y + 1, z = pos.z - 1},
+            }
+        
+        local has_grass_neighbor = false
+        local grass_found = ""
+        
+        for _, npos in ipairs(neighbors) do
+            local neighbor_name = core.get_node(npos).name
+            if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
+                has_grass_neighbor = true
+                grass_found = neighbor_name .. " em " .. core.pos_to_string(npos)
+                break
+            end
+        end
+        
+        --core.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
+        if has_grass_neighbor then
+            --core.chat_send_all("   🌱 " .. grass_found)
+        end
+        
+        if has_grass_neighbor then
+            core.set_node(pos, {name = "nh_nodes:top_grass"})
+            --core.chat_send_all("   🟩 CONVERTEU PARA GRAMA!")
+            return false
+        else
+            --core.chat_send_all("   ⏳ Sem grama ao redor, tentando novamente...")
+        end
+    else
+        --core.chat_send_all("   🌙 Pouca luz (precisa > 4)")
+    end
+    
+    return true
+end,
+})
+
+core.register_node("nh_nodes:tilleddirt", {
+    description = "Terra Arada",
+    tiles = {"tilleddirt.png","terra.png"},
+    groups = {crumbly = 2},
+    
+    drop = "nh_nodes:dirt",  
+    
+    sounds = {
+        dug = {name = "punchtimber3", gain = 0.5},
+        dig  = {name = "punchtimber3", gain = 0.5},
+    },
+    
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+    },
+    
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+    },
+  
+    on_construct = function(pos)
+        core.get_node_timer(pos):start(math.random(30, 60))
+    end,
+
+    on_timer = function(pos, elapsed)
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local node_above = core.get_node(above).name
+        if node_above ~= "air" then
+            return true
+        end
+
+        local laterals = {
+            {x = pos.x + 1, y = pos.y, z = pos.z},
+            {x = pos.x - 1, y = pos.y, z = pos.z},
+            {x = pos.x,     y = pos.y, z = pos.z + 1},
+            {x = pos.x,     y = pos.y, z = pos.z - 1},
+            -- diagonais
+            {x = pos.x + 1, y = pos.y, z = pos.z + 1},
+            {x = pos.x + 1, y = pos.y, z = pos.z - 1},
+            {x = pos.x - 1, y = pos.y, z = pos.z + 1},
+            {x = pos.x - 1, y = pos.y, z = pos.z - 1},
+        }
+
+        local has_water = false
+        for _, npos in ipairs(laterals) do
+            local name = core.get_node(npos).name
+            if name == "nh_nodes:water" or name == "nh_nodes:water2"
+            or name == "nh_nodes:water_flowing" or name == "nh_nodes:water2_flowing" then
+                has_water = true
+                break
+            end
+        end
+
+        if has_water then
+            core.set_node(pos, {name = "nh_nodes:wettilleddirt"})
+        else
+            core.set_node(pos, {name = "nh_nodes:dirt"})
+        end
+        return false
+    end,
+})
+
+core.register_node("nh_nodes:wettilleddirt", {
+    description = "Terra Arada",
+    tiles = {"wettilleddirt.png","wetdirt.png"},
+    groups = {crumbly = 2},
+    
+    drop = "nh_nodes:wetdirt",  
+    
+    sounds = {
+	dug = {name = "punchtimber3", gain = 0.5},
+	dig  = {name = "punchtimber3", gain = 0.5},
+    },
+    
+    -- Mecânica opcional: grama morrer na sombra
+    --paramtype = "light",
+    
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+  
+    on_construct = function(pos)
+        core.get_node_timer(pos):start(math.random(60, 120))
+    end,
+
+    on_timer = function(pos, elapsed)
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local node_above = core.get_node(above).name
+
+        if node_above ~= "air" then
+            return true -- tem bloco em cima, aguarda e tenta de novo
+        end
+
+        core.set_node(pos, {name = "nh_nodes:wetdirt"})
+        return false
+    end,
 })
 
 
@@ -866,60 +1368,7 @@ register_craft_station("nh_nodes:grass", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_floor
 })
 
 
@@ -1000,60 +1449,7 @@ register_craft_station("nh_nodes:top_grass", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-                {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_floor
 })
 
 -- ========================================
@@ -1142,60 +1538,7 @@ register_craft_station("nh_nodes:sand", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_floor
 })
 
 register_craft_station("nh_nodes:wet_sand", {
@@ -1231,60 +1574,7 @@ register_craft_station("nh_nodes:wet_sand", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_floor
 })
 
 
@@ -1386,60 +1676,7 @@ register_craft_station("nh_nodes:gneiss", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_floor
 })
 
 register_craft_station("nh_nodes:cobblestone", {
@@ -1479,60 +1716,7 @@ register_craft_station("nh_nodes:cobblestone", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_floor
 })
 
 core.register_node("nh_nodes:charcoal", {
@@ -2780,20 +2964,8 @@ register_craft_station("nh_nodes:campfire", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:chicken_egg"] = 1},
-            output = "nh_nodes:friedchickenegg"
-        },
-        {
-            ingredients = {["nh_nodes:raw_chicken"] = 1},
-            output = "nh_nodes:roastchicken"
-        },
-        {
-            ingredients = {["nh_nodes:cowmeat"] = 1},
-            output = "nh_nodes:roastbeef"
-        },
-    },
+    recipes = recipes_campfire,
+
         -- Quando a fogueira é colocada, verifica se deve criar chama
     on_construct = function(pos)
         local meta = core.get_meta(pos)
@@ -2990,7 +3162,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
 })     
 
 core.register_node("nh_nodes:spinningtop", {
-    description = "Pião de Carvalho",
+    description = "Pião de Carvalho\n[Item de Spawn]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = {"oakpiao.png"},
@@ -3051,7 +3223,7 @@ core.register_node("nh_nodes:spinningtop", {
 })
 
 core.register_node("nh_nodes:spinningtop2", {
-    description = "Pião de Coqueiro",
+    description = "Pião de Coqueiro\n[Item de Spawn]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = {"palmpiao.png"},
@@ -3077,13 +3249,7 @@ core.register_node("nh_nodes:spinningtop2", {
         rot = {x = 0, y = 0, z = 45},
     },
     wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    
-    -- Tornar comestível
-    --on_use = function(itemstack, user, pointed_thing)
-        --restore_hunger(user, 2)  -- Restaura 4 pontos
-        --itemstack:take_item()
-        --return itemstack
-    --end,
+ 
     
     -- Spawna o mob ao colocar o node no chão
     on_place = function(itemstack, placer, pointed_thing)
@@ -3112,7 +3278,7 @@ core.register_node("nh_nodes:spinningtop2", {
 })
 
 core.register_node("nh_nodes:spinningtop3", {
-    description = "Pião de Pinheiro",
+    description = "Pião de Pinheiro\n[Item de Spawn]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = {"pinepiao.png"},
@@ -3214,100 +3380,7 @@ register_craft_station("nh_nodes:craft_table", {
         {name="Camada Superior", x=3, width=2, height=2, start_index=4},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1, ["nh_nodes:obsidianblade"] = 7},
-            output = "nh_nodes:obsidiansword"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 8},
-            output = "nh_nodes:cobblestone"
-        },
-        {
-            ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-            output = "nh_nodes:campfiretinder"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-        {
-            ingredients = {["nh_nodes:oakboard"] = 6},
-            output = "nh_nodes:oakchest"
-        },
-        {
-            ingredients = {["nh_nodes:cowfur"] = 2, ["nh_nodes:oakdowel"] = 1},
-            output = "nh_nodes:belt"
-        },
-        {
-            ingredients = {["nh_nodes:cowfur"] = 2, ["nh_nodes:oakchest"] = 1},
-            output = "nh_nodes:backchest"
-        }, 
-        {
-            ingredients = {["nh_nodes:cowfur"] = 5},
-            output = "nh_nodes:likeglove"
-        },
-        {
-            ingredients = {["nh_nodes:cowfur"] = 6},
-            output = "nh_nodes:pointglove"
-        },
-        {
-            ingredients = {["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:oakdoor_closed"
-        },         
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
-            output = "nh_nodes:spinningtop"
-        },   
-        {
-            ingredients = {["nh_nodes:palmlog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
-            output = "nh_nodes:spinningtop2"
-        },   
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
-            output = "nh_nodes:spinningtop3"
-        },   
-    },
+    recipes = recipes_table
 })
 
 -- Exemplo 2: Fornalha 3x3 simples (SEM mesh, usando drawtype normal)
@@ -3358,68 +3431,15 @@ register_craft_station("nh_nodes:furnace", {
         {name="Grid 3x3", x=0.5, width=3, height=3, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:charcoal"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:charcoal"
-        },
-        {
-            ingredients = {["nh_nodes:palmlog"] = 1},
-            output = "nh_nodes:charcoal2"
-        },
-        {
-            ingredients = {["nh_nodes:chicken_egg"] = 1},
-            output = "nh_nodes:friedchickenegg"
-        },
-        {
-            ingredients = {["nh_nodes:raw_chicken"] = 1},
-            output = "nh_nodes:roastchicken"
-        },
-        {
-            ingredients = {["nh_nodes:cowmeat"] = 1},
-            output = "nh_nodes:roastbeef"
-        },
-        {
-            ingredients = {["nh_nodes:coppernugget"] = 3},
-            output = "nh_nodes:copperingot"
-        },
-        {
-            ingredients = {["nh_nodes:copperingot"] = 3},
-            output = "nh_nodes:copperhelmet"
-        },
-        {
-            ingredients = {["nh_nodes:copperingot"] = 8},
-            output = "nh_nodes:copperchestplate"
-        },
-        {
-            ingredients = {["nh_nodes:tinnugget"] = 3},
-            output = "nh_nodes:tiningot"
-        },
-        {
-            ingredients = {["nh_nodes:ironnugget"] = 3},
-            output = "nh_nodes:ironingot"
-        },
-        {
-            ingredients = {["nh_nodes:sand"] = 3},
-            output = "nh_nodes:bottle"
-        },
-        {
-            ingredients = {["default:steel_ingot"] = 9},
-            output = "default:steel_block"
-        },
-    },
+    recipes = recipes_furnace
 })
 
--- Exemplo 3: Bancada Avançada 2x2 simples (SEM mesh)
+-- Bancada Avançada 3x3x3 simples (SEM mesh)
 register_craft_station("nh_nodes:advanced_bench", {
     description = "Bancada Avançada",
     -- mesh = nil,  -- Opcional
     tiles = {""}, --advanced_bench.png
-    title = "Bancada Avançada 2x2",
+    title = "Bancada Avançada 3x3x3",
     grid_size = 4,
     
     positions = {
@@ -3433,48 +3453,7 @@ register_craft_station("nh_nodes:advanced_bench", {
         {name="Grid 2x2", x=0.5, width=2, height=2, start_index=0},
     },
     
-    recipes = {
-        {
-            ingredients = {["nh_nodes:pebble"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble_item"] = 2},
-            output = "nh_nodes:chippedstone"
-        },
-        {
-            ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-            output = "nh_nodes:obsidianblade"
-        },
-        {
-            ingredients = {["nh_nodes:oaklog"] = 1},
-            output = "nh_nodes:oakwood"
-        },
-        {
-            ingredients = {["nh_nodes:pinelog"] = 1},
-            output = "nh_nodes:pinewood"
-        },
-        {
-            ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-            output = "nh_nodes:torch"
-        },
-        {
-            ingredients = {["nh_nodes:oakwood"] = 1},
-            output = "nh_nodes:oakboard 8"
-        },    
-        {
-            ingredients = {["nh_nodes:oakwood"] = 2},
-            output = "nh_nodes:oakplank 4"
-        },  
-        {
-            ingredients = {["nh_nodes:oakboard"] = 1},
-            output = "nh_nodes:oakdowel 8"
-        },  
-        {
-            ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-            output = "nh_nodes:craft_table"
-        },
-    },
+    recipes = recipes_table
 })
 
 
@@ -3591,11 +3570,13 @@ core.register_node("nh_nodes:oakboard", {
 
 -- Tarugo
 core.register_node("nh_nodes:oakdowel", {
-    description = "Tarugo de Carvalho",
+    description = "Tarugo de Carvalho\nAlcance: +2",
     drawtype = "mesh",
     mesh = "oakdowel.obj",
     tiles = {"oakwood.png"},
     groups = {choppy = 3},
+    
+    range = 5,
     
     paramtype = "light",
     paramtype2 = "wallmounted",
@@ -4301,7 +4282,7 @@ core.register_node("nh_nodes:leaves_blueberry4", {
 })
 
 core.register_node("nh_nodes:nut", {
-    description = "Noz",
+    description = "Noz\n(Bolota)\nNutrição: +1",
     drawtype = "mesh",
     mesh = "noz.obj",
     tiles = {"noz.png"},
@@ -4591,7 +4572,7 @@ end)
 
 
 core.register_node("nh_nodes:apple", {
-    description = "Maçã",
+    description = "Maçã\nNutrição: +2",
     drawtype = "mesh",
     mesh = "apple.obj",
     tiles = {"AppleTexture.png"},
@@ -4619,7 +4600,7 @@ core.register_node("nh_nodes:apple", {
 })
 
 core.register_node("nh_nodes:blueberry", {
-    description = "Mirtilo",
+    description = "Mirtilo\nNutrição: +1",
     --wield_scale = {x = 10, y = 10, z = 10},
     drawtype = "mesh",
     mesh = "blueberry.obj",
@@ -4649,14 +4630,14 @@ core.register_node("nh_nodes:blueberry", {
 })
 
 core.register_node("nh_nodes:chicken_egg", {
-    description = "Ovo de Galinha",
+    description = "Ovo de Galinha\nNutrição: +1",
     drawtype = "mesh",
     mesh = "chickenegg.obj",
     tiles = {"chickenegg.png"},
     
     paramtype = "light",
     walkable = false,
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
+    groups = {oddly_breakable_by_hand = 1, falling_node = 1},
     --sounds = default.node_sound_wood_defaults(),
     
     collision_box = {
@@ -4677,7 +4658,7 @@ core.register_node("nh_nodes:chicken_egg", {
 })
 
 core.register_node("nh_nodes:friedchickenegg", {
-    description = "Ovo Frito\n(Ovo de Galinha)",
+    description = "Ovo Frito\n(Ovo de Galinha)\nNutrição: +4",
     drawtype = "mesh",
     mesh = "friedegg.obj",
     tiles = {"friedegg.png"},
@@ -4700,6 +4681,53 @@ core.register_node("nh_nodes:friedchickenegg", {
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 4)  -- Restaura 1 ponto
         itemstack:take_item()
+        return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:worm", {
+    description = "Minhoca\n[Mob e Item]",
+    drawtype = "mesh",
+    mesh = "worm_node.obj",
+    tiles = {"worm.png"},
+    
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    --sounds = default.node_sound_wood_defaults(),
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.1, -0.5, -0.1, 0.1, -0.4, 0.1}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.1, -0.5, -0.1, 0.1, -0.4, 0.1}
+    },
+    visual_size = {x = 15, y = 15},
+
+    -- Spawna o mob ao colocar o node no chão
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above  -- posição onde vai spawnar
+        
+        -- Spawna o mob
+        local mob = minetest.add_entity(pos, "nh_mob:worm")
+        
+        if mob then
+            -- Aplica a rotação do jogador ao mob
+            if placer then
+                local yaw = placer:get_look_horizontal()
+                mob:set_yaw(yaw)
+            end
+            
+            -- Consome o item da mão
+            itemstack:take_item()
+        end
+        
         return itemstack
     end,
 })
@@ -4728,7 +4756,7 @@ core.register_node("nh_nodes:chicken", {
 })
 
 core.register_node("nh_nodes:raw_chicken", {
-    description = "Frango Cru",
+    description = "Frango Cru\nNutrição: +4",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = {"raw_chicken.png"},
@@ -4765,14 +4793,14 @@ core.register_node("nh_nodes:raw_chicken", {
 })
 
 core.register_node("nh_nodes:roastchicken", {
-    description = "Frango Assado",
+    description = "Frango Assado\nNutrição: +6",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = {"roastchicken.png"},
     
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    groups = {oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
     collision_box = {
@@ -4786,7 +4814,7 @@ core.register_node("nh_nodes:roastchicken", {
     visual_size = {x = 15, y = 15},
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
-        restore_hunger(user, 7)
+        restore_hunger(user, 6)
         itemstack:take_item()
     
         local bone = ItemStack("nh_nodes:bone 2")
@@ -4824,7 +4852,7 @@ core.register_node("nh_nodes:bull", {
 })
 
 core.register_node("nh_nodes:cowmeat", {
-    description = "Carne de Bovina Cru",
+    description = "Carne Bovina Crua\nNutrição: +3",
  
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -4833,7 +4861,7 @@ core.register_node("nh_nodes:cowmeat", {
     paramtype = "light",
     walkable = false,
     paramtype2 = "facedir",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1},
+    groups = {oddly_breakable_by_hand = 1},
     
     collision_box = {
         type = "fixed",
@@ -4852,7 +4880,7 @@ core.register_node("nh_nodes:cowmeat", {
 })
 
 core.register_node("nh_nodes:roastbeef", {
-    description = "Carne Bovina Assada",
+    description = "Carne Bovina Assada\nNutrição: +6",
  
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -4861,7 +4889,7 @@ core.register_node("nh_nodes:roastbeef", {
     paramtype = "light",
     walkable = false,
     paramtype2 = "facedir",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1},
+    groups = {oddly_breakable_by_hand = 1},
     
     collision_box = {
         type = "fixed",
@@ -4902,6 +4930,28 @@ core.register_node("nh_nodes:cowfur", {
     },
 })
 
+core.register_node("nh_nodes:inksac", {
+    description = "Bolsa de Tinta\nPorção: 1",
+ 
+    drawtype = "mesh",
+    mesh = "inksac.obj",
+    tiles = {"inksac.png"},
+    
+    paramtype = "light",
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.15, -0.5, -0.25, 0.15, -0.375, 0.25}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.15, -0.5, -0.25, 0.15, -0.375, 0.25}
+    },
+})
+
 core.register_node("nh_nodes:bottle", {
     description = "Frasco",
     inventory_image = "bottle.png",
@@ -4924,6 +4974,55 @@ core.register_node("nh_nodes:bottle", {
         type = "fixed",
         fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
     },
+})
+
+core.register_node("nh_nodes:messagebottle", {
+    description = "Frasco com Mensagem\n[Item de Spawn]",
+    inventory_image = "bottlepage.png",
+    drawtype = "mesh",
+    mesh = "bottlepage.obj",
+    tiles = {"bottlepagetexture.png"},
+    
+    paramtype = "light",
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1},
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
+    },
+    
+    -- Spawna o item "mob" ao colocar o node no chão
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above  -- posição onde vai spawnar
+        
+        -- Spawna o mob
+        local mob = minetest.add_entity(pos, "nh_mob:messagebottle")
+        
+        if mob then
+            -- Aplica a rotação do jogador ao mob
+            if placer then
+                local yaw = placer:get_look_horizontal()
+                mob:set_yaw(yaw)
+            end
+            
+            -- Consome o item da mão
+            itemstack:take_item()
+        end
+        
+        return itemstack
+    end,
 })
 
 core.register_node("nh_nodes:fireflybottle", {
@@ -5049,7 +5148,7 @@ end
 
 
 core.register_node("nh_nodes:coconut", {
-    description = "Coco",
+    description = "Coco\nNutrição: +3",
     drawtype = "mesh",
     mesh = "coconut.obj",
     tiles = {"CocoTexture.png"},
@@ -6850,27 +6949,60 @@ core.register_entity("nh_nodes:pebble_entity", {
 
 
 core.register_node("nh_nodes:branch", {
-    description = "Galho",
+    description = "Galho\nAlcance: +2\nDano: +2\nUsos: 10",
     drawtype = "mesh",
     mesh = "stick.obj",
     tiles = {"stick.png"},
 
     range = 5, -- AUMENTA O ALCANCE
+	
+    groups = {
 
-	groups = {
-	    crumbly = 3, -- terra, areia, argila
-	    --cracky  = 2, -- pedra, minério
-	    snappy  = 3, -- folhas, plantas
-	    --choppy  = 2, -- troncos, madeira
-	    fleshy = 3 -- mobs, carne
-	},
+        oddly_breakable_by_hand = 3,
+        falling_node = 1,
+    },
+ 
+    tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+    -- desgasta ao cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 6552 -- ~10 usos (65535 / 10)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07},
+    },
 })
 
 core.register_node("nh_nodes:stick", {
-    description = "Graveto",
+    description = "Graveto\nAlcance: +1\nUsos: 5",
     drawtype = "mesh",
     mesh = "stick.obj",
     tiles = {"stick.png"},
+
+    range = 4,
 
     paramtype = "light",
 	
@@ -6885,6 +7017,14 @@ core.register_node("nh_nodes:stick", {
         type = "fixed",
         fixed = {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07},
     },
+    
+        -- desgasta ao cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 13107 -- ~5 usos (65535 / 5)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
 })
 
 core.register_node("nh_nodes:fallenstick", {
@@ -7020,7 +7160,7 @@ core.register_node("nh_nodes:obsidianblade", {
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidiansword", {
-    description = "Espada de Obsidiana",
+    description = "Espada de Obsidiana\nAlcance: +3\nDano: +6\nUsos: 15",
     drawtype = "mesh",
     mesh = "obsidiansword.obj",  -- 
     tiles = {"obsidiansword.png"}, -- tiles = {"pedra.png"},
@@ -7039,7 +7179,38 @@ core.register_node("nh_nodes:obsidiansword", {
         oddly_breakable_by_hand = 3,
         falling_node = 1,
     },
+    
+    range = 6, -- AUMENTA O ALCANCE
  
+    tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 7},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
 
     collision_box = {
         type = "fixed",
@@ -7116,12 +7287,12 @@ core.register_node("nh_nodes:pebble", {
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:chippedstone", {
-    description = "Pedra Lascada",
+    description = "Pedra Lascada\nDano: +2\nUsos: 15",
     drawtype = "mesh",
     mesh = "pedralascada.obj",
     tiles = {"pedralascada.png"},  -- Ícone 2D no inventário
-    inventory_image = "pedralascada.png",  -- Ícone 2D no inventário
-    wield_image = "pedralascada.png",       -- Ou deixe vazio para não mostrar nada na mão
+    inventory_image = "inv_stoneknifehead.png",  -- Ícone 2D no inventário
+    --wield_image = "pedralascada.png",       -- Ou deixe vazio para não mostrar nada na mão
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
     paramtype = "light",
     sunlight_propagates = true,
@@ -7130,11 +7301,38 @@ core.register_node("nh_nodes:chippedstone", {
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
     groups = {
-        snappy = 3,
-        oddly_breakable_by_hand = 3,
+        dig_immediate = 1,
         falling_node = 1,
-        attached_node = 1,
     },
+    
+        tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
 
     collision_box = {
         type = "fixed",
@@ -7160,11 +7358,317 @@ core.register_node("nh_nodes:chippedstone", {
     end,
 })
 
+
+---------------------------
+-- NODE DA CABEÇA DE MACHADO DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
+---------------------------
+core.register_node("nh_nodes:stoneaxehead", {
+    description = "Cabeça de Machado de Pedra\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stoneaxehead.obj",
+    tiles = {"pedralascada.png"},  -- Ícone 2D no inventário
+    inventory_image = "pedralascada.png",  -- Ícone 2D no inventário
+    --wield_image = "pedralascada.png",       -- Ou deixe vazio para não mostrar nada na mão
+    --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+    
+        tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+    },
+
+    -----------------------------
+    -- FAZ O SEIXO CAIR SOZINHO
+    -----------------------------
+    on_construct = function(pos)
+        core.check_for_falling(pos)
+    end,
+
+    after_place_node = function(pos)
+        core.check_for_falling(pos)
+    end,
+})
+
+
+---------------------------
+-- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
+---------------------------
+core.register_node("nh_nodes:stonepickaxehead", {
+    description = "Cabeça de Picareta de Pedra\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stonepickaxehead.obj",
+    tiles = {"pedralascada.png"},  -- Ícone 2D no inventário
+    inventory_image = "inv_stonepickaxehead.png",  -- Ícone 2D no inventário
+    --wield_image = "pedralascada.png",       -- Ou deixe vazio para não mostrar nada na mão
+    --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+    
+        tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+    },
+
+    -----------------------------
+    -- FAZ O SEIXO CAIR SOZINHO
+    -----------------------------
+    on_construct = function(pos)
+        core.check_for_falling(pos)
+    end,
+
+    after_place_node = function(pos)
+        core.check_for_falling(pos)
+    end,
+})
+
+
+---------------------------
+-- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
+---------------------------
+core.register_node("nh_nodes:stonehoehead", {
+    description = "Cabeça de Enxada de Pedra\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stonehoehead.obj",
+    tiles = {"pedralascada.png"},  -- Ícone 2D no inventário
+    inventory_image = "inv_stonehoehead.png",  -- Ícone 2D no inventário
+    --wield_image = "pedralascada.png",       -- Ou deixe vazio para não mostrar nada na mão
+    --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+    
+        tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+    },
+
+    -----------------------------
+    -- FAZ O SEIXO CAIR SOZINHO
+    -----------------------------
+    on_construct = function(pos)
+        core.check_for_falling(pos)
+    end,
+
+    after_place_node = function(pos)
+        core.check_for_falling(pos)
+    end,
+})
+
+
+---------------------------
+-- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
+---------------------------
+core.register_node("nh_nodes:stoneadzehead", {
+    description = "Cabeça de Enxó de Pedra\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stoneadzehead.obj",
+    tiles = {"pedralascada.png"},  -- Ícone 2D no inventário
+    inventory_image = "inv_stoneadzehead.png",  -- Ícone 2D no inventário
+    --wield_image = "pedralascada.png",       -- Ou deixe vazio para não mostrar nada na mão
+    --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+    
+        tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
+    },
+
+    -----------------------------
+    -- FAZ O SEIXO CAIR SOZINHO
+    -----------------------------
+    on_construct = function(pos)
+        core.check_for_falling(pos)
+    end,
+
+    after_place_node = function(pos)
+        core.check_for_falling(pos)
+    end,
+})
+
+
+
 ---------------------------
 -- NODE DA ESPADA ENFERRUJADA (FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:rustironsword", {
-    description = "Espada de Ferro Enferrujado",
+    description = "Espada de Ferro Enferrujado\nAlcance: +3\nDano: +4\nUsos: 10",
     drawtype = "mesh",
     mesh = "rustsword.obj",
     tiles = {"rustsword.png"}, 
@@ -7174,14 +7678,42 @@ core.register_node("nh_nodes:rustironsword", {
     sunlight_propagates = true,
     walkable = false,
 
+    range = 6, -- AUMENTA O ALCANCE
+        
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
     groups = {
-        --snappy  = 2, -- folhas, plantas
-        --crumbly = 3, -- terra, areia, argila
-        --fleshy = 2, -- mobs, carne
-        oddly_breakable_by_hand = 3,
+        dig_immediate = 1,
     },
+    
+    tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 5},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 6552 -- ~10 usos (65535 / 10)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 6552
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
     
     --drop = "nh_items:rustironsword",
 
@@ -7206,11 +7738,318 @@ core.register_node("nh_nodes:rustironsword", {
 })
 
 
+core.register_node("nh_nodes:stoneaxe", {
+    description = "Machado de Pedra\nAlcance: +2\nDano: +3\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stoneaxe.obj",
+    tiles = {"stoneaxe.png"}, 
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    range = 5,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+ 
+    tool_capabilities = {
+        full_punch_interval = 2,
+        max_drop_level = 1,
+
+        groupcaps = {
+            choppy = {times = {[1]=20, [2]=15, [3]=10.00}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.50, [2]=1.10, [3]=0.70}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 4},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03},
+    },
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.1, y = 0, z = 0.1}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+
+core.register_node("nh_nodes:stonepickaxe", {
+    description = "Picareta de Pedra\nAlcance: +2\nDano: +3\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stonepickaxe.obj",
+    tiles = {"stonepickaxe.png"}, 
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    range = 5,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        --fleshy = 1, -- mobs, carne
+        --snappy  = 2, -- folhas, plantas
+        --crumbly = 3, -- terra, areia, argila
+        --oddly_breakable_by_hand = 3,
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+ 
+    tool_capabilities = {
+        full_punch_interval = 2,
+        max_drop_level = 1,
+
+        groupcaps = {
+            crumbly = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+            cracky = {times = {[1]=20, [2]=15, [3]=10}, uses = 10, maxlevel = 1},
+            choppy = {times = {[1]=30, [2]=25, [3]=20}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 4},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03},
+    },
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.1, y = 0, z = 0.1}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+     wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+core.register_node("nh_nodes:stoneadze", {
+    description = "Enxó de Pedra\nAlcance: +2\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stoneadze.obj",
+    tiles = {"stoneadze.png"}, 
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    range = 5,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+ 
+    tool_capabilities = {
+        full_punch_interval = 2,
+        max_drop_level = 1,
+
+        groupcaps = {
+            choppy = {times = {[1]=20, [2]=15, [3]=10.00}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.50, [2]=1.10, [3]=0.70}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03},
+    },
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.1, y = 0, z = 0.1}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+core.register_node("nh_nodes:stonehoe", {
+    description = "Enxada de Pedra\nAlcance: +2\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "stonehoe.obj",
+    tiles = {"stonehoe.png"}, 
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    range = 5,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+ 
+    tool_capabilities = {
+        full_punch_interval = 2,
+        max_drop_level = 1,
+
+        groupcaps = {
+            choppy = {times = {[1]=20, [2]=15, [3]=10.00}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.50, [2]=1.10, [3]=0.70}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+    -- bater em node / transformar em terra arada
+node_placement_prediction = "",
+
+on_place = function(itemstack, puncher, pointed_thing)
+    local controls = puncher:get_player_control()
+    
+    if controls.sneak then
+        if pointed_thing.type == "node" then
+            local pos = pointed_thing.under
+            local node = core.get_node(pos)
+            local convertible = {
+                ["nh_nodes:dirt"]     = true,
+                ["nh_nodes:grass"]    = true,
+                ["nh_nodes:top_grass"] = true,
+            }
+            if convertible[node.name] then
+                core.set_node(pos, {name = "nh_nodes:tilleddirt"})
+                local wear = itemstack:get_wear()
+                wear = wear + 4369
+                itemstack:set_wear(wear)
+            end
+        end
+        return itemstack  -- Sempre cancela o place quando agachado
+    else
+        return core.item_place(itemstack, puncher, pointed_thing)
+    end
+end,
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    --after_punch = function(itemstack, user, target)
+    --    local wear = itemstack:get_wear()
+   --     wear = wear + 4369
+   --     itemstack:set_wear(wear)
+   --     return itemstack
+    --end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03},
+    },
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.1, y = 0, z = 0.1}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+
 ---------------------------
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:chippedstoneknife", {
-    description = "Faca de Pedra Lascada",
+    description = "Faca de Pedra Lascada\nAlcance: +1\nDano: +2\nUsos: 15",
     drawtype = "mesh",
     mesh = "chippedstoneknife.obj",
     tiles = {"chippedstoneknife.png"}, 
@@ -7218,14 +8057,117 @@ core.register_node("nh_nodes:chippedstoneknife", {
     sunlight_propagates = true,
     walkable = false,
 
+    range = 4,
+
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
     groups = {
-        snappy = 3,
+        --fleshy = 1, -- mobs, carne
+        --snappy  = 2, -- folhas, plantas
+        --crumbly = 3, -- terra, areia, argila
         oddly_breakable_by_hand = 3,
         falling_node = 1,
-        attached_node = 1,
     },
+ 
+    tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 3},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.08, -0.5, -0.035, 0.08, 0.05, 0.035},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.075, -0.5, -0.03, 0.075, 0.05, 0.03},
+    },
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.1, y = 0, z = 0.1}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+
+core.register_node("nh_nodes:obsidianknife", {
+    description = "Faca de Obsidiana\nAlcance: +1\nDano: +4\nUsos: 10",
+    drawtype = "mesh",
+    mesh = "obsidianknife.obj",
+    tiles = {"obsidianknife.png"}, 
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    range = 4,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        --fleshy = 1, -- mobs, carne
+        --snappy  = 2, -- folhas, plantas
+        --crumbly = 3, -- terra, areia, argila
+        oddly_breakable_by_hand = 3,
+        falling_node = 1,
+    },
+ 
+    tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            snappy = {times = {[1]=1.20, [2]=0.80, [3]=0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 5},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 6552 -- ~10 usos (65535 / 10)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
 
     collision_box = {
         type = "fixed",
@@ -8504,12 +9446,44 @@ core.register_node("nh_nodes:archion", {
         fixed = {-0.375, -0.5, -0.5, 0.375, -0.25, 0.5}
     },
 
-    on_rightclick = function(_, _, player)
-        local ctrl = player:get_player_control()
-        if not ctrl.aux1 then return end
-        if not core.is_creative_enabled(player:get_player_name()) then return end
+on_rightclick = function(pos, node, player, itemstack, pointed_thing)
+    local controls = player:get_player_control()
+    
+    if controls.aux1 then
+        if not core.is_creative_enabled(player:get_player_name()) then
+            core.chat_send_player(player:get_player_name(), "[O Archion só funciona no modo criativo]")
+            return itemstack
+        end
         show_grimoire(player, 1, "")
-    end,
+        return itemstack
+    end
+    
+    if itemstack and not itemstack:is_empty() then
+        local item_def = core.registered_items[itemstack:get_name()]
+        
+        if item_def and item_def.type == "node" then
+            return core.item_place_node(itemstack, player, pointed_thing)
+        end
+        
+        if item_def and item_def.on_place then
+            local safe_pointed = {
+                type = pointed_thing.type,
+                under = pointed_thing.above,
+                above = pointed_thing.above,
+            }
+            return item_def.on_place(itemstack, player, safe_pointed)
+        end
+    end
+    
+    if itemstack:is_empty() then
+        core.chat_send_player(
+            player:get_player_name(),
+            "Preciso observar (segurar 'E' ou 'Aux1') e acessar ele (clicar 'colocar' de mãos vazias) para abrir o Grimório..."
+        )
+    end
+    
+    return itemstack
+end,
 })
 
 
