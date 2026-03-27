@@ -1726,6 +1726,7 @@ mobs:register_mob("nh_mob:galinha", {
     
     description = "Galinha",
     
+    
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
     specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
@@ -1902,11 +1903,11 @@ mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
 -- ITEM: OVO
 -------------------------------
 -- Você pode criar um item de ovo que as galinhas dropam
-core.register_craftitem("nh_mob:chicken_egg", { -- Item precisou estar em nh_nodes:egg
-    description = "Ovo de galinha",
-    inventory_image = "chicken_egg.png",  -- Textura
-    on_use = core.item_eat(2), -- Come o ovo cru (restaura 2 de fome)
-})
+--core.register_craftitem("nh_mob:chicken_egg", { -- Item precisou estar em nh_nodes:egg
+--    description = "Ovo de galinha",
+--    inventory_image = "chicken_egg.png",  -- Textura
+--    on_use = core.item_eat(2), -- Come o ovo cru (restaura 2 de fome)
+--})
 
 -------------------------------
 -- MOB 4: TUBARÃO (Agressivo)
@@ -2044,6 +2045,7 @@ mobs:register_mob("nh_mob:messagebottle", {
     fall_speed = -6,
     fall_damage = 0,
     floats = 4,
+    pushable = true,
     
     visual = "mesh",
     mesh = "bottlepage.obj",
@@ -2075,7 +2077,8 @@ mobs:register_mob("nh_mob:messagebottle", {
     --},
     
     --follow = {"nh_nodes:raw_chicken"},
-    
+ 
+ 
 on_rightclick = function(self, clicker)
     if clicker:is_player() then
         local item = clicker:get_wielded_item()
@@ -2128,17 +2131,128 @@ end,
 -- Spawn da garrafa (somente na água)
 mobs:spawn({
     name = "nh_mob:messagebottle",
-    nodes = {"air"},           -- Spawna sobre a agua
+    nodes = {"air", "nh_nodes:water"}, -- Spawna sobre a agua
+    neighbors = {"nh_nodes:water"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 1,
+    min_height = -1,
+    max_height = 1                     -- spawna no nível do mar
+})
+
+--mobs:register_egg("nh_mob:messagebottle", "Garrafa com Mensagem", "bottle.png", 0)
+
+
+-------------------------------
+-- "MOB" item: coco
+-------------------------------
+mobs:register_mob("nh_mob:coconut", {
+    type = "animal",
+    passive = true,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    description = "Coco flutuante",
+    
+    hp_min = 1,
+    hp_max = 1,
+    armor = 100,
+    
+    collisionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    selectionbox = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    physical = true,
+    stepheight = 0,           -- NÃO consegue subir degraus (importante!)
+    fall_speed = -6,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "coconut.obj",
+    textures = {"CocoTexture.png"},
+    rotate = 180,
+    visual_size = {x = 10, y = 10},
+    
+   after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            use_texture_alpha = true,
+        })
+    end,
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    --fly = false,               -- Permite "voar" na água
+    --fly_in = "nh_nodes:water",   -- Só "voa" dentro de nodes:water
+    
+    --walk_chance = 0,
+    
+    walk_velocity = 0.2,
+    run_velocity = 0.2,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,           -- CRÍTICO: Recebe dano fora da água!
+    
+    --animation = {
+    --    speed_normal = 15,
+    --    stand_start = 0,
+    --    stand_end = 20,
+    --    walk_start = 21,
+    --    walk_end = 40,
+    --},
+    
+    --follow = {"nh_nodes:raw_chicken"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "" then
+                -- Remove uma garrafa do inventário
+                item:take_item()
+                clicker:set_wielded_item(item)
+            
+                -- Adiciona o coco ao inventário
+                local inv = clicker:get_inventory()
+                inv:add_item("main", ItemStack("nh_nodes:coconut"))
+            
+                -- Remove a garrafa
+                self.object:remove()
+            
+            elseif name == "nh_nodes:coconut" then
+                core.chat_send_player(clicker:get_player_name(), "Ploc!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "Um coco flutuante! É uma ótima comida pra achar no mar.")
+            end
+        end
+    end,
+    
+    --sounds = {
+    --    random = "tubarao_som",
+    --    damage = "tubarao_hurt",
+    --},
+    
+    drops = {
+        {name = "nh_nodes:coconut", chance = 1, min = 1, max = 1},  -- 1-1 gelo
+    },
+    
+})
+
+-- Spawn do iceberg (somente na água)
+mobs:spawn({
+    name = "nh_mob:coconut",
+    nodes = {"air", "nh_nodes:water"},           -- Spawna DENTRO da água
     neighbors = {"nh_nodes:water"},
     max_light = 15,
     interval = 120,
     chance = 2000,
     active_object_count = 2,
-    min_height = 0,
-    max_height = -1                     -- spawna no nível do mar
+    min_height = -1,
+    max_height = 1                     -- spawna no nível do mar
 })
-
---mobs:register_egg("nh_mob:messagebottle", "Garrafa com Mensagem", "bottle.png", 0)
 
 
 -------------------------------
@@ -2151,7 +2265,7 @@ mobs:register_mob("nh_mob:iceberg", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Iceberg\n[Plataforma]",
+    description = "Gelo Flutuante\n[Plataforma]",
     
     hp_min = 1,
     hp_max = 1,
@@ -2212,17 +2326,17 @@ mobs:register_mob("nh_mob:iceberg", {
                 item:take_item()
                 clicker:set_wielded_item(item)
             
-                -- Adiciona fireflybottle ao inventário
+                -- Adiciona o gelo ao inventário
                 local inv = clicker:get_inventory()
-                inv:add_item("main", ItemStack("nh_mob:iceberg"))
+                inv:add_item("main", ItemStack("nh_nodes:ice2"))
             
                 -- Remove a garrafa
                 self.object:remove()
             
             elseif name == "nh_nodes:ice" then
-                core.chat_send_player(clicker:get_player_name(), "Plim!")
+                core.chat_send_player(clicker:get_player_name(), "Plim! Preciso esvaziar a mão pra pegar.")
             else
-                core.chat_send_player(clicker:get_player_name(), "Iceberg")
+                core.chat_send_player(clicker:get_player_name(), "Gelo flutuante")
             end
         end
     end,
@@ -2251,8 +2365,121 @@ mobs:spawn({
     max_height = 1                     -- spawna no nível do mar
 })
 
-mobs:register_egg("nh_mob:iceberg", "Iceberg", "ice.png", 0)
+--mobs:register_egg("nh_mob:iceberg", "Iceberg", "ice.png", 0)
 
+
+-------------------------------
+-- "MOB" item: iceberg
+-------------------------------
+mobs:register_mob("nh_mob:iceberg2", {
+    type = "animal",
+    passive = true,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    description = "Iceberg2\n[Plataforma]",
+    
+    hp_min = 8,
+    hp_max = 10,
+    armor = 100,
+    
+    collisionbox = {-1, -1, -1, 1, 0.5, 1},
+    selectionbox = {-1.25, -2, -1.25, 1.25, 1, 1.25},
+    physical = true,
+    stepheight = 0,           -- NÃO consegue subir degraus (importante!)
+    fall_speed = -6,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "iceberg2.obj",
+    textures = {"ice3.png"},
+    rotate = 180,
+    visual_size = {x = 10, y = 10},
+    
+   after_activate = function(self, staticdata, def, dtime)
+        self.object:set_properties({
+            use_texture_alpha = true,
+        })
+    end,
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    --fly = false,               -- Permite "voar" na água
+    --fly_in = "nh_nodes:water",   -- Só "voa" dentro de nodes:water
+    
+    --walk_chance = 0,
+    
+    walk_velocity = 0.5,
+    run_velocity = 0.5,
+    
+    view_range = 16,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,           -- CRÍTICO: Recebe dano fora da água!
+    
+    --animation = {
+    --    speed_normal = 15,
+    --    stand_start = 0,
+    --    stand_end = 20,
+    --    walk_start = 21,
+    --    walk_end = 40,
+    --},
+    
+    --follow = {"nh_nodes:raw_chicken"},
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "" then
+                -- Remove uma garrafa do inventário
+                item:take_item()
+                clicker:set_wielded_item(item)
+            
+                -- Adiciona mob iceberg ao inventário
+                local inv = clicker:get_inventory()
+                inv:add_item("main", ItemStack("nh_mob:iceberg2"))
+            
+                -- Remove a garrafa
+                self.object:remove()
+            
+            elseif name == "nh_nodes:ice" then
+                core.chat_send_player(clicker:get_player_name(), "Plim!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "Iceberg")
+            end
+        end
+    end,
+    
+    --sounds = {
+    --    random = "tubarao_som",
+    --    damage = "tubarao_hurt",
+    --},
+    
+    drops = {
+        {name = "nh_nodes:ice", chance = 1, min = 3, max = 5},  -- 1-1 gelo
+        {name = "nh_nodes:snow", chance = 1, min = 3, max = 5},  -- 1-1 gelo
+    },
+    
+})
+
+-- Spawn do iceberg (somente na água)
+mobs:spawn({
+    name = "nh_mob:iceberg2",
+    nodes = {"nh_nodes:water"},           -- Spawna DENTRO da água
+    neighbors = {"nh_nodes:ice"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 5,
+    min_height = -1,
+    max_height = 1                     -- spawna no nível do mar
+})
+
+mobs:register_egg("nh_mob:iceberg2", "Iceberg2", "ice.png", 0)
 
 -------------------------------
 -- "MOB" item: piao

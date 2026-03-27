@@ -58,10 +58,11 @@ local c_leavesapple  = core.get_content_id("nh_nodes:leaves_apple")
 local c_leavesapple2 = core.get_content_id("nh_nodes:leaves_apple2")
 local c_leavesapple3 = core.get_content_id("nh_nodes:leaves_apple3")
 local c_palmtimber = core.get_content_id("nh_nodes:palmtimber")
+local c_palmstraws = core.get_content_id("nh_nodes:palmstraws")
 local c_palmleafstalks = core.get_content_id("nh_nodes:palmleafstalks")
 local c_palmleaf = core.get_content_id("nh_nodes:palmleaf")
 local c_palmstraw = core.get_content_id("nh_nodes:palmstraw")
-local c_coconut = core.get_content_id("nh_nodes:coconut")
+local c_coconut = core.get_content_id("nh_nodes:coconutlinked")
 local c_water   = core.get_content_id("nh_nodes:water")
 local c_water2  = core.get_content_id("nh_nodes:water2")
 local c_lava    = core.get_content_id("nh_nodes:lava")
@@ -439,11 +440,16 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
     -- =============== TRONCO ===============
     for y = 0, height do
         local check_pos = {x = pos.x, y = pos.y + y, z = pos.z}
-        
+    
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
             if data[vi] == c_air then
-                data[vi] = c_palmtimber
+                -- Na altura dos cocos (bottom_layer - 1 = pos.y + height), usa c_palmstraws
+                if y == height then
+                    data[vi] = c_palmstraws
+                else
+                    data[vi] = c_palmtimber
+                end
             end
         end
     end
@@ -532,13 +538,13 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
     -- =============== COCOS (0 a 4 aleatórios) ===============
     local num_coconuts = rng:next(0, 4)
     
-    -- Posições possíveis para cocos (embaixo das folhas da camada inferior)
-    local possible_positions = {
-        {x = pos.x + 1, y = bottom_layer - 1, z = pos.z},
-        {x = pos.x - 1, y = bottom_layer - 1, z = pos.z},
-        {x = pos.x, y = bottom_layer - 1, z = pos.z + 1},
-        {x = pos.x, y = bottom_layer - 1, z = pos.z - 1},
-    }
+-- Posições possíveis para cocos (embaixo das folhas da camada inferior)
+local possible_positions = {
+    {x = pos.x + 1, y = bottom_layer - 1, z = pos.z,     rotation = 1}, -- Leste
+    {x = pos.x - 1, y = bottom_layer - 1, z = pos.z,     rotation = 3}, -- Oeste
+    {x = pos.x,     y = bottom_layer - 1, z = pos.z + 1, rotation = 0}, -- Sul
+    {x = pos.x,     y = bottom_layer - 1, z = pos.z - 1, rotation = 2}, -- Norte
+}
     
     -- Embaralha as posições
     for i = #possible_positions, 2, -1 do
@@ -546,17 +552,21 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
         possible_positions[i], possible_positions[j] = possible_positions[j], possible_positions[i]
     end
     
-    -- Coloca os cocos
-    for i = 1, math.min(num_coconuts, #possible_positions) do
-        local coco_pos = possible_positions[i]
-        
-        if area:contains(coco_pos.x, coco_pos.y, coco_pos.z) then
-            local vi = area:index(coco_pos.x, coco_pos.y, coco_pos.z)
-            if data[vi] == c_air then
-                data[vi] = c_coconut
-            end
+-- Coloca os cocos
+for i = 1, math.min(num_coconuts, #possible_positions) do
+    local coco_pos = possible_positions[i]
+    
+    if area:contains(coco_pos.x, coco_pos.y, coco_pos.z) then
+        local vi = area:index(coco_pos.x, coco_pos.y, coco_pos.z)
+        if data[vi] == c_air then
+            data[vi] = c_coconut
+            table.insert(leaf_nodes, {
+                pos = {x = coco_pos.x, y = coco_pos.y, z = coco_pos.z},
+                rotation = coco_pos.rotation
+            })
         end
     end
+end
     
     -- Retorna lista de folhas para rotacionar depois (via core.set_node)
     return leaf_nodes
@@ -2220,6 +2230,11 @@ core.register_on_generated(function(minp, maxp)
             if node.name == "nh_nodes:palmleaf" then
                 core.set_node(leaf_info.pos, {
                     name = "nh_nodes:palmleaf",
+                    param2 = leaf_info.rotation
+                })
+            elseif node.name == "nh_nodes:coconutlinked" then
+                core.set_node(leaf_info.pos, {
+                    name = "nh_nodes:coconutlinked",
                     param2 = leaf_info.rotation
                 })
             end

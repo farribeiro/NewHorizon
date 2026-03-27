@@ -39,6 +39,10 @@ recipes_floor = {
         output = "nh_nodes:stoneadzehead"
     },
     {
+        ingredients = {["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1},
+        output = "nh_nodes:rowing"
+    },
+    {
         ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:stoneaxe"
     },
@@ -80,11 +84,13 @@ recipes_floor = {
     },
     {
         ingredients = {["nh_nodes:oaklog"] = 1},
-        output = "nh_nodes:oakwood"
+        output = "nh_nodes:oakwood",
+        required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:pinelog"] = 1},
-        output = "nh_nodes:pinewood"
+        output = "nh_nodes:pinewood",
+        required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -109,6 +115,10 @@ recipes_floor = {
     {
         ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
         output = "nh_nodes:inkbottle"
+    },
+    {
+        ingredients = {["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1},
+        output = "nh_nodes:messagebottle"
     },
 }
 
@@ -142,6 +152,15 @@ recipes_table = {
     {
         ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1},
         output = "nh_nodes:stoneadzehead"
+    },
+    {
+        ingredients = {["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1},
+        output = "nh_nodes:rowing"
+    },
+    {
+        ingredients = {["nh_nodes:pinelog"] = 6, ["nh_nodes:palmstraw"] = 2},
+        output = "nh_nodes:pineraft",
+        required_tool = "nh_nodes:palmstraw",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:branch"] = 1, ["nh_nodes:palmstraw"] = 1},
@@ -189,11 +208,13 @@ recipes_table = {
     },
     {
         ingredients = {["nh_nodes:oaklog"] = 1},
-        output = "nh_nodes:oakwood"
+        output = "nh_nodes:oakwood",
+        required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:pinelog"] = 1},
-        output = "nh_nodes:pinewood"
+        output = "nh_nodes:pinewood",
+        required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
@@ -218,6 +239,10 @@ recipes_table = {
     {
         ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
         output = "nh_nodes:inkbottle"
+    },
+    {
+        ingredients = {["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1},
+        output = "nh_nodes:messagebottle"
     },
     {
         ingredients = {["nh_nodes:oakboard"] = 6},
@@ -501,9 +526,19 @@ end
 local function check_and_craft(pos, config)
     local meta = core.get_meta(pos)
     local inv = meta:get_inventory()
-    
-    -- Verifica cada receita
+
+    -- Lê a ferramenta no slot extra
+    local tool_stack = inv:get_stack("tool", 1)
+    local tool_name = tool_stack:get_name()  -- "" se vazio
+
     for _, recipe in ipairs(config.recipes) do
+        -- Se a receita exige ferramenta, verifica
+        if recipe.required_tool then
+            if tool_name ~= recipe.required_tool then
+                goto continue   -- pula esta receita
+            end
+        end
+
         if check_recipe(inv, recipe) then
             inv:set_stack("output", 1, ItemStack(recipe.output))
             core.after(0.01, function()
@@ -511,9 +546,10 @@ local function check_and_craft(pos, config)
             end)
             return
         end
+
+        ::continue::
     end
-    
-    -- Nenhuma receita encontrada
+
     inv:set_stack("output", 1, ItemStack(""))
     core.after(0.01, function()
         update_item_entities(pos, config)
@@ -548,12 +584,31 @@ local function show_craft_grid(player, pos, config)
             "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";craft;" ..
             layer.x .. "," .. (y_offset + 0.5) .. ";" .. layer.width .. "," .. layer.height .. ";" .. layer.start_index .. "]"
     end
-    
+
+    -- Posição do slot de ferramenta: usa a config se definida, senão calcula automaticamente
+    local tool_x, tool_y
+    if config.tool_slot_pos then
+        tool_x = config.tool_slot_pos.x
+        tool_y = config.tool_slot_pos.y
+    else
+        local grid_top = y_offset + 0.5
+        local max_height = 0
+        for _, layer in ipairs(config.layers) do
+            if layer.height > max_height then max_height = layer.height end
+        end
+        tool_x = 3.3
+        tool_y = grid_top + (max_height / 2) - 0.5
+    end
+
     formspec = formspec ..
-        "label[6,1.5;Produzir]" ..
-        "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";output;6,2;1,1;]" ..
-        "button[6,3.2;1,0.8;craft_one;Único]" ..
-        "button[6,4.1;1,0.8;craft_all;Todos]" ..
+        "label[" .. tool_x .. "," .. tool_y .. ";Usar]" ..
+        "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";tool;" .. tool_x .. "," .. (tool_y + 0.5) .. ";1,1;]"
+
+    formspec = formspec ..
+        "label[7,1.5;Produz]" ..
+        "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";output;7,2;1,1;]" ..
+        "button[7,3.2;1,0.8;craft_one;Único]" ..
+        "button[7,4.1;1,0.8;craft_all;Todos]" ..
         "list[current_player;main;0.5,5.5;8,2;8]" ..
         "list[current_player;main;0.5,8.1;8,1;]" ..
         "listring[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";craft]" ..
@@ -561,7 +616,6 @@ local function show_craft_grid(player, pos, config)
     
     core.show_formspec(player_name, config.node_name .. "_" .. pos_string, formspec)
 end
-
 -- ========================================
 -- FUNÇÃO PRINCIPAL DE REGISTRO
 -- ========================================
@@ -627,16 +681,20 @@ end
     
     
     -- Função auxiliar para garantir que o inventário existe
-    local function ensure_inventory(pos)
-        local meta = core.get_meta(pos)
-        local inv = meta:get_inventory()
-        
-        -- Verifica se o inventário já foi inicializado
-        if inv:get_size("craft") == 0 then
-            inv:set_size("craft", config.grid_size)
-            inv:set_size("output", 1)
-        end
+local function ensure_inventory(pos)
+    local meta = core.get_meta(pos)
+    local inv = meta:get_inventory()
+    
+    if inv:get_size("craft") == 0 then
+        inv:set_size("craft", config.grid_size)
     end
+    if inv:get_size("output") == 0 then
+        inv:set_size("output", 1)
+    end
+    if inv:get_size("tool") == 0 then
+        inv:set_size("tool", 1)
+    end
+end
     
     
     -- ========================================
@@ -733,13 +791,15 @@ end
     end
     
     node_def.on_metadata_inventory_put = function(pos, listname, index, stack, player)
-        if listname == "craft" then
+        if listname == "craft" or listname == "tool" then
             check_and_craft(pos, config)
         end
     end
     
 node_def.on_metadata_inventory_take = function(pos, listname, index, stack, player)
-    if listname == "craft" then
+    if listname == "tool" then
+        check_and_craft(pos, config)
+    elseif listname == "craft" then
         check_and_craft(pos, config)
     elseif listname == "output" then
         local meta = core.get_meta(pos)
@@ -816,6 +876,11 @@ end
                 core.add_item(pos, stack)
             end
         end
+        
+        local tool_stack = inv:get_stack("tool", 1)
+	if not tool_stack:is_empty() then
+    	    core.add_item(pos, tool_stack)
+	end
         
         -- Dropa o item do output também (se houver)
         local output_stack = inv:get_stack("output", 1)
@@ -1053,6 +1118,8 @@ end,
         {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
+    
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
     
     output_position = {x=0, y=1.4, z=0},
     
@@ -1362,6 +1429,8 @@ register_craft_station("nh_nodes:grass", {
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
     
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
     output_position = {x=0, y=1.4, z=0},
     
     layers = {
@@ -1442,6 +1511,8 @@ register_craft_station("nh_nodes:top_grass", {
         {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
+    
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
     
     output_position = {x=0, y=1.4, z=0},
     
@@ -1532,6 +1603,8 @@ register_craft_station("nh_nodes:sand", {
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
     
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
     output_position = {x=0, y=1.4, z=0},
     
     layers = {
@@ -1567,6 +1640,8 @@ register_craft_station("nh_nodes:wet_sand", {
         {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
+    
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
     
     output_position = {x=0, y=1.4, z=0},
     
@@ -1670,6 +1745,8 @@ register_craft_station("nh_nodes:gneiss", {
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
     
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
     output_position = {x=0, y=1.4, z=0},
     
     layers = {
@@ -1709,6 +1786,8 @@ register_craft_station("nh_nodes:cobblestone", {
         {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
+    
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
     
     output_position = {x=0, y=1.4, z=0},
     
@@ -2958,6 +3037,8 @@ register_craft_station("nh_nodes:campfire", {
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
     
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
     output_position = {x=0, y=1.4, z=0},
     
     layers = {
@@ -3373,6 +3454,8 @@ register_craft_station("nh_nodes:craft_table", {
         {x=-0.2, y=1.1, z=0.2},  {x=0.2, y=1.1, z=0.2},
     },
     
+    tool_slot_pos = {x = 5.6, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
     output_position = {x=0, y=1.7, z=0},
     
     layers = {
@@ -3389,7 +3472,7 @@ register_craft_station("nh_nodes:furnace", {
     title = "Fornalha 3x3",
     drawtype = "mesh",
     mesh = "furnace.obj",
-    tiles = {"stonefurnace.png"},
+    tiles = {"stonefurnace.png"}, --cobblestone.png
     paramtype = "light",  -- Necessário para iluminação correta
     paramtype2 = "facedir",  -- IMPORTANTE: paramtype2, não paramtype
  
@@ -3425,6 +3508,8 @@ register_craft_station("nh_nodes:furnace", {
         {x=-0.3, y=0.9, z=0.3},  {x=0, y=0.9, z=0.3},  {x=0.3, y=0.9, z=0.3},
     },
     
+    tool_slot_pos = {x = 4.3, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
     output_position = {x=0, y=1.2, z=0},
     
     layers = {
@@ -3446,6 +3531,8 @@ register_craft_station("nh_nodes:advanced_bench", {
         {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
         {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
     },
+    
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
     
     output_position = {x=0, y=1.4, z=0},
     
@@ -4423,7 +4510,7 @@ core.register_node("nh_nodes:leaves_nut3", {
                 inv:add_item("main", "nh_nodes:nut")
             end
             
-            -- Transforma o node em leaves_apple2
+            -- Transforma o node em leaves_nut2
             core.set_node(pos, {name = "nh_nodes:leaves_nut2"})
         end
         return itemstack
@@ -4580,7 +4667,7 @@ core.register_node("nh_nodes:apple", {
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1, falling_node = 1},
     
     collision_box = {
         type = "fixed",
@@ -4976,6 +5063,31 @@ core.register_node("nh_nodes:bottle", {
     },
 })
 
+local function is_water_near(pos)
+    local offsets = {
+        {x=0,y=0,z=0},
+        {x=1,y=0,z=0}, {x=-1,y=0,z=0},
+        {x=0,y=1,z=0}, {x=0,y=-1,z=0},
+        {x=0,y=0,z=1}, {x=0,y=0,z=-1},
+    }
+
+    for _, off in ipairs(offsets) do
+        local p = vector.add(pos, off)
+        local node = core.get_node(p)
+
+        if node and node.name then
+            if node.name == "nh_nodes:water"
+            or node.name == "nh_nodes:water_flowing"
+            or node.name == "nh_nodes:water2"
+            or node.name == "nh_nodes:water2_flowing" then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 core.register_node("nh_nodes:messagebottle", {
     description = "Frasco com Mensagem\n[Item de Spawn]",
     inventory_image = "bottlepage.png",
@@ -4999,30 +5111,36 @@ core.register_node("nh_nodes:messagebottle", {
         fixed = {-0.18, -0.5, -0.18, 0.18, -0.05, 0.18}
     },
     
-    -- Spawna o item "mob" ao colocar o node no chão
-    on_place = function(itemstack, placer, pointed_thing)
-        if pointed_thing.type ~= "node" then
-            return itemstack
+    pointabilities = {
+        nodes = {
+            ["nh_nodes:water"]         = true,
+            ["nh_nodes:water_flowing"] = true,
+            ["nh_nodes:water2"]        = true,
+            ["nh_nodes:water2_flowing"] = true,
+        }
+    },
+ 
+    -- Quando o nó é colocado, verifica se está na água
+  after_place_node = function(pos, placer, itemstack, pointed_thing)
+    if placer and placer:is_player() then
+        local ctrl = placer:get_player_control()
+        if ctrl.sneak then
+            return
         end
-
-        local pos = pointed_thing.above  -- posição onde vai spawnar
-        
-        -- Spawna o mob
-        local mob = minetest.add_entity(pos, "nh_mob:messagebottle")
-        
-        if mob then
-            -- Aplica a rotação do jogador ao mob
-            if placer then
-                local yaw = placer:get_look_horizontal()
-                mob:set_yaw(yaw)
-            end
-            
-            -- Consome o item da mão
-            itemstack:take_item()
-        end
-        
-        return itemstack
-    end,
+    end
+    -- Sem agachar: vira entidade normalmente
+    if is_water_near(pos) then
+        core.remove_node(pos)
+        core.add_entity(pos, "nh_mob:messagebottle")
+    end
+end,  
+    
+-- Cobre o caso de água chegar até o nó depois que ele já está parado
+on_flood = function(pos, oldnode, newnode)
+    core.remove_node(pos)
+    core.add_entity(pos, "nh_mob:messagebottle")
+    return false
+end,
 })
 
 core.register_node("nh_nodes:fireflybottle", {
@@ -5147,6 +5265,31 @@ end
 
 
 
+core.register_node("nh_nodes:coconutlinked", {
+    description = "Coco Ligado",
+    drawtype = "mesh",
+    mesh = "coconutlinked.obj",
+    tiles = {"CocoTexture.png"},
+    
+    drop = "nh_nodes:coconut",
+    
+    walkable = false,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1, falling_node = 1},
+    --sounds = default.node_sound_wood_defaults(),
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.25, 0, -0.5, 0.25, 0.5, 0}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.25, 0, -0.5, 0.25, 0.5, 0}
+    },
+})
+
+
 core.register_node("nh_nodes:coconut", {
     description = "Coco\nNutrição: +3",
     drawtype = "mesh",
@@ -5156,7 +5299,7 @@ core.register_node("nh_nodes:coconut", {
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1},
+    groups = {snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1, falling_node = 1},
     --sounds = default.node_sound_wood_defaults(),
     
     collision_box = {
@@ -5167,15 +5310,45 @@ core.register_node("nh_nodes:coconut", {
         type = "fixed",
         fixed = {-0.25, -0.5, -0.25, 0.25, 0, 0.25}
     },
-    
-    -- Tornar comestível
+
+    pointabilities = {
+        nodes = {
+            ["nh_nodes:water"]         = true,
+            ["nh_nodes:water_flowing"] = true,
+            ["nh_nodes:water2"]        = true,
+            ["nh_nodes:water2_flowing"] = true,
+        }
+    },
+ 
+     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 3)  -- Restaura 3 pontos
         itemstack:take_item()
         return itemstack
     end,
+ 
+    -- Quando o nó é colocado, verifica se está na água
+  after_place_node = function(pos, placer, itemstack, pointed_thing)
+    if placer and placer:is_player() then
+        local ctrl = placer:get_player_control()
+        if ctrl.sneak then
+            return
+        end
+    end
+    -- Sem agachar: vira entidade normalmente
+    if is_water_near(pos) then
+        core.remove_node(pos)
+        core.add_entity(pos, "nh_mob:coconut")
+    end
+end,  
+    
+-- Cobre o caso de água chegar até o nó depois que ele já está parado
+on_flood = function(pos, oldnode, newnode)
+    core.remove_node(pos)
+    core.add_entity(pos, "nh_mob:coconut")
+    return false
+end,
 })
-
 
 core.register_node("nh_nodes:palmtimber", {
     description = "Tronco de coqueiro",
@@ -5231,6 +5404,46 @@ on_timer = function(pos)
     end
     return true
 end,
+})
+
+
+core.register_node("nh_nodes:palmstraws", {
+    description = "Tronco de Coqueiro com Palheiro",
+    drawtype = "mesh",
+    mesh = "coconutstraws.obj",
+    tiles = {"strawstimbertexture.png"},
+    stack_max = 4, 
+    
+    drop = {
+        items = {
+            {items = {"nh_nodes:palmtimber"}},
+            {items = {"nh_nodes:palmstraw 4"}},
+        }
+    },
+    
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {
+        choppy = 3,
+        falling_node = 1,
+        tree_trunk = 1
+    },
+    
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}  -- Porta na lateral quando aberta
+    },
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}  -- Colisão fina na lateral
+    },
+    
+    -- Som tocado ao bater no tronco medio (2)
+    sounds = {
+        dug = {name = "punchtimber2", gain = 0.5},
+        dig  = {name = "punchtimber2", gain = 0.5},
+    },
 })
 
 core.register_node("nh_nodes:palmlog", {
@@ -5632,6 +5845,20 @@ liquid_renewable = false,
     post_effect_color = {a=64, r=0, g=0, b=255},
     drowning = 1,  -- ADICIONE ESTA LINHA (dano por segundo quando sem ar)
     groups = {water=1, liquid=1},
+    
+    after_place_node = function(pos)
+    local neighbors = {
+        {x=1,y=0,z=0},{x=-1,y=0,z=0},
+        {x=0,y=1,z=0},{x=0,y=-1,z=0},
+        {x=0,y=0,z=1},{x=0,y=0,z=-1},
+    }
+    for _, d in ipairs(neighbors) do
+        local npos = vector.add(pos, d)
+        local node = core.get_node(npos)
+        -- força remesh do vizinho
+        core.swap_node(npos, node)
+    end
+end,
 })
 
 core.register_node("nh_nodes:water_flowing", {
@@ -5668,8 +5895,8 @@ core.register_node("nh_nodes:water_flowing", {
 core.register_node("nh_nodes:ice", {
     description = "Gelo",
     drawtype = "glasslike",
-    tiles = {"ice.png"}, 
-    groups = {snappy = 3, cracky = 3, liquid = 1},
+    tiles = {"ice2.png"}, 
+    groups = {cracky = 3},
     walkable = true,
     --is_ground_content = true,
     use_texture_alpha = "clip", --blend
@@ -5677,8 +5904,57 @@ core.register_node("nh_nodes:ice", {
     paramtype = "light",
     sunlight_propagates = true,   -- deixa a luz passar, como gelo real         -- não flui
     --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+    --connects_to = {"nh_nodes:ice"},
+
+    drop = "nh_nodes:ice2",
 })
 
+core.register_node("nh_nodes:ice2", {
+    description = "Gelo",
+    drawtype = "glasslike",
+    tiles = {"ice.png"}, 
+    groups = {cracky = 3},
+    walkable = true,
+    --is_ground_content = true,
+    use_texture_alpha = "blend", --blend
+    --alpha = 200,
+    paramtype = "light",
+    sunlight_propagates = true,   -- deixa a luz passar, como gelo real         -- não flui
+    --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+    --connects_to = {"nh_nodes:ice"},
+
+
+    pointabilities = {
+        nodes = {
+            ["nh_nodes:water"]         = true,
+            ["nh_nodes:water_flowing"] = true,
+            ["nh_nodes:water2"]        = true,
+            ["nh_nodes:water2_flowing"] = true,
+        }
+    },
+
+    -- Quando o nó é colocado, verifica se está na água
+  after_place_node = function(pos, placer, itemstack, pointed_thing)
+    if placer and placer:is_player() then
+        local ctrl = placer:get_player_control()
+        if ctrl.sneak then
+            return
+        end
+    end
+    -- Sem agachar: vira entidade normalmente
+    if is_water_near(pos) then
+        core.remove_node(pos)
+        core.add_entity(pos, "nh_mob:iceberg")
+    end
+end,  
+    
+-- Cobre o caso de água chegar até o nó depois que ele já está parado
+on_flood = function(pos, oldnode, newnode)
+    core.remove_node(pos)
+    core.add_entity(pos, "nh_mob:iceberg")
+    return false
+end,
+})
 
 core.register_node("nh_nodes:water2", {
     description = "Água doce",
@@ -6745,42 +7021,81 @@ end
 ---------------------------
 -- ITEM ARREMESSÁVEL
 ---------------------------
+---------------------------
+-- FUNÇÃO DE ARREMESSO
+---------------------------
+local function throw_pebble(itemstack, placer)
+    if not placer or not placer:is_player() then
+        return itemstack
+    end
+
+    local pos = placer:get_pos()
+    pos.y = pos.y + 1.5  -- altura dos olhos
+
+    local dir = placer:get_look_dir()
+    local obj = core.add_entity(pos, "nh_nodes:pebble_entity")
+
+    if obj then
+        obj:set_velocity(vector.multiply(dir, 18))
+        obj:set_acceleration({x = 0, y = -10, z = 0})
+
+        -- ✅ Define o atirador para não se machucar
+        local ent = obj:get_luaentity()
+        if ent then
+            ent._shooter = placer
+        end
+    end
+
+    -- Remove 1 item do stack
+    itemstack:take_item(1)
+    return itemstack
+end
+
+---------------------------
+-- ITEM SEIXO ARREMESSÁVEL
+---------------------------
+local function update_neighbors(pos)
+    local offsets = {
+        {x=0, y=1, z=0},
+        {x=0, y=-1, z=0},
+        {x=1, y=0, z=0},
+        {x=-1, y=0, z=0},
+        {x=0, y=0, z=1},
+        {x=0, y=0, z=-1},
+    }
+    for _, off in ipairs(offsets) do 
+        local npos = vector.add(pos, off)
+        -- Dispara física de falling_node (areia, cascalho, neve, etc.)
+        core.check_for_falling(npos)
+    end
+end
+
 core.register_craftitem("nh_nodes:pebble_item", {
-    description = "Seixo Arremessável",
-    inventory_image = "seixoarremessavel.png",  -- Ícone 2D no inventário
-    wield_image = "seixoarremessavel.png",       -- Ou deixe vazio para não mostrar nada na mão
+    description = "Seixo\n[Arremessável]\nDano: +1\n(Arremesso: Q / dropar)",
+    inventory_image = "seixoarremessavel.png",
+    wield_image = "seixoarremessavel.png",
     wield_scale = {x = 0.5, y = 0.5, z = 0.5},
 
-    -- Bater
     tool_capabilities = {
         full_punch_interval = 0.9,
         max_drop_level = 0,
-        groupcaps = {
+        groupcaps = { 
             cracky = {times = {[2] = 2.0, [3] = 1.0}, uses = 20, maxlevel = 1},
             crumbly = {times = {[1] = 1.5, [2] = 0.9, [3] = 0.5}, uses = 20, maxlevel = 1},
-            snappy = {times = {[2] = 1.0, [3] = 0.5}, uses = 20, maxlevel = 1},
         },
         damage_groups = {fleshy = 2},
     },
 
-    -- Botão direito = arremessa (sempre, sem precisar apontar)
+    -- Botão direito = arremessa
     on_place = function(itemstack, placer, pointed_thing)
         return throw_pebble(itemstack, placer)
     end,
-    
-    -- Botão esquerdo = bate e gera som
-    --on_use = function(itemstack, user, pointed_thing)
-        --core.sound_play("default_dig_cracky", {
-         --   pos = user:get_pos(),
-         --   gain = 0.5,
-        --})
-       -- return itemstack
-    --end,
-    
+
     -- Ao soltar = arremessa
     on_drop = function(itemstack, dropper, pos)
         return throw_pebble(itemstack, dropper)
-    end,
+    end
+
 })
 
 ---------------------------
@@ -6795,46 +7110,47 @@ core.register_entity("nh_nodes:pebble_entity", {
         visual_size = {x = 0.5, y = 0.5},
         textures = {"nh_nodes:pebble"},
     },
-    
+
     _stuck = false,
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
-    
+    _shooter = nil,  -- ✅ Declarado aqui para ficar visível
+
     on_activate = function(self, staticdata)
         self._timer = 0
         self._stuck = false
         self._stuck_timer = 0
+        self._shooter = nil
     end,
-    
+
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then
             self.object:remove()
             return
         end
-        
+
         -- Timer geral para remover após muito tempo
         self._timer = self._timer + dtime
         if self._timer > 60 then
             self.object:remove()
             return
         end
-        
+
         -- Se já está grudado
         if self._stuck then
             self._stuck_timer = self._stuck_timer + dtime
-            
+
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
                 local node = core.get_node(node_pos)
-                
-                -- Tenta colocar o node na posição atual
+
                 if node.name == "air" or not core.registered_nodes[node.name].walkable then
                     core.set_node(node_pos, {name = "nh_nodes:pebble"})
+                    update_neighbors(node_pos)
                 else
-                    -- Tenta posições adjacentes
                     local offsets = {
                         {x=0, y=1, z=0},
                         {x=0, y=-1, z=0},
@@ -6843,110 +7159,152 @@ core.register_entity("nh_nodes:pebble_entity", {
                         {x=0, y=0, z=1},
                         {x=0, y=0, z=-1},
                     }
-                    
+
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
                         local try_node = core.get_node(try_pos)
                         if try_node.name == "air" then
                             core.set_node(try_pos, {name = "nh_nodes:pebble"})
+                            update_neighbors(try_pos)
                             placed = true
                             break
                         end
                     end
-                    
-                    -- Se não conseguiu colocar, dropa item
+
                     if not placed then
                         core.add_item(pos, "nh_nodes:pebble_item")
                     end
                 end
-                
+
                 self.object:remove()
             end
             return
         end
-        
-        -- Detecção de colisão com raio maior
+
         local vel = self.object:get_velocity()
         if not vel then
             self.object:remove()
             return
         end
-        
+
         local speed = vector.length(vel)
-        
+
         -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
             self.object:set_velocity({x=0, y=0, z=0})
             self.object:set_acceleration({x=0, y=0, z=0})
-            --core.sound_play("default_dug_node", {pos = pos, gain = 0.5})
             return
         end
-        
-        -- Verifica múltiplas posições ao longo do caminho (raycast manual)
+
+        -- Verifica colisão com blocos sólidos via raycast manual
         local step_dir = vector.normalize(vel)
         local check_distance = math.min(speed * dtime * 2, 1)
         local steps = math.ceil(check_distance / 0.2)
-        
+
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
             local node = core.get_node(check_pos)
-            
+
             if node and node.name and core.registered_nodes[node.name] then
                 if core.registered_nodes[node.name].walkable then
-                    -- Colidiu com bloco sólido
                     self._stuck = true
                     self.object:set_pos(check_pos)
                     self.object:set_velocity({x=0, y=0, z=0})
                     self.object:set_acceleration({x=0, y=0, z=0})
-                    --core.sound_play("default_dug_node", {pos = check_pos, gain = 0.5})
+                    return
+                end
+                if node.name == "nh_nodes:coconutlinked" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:coconut"})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut"})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut2" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut", count = 2})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut3" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut", count = 3})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_apple" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple"})
+                    update_neighbors(check_pos)
+                    return
+                end 
+                if node.name == "nh_nodes:leaves_apple2" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple", count = 2})
+                    update_neighbors(check_pos)
+                    return
+                end              
+                if node.name == "nh_nodes:leaves_apple3" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple", count = 3})
+                    update_neighbors(check_pos)
                     return
                 end
             end
         end
-        
-        -- Verifica colisão com entidades (jogadores, mobs)
-        local objs = core.get_objects_inside_radius(pos, 0.6)
+
+        -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
+        local objs = core.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
+            -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
-                    -- ADICIONE ESTE LOG:
-        core.log("action", "[Seixo] Objeto detectado!")
-            
+
                 local is_target = obj:is_player()
-                
+
                 if not is_target then
                     local ent = obj:get_luaentity()
-                    if ent and ent.name ~= "nh_nodes:pebble_entity" and ent.hp_max then
-                        is_target = true
+                    -- ✅ Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    if ent and ent.name ~= "nh_nodes:pebble_entity" then
+                        local hp = obj:get_hp()
+                        if hp and hp > 0 then
+                            is_target = true
+                        end
                     end
                 end
-                
+
                 if is_target then
-                
-                            -- ADICIONE ESTE LOG:
-            core.log("action", "[Seixo] CAUSANDO DANO!")
-                
+                    core.log("action", "[Seixo] Acertou alvo em " .. core.pos_to_string(pos))
+
                     core.sound_play("default_dig_cracky", {pos = pos, gain = 0.5})
-                    
-                    -- Causa dano
+
                     obj:punch(self.object, 1.0, {
                         full_punch_interval = 1.0,
                         damage_groups = {fleshy = 2},
                     }, vel)
-                    
-                    -- Dropa item no chão
+
                     core.add_item(pos, "nh_nodes:pebble_item")
                     self.object:remove()
                     return
                 end
             end
         end
-        
+
         self._last_pos = pos
     end,
 })
-
 
 core.register_node("nh_nodes:branch", {
     description = "Galho\nAlcance: +2\nDano: +2\nUsos: 10",
@@ -7004,6 +7362,8 @@ core.register_node("nh_nodes:stick", {
 
     range = 4,
 
+    groups = {oddly_breakable_by_hand = 1, flammable = 2, falling_node = 1},
+
     paramtype = "light",
 	
     collision_box = {
@@ -7033,31 +7393,22 @@ core.register_node("nh_nodes:fallenstick", {
     mesh = "stick2.obj",
     tiles = {"stick.png"},
 
+    drop = "nh_nodes:stick",
+
     paramtype = "light",
     walkable = false,
 
-	groups = {
-	snappy = 3, oddly_breakable_by_hand = 1, flammable = 2,
-	    crumbly = 2,
-	    cracky  = 2,
-	    snappy  = 2,
-	    choppy  = 2,
-	    fleshy = 2
-	},
+    groups = {oddly_breakable_by_hand = 1, flammable = 2, falling_node = 1},
 
     collision_box = {
         type = "fixed",
-        fixed = {
-            {-0.5, -0.5, -0.12, 0.5, -0.435, 0.065},
-        },
+        fixed = {-0.5, -0.5, -0.12, 0.5, -0.435, 0.065},
     },
 
     selection_box = {
         type = "fixed",
         fixed = {-0.5, -0.5, -0.12, 0.5, -0.435, 0.065},
     },
-
-    drop = "nh_nodes:stick",
 })
 
 
@@ -7065,7 +7416,7 @@ core.register_node("nh_nodes:fallenstick", {
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidianpebble", {
-    description = "Seixo de Obsidiana",
+    description = "Seixo de Obsidiana\nDano: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",  -- 
     tiles = {"obsidiana.png"}, -- tiles = {"pedra.png"},
@@ -7075,10 +7426,11 @@ core.register_node("nh_nodes:obsidianpebble", {
     sunlight_propagates = true,
     walkable = false,
 
+    drop = "nh_nodes:obsidianpebble_item",
+
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
     groups = {
-        snappy = 3,
         oddly_breakable_by_hand = 3,
         falling_node = 1,
         attached_node = 1,
@@ -7105,6 +7457,245 @@ core.register_node("nh_nodes:obsidianpebble", {
 
     after_place_node = function(pos)
         core.check_for_falling(pos)
+    end,
+    
+   tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 2},
+    },
+})
+
+---------------------------
+-- FUNÇÃO DE ARREMESSO
+---------------------------
+local function throw_pebble(itemstack, placer)
+    if not placer or not placer:is_player() then
+        return itemstack
+    end
+
+    local pos = placer:get_pos()
+    pos.y = pos.y + 1.5  -- altura dos olhos
+
+    local dir = placer:get_look_dir()
+    local obj = core.add_entity(pos, "nh_nodes:obsidianpebble_entity")
+
+    if obj then
+        obj:set_velocity(vector.multiply(dir, 18))
+        obj:set_acceleration({x = 0, y = -10, z = 0})
+
+        -- ✅ Define o atirador para não se machucar
+        local ent = obj:get_luaentity()
+        if ent then
+            ent._shooter = placer
+        end
+    end
+
+    -- Remove 1 item do stack
+    itemstack:take_item(1)
+    return itemstack
+end
+
+---------------------------
+-- ITEM
+---------------------------
+core.register_craftitem("nh_nodes:obsidianpebble_item", {
+    description = "Seixo de Obsidiana\n[Arremessável]\nDano: +1\n(Arremesso: Q / dropar)",
+    inventory_image = "obsidiana_seixo_arremessavel.png",
+    wield_image = "obsidiana_seixo_arremessavel.png",
+    wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+
+    tool_capabilities = {
+        full_punch_interval = 0.9,
+        max_drop_level = 0,
+        groupcaps = {
+            cracky = {times = {[2] = 2.0, [3] = 1.0}, uses = 20, maxlevel = 1},
+            crumbly = {times = {[1] = 1.5, [2] = 0.9, [3] = 0.5}, uses = 20, maxlevel = 1},
+            snappy = {times = {[2] = 1.0, [3] = 0.5}, uses = 20, maxlevel = 1},
+        },
+        damage_groups = {fleshy = 2},
+    },
+
+    -- Botão direito = arremessa
+    on_place = function(itemstack, placer, pointed_thing)
+        return throw_pebble(itemstack, placer)
+    end,
+
+    -- Ao soltar = arremessa
+    on_drop = function(itemstack, dropper, pos)
+        return throw_pebble(itemstack, dropper)
+    end,
+})
+
+
+---------------------------
+-- ENTIDADE DO PROJÉTIL
+---------------------------
+core.register_entity("nh_nodes:obsidianpebble_entity", {
+    initial_properties = {
+        physical = true,
+        collide_with_objects = true,
+        collisionbox = {-0.1, -0.1, -0.1, 0.1, 0.1, 0.1},
+        visual = "wielditem",
+        visual_size = {x = 0.5, y = 0.5},
+        textures = {"nh_nodes:obsidianpebble"},
+    },
+
+    _stuck = false,
+    _timer = 0,
+    _stuck_timer = 0,
+    _last_pos = nil,
+    _shooter = nil,  -- ✅ Declarado aqui para ficar visível
+
+    on_activate = function(self, staticdata)
+        self._timer = 0
+        self._stuck = false
+        self._stuck_timer = 0
+        self._shooter = nil
+    end,
+
+    on_step = function(self, dtime)
+        local pos = self.object:get_pos()
+        if not pos then
+            self.object:remove()
+            return
+        end
+
+        -- Timer geral para remover após muito tempo
+        self._timer = self._timer + dtime
+        if self._timer > 60 then
+            self.object:remove()
+            return
+        end
+
+        -- Se já está grudado
+        if self._stuck then
+            self._stuck_timer = self._stuck_timer + dtime
+
+            -- Após 0.1 segundo grudado, vira node
+            if self._stuck_timer >= 0.1 then
+                local node_pos = vector.round(pos)
+                local node = core.get_node(node_pos)
+
+                if node.name == "air" or not core.registered_nodes[node.name].walkable then
+                    core.set_node(node_pos, {name = "nh_nodes:obsidianpebble"})
+                else
+                    local offsets = {
+                        {x=0, y=1, z=0},
+                        {x=0, y=-1, z=0},
+                        {x=1, y=0, z=0},
+                        {x=-1, y=0, z=0},
+                        {x=0, y=0, z=1},
+                        {x=0, y=0, z=-1},
+                    }
+
+                    local placed = false
+                    for _, offset in ipairs(offsets) do
+                        local try_pos = vector.add(node_pos, offset)
+                        local try_node = core.get_node(try_pos)
+                        if try_node.name == "air" then
+                            core.set_node(try_pos, {name = "nh_nodes:obsidianpebble"})
+                            placed = true
+                            break
+                        end
+                    end
+
+                    if not placed then
+                        core.add_item(pos, "nh_nodes:obsidianpebble_item")
+                    end
+                end
+
+                self.object:remove()
+            end
+            return
+        end
+
+        local vel = self.object:get_velocity()
+        if not vel then
+            self.object:remove()
+            return
+        end
+
+        local speed = vector.length(vel)
+
+        -- Se a velocidade é muito baixa (parou de se mover)
+        if speed < 0.5 then
+            self._stuck = true
+            self.object:set_velocity({x=0, y=0, z=0})
+            self.object:set_acceleration({x=0, y=0, z=0})
+            return
+        end
+
+        -- Verifica colisão com blocos sólidos via raycast manual
+        local step_dir = vector.normalize(vel)
+        local check_distance = math.min(speed * dtime * 2, 1)
+        local steps = math.ceil(check_distance / 0.2)
+
+        for i = 1, steps do
+            local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
+            local node = core.get_node(check_pos)
+
+            if node and node.name and core.registered_nodes[node.name] then
+                if core.registered_nodes[node.name].walkable then
+                    self._stuck = true
+                    self.object:set_pos(check_pos)
+                    self.object:set_velocity({x=0, y=0, z=0})
+                    self.object:set_acceleration({x=0, y=0, z=0})
+                    return
+                end
+                if node.name == "nh_nodes:coconutlinked" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:coconut"})
+                    update_neighbors(check_pos)
+                    return
+                end
+            end
+        end
+
+        -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
+        local objs = core.get_objects_inside_radius(pos, 1.2)
+        for _, obj in ipairs(objs) do
+            -- Ignora o próprio projétil e o atirador
+            if obj ~= self.object and obj ~= self._shooter then
+
+                local is_target = obj:is_player()
+
+                if not is_target then
+                    local ent = obj:get_luaentity()
+                    -- ✅ Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    if ent and ent.name ~= "nh_nodes:obsidianpebble_entity" then
+                        local hp = obj:get_hp()
+                        if hp and hp > 0 then
+                            is_target = true
+                        end
+                    end
+                end
+
+                if is_target then
+                    core.log("action", "[Seixo de Obsidiana] Acertou alvo em " .. core.pos_to_string(pos))
+
+                    core.sound_play("default_dig_cracky", {pos = pos, gain = 0.5})
+
+                    obj:punch(self.object, 1.0, {
+                        full_punch_interval = 1.0,
+                        damage_groups = {fleshy = 2},
+                    }, vel)
+
+                    core.add_item(pos, "nh_nodes:obsidianpebble_item")
+                    self.object:remove()
+                    return
+                end
+            end
+        end
+
+        self._last_pos = pos
     end,
 })
 
@@ -7157,7 +7748,430 @@ core.register_node("nh_nodes:obsidianblade", {
 })
 
 ---------------------------
--- NODE DO SEIXO DE OBSIDIANA
+-- NODE DA FERRAMENTA REMO
+---------------------------
+core.register_node("nh_nodes:rowing", {
+    description = "Remo\nAlcance: +3\nDano: +2\nUsos: 15",
+    drawtype = "mesh",
+    mesh = "rowing.obj",  -- 
+    tiles = {"oakwood.png"}, -- tiles = {"pedra.png"},
+    --inventory_image = "seixo.png",
+    --wield_image = "seixo.png",
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        dig_immediate = 1,
+        falling_node = 1,
+    },
+    
+    range = 6, -- AUMENTA O ALCANCE
+ 
+    tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 2},
+    },
+    
+        -- cavar node
+    after_use = function(itemstack, user, node, digparams)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369 -- ~15 usos (65535 / 15)
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+    
+    -- bater em mob
+    after_punch = function(itemstack, user, target)
+        local wear = itemstack:get_wear()
+        wear = wear + 4369
+        itemstack:set_wear(wear)
+        return itemstack
+    end,
+
+
+    collision_box = {
+        type = "fixed",
+        fixed = {
+            {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
+        },
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
+    },
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 3, y = 0, z = 1.8},
+        rot = {x = 90, y = 0, z = -90},
+    },
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})
+
+
+---------------------------
+-- ENTIDADE DA JANGADA (versão navegável)
+---------------------------
+core.register_entity("nh_nodes:pineraft_entity", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "pineraft_entity.obj",
+        textures = {"pineraft.png"},
+        visual_size = {x = 2.5, y = 2.5, z = 2.5},
+        collisionbox = {-1, 0, -1.5, 1, 0.9, 1.5},
+        physical = true,
+        is_visible = true,
+        hp_max = 4, -- "durabilidade": quantos socos para quebrar
+            -- Adicione isso:
+    automatic_face_movement_dir = false,
+    stepheight = 0.5,
+    gravity = {x = 0, y = -9.81, z = 0},
+    },
+
+    driver = nil,
+
+on_activate = function(self, staticdata)
+    self.object:set_armor_groups({immortal = 0, fleshy = 100})
+    self.object:set_hp(8)
+    self.object:set_velocity({x = 0, y = 0, z = 0})
+    self.object:set_acceleration({x = 0, y = -9.81, z = 0})
+end,
+
+    on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
+        -- Desmonta se for o motorista
+	if self.driver and puncher == self.driver then
+	    self.driver:set_detach()
+	    if self._driver_visual_size then
+		self.driver:set_properties({ visual_size = self._driver_visual_size })
+		self._driver_visual_size = nil
+	    end
+	    self.driver = nil
+	    return
+	end
+
+        -- Só permite quebrar com a mão (sem ferramenta)
+        local item = puncher:get_wielded_item()
+        if item:get_name() ~= "" then
+            -- tem ferramenta na mão, não quebra (opcional, remova se quiser)
+            return
+        end
+
+        local hp = self.object:get_hp()
+        hp = hp - 1
+
+        if hp <= 0 then
+            -- Dropa o item da jangada
+            local pos = self.object:get_pos()
+            core.add_item(pos, "nh_nodes:pineraft")
+            self.object:remove()
+        else
+            self.object:set_hp(hp)
+            -- Feedback visual: pisca (opcional)
+            -- self.object:punch(puncher, ...) -- deixa o engine piscar
+        end
+    end,
+
+    on_step = function(self, dtime)
+	    local pos = self.object:get_pos()
+	    if not pos then return end
+
+	    local node_at    = core.get_node({x=pos.x, y=pos.y + 0.5, z=pos.z})
+	    local node_below = core.get_node({x=pos.x, y=pos.y - 0.5, z=pos.z})
+	    local node_below2 = core.get_node({x=pos.x, y=pos.y + 0.35, z=pos.z})  -- logo abaixo do centro
+
+	    local water_nodes = {
+		["nh_nodes:water"]          = true,
+		["nh_nodes:water_flowing"]  = true,
+		["nh_nodes:water2"]         = true,
+		["nh_nodes:water2_flowing"] = true,
+	    }
+
+	    local submerged  = water_nodes[node_at.name]    -- entidade está dentro da água
+	    local on_surface = water_nodes[node_below2.name] and not submerged -- entidade está na superfície
+
+	local vel = self.object:get_velocity()
+
+	if submerged then
+	    self.object:set_acceleration({x = 0, y = 0, z = 0})
+	    self.object:set_velocity({x = vel.x, y = 2, z = vel.z})
+	elseif on_surface then
+	    self.object:set_acceleration({x = 0, y = 0, z = 0})
+	    self.object:set_velocity({x = vel.x, y = 0, z = vel.z})
+	else
+	    -- No ar: gravidade age normalmente
+	    self.object:set_acceleration({x = 0, y = -9.81, z = 0})
+	    if vel.y > 0 then
+		self.object:set_velocity({x = vel.x, y = 0, z = vel.z})
+	    end
+	end
+	if self.driver then
+	    -- Verifica se o jogador tem o remo na hotbar
+	    local has_oar = false
+	    local inv = self.driver:get_inventory()
+	    if inv then
+		local hotbar_size = 8
+		if self.driver.hud_get_hotbar_itemcount then
+		    hotbar_size = self.driver:hud_get_hotbar_itemcount()
+		end
+		for i = 1, hotbar_size do
+		    local stack = inv:get_stack("main", i)
+		    if stack:get_name() == "nh_nodes:rowing" then
+		        has_oar = true
+		        break
+		    end
+		end
+		for i = 1, hotbar_size do
+		    local stack = inv:get_stack("main", i)
+		    if stack:get_name() == "nh_nodes:rowing" then
+			has_oar = true
+			break
+		    end
+		end
+
+		-- Mensagem FORA do loop, e só envia uma vez usando um cooldown
+		if not has_oar then
+		    if not self._oar_msg_timer or self._oar_msg_timer <= 0 then
+			core.chat_send_player(self.driver:get_player_name(), "Acho que preciso de um remo pra mover a jangada...")
+			self._oar_msg_timer = 5 -- segundos antes de repetir
+		    end
+		end
+
+		if self._oar_msg_timer and self._oar_msg_timer > 0 then
+		    self._oar_msg_timer = self._oar_msg_timer - dtime
+		end
+	    end
+
+	    local speed   = 3
+	    local raft_yaw = self.object:get_yaw()
+
+	    if has_oar then
+		local ctrl       = self.driver:get_player_control()
+		local mouse_yaw  = self.driver:get_look_horizontal()
+		local turn_speed = 1.5
+
+		-- Rotação suave em direção ao mouse
+		local diff = mouse_yaw - raft_yaw
+		while diff >  math.pi do diff = diff - 2 * math.pi end
+		while diff < -math.pi do diff = diff + 2 * math.pi end
+		local new_yaw = raft_yaw + diff * turn_speed * dtime
+
+		if ctrl.left  then new_yaw = new_yaw + 0.05 end
+		if ctrl.right then new_yaw = new_yaw - 0.05 end
+
+		self.object:set_yaw(new_yaw)
+
+		local vx, vz = 0, 0
+		if ctrl.up   then vx =  math.sin(-new_yaw) * speed; vz =  math.cos(-new_yaw) * speed end
+		if ctrl.down then vx = -math.sin(-new_yaw) * speed; vz = -math.cos(-new_yaw) * speed end
+
+		local vel = self.object:get_velocity()
+		self.object:set_velocity({x=vx, y=vel.y, z=vz})
+	    else
+		-- Sem remo: para a jangada gradualmente (atrito)
+		local vel = self.object:get_velocity()
+		self.object:set_velocity({
+		    x = vel.x * 0.85,
+		    y = vel.y,
+		    z = vel.z * 0.85,
+		})
+	    end
+	end
+	
+local half_width = 2.7 --/ 2
+local half_length = 2.9 --/ 2
+local half_height = 1.5 --/ 2
+
+local search_radius = 4 -- só para busca inicial (ligeiramente maior)
+
+local being_pushed = false
+
+for _, obj in ipairs(core.get_objects_inside_radius(pos, search_radius)) do
+
+    if obj:is_player() and obj ~= self.driver then
+
+        local ppos = obj:get_pos()
+
+        local dx = ppos.x - pos.x
+        local dy = ppos.y - pos.y
+        local dz = ppos.z - pos.z
+
+        -- ✅ filtro retangular (caixa)
+        if math.abs(dx) <= half_width and
+           math.abs(dy) <= half_height and
+           math.abs(dz) <= half_length then
+
+            local pvel = obj:get_velocity()
+            local speed_sq = pvel.x * pvel.x + pvel.z * pvel.z
+
+            if speed_sq > 0.1 then
+
+                local spd = math.sqrt(speed_sq)
+                local force = 1.75
+                local cur_vel = self.object:get_velocity()
+
+                self.object:set_velocity({
+                    x = cur_vel.x + (pvel.x / spd) * force * dtime,
+                    y = cur_vel.y,
+                    z = cur_vel.z + (pvel.z / spd) * force * dtime,
+                })
+
+                being_pushed = true
+            end
+        end
+    end
+end
+
+-- Atrito só quando ninguém está empurrando e não há driver
+if not self.driver and not being_pushed then
+    local cur_vel = self.object:get_velocity()
+    self.object:set_velocity({
+        x = cur_vel.x * 0.93,  -- suave, desliza um pouco
+        y = cur_vel.y,
+        z = cur_vel.z * 0.93,
+    })
+end
+
+
+
+
+
+    end,
+
+on_rightclick = function(self, clicker)
+    if not clicker or not clicker:is_player() then return end
+
+    if self.driver == nil then
+        self.driver = clicker
+
+        -- Salva as propriedades originais do player
+        self._driver_visual_size = clicker:get_properties().visual_size
+
+        -- Contra-escala: 1 / 2.5 = 0.4
+        -- Assim o player aparece no tamanho normal mesmo dentro da entidade escalonada
+        clicker:set_properties({
+            visual_size = {
+                x = 1 / 2.5,
+                y = 1 / 2.5,
+                z = 1 / 2.5,
+            }
+        })
+
+        clicker:set_attach(self.object, "", {x=0, y=3, z=0}, {x=0, y=0, z=0})
+
+    elseif self.driver == clicker then
+        clicker:set_detach()
+        self.driver = nil
+
+        -- Restaura as propriedades originais
+        if self._driver_visual_size then
+            clicker:set_properties({
+                visual_size = self._driver_visual_size
+            })
+            self._driver_visual_size = nil
+        end
+    end
+end,
+
+on_death = function(self)
+    if self.driver then
+        self.driver:set_detach()
+        if self._driver_visual_size then
+            self.driver:set_properties({ visual_size = self._driver_visual_size })
+            self._driver_visual_size = nil
+        end
+        self.driver = nil
+    end
+    local pos = self.object:get_pos()
+    if pos then
+        core.add_item(pos, "nh_nodes:pineraft")
+    end
+end,
+})
+
+---------------------------
+-- NODE DA JANGADA PRIMITIVA
+---------------------------
+core.register_node("nh_nodes:pineraft", {
+    description = "Jangada de Pinheiro",
+    drawtype = "mesh",
+    mesh = "pineraft.obj",  -- 
+    tiles = {"pineraft.png"}, -- tiles = {"pedra.png"},
+    inventory_image = "pineraft_inv.png",
+
+    -- falling_node faz ele cair,
+    -- attached_node previne ficar flutuando encostado
+    groups = {
+        oddly_breakable_by_hand = 1,
+        --falling_node = 1,
+    },
+
+
+    collision_box = {
+        type = "fixed",
+        fixed = {-1, -0.5, -1.5, 1, 0.5, 1.5},
+    },
+
+    selection_box = {
+        type = "fixed",
+        fixed = {-1, -0.5, -1.5, 1, 0.5, 1.5},
+    },
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = -2, y = -2, z = 1.8},
+        rot = {x = 90, y = 0, z = -90},
+    },
+    --wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 0, y = -1, z = -0.5},
+        rot = {x = 90, y = 0, z = 90},
+    },
+    
+    pointabilities = {
+        nodes = {
+            ["nh_nodes:water"]         = true,
+            ["nh_nodes:water_flowing"] = true,
+            ["nh_nodes:water2"]        = true,
+            ["nh_nodes:water2_flowing"] = true,
+        }
+    },
+    
+    -- Quando o nó é colocado, verifica se está na água
+after_place_node = function(pos, placer, itemstack, pointed_thing)
+    -- Se segurou agachar, deixa como nó estático (não vira entidade)
+    if placer and placer:is_player() then
+        local ctrl = placer:get_player_control()
+        if ctrl.sneak then
+            return -- coloca normalmente como nó, não faz nada
+        end
+    end
+    -- Sem agachar: vira entidade normalmente
+    core.remove_node(pos)
+    core.add_entity(pos, "nh_nodes:pineraft_entity")
+end,
+    
+-- Cobre o caso de água chegar até o nó depois que ele já está parado
+on_flood = function(pos, oldnode, newnode)
+    core.add_entity(pos, "nh_nodes:pineraft_entity")
+    return false
+end,
+})
+
+---------------------------
+-- NODE DA ESPADA DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidiansword", {
     description = "Espada de Obsidiana\nAlcance: +3\nDano: +6\nUsos: 15",
@@ -7237,7 +8251,7 @@ core.register_node("nh_nodes:obsidiansword", {
 -- NODE DO SEIXO NO CHÃO
 ---------------------------
 core.register_node("nh_nodes:pebble", {
-    description = "Seixo",
+    description = "Seixo\nDano: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",  -- 
     tiles = {"seixo.png"}, -- tiles = {"pedra.png"},
@@ -7250,7 +8264,6 @@ core.register_node("nh_nodes:pebble", {
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
     groups = {
-        snappy = 3,
         oddly_breakable_by_hand = 3,
         falling_node = 1,
         attached_node = 1,
@@ -7280,6 +8293,18 @@ core.register_node("nh_nodes:pebble", {
     after_place_node = function(pos)
         core.check_for_falling(pos)
     end,
+    
+   tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 2},
+    },
 })
 
 
@@ -7912,6 +8937,36 @@ core.register_node("nh_nodes:stoneadze", {
         damage_groups = {fleshy = 3},
     },
     
+        -- bater em node / transformar em terra arada
+node_placement_prediction = "",
+
+on_place = function(itemstack, puncher, pointed_thing)
+    local controls = puncher:get_player_control()
+    
+    if controls.sneak then
+        if pointed_thing.type == "node" then
+            local pos = pointed_thing.under
+            local node = core.get_node(pos)
+            
+            -- Mapeamento: tora -> madeira
+            local conversions = {
+                ["nh_nodes:oaklog"]  = "nh_nodes:oakwood",
+                ["nh_nodes:pinelog"] = "nh_nodes:pinewood",
+            }
+            
+            local result = conversions[node.name]
+            if result then
+                core.set_node(pos, {name = result})
+                local wear = itemstack:get_wear()
+                itemstack:set_wear(wear + 4369)
+            end
+        end
+        return itemstack
+    else
+        return core.item_place(itemstack, puncher, pointed_thing)
+    end
+end,
+    
         -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8214,8 +9269,8 @@ end
 -- ITEM ARREMESSÁVEL (SEIXO branco)
 ---------------------------
 core.register_craftitem("nh_nodes:white_pebble_item", {
-    description = "Seixo branco Arremessável",
-    inventory_image = "seixo_branco.png", -- Use uma textura diferente
+    description = "Seixo Branco\n[Arremessável]\nDano: +1\n(Arremesso: Q / dropar)",
+    inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
 
     tool_capabilities = {
         full_punch_interval = 0.9,
@@ -8254,33 +9309,38 @@ core.register_entity("nh_nodes:white_pebble_entity", {
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
-    
+    _shooter = nil,  -- ✅ Declarado aqui para ficar visível
+
     on_activate = function(self, staticdata)
         self._timer = 0
         self._stuck = false
         self._stuck_timer = 0
+        self._shooter = nil
     end,
-    
+
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then
             self.object:remove()
             return
         end
-        
+
+        -- Timer geral para remover após muito tempo
         self._timer = self._timer + dtime
         if self._timer > 60 then
             self.object:remove()
             return
         end
-        
+
+        -- Se já está grudado
         if self._stuck then
             self._stuck_timer = self._stuck_timer + dtime
-            
+
+            -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
                 local node = core.get_node(node_pos)
-                
+
                 if node.name == "air" or not core.registered_nodes[node.name].walkable then
                     core.set_node(node_pos, {name = "nh_nodes:white_pebble"})
                 else
@@ -8292,7 +9352,7 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                         {x=0, y=0, z=1},
                         {x=0, y=0, z=-1},
                     }
-                    
+
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
@@ -8303,40 +9363,42 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                             break
                         end
                     end
-                    
+
                     if not placed then
                         core.add_item(pos, "nh_nodes:white_pebble_item")
                     end
                 end
-                
+
                 self.object:remove()
             end
             return
         end
-        
+
         local vel = self.object:get_velocity()
         if not vel then
             self.object:remove()
             return
         end
-        
+
         local speed = vector.length(vel)
-        
+
+        -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
             self.object:set_velocity({x=0, y=0, z=0})
             self.object:set_acceleration({x=0, y=0, z=0})
             return
         end
-        
+
+        -- Verifica colisão com blocos sólidos via raycast manual
         local step_dir = vector.normalize(vel)
         local check_distance = math.min(speed * dtime * 2, 1)
         local steps = math.ceil(check_distance / 0.2)
-        
+
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
             local node = core.get_node(check_pos)
-            
+
             if node and node.name and core.registered_nodes[node.name] then
                 if core.registered_nodes[node.name].walkable then
                     self._stuck = true
@@ -8345,39 +9407,51 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                     self.object:set_acceleration({x=0, y=0, z=0})
                     return
                 end
+                if node.name == "nh_nodes:coconutlinked" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:coconut"})
+                    update_neighbors(check_pos)
+                    return
+                end
             end
         end
-        
-        local objs = core.get_objects_inside_radius(pos, 0.6)
+
+        -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
+        local objs = core.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
+            -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
-                core.log("action", "[Seixo branco] Objeto detectado!")
-            
+
                 local is_target = obj:is_player()
-                
+
                 if not is_target then
                     local ent = obj:get_luaentity()
-                    if ent and ent.name ~= "nh_nodes:white_pebble_entity" and ent.hp_max then
-                        is_target = true
+                    -- ✅ Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    if ent and ent.name ~= "nh_nodes:white_pebble_entity" then
+                        local hp = obj:get_hp()
+                        if hp and hp > 0 then
+                            is_target = true
+                        end
                     end
                 end
-                
+
                 if is_target then
-                    core.log("action", "[Seixo branco] CAUSANDO DANO!")
+                    core.log("action", "[Seixo Branco] Acertou alvo em " .. core.pos_to_string(pos))
+
                     core.sound_play("default_dig_cracky", {pos = pos, gain = 0.5})
-                    
+
                     obj:punch(self.object, 1.0, {
                         full_punch_interval = 1.0,
                         damage_groups = {fleshy = 2},
                     }, vel)
-                    
+
                     core.add_item(pos, "nh_nodes:white_pebble_item")
                     self.object:remove()
                     return
                 end
             end
         end
-        
+
         self._last_pos = pos
     end,
 })
@@ -9547,7 +10621,7 @@ core.register_on_newplayer(function(player)
         "- Confira as outras páginas em caso de dúvida\n" .. 
         "- Há baús escondidos pelo mundo, mas não espere grandes recompensas\n" ..
         "- Dizem haver de um livro perdido chamado Archion que pode dar tudo o que esse mundo tem a oferecer\n" ..
-        "- Alguém teria invocado o livro usando o seu poder criativo ilimitado entoando: /grantme nh_nodes:archion\n" ..
+        "- Alguém teria invocado o livro usando o seu poder criativo ilimitado entoando: '/grantme all' e '/giveme nh_nodes:archion'\n" ..
         "- Segundo a lenda, há também criaturas que só surgem em localidades específicas\n" ..
         "- Alguns tentaram fugir, mas não conseguiram, esse mundo não parece ter limites.\n\n" ..
         "Boa sorte...\n\n\n\n\n\n\n\n" ..
