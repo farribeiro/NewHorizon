@@ -4402,7 +4402,7 @@ core.register_node("nh_nodes:leaves_nut", {
     description = "Folhas com noz",
     drawtype = "allfaces_optional",
     waving = 1,
-    tiles = {"folhasnoz.png"},
+    tiles = {"leavesnut1.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
         items = {
@@ -4442,7 +4442,7 @@ core.register_node("nh_nodes:leaves_nut2", {
     description = "Folhas com 2 nozes",
     drawtype = "allfaces_optional",
     waving = 1,
-    tiles = {"folhasnoz2.png"},
+    tiles = {"leavesnut2.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
         items = {
@@ -4482,7 +4482,7 @@ core.register_node("nh_nodes:leaves_nut3", {
     description = "Folhas com 3 nozes",
     drawtype = "allfaces_optional",
     waving = 1,
-    tiles = {"folhasnoz3.png"},
+    tiles = {"leavesnut3.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
         items = {
@@ -7074,7 +7074,14 @@ core.register_craftitem("nh_nodes:pebble_item", {
     description = "Seixo\n[Arremessável]\nDano: +1\n(Arremesso: Q / dropar)",
     inventory_image = "seixoarremessavel.png",
     wield_image = "seixoarremessavel.png",
-    wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+    --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = -0.25, z = 0},
+        rot = {x = 0, y = 0, z = 0},
+    },
+    wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
 
     tool_capabilities = {
         full_punch_interval = 0.9,
@@ -7510,7 +7517,14 @@ core.register_craftitem("nh_nodes:obsidianpebble_item", {
     description = "Seixo de Obsidiana\n[Arremessável]\nDano: +1\n(Arremesso: Q / dropar)",
     inventory_image = "obsidiana_seixo_arremessavel.png",
     wield_image = "obsidiana_seixo_arremessavel.png",
-    wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+    --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
+
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = -0.25, z = 0},
+        rot = {x = 0, y = 0, z = 0},
+    },
+    wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
 
     tool_capabilities = {
         full_punch_interval = 0.9,
@@ -7653,6 +7667,48 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
                 if node.name == "nh_nodes:coconutlinked" then
                     core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
                     core.set_node(check_pos, {name = "nh_nodes:coconut"})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut"})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut2" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut", count = 2})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut3" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut", count = 3})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_apple" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple"})
+                    update_neighbors(check_pos)
+                    return
+                end 
+                if node.name == "nh_nodes:leaves_apple2" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple", count = 2})
+                    update_neighbors(check_pos)
+                    return
+                end              
+                if node.name == "nh_nodes:leaves_apple3" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple", count = 3})
                     update_neighbors(check_pos)
                     return
                 end
@@ -9272,6 +9328,13 @@ core.register_craftitem("nh_nodes:white_pebble_item", {
     description = "Seixo Branco\n[Arremessável]\nDano: +1\n(Arremesso: Q / dropar)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
 
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = -0.25, z = 0},
+        rot = {x = 0, y = 0, z = 0},
+    },
+    wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
+
     tool_capabilities = {
         full_punch_interval = 0.9,
         max_drop_level = 0,
@@ -9413,9 +9476,51 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                     update_neighbors(check_pos)
                     return
                 end
+                if node.name == "nh_nodes:leaves_nut" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut"})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut2" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut", count = 2})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_nut3" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:nut", count = 3})
+                    update_neighbors(check_pos)
+                    return
+                end
+                if node.name == "nh_nodes:leaves_apple" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple"})
+                    update_neighbors(check_pos)
+                    return
+                end 
+                if node.name == "nh_nodes:leaves_apple2" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple", count = 2})
+                    update_neighbors(check_pos)
+                    return
+                end              
+                if node.name == "nh_nodes:leaves_apple3" then
+                    core.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    core.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    core.add_item(check_pos, {name = "nh_nodes:apple", count = 3})
+                    update_neighbors(check_pos)
+                    return
+                end
             end
         end
-
+        
         -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         local objs = core.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do

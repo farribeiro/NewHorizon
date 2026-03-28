@@ -77,7 +77,7 @@ core.register_on_joinplayer(function(player)
     hud_icons[name] = player:hud_add({
         type = "image",
         position = {x = 0.5, y = 1},
-        text          = "background_bar.png",
+        text          = "background_bar2.png",
         scale         = {x = 1.5, y = 1.5},
         offset = {x = -180, y = -76}
     })
@@ -85,9 +85,9 @@ core.register_on_joinplayer(function(player)
     hud_icons[name] = player:hud_add({
         type = "image",
         position = {x = 0.495, y = 1},
-        text          = "heart.png",
-        scale         = {x = 3, y = 3},
-        offset = {x = -300, y = -88}
+        text          = "heart3.png",
+        scale         = {x = 2, y = 2},
+        offset = {x = -302, y = -85}
     })   
    
     -- Cria a nova barra
@@ -131,24 +131,23 @@ core.register_on_joinplayer(function(player)
         hunger_data[name] = {
             level = 20,
             hud_id = nil
-        }
-        
-    hud_icons[name] = player:hud_add({
-        type = "image",
-        position = {x = 0.495, y = 1},
-        text          = "hunger.png",
-        scale         = {x = 2, y = 2},
-        offset = {x = 310, y = -88}
-    })    
+        }  
         
     hud_icons[name] = player:hud_add({
         type = "image",
         position = {x = 0.5, y = 1},
-        text          = "background_bar.png",
+        text          = "background_bar2.png",
         scale         = {x = 1.5, y = 1.5},
-        offset = {x = 170, y = -76}
+        offset = {x = 180, y = -76}
     })
     
+    hud_icons[name] = player:hud_add({
+        type = "image",
+        position = {x = 0.495, y = 1},
+        text          = "honeydroplet3.png",
+        scale         = {x = 2, y = 2},
+        offset = {x = 324, y = -85}
+    })  
         
         -- Cria o HUD da barra de fome
         hunger_data[name].hud_id = player:hud_add({
@@ -158,7 +157,7 @@ core.register_on_joinplayer(function(player)
             number = 20,
             direction = 0,
             size = {x = 24, y = 24},
-            offset = {x = 50, y = -88},
+            offset = {x = 60, y = -88},
         })
     end)
     

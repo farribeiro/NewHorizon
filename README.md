@@ -58,7 +58,7 @@
 
 📄 3D writeable papers
 
-📖 Grimoire of creative (/grantme give → /giveme archion) 
+📖 Grimoire of creative (/grantme give → /giveme nh_nodes:archion) 
 
 
 - Objects
@@ -76,7 +76,7 @@ And a few more details...
 4. The icon will appear when you open Luanti. Create a world and play!
 
 ## External Mods
-The features are not fully accessible yet...
+Modified mods used to this game
 
 - Mobs Redo API - For Minetest Game (outdated version) [Github Repo](https://codeberg.org/tenplus1/mobs_redo.git)
 - Happy Mob - [Github Repo](https://github.com/cookieukw/happy_mob)
