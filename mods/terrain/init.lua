@@ -21,6 +21,8 @@ local c_grass   = core.get_content_id("nh_nodes:grass")
 local c_topgrass = core.get_content_id("nh_nodes:top_grass")
 local c_grassleaves = core.get_content_id("nh_nodes:grassleaves")
 local c_grassleavesmedium = core.get_content_id("nh_nodes:grassleavesmedium")
+local c_smallgrass = core.get_content_id("nh_nodes:smallgrass")
+local c_highgrass = core.get_content_id("nh_nodes:highgrass")
 local c_rush = core.get_content_id("nh_nodes:rush")
 local c_dandelion = core.get_content_id("nh_nodes:dandelion")
 local c_micaceusfungus = core.get_content_id("nh_nodes:micaceusfungus")
@@ -32,6 +34,7 @@ local c_sand    = core.get_content_id("nh_nodes:sand")
 local c_wetsand = core.get_content_id("nh_nodes:wet_sand")
 local c_saprolite = core.get_content_id("nh_nodes:saprolite")
 local c_gneiss  = core.get_content_id("nh_nodes:gneiss")
+local c_cobblestone  = core.get_content_id("nh_nodes:cobblestone")
 local c_basalt = core.get_content_id("nh_nodes:basalt")
 local c_magma = core.get_content_id("nh_nodes:magma")
 local c_peridotite = core.get_content_id("nh_nodes:peridotite")
@@ -46,7 +49,7 @@ local c_oakwood = core.get_content_id("nh_nodes:oakwood")
 local c_oakplank = core.get_content_id("nh_nodes:oakplank")
 local c_oakdowel = core.get_content_id("nh_nodes:oakdowel")
 local c_oakchest = core.get_content_id("nh_nodes:oak_chest")
---local c_oakdoor = core.get_content_id("nh_nodes:oak_door")
+local c_oakdoor = core.get_content_id("nh_nodes:oakdoor_closed")
 local c_leaves  = core.get_content_id("nh_nodes:leaves")
 local c_appleleaves  = core.get_content_id("nh_nodes:appleleaves")
 local c_blueberryleaves = core.get_content_id("nh_nodes:blueberryleaves")
@@ -70,6 +73,8 @@ local c_obsidian = core.get_content_id("nh_nodes:obsidian")
 local c_snow    = core.get_content_id("nh_nodes:snow")
 local c_ice    = core.get_content_id("nh_nodes:ice")
 
+local c_sphere    = core.get_content_id("nh_nodes:sphere")
+
 local c_coal      = core.get_content_id("nh_nodes:coal")
 local c_copper    = core.get_content_id("nh_nodes:copper")
 local c_tin       = core.get_content_id("nh_nodes:tin")
@@ -88,6 +93,8 @@ local TENT_SEARCH_RADIUS = 256
 local ship_generated = false
 local SHIP_SEARCH_RADIUS = 256
 
+local house_generated = false
+local HOUSE_SEARCH_RADIUS = 256
 
 -----------------------------
 -- NOISES (mantidos para compatibilidade com funções antigas)
@@ -1250,6 +1257,10 @@ local function can_spawn_ship(area, data, base_pos)
     return true
 end
 
+---
+--Barco
+---
+
 local function spawn_ship(area, data, base_pos)
     local width = 5
     local depth = 8
@@ -1298,6 +1309,21 @@ local function spawn_ship(area, data, base_pos)
         end
     end
     
+    -- porta traseira (gap em dx = width-2, dz = depth-3)
+	local door_pos = {
+	    x = base_pos.x + width - 2,
+	    y = base_pos.y + 1,
+	    z = base_pos.z + depth - 3
+	}
+
+	core.after(0, function()
+	    -- confirma que o chão embaixo existe antes de colocar
+	    core.set_node(door_pos, {
+		name  = "nh_nodes:oakdoor_closed",   -- substitua pelo nome real do c_oakdoor
+		param2 = 2                   -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
+	    })
+	end)
+    
     -- parede lateral esquerda fechada (dx = 0)
     for dz = 0, depth - 3 do
         for y = 0, pillar_height do
@@ -1317,17 +1343,13 @@ end
 
 local function place_random_chest(area, data, base_pos)
     local candidates = {}
-
-    -- espaço interno: x = 1..2, z = 1..3
     for dx = 1, 2 do
         for dz = 1, 3 do
             table.insert(candidates, {dx = dx, dz = dz})
         end
     end
-
     if #candidates == 0 then return end
 
-    -- ✅ RNG determinístico baseado na posição do baú
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
     local idx = rng_chest:next(1, #candidates)
     local c = candidates[idx]
@@ -1338,13 +1360,179 @@ local function place_random_chest(area, data, base_pos)
         z = base_pos.z + c.dz
     }
 
-    local vi = area:index(chest_pos.x, chest_pos.y, chest_pos.z)
-    data[vi] = c_oakchest
-
-    -- garantir inicialização correta
+    -- Remove a linha data[vi] = c_oakchest e substitui por set_node
     core.after(0, function()
-        local node = core.get_node(chest_pos)
-        local def = core.registered_nodes[node.name]
+        core.set_node(chest_pos, {
+            name   = "nh_nodes:oak_chest",
+            param2 = 2  -- mesmo param2 da porta, virado para sul (+Z)
+        })
+        -- inicializa o baú corretamente
+        local def = core.registered_nodes["nh_nodes:oak_chest"]
+        if def and def.on_construct then
+            def.on_construct(chest_pos)
+        end
+    end)
+end
+
+local function safe_index(area, x, y, z, minp, maxp)
+    if x < minp.x or x > maxp.x or
+       y < minp.y or y > maxp.y or
+       z < minp.z or z > maxp.z then
+        return nil
+    end
+    return area:index(x, y, z)
+end
+
+
+---
+--Casa
+---
+
+-- Modelo da casa
+local function can_spawn_house(area, data, base_pos)
+    local width = 5
+    local depth = 8
+    local height = 5  -- pillar_height (3) + teto + margem
+
+    -- chão: precisa ser c_grass ou c_topgrass diretamente abaixo
+    for dx = 0, width - 1 do
+        for dz = 0, depth - 1 do
+            local vi_floor = area:index(base_pos.x + dx, base_pos.y - 1, base_pos.z + dz)
+            local floor_node = data[vi_floor]
+            if floor_node ~= c_grass and floor_node ~= c_topgrass then
+                return false
+            end
+        end
+    end
+
+    -- volume acima deve ser apenas air, grassleaves ou grassleavesmedium
+    local allowed = {
+        [c_air]                = true,
+        [c_grassleaves]        = true,
+        [c_grassleavesmedium]  = true,
+    }
+
+    for dx = 0, width - 1 do
+        for dz = 0, depth - 1 do
+            for dy = 0, height do
+                local vi = area:index(base_pos.x + dx, base_pos.y + dy, base_pos.z + dz)
+                if not allowed[data[vi]] then
+                    return false
+                end
+            end
+        end
+    end
+
+    return true
+end
+
+local function spawn_house(area, data, base_pos)
+    local width = 5
+    local depth = 8
+    local pillar_height = 3
+    local roof_y = base_pos.y + pillar_height
+
+    local corners = {
+        {0,         0},
+        {width - 1, 0},
+        {0,         depth - 1},
+        {width - 1, depth - 1},
+    }
+
+    -- piso
+    for dx = -2, width + 1 do
+        for dz = -2 , depth - 1 do
+            data[area:index(
+                base_pos.x + dx,
+                base_pos.y,
+                base_pos.z + dz
+            )] = c_oakwood
+        end
+    end
+
+    -- teto
+    for dx = 0, width + 1  do
+        for dz = 0, depth - 1 do
+            data[area:index(
+                base_pos.x + dx - 1,
+                roof_y + 1,
+                base_pos.z + dz - 1
+            )] = c_oakwood
+        end
+    end
+        -- parede traseira (dz = 0)
+    for dx = 0, width - 1 do
+        for y = 0, pillar_height do
+            data[area:index(base_pos.x + dx, base_pos.y + y, base_pos.z)] = c_cobblestone
+        end
+    end
+    
+    -- parede frontal, da porta
+    for dx = 0, width - 3 do
+        for y = 0, pillar_height do
+            data[area:index(base_pos.x + dx, base_pos.y + y, base_pos.z + depth - 3)] = c_cobblestone
+        end
+    end
+    
+    -- porta traseira (gap em dx = width-2, dz = depth-3)
+	local door_pos = {
+	    x = base_pos.x + width - 2,
+	    y = base_pos.y + 1,
+	    z = base_pos.z + depth - 3
+	}
+
+	core.after(0, function()
+	    -- confirma que o chão embaixo existe antes de colocar
+	    core.set_node(door_pos, {
+		name  = "nh_nodes:oakdoor_closed",   -- substitua pelo nome real do c_oakdoor
+		param2 = 2                   -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
+	    })
+	end)
+    
+    -- parede lateral esquerda fechada (dx = 0)
+    for dz = 0, depth - 3 do
+        for y = 0, pillar_height do
+            data[area:index(base_pos.x, base_pos.y + y, base_pos.z + dz)] = c_cobblestone
+        end
+    end
+    
+    -- parede lateral direita fechada (dx = width-1)
+    for dz = 0, depth - 3 do
+        for y = 0, pillar_height do
+            data[area:index(base_pos.x + width - 1, base_pos.y + y, base_pos.z + dz)] = c_cobblestone
+        end
+    end
+
+    -- parede do fundo (dz = depth-1) fica ABERTA — entrada da cabine 
+end
+
+local function place_random_chest(area, data, base_pos)
+    local candidates = {}
+    for dx = 1, 2 do
+        for dz = 1, 3 do
+            table.insert(candidates, {dx = dx, dz = dz})
+        end
+    end
+    if #candidates == 0 then return end
+
+    local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
+    local idx = rng_chest:next(1, #candidates)
+    local c = candidates[idx]
+
+    local chest_pos = {
+        x = base_pos.x + c.dx,
+        y = base_pos.y,
+        z = base_pos.z + c.dz
+    }
+
+    -- Remove a linha data[vi] = c_oakchest e substitui por set_node
+    core.after(0, function()
+        core.set_node(chest_pos, {
+            name   = "nh_nodes:oakchest",
+            param2 = 2  -- mesmo param2 da porta, virado para sul (+Z)
+        })
+        -- inicializa o baú corretamente
+        local def = core.registered_nodes["nh_nodes:oakchest"]
         if def and def.on_construct then
             def.on_construct(chest_pos)
         end
@@ -1607,9 +1795,14 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                         data[vi] = c_dirt
                     elseif height <= SEA_LEVEL + 7 then
                         data[vi] = c_topgrass
-                    else
-                        data[vi] = c_topgrass
-                    end
+		    else
+			-- Porções aleatórias de dirt no lugar de topgrass
+			if rng_terrain:next(1, 1000) <= 2 then  -- 0.5% de chance
+			    data[vi] = c_dirt
+			else
+			    data[vi] = c_topgrass
+			end
+		    end
                 --elseif y <= SEA_LEVEL and data[vi] == c_air then
                     --data[vi] = c_water
                 else
@@ -1826,7 +2019,7 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
             
             -- Folhas de grama (não gera em área de neve)
 	    if not inside_snow_area(x, z) and height > SEA_LEVEL + 6 and height >= minp.y and height <= maxp.y then
-	        local grassleaves_density = biome_factor < 0.4 and 0.85 or (biome_factor > 0.7 and 0.8 or 0.85)
+	        local grassleaves_density = biome_factor < 0.4 and 0.9 or (biome_factor > 0.7 and 0.8 or 0.9)
 	        if noise_maps.grassleaves_2d[index_2d] > grassleaves_density then
 		    table.insert(grassleaves_positions, {x=x, y=height+1, z=z})
 	        end
@@ -1993,6 +2186,10 @@ local function apply_decorations(area, data, decorations)
 		        data[vi] = c_rush
 		    elseif r <= 3 then  -- 0.003 = 30/10000
 		        data[vi] = c_dandelion
+		    elseif r <= 4 then  -- 0.004 = 40/10000
+		        data[vi] = c_highgrass	
+		    elseif r <= 5 then  -- 0.005 = 50/10000
+		        data[vi] = c_smallgrass		
 		    elseif r <= 250 then  -- 0.25 = 2500/10000
 		        data[vi] = c_grassleavesmedium
 		    else
@@ -2053,6 +2250,23 @@ local function generate_obsidian_towers(area, data, minp, maxp)
                     end
                 end
             end
+        end
+
+        -- Place c_sphere centered at the top of the tower
+        local sx, sy, sz = base.x + 2, TOWER_MAX_Y + 2, base.z + 2
+        local vi = safe_index(area, sx, sy, sz, minp, maxp)
+        if vi then
+            data[vi] = c_sphere
+            -- Agenda as trocas e spawns após o chunk ser finalizado
+            local pos = {x = sx, y = sy, z = sz}
+            core.after(0, function()
+                local node = core.get_node(pos)
+                if node.name == "nh_nodes:sphere" then
+                    core.set_node(pos, {name = "nh_nodes:sphere_placed"})
+                    core.add_entity(pos, "nh_nodes:sphere_anim")
+                    core.add_entity(pos, "nh_nodes:crystal_anim")
+                end
+            end)
         end
     end
 end
@@ -2129,6 +2343,37 @@ local function try_spawn_ship(area, data, minp, maxp)
     return false
 end
 
+-----------------------------
+-- FUNÇÃO DE TENTATIVA DE SPAWN DA CASA
+-----------------------------
+local function try_spawn_house(area, data, minp, maxp)
+    if hause_generated then
+        return false
+    end
+
+    if math.abs(minp.x) > HOUSE_SEARCH_RADIUS or math.abs(minp.z) > HOUSE_SEARCH_RADIUS then
+        return false
+    end
+
+    for z = minp.z, maxp.z do
+        for x = minp.x, maxp.x do
+            if (x * x + z * z) <= (HOUSE_SEARCH_RADIUS * HOUSE_SEARCH_RADIUS) then
+                for y = 22, 50 do  -- ← altitude da casa em terra firme
+                    if area:contains(x, y, z) and can_spawn_house(area, data, {x=x, y=y, z=z}) then
+                        spawn_house(area, data, {x=x, y=y, z=z})
+                        place_random_chest(area, data, {x=x, y=y+1, z=z})
+                        hause_generated = true  -- ← corrigido (estava "house_generated")
+                        return true
+                    end
+                end
+            end
+            if hause_generated then return true end
+        end
+        if hause_generated then return true end
+    end
+
+    return false
+end
 
 -----------------------------
 -- GERAÇÃO DO MUNDO (OTIMIZADA E REFATORADA)
@@ -2221,6 +2466,15 @@ core.register_on_generated(function(minp, maxp)
         vm:update_map()
     end
 
+    
+    local house_spawned = try_spawn_house(area, data, minp, maxp)
+    
+    if house_spawned then
+        -- Regrava apenas se modificou
+        vm:set_data(data)
+        vm:write_to_map()
+        vm:update_map()
+    end
     
     -- Rotaciona folhas de coqueiro e inicializa baús
     core.after(0, function()

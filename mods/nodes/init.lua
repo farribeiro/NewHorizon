@@ -3601,7 +3601,7 @@ core.register_node("nh_nodes:oakboard", {
     
     collision_box = {
         type = "fixed",
-        fixed = {-0.5, -0.5, -0.06, 0.5, 0.5, 0.06},
+        fixed = {-0.5, -0.5, -0.03, 0.5, 0.5, 0.5},
     },
     
             -- Configuração mão direita
@@ -4095,7 +4095,7 @@ core.register_node("nh_nodes:torch3", {
 core.register_node("nh_nodes:leaves", {
     description = "Folhas",
     drawtype = "liquid",
-    waving = 1,
+    waving = 3,
     tiles = {"oakleaves3.png"}, --tiles = {"folhas.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop =  {
@@ -4173,10 +4173,9 @@ core.register_node("nh_nodes:appleleaves", {
 core.register_node("nh_nodes:leaves_apple", {
     description = "Folhas com Maçã",
     drawtype = "mesh",
-    drawtype = "mesh",
     mesh = "leavesapple1.obj",
     tiles = {"appleleaves.png"},
-    waving = 1,
+    waving = 2,
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
         items = {
@@ -4185,7 +4184,7 @@ core.register_node("nh_nodes:leaves_apple", {
         }
     },
     walkable = false,
-    use_texture_alpha = 30,
+    use_texture_alpha = "clip",
     paramtype = "light",
     liquidtype = "source",
     liquid_alternative_flowing = "nh_nodes:leaves_apple",
@@ -4217,7 +4216,7 @@ core.register_node("nh_nodes:leaves_apple2", {
     drawtype = "mesh",
     mesh = "leavesapple2.obj",
     tiles = {"appleleaves.png"},
-    waving = 1,
+    waving = 2,
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
         items = {
@@ -4226,7 +4225,7 @@ core.register_node("nh_nodes:leaves_apple2", {
         }
     },
     walkable = false,
-    use_texture_alpha = 30,
+    use_texture_alpha = "clip",
     paramtype = "light",
     liquidtype = "source",
     liquid_alternative_flowing = "nh_nodes:leaves_apple2",
@@ -4258,7 +4257,7 @@ core.register_node("nh_nodes:leaves_apple3", {
     drawtype = "mesh",
     mesh = "leavesapple3.obj",
     tiles = {"appleleaves.png"},
-    waving = 1,
+    waving = 2,
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
         items = {
@@ -4368,6 +4367,229 @@ core.register_node("nh_nodes:leaves_blueberry4", {
     end,
 })
 
+core.register_node("nh_nodes:sphere", {
+    description = "Esfera\n[Desconhecido]",
+    drawtype = "mesh",
+    mesh = "ball_crystal.obj",
+    tiles = {"ball2.png"},
+
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1, not_in_creative_inventory = 0},
+
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+
+    -- Ao colocar: troca para a versão invisível e spawna entidades
+    after_place_node = function(pos, placer, itemstack)
+        core.set_node(pos, {name = "nh_nodes:sphere_placed"})
+        core.add_entity(pos, "nh_nodes:sphere_anim")
+        core.add_entity(pos, "nh_nodes:crystal_anim")
+    end,
+})
+
+-- Nó invisível (versão que fica no mundo)
+core.register_node("nh_nodes:sphere_placed", {
+    description = "Esfera (colocada)\n[Node Invisível]",
+    drawtype = "mesh",
+    mesh = "ball2.obj",
+    tiles = {"empty.png"},  -- PNG 1x1 totalmente transparente
+
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1, not_in_creative_inventory = 1},
+    light_source = 9,
+
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+
+    -- Ao quebrar: remove entidades e dropa o item original
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        for _, obj in ipairs(core.get_objects_inside_radius(pos, 0.6)) do
+            local ent = obj:get_luaentity()
+            if ent and (ent.name == "nh_nodes:sphere_anim" or ent.name == "nh_nodes:crystal_anim") then
+                obj:remove()
+            end
+        end
+        -- Dropa o item visível (com textura) em vez do invisível
+        digger:get_inventory():add_item("main", "nh_nodes:sphere")
+    end,
+
+    -- Sem drop automático (já feito manualmente acima)
+    drop = "",
+})
+
+-- Entidade só visual, com a animação do GLB
+core.register_entity("nh_nodes:sphere_anim", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "ball.glb",
+        textures = {"ball.png"},
+        visual_size = {x = 10, y = 10},
+        collisionbox = {0, 0, 0, 0, 0, 0}, -- sem colisão própria
+        physical = false,
+        is_visible = true,
+        glow = 4,
+    },
+
+    
+    on_activate = function(self, staticdata)
+        self.object:set_animation(
+            {x = 0, y = 150},
+            15,
+            0,
+            true
+        )
+     --   self.object:set_properties({
+     --       use_texture_alpha = true,
+     --       textures = {
+     --           "ball.png",
+     --           "ball.png",
+     --       },
+     --   })
+    end,  
+
+    on_step = function(self, dtime)
+    end,
+
+    get_staticdata = function(self)
+        return "saved"
+    end,
+})
+
+
+-- Entidade só visual, com a animação do GLB
+core.register_entity("nh_nodes:crystal_anim", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "crystal.glb",
+        textures = {"ball.png"},
+        visual_size = {x = 10, y = 10},
+        collisionbox = {0, 0, 0, 0, 0, 0}, -- sem colisão própria
+        physical = false,
+        is_visible = true,
+        --glow = 10,
+    },
+
+    
+    on_activate = function(self, staticdata)
+        self.object:set_animation(
+            {x = 0, y = 150},
+            0.05,
+            0,
+            true
+        )
+        self.object:set_properties({
+            use_texture_alpha = true,
+     --       textures = {
+     --           "ball.png",
+     --           "ball.png",
+     --       },
+        })
+    end,  
+
+    on_step = function(self, dtime)
+    end,
+
+    get_staticdata = function(self)
+        return "saved"
+    end,
+})
+
+
+core.register_node("nh_nodes:orb_empty", {
+    description = "Orbe Vazio\n[Gerador de Mob]",
+    drawtype = "mesh",
+    mesh = "orb.obj",
+    tiles = {"orb_node.png"},
+    inventory_image = "orbspawner.png",
+    
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    
+    walkable = false,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1},
+    --sounds = default.node_sound_wood_defaults(),
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.14, -0.5, -0.14, 0.14, 0, 0.14}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.14, -0.5, -0.14, 0.14, -0.15, 0.14}
+    },
+})
+
+-- Função auxiliar para registrar o "ovo" como node com mesh
+function register_orb_egg(mob_name, description, texture)
+    -- "nh_mob:octopus" → "octopus_orb"
+    local short_name = mob_name:match(":(.+)") .. "" -- "_orb"
+    
+    core.register_node("nh_mob:" .. short_name, {
+        description = description .. "\n[Orbe Gerador]",
+        drawtype = "mesh",
+        mesh = "orb.obj",
+        tiles = {texture or "orb_node.png"},
+        inventory_image = "orbspawner.png",
+        
+        sunlight_propagates = true,
+        use_texture_alpha = "blend",
+        walkable = false,
+        paramtype = "light",
+        paramtype2 = "facedir",
+        groups = {oddly_breakable_by_hand = 1},
+        
+        collision_box = {
+            type = "fixed",
+            fixed = {-0.14, -0.5, -0.14, 0.14, 0, 0.14}
+        },
+        selection_box = {
+            type = "fixed",
+            fixed = {-0.14, -0.5, -0.14, 0.14, -0.15, 0.14}
+        },
+        
+        -- Ao clicar com o orbe em um node, spawna o mob
+	on_place = function(itemstack, placer, pointed_thing)
+	    if pointed_thing.type ~= "node" then return end
+
+	    -- Só spawna se o player NÃO estiver agachado
+	    local controls = placer:get_player_control()
+	    if controls.sneak then
+		-- Agachado: coloca o node normalmente
+		return minetest.item_place(itemstack, placer, pointed_thing)
+	    end
+
+	    -- Em pé: spawna o mob
+	    local pos = pointed_thing.above
+	    minetest.add_entity(pos, mob_name)
+
+	    if not minetest.settings:get_bool("creative_mode") then
+		itemstack:take_item()
+	    end
+	    return itemstack
+	end,
+    })
+end
+
 core.register_node("nh_nodes:nut", {
     description = "Noz\n(Bolota)\nNutrição: +1",
     drawtype = "mesh",
@@ -4401,7 +4623,7 @@ core.register_node("nh_nodes:nut", {
 core.register_node("nh_nodes:leaves_nut", {
     description = "Folhas com noz",
     drawtype = "allfaces_optional",
-    waving = 1,
+    waving = 3,
     tiles = {"leavesnut1.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
@@ -4441,7 +4663,7 @@ core.register_node("nh_nodes:leaves_nut", {
 core.register_node("nh_nodes:leaves_nut2", {
     description = "Folhas com 2 nozes",
     drawtype = "allfaces_optional",
-    waving = 1,
+    waving = 3,
     tiles = {"leavesnut2.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
@@ -4481,7 +4703,7 @@ core.register_node("nh_nodes:leaves_nut2", {
 core.register_node("nh_nodes:leaves_nut3", {
     description = "Folhas com 3 nozes",
     drawtype = "allfaces_optional",
-    waving = 1,
+    waving = 3,
     tiles = {"leavesnut3.png"},
     groups = {snappy = 3, tree_leaves = 1},
     drop = {
@@ -5271,6 +5493,7 @@ core.register_node("nh_nodes:coconutlinked", {
     mesh = "coconutlinked.obj",
     tiles = {"CocoTexture.png"},
     
+    waving = 2,
     drop = "nh_nodes:coconut",
     
     walkable = false,
@@ -5358,6 +5581,7 @@ core.register_node("nh_nodes:palmtimber", {
     stack_max = 4, 
     drop = "nh_nodes:palmlog",
     
+    --waving = 2,
     paramtype = "light",
     paramtype2 = "facedir",
     groups = {
@@ -5414,6 +5638,7 @@ core.register_node("nh_nodes:palmstraws", {
     tiles = {"strawstimbertexture.png"},
     stack_max = 4, 
     
+    waving = 2,
     drop = {
         items = {
             {items = {"nh_nodes:palmtimber"}},
@@ -5490,6 +5715,7 @@ core.register_node("nh_nodes:palmleafstalks", {
     mesh = "TaloCoqueiro.obj",
     tiles = {"PalmLeafTexture.png"},
     
+    waving = 2,
     paramtype = "light",
     walkable = false,
     sunlight_propagates = true,
@@ -5517,7 +5743,7 @@ core.register_node("nh_nodes:palmleaf", {
     drawtype = "mesh",
     mesh = "palm_leaf.obj",
     tiles = {"PalmLeafTexture.png"},
-    
+    waving = 2,
     paramtype = "light",
     walkable = false,
     sunlight_propagates = true,
@@ -5832,7 +6058,8 @@ core.register_node("nh_nodes:water", {
     animation = {type="vertical_frames", aspect_w=16, aspect_h=16, length=10.0}},
     "agua.png"}, -- resto das faces
  
-liquid_renewable = false,
+    waving = 3,
+    liquid_renewable = false,
     use_texture_alpha = "blend",
     paramtype = "light",
     walkable = false,
@@ -9997,6 +10224,149 @@ core.register_node("nh_nodes:grassleavesmedium", {
 })
 
 ---------------------------
+-- NODE DAS FOLHAS DE GRAMA
+---------------------------
+core.register_node("nh_nodes:smallgrass", {
+    description = "Mato Baixo",
+    drawtype = "mesh",
+    mesh = "smallgrass.obj",
+    tiles = {"highgrass.png"},
+        --drawtype = "plantlike",
+        --tiles = {"grassleavesbasic2.png"},
+    
+    waving = 1,
+    
+    paramtype = "light",
+    walkable = false,
+    --buildable_to = true,
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, flammable = 2},
+    
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+    
+        -- Quando a palha é atingida com tocha
+    on_punch = function(pos, node, puncher, pointed_thing)
+        if not puncher or not puncher:is_player() then
+            return
+        end
+        
+        local wielded = puncher:get_wielded_item()
+        local wielded_name = wielded:get_name()
+        local meta = core.get_meta(pos)
+        
+        -- Se já tem chama, não faz nada
+        if meta:get_int("has_flame") == 1 then
+            return
+        end
+        
+        -- Verifica se está segurando uma tocha acesa
+        if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
+            -- Marca que tem chama
+            meta:set_int("has_flame", 1)
+            
+            -- Cria a entidade da chama
+            local obj = core.add_entity(pos, "nh_nodes:flame_entity")
+            if obj then
+                local ent = obj:get_luaentity()
+                if ent then
+                    ent._grass_pos = pos
+                end
+            end
+            
+            -- Efeito sonoro (opcional)
+            core.sound_play("fire_flint_and_steel", {
+                pos = pos,
+                gain = 0.5,
+                max_hear_distance = 8,
+            }, true)
+        end
+    end,
+    
+    -- Quando a grama for removida, remove as chamas nela
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        local objs = core.get_objects_inside_radius(pos, 0.5)
+        for _, obj in ipairs(objs) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "nh_nodes:flame_entity" then
+                obj:remove()
+            end
+        end
+    end,
+})
+
+core.register_node("nh_nodes:highgrass", {
+    description = "Mato Alto",
+    drawtype = "mesh",
+    mesh = "highgrass.obj",
+    tiles = {"highgrass.png"},
+        --drawtype = "plantlike",
+        --tiles = {"grassleavesbasic2.png"},
+    
+    waving = 1,
+    
+    paramtype = "light",
+    walkable = false,
+    --buildable_to = true,
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, flammable = 2},
+    
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 1.5, 0.5}
+    },
+    
+        -- Quando a palha é atingida com tocha
+    on_punch = function(pos, node, puncher, pointed_thing)
+        if not puncher or not puncher:is_player() then
+            return
+        end
+        
+        local wielded = puncher:get_wielded_item()
+        local wielded_name = wielded:get_name()
+        local meta = core.get_meta(pos)
+        
+        -- Se já tem chama, não faz nada
+        if meta:get_int("has_flame") == 1 then
+            return
+        end
+        
+        -- Verifica se está segurando uma tocha acesa
+        if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
+            -- Marca que tem chama
+            meta:set_int("has_flame", 1)
+            
+            -- Cria a entidade da chama
+            local obj = core.add_entity(pos, "nh_nodes:flame_entity")
+            if obj then
+                local ent = obj:get_luaentity()
+                if ent then
+                    ent._grass_pos = pos
+                end
+            end
+            
+            -- Efeito sonoro (opcional)
+            core.sound_play("fire_flint_and_steel", {
+                pos = pos,
+                gain = 0.5,
+                max_hear_distance = 8,
+            }, true)
+        end
+    end,
+    
+    -- Quando a grama for removida, remove as chamas nela
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        local objs = core.get_objects_inside_radius(pos, 0.5)
+        for _, obj in ipairs(objs) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "nh_nodes:flame_entity" then
+                obj:remove()
+            end
+        end
+    end,
+})
+
+---------------------------
 -- NODE DAS FLORES DE DENTE DE LEAO
 ---------------------------
 core.register_node("nh_nodes:dandelion", {
@@ -10423,12 +10793,12 @@ core.register_node("nh_nodes:oakdoor_closed", {
     
     selection_box = {
         type = "fixed",
-        fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.3}  -- 3 blocos de altura, fina
+        fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, -0.375}  -- 3 blocos de altura, fina
     },
     
     collision_box = {
         type = "fixed",
-        fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.3}
+        fixed = {-0.5, -0.5, -0.3, 0.5, 2.5, 0.05}
     },
     
             -- Configuração mão direita
@@ -10470,6 +10840,8 @@ core.register_node("nh_nodes:oakdoor_open", {
     groups = {choppy = 3, door = 1, not_in_creative_inventory = 1},
     drop = "nh_nodes:oakdoor_closed",
     --sounds = default.node_sound_wood_defaults(),
+    
+    walkable = false,
     
     selection_box = {
         type = "fixed",
@@ -10529,29 +10901,141 @@ end
 
 local function filter_items(search)
     build_item_cache()
-
-    if search == "" or not search then
-        return item_cache
-    end
-
+    if search == "" or not search then return item_cache end
     local result = {}
     search = search:lower()
-
     for _, name in ipairs(item_cache) do
         if name:lower():find(search, 1, true) then
             table.insert(result, name)
         end
     end
-
     return result
 end
 
 
+-- ─── Entidade Grimório ───────────────────────────────────────────────────────
+
+core.register_entity("nh_nodes:grimoire_entity", {
+    initial_properties = {
+        visual        = "mesh",
+        mesh          = "grimorie.glb",
+        textures      = {"grimorie.png"},
+        visual_size   = {x = 10, y = 10},
+        collisionbox  = {0, 0, 0, 0, 0, 0},   -- sem colisão
+        physical      = false,
+        static_save   = false,                  -- não persiste ao reiniciar
+    },
+
+    on_activate = function(self, staticdata)
+        -- Animação de abertura: frames 0 → 0.5 s  (ex.: 30 fps → frame 0 a 15)
+        self.object:set_animation(
+            {x = 0,  y = 0.5},   -- intervalo de frames
+            30,                  -- fps
+            0,                   -- frame_blend
+            false                -- loop
+        )
+        self._closing = false
+    end,
+
+    on_step = function(self, dtime)
+        if not self._closing then return end
+
+        self._close_timer = (self._close_timer or 0) + dtime
+
+        -- Espera a animação de fechamento terminar (~0.5 s) e então limpa tudo
+        if self._close_timer >= 0.6 then
+            local pos = self.object:get_pos()
+
+            -- Restaura o node original
+            if self._node_pos then
+                core.set_node(self._node_pos, {name = "nh_nodes:archion", param2 = self._node_param2 or 0})
+            end
+
+            self.object:remove()
+        end
+    end,
+})
+
+
+-- ─── Helpers de swap ─────────────────────────────────────────────────────────
+
+-- Guarda: player_name → {entity, node_pos, node_param2}
+local open_grimoires = {}
+
+local function spawn_grimoire_entity(pos, param2, player_name)
+    -- Esconde o node substituindo por air
+    local node_param2 = core.get_node(pos).param2
+    core.set_node(pos, {name = "air"})
+
+    -- Spawna a entidade no mesmo lugar
+    local obj = core.add_entity(pos, "nh_nodes:grimoire_entity")
+    if not obj then
+        -- Fallback: restaura o node se falhar
+        core.set_node(pos, {name = "nh_nodes:archion", param2 = node_param2})
+        return nil
+    end
+
+    -- Aplica a mesma rotação do node (facedir → yaw)
+    local yaw_map = {[0]=0, [1]=math.pi/2, [2]=math.pi, [3]=3*math.pi/2}
+    obj:set_yaw(yaw_map[param2 % 4] or 0)
+
+    local ent = obj:get_luaentity()
+    ent._node_pos   = vector.copy(pos)
+    ent._node_param2 = node_param2
+    ent._player_name = player_name
+
+    open_grimoires[player_name] = {
+        entity    = obj,
+        node_pos  = vector.copy(pos),
+        node_param2 = node_param2,
+    }
+
+    return obj
+end
+
+local function close_grimoire_entity(player_name)
+    local data = open_grimoires[player_name]
+    if not data then return end
+
+    local obj = data.entity
+    if not obj or not obj:get_pos() then
+        -- Entidade já sumiu; só restaura o node
+        core.set_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        open_grimoires[player_name] = nil
+        return
+    end
+
+    local ent = obj:get_luaentity()
+    if not ent then
+        obj:remove()
+        core.set_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        open_grimoires[player_name] = nil
+        return
+    end
+
+    -- Animação de fechamento: frames 0.5 → 1 s  (ex.: 30 fps → frame 15 a 30)
+    obj:set_animation(
+        {x = 0.5, y = 1},
+        30,
+        0,
+        false
+    )
+
+    ent._closing      = true
+    ent._close_timer  = 0
+    -- on_step cuidará de remover a entidade e restaurar o node
+
+    open_grimoires[player_name] = nil
+end
+
+
+-- ─── Formspec ────────────────────────────────────────────────────────────────
+
 function show_grimoire(player, page, search)
-    page = page or 1
+    page   = page   or 1
     search = search or ""
 
-    local name = player:get_player_name()
+    local name  = player:get_player_name()
     local items = filter_items(search)
 
     local max_page = math.max(1, math.ceil(#items / ITEMS_PER_PAGE))
@@ -10562,10 +11046,8 @@ function show_grimoire(player, page, search)
         "formspec_version[4]",
         "size[14,13]",
         "label[0.3,0.3;Grimório Completo de Materialização]",
-
         "field[0.3,0.9;6,0.8;search;;" .. core.formspec_escape(search) .. "]",
         "button[6.4,0.9;1.2,0.8;do_search;Buscar]",
-
         "button[8,0.9;1,0.8;prev;<]",
         "label[9.2,1.05;" .. page .. "/" .. max_page .. "]",
         "button[10.3,0.9;1,0.8;next;>]",
@@ -10573,7 +11055,6 @@ function show_grimoire(player, page, search)
 
     local x0, y0 = 0.3, 1.8
     local i = start
-
     for y = 0, GRID_H - 1 do
         for x = 0, GRID_W - 1 do
             if not items[i] then break end
@@ -10587,7 +11068,6 @@ function show_grimoire(player, page, search)
         end
     end
 
-    -- Inventário do jogador
     table.insert(fs, "list[current_player;main;1,8.6;8,2;8]")
     table.insert(fs, "list[current_player;main;1,11.3;8,1;]")
     table.insert(fs, "listring[current_player;main]")
@@ -10596,75 +11076,73 @@ function show_grimoire(player, page, search)
 end
 
 
+-- ─── Node ────────────────────────────────────────────────────────────────────
+
 core.register_node("nh_nodes:archion", {
     description = "Archion\nGrimório de Materialização\n(completo)\n[só ativa no criativo]",
-    drawtype = "mesh",
-    mesh = "grimorie.obj",
-    tiles = {"grimorie.png"},
-    
-    -- Propriedades essenciais
-    walkable = false,
-    max_stake = 1,
-    paramtype = "light",  -- Necessário para iluminação correta
-    paramtype2 = "facedir",  -- IMPORTANTE: paramtype2, não paramtype
-    
-    -- Grupos para quebra manual
-    groups = {
-        snappy = 3,
-        oddly_breakable_by_hand = 3,
-        falling_node = 1,
-    },
-    
-    -- Caixas de colisão e seleção
+    drawtype  = "mesh",
+    mesh      = "grimorie.obj",
+    tiles     = {"grimorie.png"},
+
+    walkable   = false,
+    max_stake  = 1,
+    paramtype  = "light",
+    paramtype2 = "facedir",
+
+    groups = {snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1},
+
     collision_box = {
-        type = "fixed",  -- Deve ser "fixed", não "facedir"
+        type  = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}
     },
     selection_box = {
-        type = "fixed",  -- Deve ser "fixed", não "facedir"
+        type  = "fixed",
         fixed = {-0.375, -0.5, -0.5, 0.375, -0.25, 0.5}
     },
 
-on_rightclick = function(pos, node, player, itemstack, pointed_thing)
-    local controls = player:get_player_control()
-    
-    if controls.aux1 then
-        if not core.is_creative_enabled(player:get_player_name()) then
-            core.chat_send_player(player:get_player_name(), "[O Archion só funciona no modo criativo]")
+    on_rightclick = function(pos, node, player, itemstack, pointed_thing)
+        local controls = player:get_player_control()
+
+        if controls.aux1 then
+            if not core.is_creative_enabled(player:get_player_name()) then
+                core.chat_send_player(player:get_player_name(), "[O Archion só funciona no modo criativo]")
+                return itemstack
+            end
+
+            -- Spawna a entidade e abre o formspec
+            spawn_grimoire_entity(pos, node.param2, player:get_player_name())
+            show_grimoire(player, 1, "")
             return itemstack
         end
-        show_grimoire(player, 1, "")
+
+        if itemstack and not itemstack:is_empty() then
+            local item_def = core.registered_items[itemstack:get_name()]
+            if item_def and item_def.type == "node" then
+                return core.item_place_node(itemstack, player, pointed_thing)
+            end
+            if item_def and item_def.on_place then
+                local safe_pointed = {
+                    type  = pointed_thing.type,
+                    under = pointed_thing.above,
+                    above = pointed_thing.above,
+                }
+                return item_def.on_place(itemstack, player, safe_pointed)
+            end
+        end
+
+        if itemstack:is_empty() then
+            core.chat_send_player(
+                player:get_player_name(),
+                "Preciso observar (segurar 'E' ou 'Aux1') e acessar ele (clicar 'colocar' de mãos vazias) para abrir o Grimório..."
+            )
+        end
+
         return itemstack
-    end
-    
-    if itemstack and not itemstack:is_empty() then
-        local item_def = core.registered_items[itemstack:get_name()]
-        
-        if item_def and item_def.type == "node" then
-            return core.item_place_node(itemstack, player, pointed_thing)
-        end
-        
-        if item_def and item_def.on_place then
-            local safe_pointed = {
-                type = pointed_thing.type,
-                under = pointed_thing.above,
-                above = pointed_thing.above,
-            }
-            return item_def.on_place(itemstack, player, safe_pointed)
-        end
-    end
-    
-    if itemstack:is_empty() then
-        core.chat_send_player(
-            player:get_player_name(),
-            "Preciso observar (segurar 'E' ou 'Aux1') e acessar ele (clicar 'colocar' de mãos vazias) para abrir o Grimório..."
-        )
-    end
-    
-    return itemstack
-end,
+    end,
 })
 
+
+-- ─── Recebimento de campos ───────────────────────────────────────────────────
 
 local player_state = {}
 
@@ -10673,12 +11151,17 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 
     local name = player:get_player_name()
     player_state[name] = player_state[name] or {page = 1, search = ""}
-
     local state = player_state[name]
+
+    -- Fechamento do formspec (clique em X ou pressiona Esc)
+    if fields.quit then
+        close_grimoire_entity(name)
+        return
+    end
 
     if fields.do_search then
         state.search = fields.search or ""
-        state.page = 1
+        state.page   = 1
         show_grimoire(player, state.page, state.search)
         return
     end
@@ -10696,10 +11179,10 @@ core.register_on_player_receive_fields(function(player, formname, fields)
     end
 
     for field, _ in pairs(fields) do
-        if field:sub(1,5) == "item_" then
+        if field:sub(1, 5) == "item_" then
             local index = tonumber(field:sub(6))
             local items = filter_items(state.search)
-            local item = items[index]
+            local item  = items[index]
             if item then
                 player:get_inventory():add_item("main", item)
             end
@@ -10708,6 +11191,22 @@ core.register_on_player_receive_fields(function(player, formname, fields)
     end
 end)
 
+
+-- ─── Limpeza ao deslogar ─────────────────────────────────────────────────────
+
+core.register_on_leaveplayer(function(player)
+    local name = player:get_player_name()
+    -- Fecha "na força" sem animação para não deixar entidade órfã
+    local data = open_grimoires[name]
+    if data then
+        if data.entity and data.entity:get_pos() then
+            data.entity:remove()
+        end
+        core.set_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        open_grimoires[name] = nil
+    end
+    player_state[name] = nil
+end)
 core.register_on_newplayer(function(player)
     local inv = player:get_inventory()
     

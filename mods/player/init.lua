@@ -113,7 +113,7 @@ core.register_on_joinplayer(function(player)
     -- Define a hotbar com 2 slots
     core.after(0.1, function()
         player:hud_set_hotbar_itemcount(2)
-        player:hud_set_hotbar_image("gui_hotbar2.png")
+        player:hud_set_hotbar_image("gui_hotbar3.png")
         player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
     end)
     
@@ -231,6 +231,7 @@ end
 -----------------------------
 -- SISTEMA DE AUTO-PULO
 -----------------------------
+
 local auto_jump_cooldown = {}  -- Evita pulos repetidos muito rápidos
 
 
@@ -265,7 +266,7 @@ core.register_globalstep(function(dtime)
                 else
                     -- Volta para 2 slots (customizado)
                     player:hud_set_hotbar_itemcount(2)
-                    player:hud_set_hotbar_image("gui_hotbar2.png")
+                    player:hud_set_hotbar_image("gui_hotbar3.png")
                     player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
                 end
             end
@@ -291,6 +292,7 @@ core.register_globalstep(function(dtime)
             end
         end
         
+        --[[
         -- Atualiza cooldown
         if auto_jump_cooldown[player_name] then
             auto_jump_cooldown[player_name] = auto_jump_cooldown[player_name] - dtime
@@ -374,24 +376,29 @@ core.register_globalstep(function(dtime)
 
                     
                         return node_name ~= "air" and 
-                               node_name ~= "nodes:water" and
-                               node_name ~= "nodes:lava" and
-                               node_name ~= "nodes:leaves" and
-                               node_name ~= "nodes:pebble" and
-                               node_name ~= "nodes:apple" and
-                               node_name ~= "nodes:blueberry" and
-                               node_name ~= "nodes:coconut"
+                               node_name ~= "nh_nodes:water" and
+                               node_name ~= "nh_nodes:water2" and
+                               node_name ~= "nh_nodes:lava" and
+                               node_name ~= "nh_nodes:leaves" and
+                               node_name ~= "nh_nodes:pebble" and
+                               node_name ~= "nh_nodes:apple" and
+                               node_name ~= "nh_nodes:blueberry" and
+                               node_name ~= "nh_nodes:coconut" and
+                               node_name ~= "nh_nodes:oakdoor_closed" and
+                               node_name ~= "nh_nodes:oakdoor_open"
                     end
                     
                     -- Define quais blocos permitem passagem
                     local function is_passable(node_name)
                         return node_name == "air" or 
-                               node_name == "nodes:water" or
-                               node_name == "nodes:leaves" or 
-                               node_name == "nodes:pebble" or
-                               node_name == "nodes:apple" or
-                               node_name == "nodes:blueberry" or
-                               node_name == "nodes:coconut"
+                               node_name == "nh_nodes:water" or
+                               node_name == "nh_nodes:leaves" or 
+                               node_name == "nh_nodes:pebble" or
+                               node_name == "nh_nodes:apple" or
+                               node_name == "nh_nodes:blueberry" or
+                               node_name == "nh_nodes:coconut" or
+                               node_name == "nh_nodes:oakdoor_closed" or
+                               node_name == "nh_nodes:oakdoor_open"
                     end
                     
                     -- CONDIÇÕES PARA PULAR:
@@ -413,6 +420,7 @@ core.register_globalstep(function(dtime)
                 end
             end
         end
+        ]]--
     end
 end)
 

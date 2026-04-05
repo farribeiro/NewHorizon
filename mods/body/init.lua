@@ -13,6 +13,7 @@ local armor_entities = {}
 local belt_entities = {}
 local last_belt_items = {}
 local last_armor_items = {}
+local last_sneak = {}
 
 local last_backpack_state = {}
 local body_entities = {}
@@ -48,7 +49,7 @@ local rotate_head_to_look
 core.register_entity("nh_body:player_body", {
     initial_properties = {
         visual = "mesh",
-        mesh = "character3.glb",
+        mesh = "character5.glb",
         textures = {"skin.png"},
         visual_size = {x = 1, y = 1, z = 1},
         physical = false,
@@ -658,7 +659,7 @@ local function get_armor_formspec(player_name)
         "list[current_player;armor_feet;0.5,3.8;1,1;]" ..
         
         "model[1.25,0.5;3,6;player_model;" .. 
-        "character3.glb;skin.png;0,180;false;true]" ..
+        "character5.glb;skin.png;0,180;false;true]" ..
         
         "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]" ..
         
@@ -949,10 +950,10 @@ local function apply_custom_model(player)
     -- Aplica modelo INVISÍVEL (nametag_color com alpha 0)
     player:set_properties({
         visual = "mesh",
-        mesh = "character3.glb",
+        mesh = "character5.glb",
         textures = {"blank.png"},  -- textura vazia, invisivel
         visual_size = {x = 1, y = 1, z = 1},
-        collisionbox = {-0.5, 0.0, -0.3, 0.3, 2.7, 0.3},
+        collisionbox = {-0.45, 0.0, -0.45, 0.45, 2.7, 0.45},
         stepheight = 0.6,
         eye_height = 2.5,
         --shaded = true,
@@ -967,7 +968,7 @@ local function apply_custom_model(player)
     
     -- Ajusta a câmera para ficar à frente da cabeça
     player:set_eye_offset(
-        {x = 0, y = -3, z = 3},    -- Primeira pessoa: move 5 unidades para frente (Z negativo)
+        {x = 0, y = -1, z = 3},    -- Primeira pessoa: move 3 unidades para frente (Z negativo)
         {x = 0, y = 7, z = -7}     -- Terceira pessoa
     )
     
@@ -1215,6 +1216,10 @@ core.register_globalstep(function(dtime)
         
         local name = player:get_player_name()
         local ctrl = player:get_player_control()
+        
+	if last_sneak[player_name] ~= ctrl.sneak then
+	    last_sneak[player_name] = ctrl.sneak
+	end
 
         -- BOTÃO ESQUERDO (bater)
         if ctrl.LMB then
@@ -1327,6 +1332,12 @@ core.register_globalstep(function(dtime)
                 local is_crawling = props.eye_height <= 0.7
 
                 if is_crawling then
+                
+                    player:set_eye_offset(
+			{x = 0, y = -0.5, z = 7.5},   -- ajusta para crawling
+			{x = 0, y = 7, z = -7}
+		    )
+		
                     local horizontal = {x = vel.x, y = 0, z = vel.z}
                     local speed = vector.length(horizontal)
 
@@ -1335,9 +1346,26 @@ core.register_globalstep(function(dtime)
                     else
                         set_player_animation(player, "crawling")
                     end
+                    
+                    
                 elseif ctrl.sneak and vel.x < 0.1 and vel.z < 0.1 then
                     set_player_animation(player, "sneak")
+		    --player:set_properties({
+			--collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6}
+		    --})
+                    player:set_eye_offset(
+			{x = 0, y = 8, z = 10},   -- ajusta para sneak
+			{x = 0, y = 7, z = -7}
+		    )
                 else
+                    player:set_properties({
+        		collisionbox = {-0.45, 0.0, -0.45, 0.45, 2.7, 0.45},
+        	    })
+                    player:set_eye_offset(
+                        {x = 0, y = -1, z = 3},
+                        {x = 0, y = 7, z = -7}
+                    )
+                
                     local is_moving_back = ctrl.down
                     local is_moving = ctrl.up or ctrl.left or ctrl.right
                     local horizontal = {x = vel.x, y = 0, z = vel.z}
@@ -1346,6 +1374,10 @@ core.register_globalstep(function(dtime)
                     if is_moving_back then
                         if ctrl.sneak and speed >= 0.1 then
                             set_player_animation(player, "sneak_walk_back")
+		            player:set_eye_offset(
+				{x = 0, y = 8, z = 10},   -- ajusta para sneak
+				{x = 0, y = 7, z = -7}
+			    )
                         elseif ctrl.aux1 or speed >= 4 then
                             set_player_animation(player, "run_back")
                         elseif speed < 4 and speed > 0 then
@@ -1354,12 +1386,20 @@ core.register_globalstep(function(dtime)
                     elseif is_moving then
                         if ctrl.sneak and speed >= 0.1 then
                             set_player_animation(player, "sneak_walk")
+		            player:set_eye_offset(
+				{x = 0, y = 8, z = 10},   -- ajusta para sneak
+				{x = 0, y = 7, z = -7}
+			    )
                         elseif ctrl.aux1 or speed >= 4 then
                             set_player_animation(player, "run")
                         elseif speed < 4 and speed > 0 then
                             set_player_animation(player, "walk")
                         end
                     else
+                    player:set_eye_offset(
+                        {x = 0, y = -1, z = 3},
+                        {x = 0, y = 7, z = -7}
+                    )
                         if has_item then
                             set_player_animation(player, "holding")
                         else

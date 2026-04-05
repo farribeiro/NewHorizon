@@ -106,8 +106,8 @@ mobs:spawn({
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:rat", "Orbe com Ratazana", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:rat", "Orbe com Ratazana", "orbspawner.png", 0)
+register_orb_egg("nh_mob:rat", "Orbe com Ratazana")
 
 
 -------------------------------
@@ -196,8 +196,8 @@ mobs:spawn({
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:ladybug", "Orbe com Joaninha", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:ladybug", "Orbe com Joaninha", "orbspawner.png", 0)
+register_orb_egg("nh_mob:ladybug", "Orbe com Joaninha")
 
 -------------------------------
 -- MOB 5: Grilo 
@@ -291,8 +291,8 @@ mobs:spawn({
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:cricket", "Orbe com Grilo", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:cricket", "Orbe com Grilo", "orbspawner.png", 0)
+register_orb_egg("nh_mob:cricket", "Orbe com Grilo")
 
 -------------------------------
 -- MOB 5: Cigarra 
@@ -386,7 +386,8 @@ mobs:spawn({
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:cicada", "Orbe com Cigarra", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:cicada", "Orbe com Cigarra", "orbspawner.png", 0)
+register_orb_egg("nh_mob:cicada", "Orbe com Cigarra")
 
 -------------------------------
 -- MOB 5: Vagalume 
@@ -496,8 +497,8 @@ mobs:spawn({
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:firefly", "Orbe com Vaga-lume", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:firefly", "Orbe com Vaga-lume", "orbspawner.png", 0)
+register_orb_egg("nh_mob:firefly", "Orbe com Vaga-lume")
 
 
 -------------------------------
@@ -592,7 +593,8 @@ mobs:spawn({
     max_height = 30                  
 })
 
-mobs:register_egg("nh_mob:worm", "Orbe com Minhoca", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:worm", "Orbe com Minhoca", "orbspawner.png", 0)
+register_orb_egg("nh_mob:worm", "Orbe com Minhoca")
 
 -------------------------------
 -- MOB 5: Touro 
@@ -610,6 +612,143 @@ mobs:register_mob("nh_mob:bull", {
     },
     
     description = "Touro",
+    
+    hp_min = 25,
+    hp_max = 35,
+    armor = 100,
+    
+    collisionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
+    selectionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
+    physical = true,
+    stepheight = 2,
+    fall_speed = -8,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "bull.glb",
+    textures = {"bull2.png"},
+    --rotate = 180,
+    visual_size = {x = 7.5, y = 7.5},
+    
+    -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
+    --fly = true,
+    --fly_in = {"nh_nodes:air"},  -- Pode ser uma lista!
+    
+    walk_velocity = 1,
+    run_velocity = 6,
+    
+    view_range = 8,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    
+    follow = {"nh_nodes:grassleaves"},
+
+    
+    sounds = {
+        random = "BullSound",
+        damage = "BullAngrySound",
+    },
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0.5,
+        stand_end = 0.5,
+        walk_start = 1,
+        walk_end = 5,
+        run_start = 5.25,
+        run_end = 6.25,
+        -- Animação usada ao montar (pode usar a mesma de corrida)
+        ride_start = 5.25,
+        ride_end = 6.25,
+    },
+    
+    -- MONTARIA
+    saddle = "mobs:saddle",           -- item de sela necessário
+    ride_speed = 8,                   -- velocidade montado
+    ride_acceleration = 1.0,          -- aceleração montado
+    ride_friction = 0.8,              -- fricção ao parar
+    
+    -- Offset do jogador sobre o mob (ajuste conforme o visual do touro)
+    driver_attach_at = {x = 0, y = 30, z = -5},
+    driver_eye_offset = {x = 0, y = 3, z = 0},
+    driver_scale_factor = 1,
+
+on_rightclick = function(self, clicker)
+    if not clicker:is_player() then return end
+
+    if mobs:protect(self, clicker) then return end
+    if mobs:feed_tame(self, clicker, 1, false, false) then return end
+
+    -- Se já tem alguém montado, desmonta
+    if self.driver then
+        mobs:detach(self.driver, {x=1, y=0, z=0})
+        self.driver = nil
+        return
+    end
+
+    local item = clicker:get_wielded_item()
+    local name = item:get_name()
+
+    -- Coloca a sela E já monta
+    if name == "mobs:saddle" then
+        self.saddled = true  -- flag interna
+        item:take_item()
+        clicker:set_wielded_item(item)
+        core.chat_send_player(clicker:get_player_name(), "Sela colocada!")
+        mobs:attach(self, clicker)  -- já monta na hora
+        return
+    end
+
+    -- Clicou sem sela na mão: monta se já estiver selado
+    if self.saddled then
+        mobs:attach(self, clicker)
+        return
+    end
+
+	if name == "nh_nodes:grassleaves" or "nh_nodes:grassleavesmedium" then
+	    core.chat_send_player(clicker:get_player_name(), "Você alimentou o touro! Muuumm!")
+	elseif name == "" then
+	    -- mão vazia
+	    core.chat_send_player(clicker:get_player_name(), "Você alisou o touro. hff, hff...")
+	else
+	    -- item errado
+	    core.chat_send_player(clicker:get_player_name(), "O touro não se interessa por isso.")
+	end
+end,
+})
+
+-- Spawn do touro (folhas de grama)
+mobs:spawn({
+    name = "nh_mob:bull",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:grassleaves"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 3,
+    min_height = -20,
+    max_height = 30                  
+})
+
+--mobs:register_egg("nh_mob:bull", "Orbe com Touro", "orbspawner.png", 0)
+register_orb_egg("nh_mob:bull", "Orbe com Touro")
+
+
+mobs:register_mob("nh_mob:ox", {
+    type = "animal",
+    passive = false,
+    reach = 1,
+    damage = 7,
+    attack_type = "dogfight",
+    drops = {
+        {name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4},  -- 1-4 couros
+        {name = "nh_nodes:cowmeat", chance = 1, min = 2, max = 5},  -- 2-7 carnes (sempre)
+        {name = "nh_nodes:bone", chance = 1, min = 2, max = 5},  -- 2-7 ossos (sempre)
+    },
+    
+    description = "Boi",
     
     hp_min = 25,
     hp_max = 35,
@@ -717,21 +856,7 @@ on_rightclick = function(self, clicker)
 end,
 })
 
--- Spawn do touro (folhas de grama)
-mobs:spawn({
-    name = "nh_mob:bull",
-    nodes = {"air"},
-    neighbors = {"nh_nodes:grassleaves"},
-    max_light = 15,
-    interval = 120,
-    chance = 2000,
-    active_object_count = 3,
-    min_height = -20,
-    max_height = 30                  
-})
-
-mobs:register_egg("nh_mob:bull", "Orbe com Touro", "orbspawner.png", 0)
-
+register_orb_egg("nh_mob:ox", "Orbe com Boi")
 
 -------------------------------
 -- MOB 4: Aguia (Agressivo)
@@ -924,8 +1049,8 @@ mobs:spawn({
     max_height = 50                  
 })
 
-mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
+register_orb_egg("nh_mob:eagle", "Orbe com Águia")
 
 
 -------------------------------
@@ -1119,7 +1244,8 @@ mobs:spawn({
     max_height = 50                  
 })
 
-mobs:register_egg("nh_mob:blackkite", "Orbe com Milhafre", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:blackkite", "Orbe com Milhafre", "orbspawner.png", 0)
+register_orb_egg("nh_mob:blackkite", "Orbe com Milhafre")
 
 -------------------------------
 -- MOB 4: Fenix (Agressivo)
@@ -1308,8 +1434,8 @@ mobs:spawn({
     max_height = 50                  
 })
 
-mobs:register_egg("nh_mob:phoenix", "Orbe com Fênix", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:phoenix", "Orbe com Fênix", "orbspawner.png", 0)
+register_orb_egg("nh_mob:phoenix", "Orbe com Fênix")
 
 -------------------------------
 -- MOB 1: OURIÇO (Defensivo)
@@ -1419,7 +1545,8 @@ mobs:spawn({
     max_height = 25
 })
 
-mobs:register_egg("nh_mob:ourico", "Orbe com Ouriço", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:ourico", "Orbe com Ouriço", "orbspawner.png", 0)
+register_orb_egg("nh_mob:ourico", "Orbe com Ouriço")
 
 -------------------------------
 -- MOB 1: OURIÇO SHADOW (Defensivo)
@@ -1496,7 +1623,8 @@ mobs:spawn({
     max_height = 25
 })
 
-mobs:register_egg("nh_mob:ouricoshadow", "Orbe com Ouriço Raro", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:ouricoshadow", "Orbe com Ouriço Raro", "orbspawner.png", 0)
+register_orb_egg("nh_mob:ouricoshadow", "Orbe com Ouriço Escuro")
 
 -------------------------------
 -- MOB 2: COELHO (Passivo/Tímido)
@@ -1579,7 +1707,8 @@ mobs:spawn({
     max_height = 100
 })
 
-mobs:register_egg("nh_mob:rabbit", "Orbe com Coelho", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:rabbit", "Orbe com Coelho", "orbspawner.png", 0)
+register_orb_egg("nh_mob:rabbit", "Orbe com Coelho")
 
 -------------------------------
 -- MOB 3: GALO (Agressivo)
@@ -1713,7 +1842,8 @@ mobs:spawn({
     max_height = 50
 })
 
-mobs:register_egg("nh_mob:galo", "Orbe com Galo", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:galo", "Orbe com Galo", "orbspawner.png", 0)
+register_orb_egg("nh_mob:galo", "Orbe com Galo")
 
 -------------------------------
 -- MOB 3: GALINHA (Passiva/Põe Ovos)
@@ -1897,7 +2027,8 @@ mobs:spawn({
     max_height = 50
 })
 
-mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
+register_orb_egg("nh_mob:galinha", "Orbe com Galinha")
 
 -------------------------------
 -- ITEM: OVO
@@ -2016,8 +2147,8 @@ mobs:spawn({
     max_height = -12                     -- Não spawna acima do nível do mar
 })
 
-mobs:register_egg("nh_mob:shark", "Orbe com Tubarão", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:shark", "Orbe com Tubarão", "orbspawner.png", 0)
+register_orb_egg("nh_mob:shark", "Orbe com Tubarão")
 
 
 
@@ -2999,7 +3130,10 @@ mobs:register_mob("nh_mob:octopus", {
 })
 
 
-mobs:register_egg("nh_mob:octopus", "Orbe com Polvo", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:octopus", "Orbe com Polvo", "orbspawner.png", 0)
+-- Substitua os register_egg pelos orbes com mesh:
+register_orb_egg("nh_mob:octopus",  "Orbe com Polvo")
+
 
 
 -------------------------------
@@ -3118,7 +3252,8 @@ mobs:spawn({
     max_height = 3                  
 })
 
-mobs:register_egg("nh_mob:octoskull", "Orbe com Exopolvo", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:octoskull", "Orbe com Exopolvo", "orbspawner.png", 0)
+register_orb_egg("nh_mob:exoskull", "Orbe com Exopolvo")
 
 
 -------------------------------
@@ -3222,7 +3357,9 @@ mobs:spawn({
     max_height = 1   -- -10               
 })
 
-mobs:register_egg("nh_mob:sirenia", "Orbe com Sirenia", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:sirenia", "Orbe com Sirenia", "orbspawner.png", 0)
+register_orb_egg("nh_mob:sirenia",  "Orbe com Sirenia")
+
 
 -------------------------------
 -- MOB 4: PLANARIA SLIME (Agressivo)
@@ -3240,8 +3377,8 @@ mobs:register_mob("nh_mob:slime", {
     hp_max = 20,
     armor = 100,
     
-    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
-    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
+    collisionbox = {-0.2, 0, -0.2, 0.2, 0.4, 0.2},
+    selectionbox = {-0.2, 0, -0.2, 0.2, 0.4, 0.2},
     physical = true,
     stepheight = 3,           -- Consegue subir no player (importante!)
     fall_speed = -4,
@@ -3257,15 +3394,39 @@ mobs:register_mob("nh_mob:slime", {
     -- BRILHO NOS OLHOS
     glow = 5,  -- Intensidade de 0 a 14 (14 = mais brilhante)
     
-    after_activate = function(self, staticdata, def, dtime)
-        self.object:set_properties({
-            use_texture_alpha = true,
+after_activate = function(self, staticdata, def, dtime)
+    self.object:set_properties({
+        use_texture_alpha = true,
         textures = {
-            "planaria_slime2.png",  -- camada externa semi-transparente
-            "planaria_slime2.png",                -- camada interna opaca
+            "planaria_slime2.png",
+            "planaria_slime2.png",
         },
-        })
-    end,
+    })
+    
+    -- Procura jogador próximo e já começa a atacar
+    local pos = self.object:get_pos()
+    local nearest_player = nil
+    local nearest_dist = self.view_range or 7
+    
+    for _, player in ipairs(minetest.get_connected_players()) do
+        local dist = vector.distance(pos, player:get_pos())
+        if dist < nearest_dist then
+            nearest_dist = dist
+            nearest_player = player
+        end
+    end
+    
+    if nearest_player then
+        minetest.after(0.4, function()
+            if self.object and self.object:is_valid() then
+                self.object:punch(nearest_player, 1.0, {
+                    full_punch_interval = 1.0,
+                    damage_groups = {fleshy = 1},
+                }, nil)
+            end
+        end)
+    end
+end,
 
     walk_velocity = 1,
     run_velocity = 2,
@@ -3318,8 +3479,8 @@ mobs:spawn({
     max_height = -5                 
 })
 
-mobs:register_egg("nh_mob:slime", "Orbe com Slime", "orbspawner.png", 0)
-
+--mobs:register_egg("nh_mob:slime", "Orbe com Limu Pequeno", "orbspawner.png", 0)
+register_orb_egg("nh_mob:slime",    "Orbe com Limu Pequeno")
 
 -- MOB 4: PLANARIA SLIME2 (Agressivo)
 -------------------------------
@@ -3336,8 +3497,20 @@ mobs:register_mob("nh_mob:slime2", {
     hp_max = 20,
     armor = 100,
     
-    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
-    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
+    on_die = function(self, pos)
+        minetest.after(0.1, function()
+            -- Spawna 6 slime normal
+            minetest.add_entity(pos, "nh_mob:slime")
+            minetest.add_entity(pos, "nh_mob:slime")
+            minetest.add_entity(pos, "nh_mob:slime")
+            minetest.add_entity(pos, "nh_mob:slime")
+            minetest.add_entity(pos, "nh_mob:slime")
+            minetest.add_entity(pos, "nh_mob:slime")
+        end)
+    end,
+    
+    collisionbox = {-0.35, 0, -0.35, 0.35, 0.7, 0.35},
+    selectionbox = {-0.35, 0, -0.35, 0.35, 0.7, 0.35},
     physical = true,
     stepheight = 4,           -- Consegue subir no player (importante!)
     fall_speed = -4,
@@ -3356,15 +3529,39 @@ mobs:register_mob("nh_mob:slime2", {
     --use_texture_alpha = "blend",  -- Tente "blend" em vez de true -> use_texture_alpha = true,  -- Habilita transparência
     --backface_culling = true,   -- Renderiza ambos os lados das faces
     
-    after_activate = function(self, staticdata, def, dtime)
-        self.object:set_properties({
-            use_texture_alpha = true,
+after_activate = function(self, staticdata, def, dtime)
+    self.object:set_properties({
+        use_texture_alpha = true,
         textures = {
-            "planaria_slime2.png",  -- camada externa semi-transparente
-            "planaria_slime2.png",                -- camada interna opaca
+            "planaria_slime2.png",
+            "planaria_slime2.png",
         },
-        })
-    end,
+    })
+    
+    -- Procura jogador próximo e já começa a atacar
+    local pos = self.object:get_pos()
+    local nearest_player = nil
+    local nearest_dist = self.view_range or 7
+    
+    for _, player in ipairs(minetest.get_connected_players()) do
+        local dist = vector.distance(pos, player:get_pos())
+        if dist < nearest_dist then
+            nearest_dist = dist
+            nearest_player = player
+        end
+    end
+    
+    if nearest_player then
+        minetest.after(0.4, function()
+            if self.object and self.object:is_valid() then
+                self.object:punch(nearest_player, 1.0, {
+                    full_punch_interval = 1.0,
+                    damage_groups = {fleshy = 1},
+                }, nil)
+            end
+        end)
+    end
+end,
 
     walk_velocity = 1,
     run_velocity = 2,
@@ -3417,7 +3614,8 @@ mobs:spawn({
     max_height = -5                 
 })
 
-mobs:register_egg("nh_mob:slime2", "Orbe com Slime", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:slime2", "Orbe com Limu Médio", "orbspawner.png", 0)
+register_orb_egg("nh_mob:slime2",    "Orbe com Limu Médio")
 
 -- MOB 4: PLANARIA SLIME3 (Agressivo)
 -------------------------------
@@ -3434,8 +3632,21 @@ mobs:register_mob("nh_mob:slime3", {
     hp_max = 20,
     armor = 100,
     
-    collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
-    selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
+on_die = function(self, pos)
+    minetest.after(0.1, function()
+        -- Spawna 4 slime2
+        minetest.add_entity(pos, "nh_mob:slime2")
+        minetest.add_entity(pos, "nh_mob:slime2")
+        minetest.add_entity(pos, "nh_mob:slime2")
+        minetest.add_entity(pos, "nh_mob:slime2")
+        -- Spawna 2 slime normal
+        minetest.add_entity(pos, "nh_mob:slime")
+        minetest.add_entity(pos, "nh_mob:slime")
+    end)
+end,
+    
+    collisionbox = {-0.625, 0, -0.625, 0.625, 1.25, 0.625},
+    selectionbox = {-0.625, 0, -0.625, 0.625, 1.25, 0.625},
     physical = true,
     stepheight = 4,           -- Consegue subir no player (importante!)
     fall_speed = -4,
@@ -3454,15 +3665,39 @@ mobs:register_mob("nh_mob:slime3", {
     --use_texture_alpha = "blend",  -- Tente "blend" em vez de true -> use_texture_alpha = true,  -- Habilita transparência
     --backface_culling = true,   -- Renderiza ambos os lados das faces
     
-    after_activate = function(self, staticdata, def, dtime)
-        self.object:set_properties({
-            use_texture_alpha = true,
+after_activate = function(self, staticdata, def, dtime)
+    self.object:set_properties({
+        use_texture_alpha = true,
         textures = {
-            "planaria_slime2.png",  -- camada externa semi-transparente
-            "planaria_slime2.png",                -- camada interna opaca
+            "planaria_slime2.png",
+            "planaria_slime2.png",
         },
-        })
-    end,
+    })
+    
+    -- Procura jogador próximo e já começa a atacar
+    local pos = self.object:get_pos()
+    local nearest_player = nil
+    local nearest_dist = self.view_range or 7
+    
+    for _, player in ipairs(minetest.get_connected_players()) do
+        local dist = vector.distance(pos, player:get_pos())
+        if dist < nearest_dist then
+            nearest_dist = dist
+            nearest_player = player
+        end
+    end
+    
+    if nearest_player then
+        minetest.after(0.2, function()
+            if self.object and self.object:is_valid() then
+                self.object:punch(nearest_player, 1.0, {
+                    full_punch_interval = 1.0,
+                    damage_groups = {fleshy = 1},
+                }, nil)
+            end
+        end)
+    end
+end,
 
     walk_velocity = 1,
     run_velocity = 2,
@@ -3515,12 +3750,110 @@ mobs:spawn({
     max_height = -10                 
 })
 
-mobs:register_egg("nh_mob:slime3", "Orbe com Slime", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:slime3", "Orbe com Limu Grande", "orbspawner.png", 0)
+register_orb_egg("nh_mob:slime3",    "Orbe com Limu Grande")
+
 
 -------------------------------
 -- MOB 4: VULTO / VISAGE (Agressivo)
 -------------------------------
 mobs:register_mob("nh_mob:visage", {
+    type = "monster",
+    passive = false,
+    reach = 1,
+    damage = 5,
+    attack_type = "dogfight",
+    
+    description = "Vulto\n[Fenômeno]",
+    
+    hp_min = 1,
+    hp_max = 1,
+    armor = 100,
+    
+    collisionbox = {-0.25, -2, -0.2, 0.3, 0.4, 0.2},
+    selectionbox = {-0.5, -2, -0.2, 0.5, 0.4, 0.2},
+    physical = true,
+    stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -4,
+    fall_damage = 0,
+    floats = 3,
+    
+    visual = "mesh",
+    mesh = "vulto.obj",
+    textures = {"vulto3.png"}, --vulto.png^[opacity:200
+    rotate = 180,
+    visual_size = {x = 2, y = 2},
+    
+    
+    -- IMPORTANTE: Propriedades para manter na água
+    fly = true,               -- Permite "voar" na água
+    fly_in = "air",   -- Voa no ar
+    
+    walk_velocity = 1,
+    run_velocity = 4,
+    
+    view_range = 16,
+    water_damage = 2,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,         
+    
+    animation = {
+        speed_normal = 15,
+        stand_start = 0,
+        stand_end = 20,
+        walk_start = 21,
+        walk_end = 40,
+    },
+    
+    follow = {"nh_nodes:torch2"},
+    
+    on_die = function(self, pos)
+        minetest.after(0.1, function()
+            local obj = minetest.add_entity(pos, "nh_mob:visage2")
+        end)
+    end,
+    
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            if name == "nh_nodes:torch2" then
+                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+            else
+                core.chat_send_player(clicker:get_player_name(), "...")
+            end
+        end
+    end,
+    
+    sounds = {
+        random = "vulto_som",
+        damage = "vulto_hurt",
+    },
+})
+
+-- Spawn do vulto (fundo de cavernas escuras)
+mobs:spawn({
+    name = "nh_mob:visage",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:gneiss", "nh_nodes:water"},
+    max_light = 1,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 2,
+    min_height = -50,
+    max_height = -20                  
+})
+
+--mobs:register_egg("nh_mob:visage", "Orbe com Vulto", "orbspawner.png", 0)
+register_orb_egg("nh_mob:visage",    "Orbe com Vulto")
+
+
+-------------------------------
+-- MOB 4: VULTO / VISAGE (Agressivo)
+-------------------------------
+mobs:register_mob("nh_mob:visage2", {
     type = "monster",
     passive = false,
     reach = 1,
@@ -3550,15 +3883,37 @@ mobs:register_mob("nh_mob:visage", {
     -- BRILHO NOS OLHOS
     glow = 14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
     
-    after_activate = function(self, staticdata, def, dtime)
-        self.object:set_properties({
-            use_texture_alpha = true,
-        textures = {
-            "vulto2.png",  -- camada externa semi-transparente
-            --"planaria_slime2.png",                -- camada interna opaca
-        },
-        })
-    end,
+after_activate = function(self, staticdata, def, dtime)
+    self.object:set_properties({
+        use_texture_alpha = true,
+        textures = {"vulto2.png"},
+    })
+    
+    -- Procura o jogador mais próximo e simula um soco dele no mob
+    local pos = self.object:get_pos()
+    local nearest_player = nil
+    local nearest_dist = 20  -- só considera jogadores em até 20 blocos
+    
+    for _, player in ipairs(minetest.get_connected_players()) do
+        local dist = vector.distance(pos, player:get_pos())
+        if dist < nearest_dist then
+            nearest_dist = dist
+            nearest_player = player
+        end
+    end
+    
+    if nearest_player then
+        -- Pequeno delay para o mob terminar de spawnar antes do punch
+        minetest.after(0.2, function()
+            if self.object:is_valid() then
+                self.object:punch(nearest_player, 1.0, {
+                    full_punch_interval = 1.0,
+                    damage_groups = {fleshy = 1},  -- 1 de dano simbólico
+                }, nil)
+            end
+        end)
+    end
+end,
     
     -- IMPORTANTE: Propriedades para manter na água
     fly = true,               -- Permite "voar" na água
@@ -3602,20 +3957,7 @@ mobs:register_mob("nh_mob:visage", {
     },
 })
 
--- Spawn do vulto (fundo de cavernas escuras)
-mobs:spawn({
-    name = "nh_mob:visage",
-    nodes = {"air"},
-    neighbors = {"nh_nodes:gneiss", "nh_nodes:water"},
-    max_light = 1,
-    interval = 120,
-    chance = 2000,
-    active_object_count = 2,
-    min_height = -50,
-    max_height = -20                  
-})
 
-mobs:register_egg("nh_mob:visage", "Orbe com Vulto", "orbspawner.png", 0)
 
 
 
@@ -3641,14 +3983,17 @@ mobs:register_mob("nh_mob:dopel", {
     fall_damage = 0,
     floats = 3,
     
+    despawn_by_day = false,
+    remove_far = false,
+    
     visual = "mesh",
-    mesh = "character2.glb",
+    mesh = "character3.glb",
     textures = {"skin.png"},
     --rotate = 180,
     visual_size = {x = 1, y = 1},
     
     -- BRILHO NOS OLHOS
-    glow = -14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    --glow = -14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
     
     -- IMPORTANTE: Propriedades para manter na água
     --fly = true,               -- Permite "voar" na água
@@ -3669,19 +4014,25 @@ mobs:register_mob("nh_mob:dopel", {
         stand_end = 1,
         walk_start = 1,
         walk_end = 2,
+        -- ANIMAÇÃO DE ATAQUE:
+        punch_start = 11.5,    -- Frame inicial do ataque
+        punch_end = 12,      -- Frame final do ataque
     },
     
-    follow = {"nh_nodes:torch2"},
+    -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
+    -- O seguimento real será feito pelo do_custom abaixo
+    follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
     
+    -- ✅ RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            
-            if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+
+            if name == "" then
+                core.chat_send_player(clicker:get_player_name(), "Quem é você? Por que se parece comigo?!")
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                core.chat_send_player(clicker:get_player_name(), "Isso que você tá segurando é meu!")  
             end
         end
     end,
@@ -3702,20 +4053,21 @@ mobs:register_mob("nh_mob:dopel", {
 	end,	
 })
 
--- Spawn do vulto (fundo de cavernas escuras)
+-- Spawn do dopel (casas, blocos de madeiras)
 mobs:spawn({
     name = "nh_mob:dopel",
     nodes = {"air"},
-    neighbors = {"nh_nodes:obsidian"},
-    max_light = 15,
-    interval = 120,
-    chance = 2000,
+    neighbors = {"nh_nodes:oakwood"},
+    max_light = 14,
+    interval = 30,
+    chance = 20,
     active_object_count = 1,
     min_height = -50,
-    max_height = 40                  
+    max_height = 50                  
 })
 
-mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
+--mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
+register_orb_egg("nh_mob:dopel", "Orbe com Dopel")
 
 -------------------------------
 -- LOGS FINAIS

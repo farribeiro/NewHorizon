@@ -8,7 +8,7 @@
 ## World of Mystery
 
   <a href="https://www.minetest.net/">
-    <img src="https://img.shields.io/badge/Minetest-5.0+-blue?logo=minetest">
+    <img src="https://img.shields.io/badge/Minetest-5.5+-blue?logo=minetest">
   </a>
   <img src="https://img.shields.io/badge/version-prealpha-red">
 
