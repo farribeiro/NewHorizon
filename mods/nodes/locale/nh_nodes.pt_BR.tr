@@ -1,0 +1,297 @@
+# textdomain: nh_nodes
+
+2x2 Grid=Grade 2x2
+3x3 Grid=Grade 3x3
+Tool=Usar
+Produces=Produz
+Single=Único
+All=Todos
+
+
+2x2 Craft on the Grass=Produção 2x2 na Grama
+2x2 Craft on the Lawn=Produção 2x2 no Gramado
+2x2 Craft on the Dirt=Produção 2x2 na Terra
+2x2 Craft on the Sand=Produção 2x2 na Areia
+2x2 Craft on the Wet Sand=Produção 2x2 na Areia Molhada
+2x2 Craft on the Gneiss=Produção 2x2 no Gnaisse
+
+3x3 Furnace=Fornalha 3x3
+3x3x3 Advanced Bench=Bancada Avançada 3x3x3
+
+Water=Água
+Flowing Water=Água Corrente
+Fresh Water=Água Doce
+Flowing Fresh Water=Água Doce Corrente
+Snow=Neve
+Avalanche=Avalanche
+Ice=Gelo
+
+Dirt=Terra
+Wet Dirt=Terra Molhada
+Tilled Dirt=Terra Arada
+Wet Tilled Dirt=Terra Arada Irrigada
+Grass=Grama
+Lawn=Gramado
+Sand=Areia
+Wet Sand=Areia molhada
+Saprolite=Saprólito
+Basalt=Basalto
+Gneiss=Gnaisse
+
+Flowing Lava=Lava Corrente
+
+Cobblestone=Pedregulho
+
+Charcoal=Carvão Vegetal
+Smaller Charcoal=Carvão Vegetal Menor
+Black Coal=Hulha
+[Coal Ore]=[Carvão Mineral]
+Coal Nugget=Pedra de Carvão Mineral
+Charcoal Nugget=Pedra de Carvão Vegetal
+
+Chalcopyrite=Calcopirita
+[Copper Ore]=[Minério de Cobre]
+Copper Nugget=Pepita de Cobre
+Copper Ingot=Lingote de Cobre
+
+Cassiterite=Cassiterita
+[Tin Ore]=[Minério de Estanho]
+Tin Nugget=Pepita de Estanho
+Tin Ingot=Lingote de Estanho
+
+Pyrite=Pirita
+[Iron Ore]=[Minério de Ferro]
+Iron Nugget=Pepita de Ferro
+Iron Ingot=Lingote de Ferro
+
+Garnierite=Garnierita
+[Nickel Ore]=[Minério de Níquel]
+
+Pyrolusite=Pirolusita
+[Manganese Ore]=[Minério de Manganês]
+
+Chromite=Cromita
+[Chromium Ore]=[Minério de Cromo]
+
+Obsidian=Obsidiana
+Peridotite=Peridotito
+Bridgmanite=Bridgmanita
+Ruborite=Ruborita
+
+Grass Leaves=Folhas de Grama
+[Small]=[Baixa]
+[Medium]=[Média]
+
+Tall Grass=Mato Alto
+Short Grass=Mato Baixo
+
+Dandelion=Dente-de-leão
+Rush=Junco
+Micaceus Fungus=Cogumelo Micaceus
+Fly Agaric Fungus=Cogumelo Agário-das-Moscas
+
+Paper=Papel
+I think I need =Acho que preciso de 
+a feather in the hotbar and an ink bottle in the inventory to write.=uma pena na hotbar e um frasco de tinta no inventário para escrever.
+a feather in the hotbar to write.=uma pena na hotbar para escrever.
+an ink bottle in the inventory to write.=um frasco de tinta no inventário para escrever.
+Write on the Paper:=Escrever no Papel:
+Save=Salvar
+Cancel=Cancelar
+Writed Paper=Papel Escrito
+Blank Paper=Papel em Branco
+Text saved on the page!=Texto salvo na página!
+
+Oak Timber=Tronco de Carvalho
+Oak Log=Tora de Carvalho
+Oak Resin=Goma de Carvalho
+Oak Leaves=Folhas de Carvalho
+
+Oak Wood=Madeira de Carvalho
+Oak Plank=Prancha de Carvalho
+Oak Board=Tábua de Carvalho
+Oak Dowel=Tarugo de Carvalho
+Oak Door=Porta de Carvalho
+(Open)=(Aberta)
+Oak Chest=Baú de Carvalho
+Lost Oak Chest=Baú de Carvalho Perdido
+[with items]=[com itens]
+Day 1: I found this abandoned place. It seems someone lived here a long time ago.=Dia 1: Encontrei este lugar abandonado. Parece que alguém viveu aqui há muito tempo atrás.
+Day 15: Supplies are running out. I need to find a way out before it's too late.=Dia 15: Os suprimentos estão acabando. Preciso encontrar uma saída antes que seja tarde demais.
+Day 30: I heard strange sounds during the night. I'm not alone here...=Dia 30: Ouvi sons estranhos durante a noite. Não estou sozinho aqui...
+
+Acorn=Bolota
+(Nut)=(Noz)
+Nutrition: +1=Nutrição: +1
+Leaves with Nut=Folhas com Noz
+Leaves with 2 Nuts=Folhas com 2 Nozes
+Leaves with 3 Nuts=Folhas com 3 Nozes
+
+Torch=Tocha
+Torch Lit=Tocha Acesa
+Torch Extinguished=Tocha Apagada
+
+Apple Timber=Tronco de Macieira
+Apple Tree Leaves=Folhas de Macieira
+Leaves with Apple=Folhas com Maçã
+Leaves with 2 Apples=Folhas com 2 Maçãs
+Leaves with 3 Apples=Folhas com 3 Maçãs
+Apple=Maçã
+Nutrition: +2=Nutrição: +2
+
+Blueberry Leaves=Folhas de Mirtilo
+Leaves with 4 Blueberries=Folhas com 4 Mirtilos
+Blueberry=Mirtilo
+
+Stick=Graveto
+Uses: 5=Usos: 5
+Fallen stick=Graveto caído
+
+Oak Branch=Ramo de Carvalho
+Limb=Galho
+Uses: 10=Usos: 10
+
+Pine Timber=Tronco de Pinheiro
+Pine Log=Tora de Pinheiro
+Pine Leaves=Folhas de Pinheiro
+
+Pine Wood=Madeira de Pinheiro
+
+Pine Raft=Jangada de Pinheiro
+Rowing=Remo
+
+Obsidian Sword=Espada de Obsidiana
+Damage: +6=Dano: +6
+
+Basic Belt=Cinto Básico
+Backpack Chest=Mochila Baú
+Copper Helmet=Elmo de Cobre
+Copper Chestplate=Peitoral de Cobre
+Copper Fauld=Escarcelas de Cobre
+Copper Leggings=Calça de Cobre
+
+Like Glove=Luva Legal
+Point Glove=Luva Apontar
+
+Pebble=Seixo
+White Pebble=Seixo Branco
+Obsidian Pebble=Seixo de Obsidiana
+[Throwable]=[Arremessável]
+Damage: +1=Dano: +1
+(Throw: Q / drop)=(Arremesso: Q / dropar)
+
+Chipped Stone=Pedra Lascada
+Obsidian Blade=Lâmina de Obsidiana
+
+Bone=Osso
+Chicken Egg=Ovo de Galinha
+Fried Egg=Ovo Frito
+(Chicken Egg)=(Ovo de Galinha)
+Nutrition: +4=Nutrição: +4
+
+Worm=Minhoca
+Limu=Limu
+Cricket=Grilo
+Chicken=Galinha
+Bull=Touro
+[collectible]=[colecionável]
+
+Raw Chicken=Frango Cru
+Roast Chicken=Frango Assado
+Nutrition: +6=Nutrição: +6
+
+Raw Beef=Bife Cru
+Nutrition: +3=Nutrição: +3
+Roast Beef=Bife Assado
+Bull Fur=Pele de Touro
+
+Ink Sack=Bolsa de Tinta
+Portion: 1=Porção: 1
+
+Bottle=Frasco
+Bottle with Message=Frasco com Mensagem
+[Floating Item]=[Item Flutuante]
+Bottle with Firefly=Frasco com Vaga-lume
+Bottle with Ink=Frasco com Tinta
+
+Palm Trunk=Tronco de Coqueiro
+Palm Log=Tora de Coqueiro
+Palm Trunk with Straws=Tronco de Coqueiro com Palhas
+Palm Leaves Stalks=Talos de Coqueiro
+Palm Leaf=Folha de Coqueiro
+Palm Straw=Palha de Coqueiro
+Fixed Coconut=Coco Fixo
+Coconut=Coco
+
+Campfire Tinder=Isca de fogueira
+Oak Firewood=Lenha de Carvalho
+Firewood on the Campfire 1/4=Lenha na Fogueira 1/4
+Firewood on the Campfire 2/4=Lenha na Fogueira 2/4
+Firewood on the Campfire 3/4=Lenha na Fogueira 3/4
+Campfire=Fogueira
+
+Oak Spinningtop=Pião de Carvalho
+Pine Spinningtop=Pião de Pinheiro
+Palm Spinningtop=Pião de Coqueiro
+[Battle Toy]=[Brinquedo de Batalha]
+
+Stone Axe Head=Cabeça de Machado de Pedra
+Stone Pickaxe Head=Cabeça de Picareta de Pedra
+Stone Hoe Head=Cabeça de Enxada de Pedra
+Stone Adze Head=Cabeça de Enxó de Pedra
+Rusty Iron Sword=Espada de Ferro Enferrujado
+Stone Axe=Machado de Pedra
+Stone Pickaxe=Picareta de Pedra
+Stone Adze=Enxó de Pedra
+Stone Hoe=Enxada de Pedra
+Chipped Stone Knife=Faca de Pedra Lascada
+Obsidian Knife=Faca de Obsidiana
+Damage: +2=Dano: +2
+Damage: +3=Dano: +3
+Damage: +4=Dano: +4
+Reach: +1=Alcance: +1
+Reach: +2=Alcance: +2
+Reach: +3=Alcance: +3
+Uses: 10=Usos: 10
+Uses: 15=Usos: 15
+
+Production Bench=Bancada de Produção
+Advanced Bench=Bancada Avançada
+
+Furnace=Fornalha
+
+I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something...=Preciso observar (segurar 'E' ou 'Aux1') e alcançar o chão (clicar 'colocar' de mãos vazias) pra tentar produzir alguma coisa...
+
+I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to open...=Preciso observar (segurar 'E' ou 'Aux1') e alcançar o chão (clicar 'colocar' de mãos vazias) pra abrir...
+
+Sphere of Vertices=Esfera dos Vértices
+Bubble of Vertices=Bolha dos Vértices
+[Unknown]=[Desconhecido]
+
+Orb=Orbe
+(Empty)=(Vazio)
+[Mob Catcher]=[Capturador de Mobs]
+[Mob Spawner]=[Liberador de Mobs]
+
+Archion=Archion
+Grimoire of Materialization=Grimório de Materialização
+(completed)=(completo)
+[only active in creative mode]=[só ativa no criativo]
+Complete Materialization Grimoire=Grimório Completo de Materialização
+Search=Buscar
+
+--- THE NEW HORIZON ---=--- O NOVO HORIZONTE ---
+General guide:=Guia geral:
+Collect pebbles on the ground to craft a tool=Colete seixos no chão para produzir uma ferramenta
+Some pebbles create sparks when struck together=Alguns seixos criam faíscas ao bater um no outro
+Try to make fire by spreading a spark onto nearby material=Tente produzir fogo espalhando faísca em algum material próximo
+Light torches by using them on fire=Acenda tochas usando elas em algum fogo
+Activate your mind (Aux1 / E) and touch ground blocks to idealize crafts=Ative a sua mente (Aux1 / E) e toque em blocos do chão para idealizar produções
+Crafts do not depend on material arrangement, only quantities=As produções não dependem da disposição dos materiais, só quantidades
+Check the other pages if in doubt=Confira as outras páginas em caso de dúvida
+There are hidden chests around the world, but don't expect great rewards=Há baús escondidos pelo mundo, mas não espere grandes recompensas\n
+They say there is a lost book called Archion that can grant everything this world has to offer=Dizem haver de um livro perdido chamado Archion que pode dar tudo o que esse mundo tem a oferecer
+Someone could have summoned the book using their unlimited creative power by saying: '/grantme all' and '/giveme nh_nodes:archion'=Alguém teria invocado o livro usando o seu poder criativo ilimitado entoando: '/grantme all' e '/giveme nh_nodes:archion'
+According to legend, there are also creatures that only appear in specific locations=Segundo a lenda, há também criaturas que só surgem em localidades específicas
+Some tried to escape, but couldn't — this world seems to have no limits.=Alguns tentaram fugir, mas não conseguiram, esse mundo não parece ter limites.
+Good luck...=Boa sorte...

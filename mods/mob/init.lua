@@ -15,6 +15,8 @@ local function log(msg)
     end
 end
 
+local S = minetest.get_translator("nh_mob")
+
 --mobs:set_spawn_setting("spawn", true)
 --mobs:set_spawn_setting("remove_far", false)
 
@@ -28,7 +30,7 @@ mobs:register_mob("nh_mob:rat", {
     damage = 2,
     attack_type = "dogfight",
     
-    description = "Ratazana",
+    description = S("Rat"),
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -80,9 +82,9 @@ mobs:register_mob("nh_mob:rat", {
             local name = item:get_name()
             
             if name == "nh_nodes:blueberry" then
-                core.chat_send_player(clicker:get_player_name(), "A ratazana quer comida!")
+                core.chat_send_player(clicker:get_player_name(), S("The rat wants food!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "Quick, quick...")
+                core.chat_send_player(clicker:get_player_name(), S("Quick, quick..."))
             end
         end
     end,
@@ -107,7 +109,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:rat", "Orbe com Ratazana", "orbspawner.png", 0)
-register_orb_egg("nh_mob:rat", "Orbe com Ratazana")
+register_orb_egg("nh_mob:rat", S("Orb with Rat"))
 
 
 -------------------------------
@@ -120,7 +122,7 @@ mobs:register_mob("nh_mob:ladybug", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Joaninha",
+    description = S("Ladybug"),
     
     hp_min = 1,
     hp_max = 3,
@@ -168,9 +170,9 @@ mobs:register_mob("nh_mob:ladybug", {
             local name = item:get_name()
             
             if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), "A joaninha quer folhas!")
+                core.chat_send_player(clicker:get_player_name(), S("The ladybug wants leaves!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+                core.chat_send_player(clicker:get_player_name(), S("bzz, bzz..."))
             end
         end
     end,
@@ -197,7 +199,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:ladybug", "Orbe com Joaninha", "orbspawner.png", 0)
-register_orb_egg("nh_mob:ladybug", "Orbe com Joaninha")
+register_orb_egg("nh_mob:ladybug",  S("Orb with Ladybug"))
 
 -------------------------------
 -- MOB 5: Grilo 
@@ -209,7 +211,7 @@ mobs:register_mob("nh_mob:cricket", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Grilo",
+    description =  S("Cricket"),
     
     hp_min = 1,
     hp_max = 3,
@@ -263,7 +265,7 @@ mobs:register_mob("nh_mob:cricket", {
             local name = item:get_name()
             
             if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), "O grilo comeu as folhas!")
+                core.chat_send_player(clicker:get_player_name(), S("The cricket ate the leaves!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "cri-cri, cri-cri...")
             end
@@ -292,7 +294,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:cricket", "Orbe com Grilo", "orbspawner.png", 0)
-register_orb_egg("nh_mob:cricket", "Orbe com Grilo")
+register_orb_egg("nh_mob:cricket",  S("Orb with Cricket"))
 
 -------------------------------
 -- MOB 5: Cigarra 
@@ -304,7 +306,7 @@ mobs:register_mob("nh_mob:cicada", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Cigarra",
+    description = S("Cicada"),
     
     hp_min = 1,
     hp_max = 3,
@@ -387,7 +389,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:cicada", "Orbe com Cigarra", "orbspawner.png", 0)
-register_orb_egg("nh_mob:cicada", "Orbe com Cigarra")
+register_orb_egg("nh_mob:cicada",  S("Orb with Cicada"))
 
 -------------------------------
 -- MOB 5: Vagalume 
@@ -399,7 +401,7 @@ mobs:register_mob("nh_mob:firefly", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Vagalume",
+    description = S("Firefly"),
     
     hp_min = 1,
     hp_max = 3,
@@ -472,7 +474,7 @@ mobs:register_mob("nh_mob:firefly", {
             elseif name == "nh_nodes:apple" then
                 core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
             else
-                core.chat_send_player(clicker:get_player_name(), "O vagalume quer comer maçã!")
+                core.chat_send_player(clicker:get_player_name(), S("The firefly wants to eat an apple!"))
             end
         end
     end,
@@ -498,7 +500,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:firefly", "Orbe com Vaga-lume", "orbspawner.png", 0)
-register_orb_egg("nh_mob:firefly", "Orbe com Vaga-lume")
+register_orb_egg("nh_mob:firefly", S("Orb with Firefly"))
 
 
 -------------------------------
@@ -511,7 +513,7 @@ mobs:register_mob("nh_mob:worm", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Minhoca",
+    description = S("Worm"),
     
     hp_min = 1,
     hp_max = 3,
@@ -565,7 +567,7 @@ mobs:register_mob("nh_mob:worm", {
                 self.object:remove()
                 
             elseif name == "nh_nodes:dirt" then
-                core.chat_send_player(clicker:get_player_name(), "A minhoca quer terra!")
+                core.chat_send_player(clicker:get_player_name(), S("The worm wants dirt!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -594,7 +596,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:worm", "Orbe com Minhoca", "orbspawner.png", 0)
-register_orb_egg("nh_mob:worm", "Orbe com Minhoca")
+register_orb_egg("nh_mob:worm", S("Orb with Worm"))
 
 -------------------------------
 -- MOB 5: Touro 
@@ -611,7 +613,7 @@ mobs:register_mob("nh_mob:bull", {
         {name = "nh_nodes:bone", chance = 1, min = 2, max = 5},  -- 2-7 ossos (sempre)
     },
     
-    description = "Touro",
+    description = S("Bull"),
     
     hp_min = 25,
     hp_max = 35,
@@ -696,7 +698,7 @@ on_rightclick = function(self, clicker)
         self.saddled = true  -- flag interna
         item:take_item()
         clicker:set_wielded_item(item)
-        core.chat_send_player(clicker:get_player_name(), "Sela colocada!")
+        core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
         mobs:attach(self, clicker)  -- já monta na hora
         return
     end
@@ -708,13 +710,13 @@ on_rightclick = function(self, clicker)
     end
 
 	if name == "nh_nodes:grassleaves" or "nh_nodes:grassleavesmedium" then
-	    core.chat_send_player(clicker:get_player_name(), "Você alimentou o touro! Muuumm!")
+	    core.chat_send_player(clicker:get_player_name(), S("You fed the bull! Mooo!"))
 	elseif name == "" then
 	    -- mão vazia
-	    core.chat_send_player(clicker:get_player_name(), "Você alisou o touro. hff, hff...")
+	    core.chat_send_player(clicker:get_player_name(), S("You petted the bull. hff, hff..."))
 	else
 	    -- item errado
-	    core.chat_send_player(clicker:get_player_name(), "O touro não se interessa por isso.")
+	    core.chat_send_player(clicker:get_player_name(), S("The bull is not interested in that..."))
 	end
 end,
 })
@@ -733,7 +735,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:bull", "Orbe com Touro", "orbspawner.png", 0)
-register_orb_egg("nh_mob:bull", "Orbe com Touro")
+register_orb_egg("nh_mob:bull", S("Orb with Bull"))
 
 
 mobs:register_mob("nh_mob:ox", {
@@ -748,7 +750,7 @@ mobs:register_mob("nh_mob:ox", {
         {name = "nh_nodes:bone", chance = 1, min = 2, max = 5},  -- 2-7 ossos (sempre)
     },
     
-    description = "Boi",
+    description = S("Ox"),
     
     hp_min = 25,
     hp_max = 35,
@@ -833,7 +835,7 @@ on_rightclick = function(self, clicker)
         self.saddled = true  -- flag interna
         item:take_item()
         clicker:set_wielded_item(item)
-        core.chat_send_player(clicker:get_player_name(), "Sela colocada!")
+        core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
         mobs:attach(self, clicker)  -- já monta na hora
         return
     end
@@ -845,18 +847,18 @@ on_rightclick = function(self, clicker)
     end
 
 	if name == "nh_nodes:grassleaves" or "nh_nodes:grassleavesmedium" then
-	    core.chat_send_player(clicker:get_player_name(), "Você alimentou o touro! Muuumm!")
+	    core.chat_send_player(clicker:get_player_name(), S("You fed the ox! Mooo!"))
 	elseif name == "" then
 	    -- mão vazia
-	    core.chat_send_player(clicker:get_player_name(), "Você alisou o touro. hff, hff...")
+	    core.chat_send_player(clicker:get_player_name(), S("You petted the ox. hff, hff..."))
 	else
 	    -- item errado
-	    core.chat_send_player(clicker:get_player_name(), "O touro não se interessa por isso.")
+	    core.chat_send_player(clicker:get_player_name(), S("The ox is not interested in that..."))
 	end
 end,
 })
 
-register_orb_egg("nh_mob:ox", "Orbe com Boi")
+register_orb_egg("nh_mob:ox", S("Orb with Ox"))
 
 -------------------------------
 -- MOB 4: Aguia (Agressivo)
@@ -869,7 +871,7 @@ mobs:register_mob("nh_mob:eagle", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
-    description = "Águia",
+    description = S("Eagle"),
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -937,7 +939,7 @@ mobs:register_mob("nh_mob:eagle", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "A águia não quer luz!")
+                core.chat_send_player(clicker:get_player_name(), S("The eagle doesn't want light!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -1050,7 +1052,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
-register_orb_egg("nh_mob:eagle", "Orbe com Águia")
+register_orb_egg("nh_mob:eagle", S("Orb with Eagle"))
 
 
 -------------------------------
@@ -1064,7 +1066,7 @@ mobs:register_mob("nh_mob:blackkite", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
-    description = "Milhafre",
+    description = S("Black Kite"),
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -1132,7 +1134,7 @@ mobs:register_mob("nh_mob:blackkite", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O milhafre quer a tocha!")
+                core.chat_send_player(clicker:get_player_name(), S("The black kite wants the torch!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -1245,7 +1247,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:blackkite", "Orbe com Milhafre", "orbspawner.png", 0)
-register_orb_egg("nh_mob:blackkite", "Orbe com Milhafre")
+register_orb_egg("nh_mob:blackkite", S("Orb with Black Kite"))
 
 -------------------------------
 -- MOB 4: Fenix (Agressivo)
@@ -1258,7 +1260,7 @@ mobs:register_mob("nh_mob:phoenix", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
-    description = "Fênix\n[Animal Alterado]",
+    description = S("Phoenix") .. "\n" .. S("[Altered Animal]"),
     
     hp_min = 10,
     hp_max = 20,
@@ -1325,7 +1327,7 @@ mobs:register_mob("nh_mob:phoenix", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "A fênix quer fogo!")
+                core.chat_send_player(clicker:get_player_name(), S("The phoenix wants fire!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -1435,19 +1437,19 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:phoenix", "Orbe com Fênix", "orbspawner.png", 0)
-register_orb_egg("nh_mob:phoenix", "Orbe com Fênix")
+register_orb_egg("nh_mob:phoenix", S("Orb with Phoenix"))
 
 -------------------------------
 -- MOB 1: OURIÇO (Defensivo)
 -------------------------------
 
-mobs:register_mob("nh_mob:ourico", {
+mobs:register_mob("nh_mob:hedgehog", {
     type = "animal",
     passive = true,          -- Pode se defender quando atacado
     damage = 5,
     reach = 1,
     
-    description = "Ouriço",
+    description = S("Hedgehog"),
     
     hp_min = 10,
     hp_max = 15,
@@ -1491,7 +1493,7 @@ mobs:register_mob("nh_mob:ourico", {
 
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), "O ouriço é amigável, mas cuidado ao atacá-lo!")
+            core.chat_send_player(clicker:get_player_name(), S("The hedgehog is friendly, but be careful when attacking it!"))
         end
     end,
     
@@ -1503,7 +1505,7 @@ do_punch = function(self, hitter, tflp, tool_caps, dir, damage)
     if item:get_name() == "" then
         -- machuca o jogador
         hitter:set_hp(hitter:get_hp() - 2)
-        core.chat_send_player(hitter:get_player_name(), "Os espinhos te machucaram!")
+        core.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
         return false -- CANCELA o dano no ouriço
     end
     -- com ferramenta: dano normal (não retorna false)
@@ -1520,7 +1522,7 @@ do_custom = function(self, dtime)
     for _, obj in ipairs(objetos) do
         if obj ~= self.object then
             local ent = obj:get_luaentity()
-            if ent and ent._cmi_is_mob and ent.name ~= "nh_mob:ourico" then
+            if ent and ent._cmi_is_mob and ent.name ~= "nh_mob:hedgehog" then
                 -- aplica dano de espinho no mob próximo (mas ainda sofre dano)
                 obj:punch(obj, 1.0, {
                     full_punch_interval = 1.0,
@@ -1534,7 +1536,7 @@ end,
 
 -- Spawn do Ouriço (grama)
 mobs:spawn({
-    name = "nh_mob:ourico",
+    name = "nh_mob:hedgehog",
     nodes = {"air"},
     neighbors = {"nh_nodes:grass"},
     max_light = 15,
@@ -1546,19 +1548,19 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:ourico", "Orbe com Ouriço", "orbspawner.png", 0)
-register_orb_egg("nh_mob:ourico", "Orbe com Ouriço")
+register_orb_egg("nh_mob:hedgehog", S("Orb with Hedgehog"))
 
 -------------------------------
 -- MOB 1: OURIÇO SHADOW (Defensivo)
 -------------------------------
 
-mobs:register_mob("nh_mob:ouricoshadow", {
+mobs:register_mob("nh_mob:hedgehogshadow", {
     type = "animal",
     passive = true,          -- Pode se defender quando atacado
     damage = 2,
     reach = 1,
     
-    description = "Ouriço Sombrio\n[Animal Modificado]",
+    description = S("Shadow Hedgehog") .. "\n" .. S("[Modified Animal]"),
     
     hp_min = 10,
     hp_max = 15,
@@ -1603,7 +1605,7 @@ mobs:register_mob("nh_mob:ouricoshadow", {
 
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), "O ouriço é amigável, mas cuidado ao atacá-lo!")
+            core.chat_send_player(clicker:get_player_name(), S("The hedgehog is friendly, but be careful when attacking it!"))
         end
     end,
     
@@ -1612,7 +1614,7 @@ mobs:register_mob("nh_mob:ouricoshadow", {
 
 -- Spawn do Ouriço (grama)
 mobs:spawn({
-    name = "nh_mob:ouricoshadow",
+    name = "nh_mob:hedgehogshadow",
     nodes = {"air"},
     neighbors = {"nh_nodes:grass"},
     max_light = 15,
@@ -1624,7 +1626,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:ouricoshadow", "Orbe com Ouriço Raro", "orbspawner.png", 0)
-register_orb_egg("nh_mob:ouricoshadow", "Orbe com Ouriço Escuro")
+register_orb_egg("nh_mob:hedgehogshadow", S("Orb with Shadow Hedgehog"))
 
 -------------------------------
 -- MOB 2: COELHO (Passivo/Tímido)
@@ -1635,7 +1637,7 @@ mobs:register_mob("nh_mob:rabbit", {
     passive = true,           -- Totalmente passivo
     damage = 0,               -- Não causa dano
     
-    description = "Coelho Anão",
+    description = S("Dwarf Rabbit"),
     
     hp_min = 5,
     hp_max = 8,
@@ -1681,7 +1683,7 @@ mobs:register_mob("nh_mob:rabbit", {
 
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), "O coelho fugiu assustado!")
+            core.chat_send_player(clicker:get_player_name(), S("The rabbit ran away scared!"))
             -- Faz o coelho pular e fugir
             self.object:set_velocity({x = 0, y = 6, z = 0})
         end
@@ -1708,20 +1710,20 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:rabbit", "Orbe com Coelho", "orbspawner.png", 0)
-register_orb_egg("nh_mob:rabbit", "Orbe com Coelho")
+register_orb_egg("nh_mob:rabbit", S("Orb with Dwarf Rabbit"))
 
 -------------------------------
--- MOB 3: GALO (Agressivo)
+-- MOB 3: GALO / rooster (Agressivo)
 -------------------------------
 
-mobs:register_mob("nh_mob:galo", {
+mobs:register_mob("nh_mob:rooster", {
     type = "animal",
     passive = false,
     reach = 1,
     damage = 1,
     attack_type = "dogfight",
     
-    description = "Galo",
+    description = S("Rooster"),
     
         -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -1784,9 +1786,9 @@ mobs:register_mob("nh_mob:galo", {
             
             -- Se o jogador está segurando sementes, a galinha segue
             if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), "O galo está interessada na comida!")
+                core.chat_send_player(clicker:get_player_name(), S("The rooster is interested in the food!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "Cocoricó! 🐔")
+                core.chat_send_player(clicker:get_player_name(), S("Cocoricó! 🐔"))
             end
         end
     end,
@@ -1831,7 +1833,7 @@ end,
 
 -- Spawn da Galinha (terra/dirt)
 mobs:spawn({
-    name = "nh_mob:galo",
+    name = "nh_mob:rooster",
     nodes = {"air"},
     neighbors = {"nh_nodes:dirt", "nh_nodes:grass"},  -- Spawna em dirt e grama
     max_light = 15,
@@ -1843,18 +1845,18 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:galo", "Orbe com Galo", "orbspawner.png", 0)
-register_orb_egg("nh_mob:galo", "Orbe com Galo")
+register_orb_egg("nh_mob:rooster", S("Orb with Rooster"))
 
 -------------------------------
 -- MOB 3: GALINHA (Passiva/Põe Ovos)
 -------------------------------
 
-mobs:register_mob("nh_mob:galinha", {
+mobs:register_mob("nh_mob:chicken", {
     type = "animal",
     passive = true,
     damage = 0,
     
-    description = "Galinha",
+    description = S("Chicken"),
     
     
     -- lista de mobs que ele vai atacar ativamente
@@ -1917,9 +1919,9 @@ mobs:register_mob("nh_mob:galinha", {
             
             -- Se o jogador está segurando sementes, a galinha segue
             if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-                core.chat_send_player(clicker:get_player_name(), "A galinha está interessada na comida!")
+                core.chat_send_player(clicker:get_player_name(), S("The chicken is interested in the food!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "Pó pó! 🐔")
+                core.chat_send_player(clicker:get_player_name(), S("Pó pó! 🐔"))
             end
         end
     end,
@@ -1966,14 +1968,14 @@ do_custom = function(self, dtime)
         core.add_item(egg_pos, "nh_nodes:chicken_egg")
 
 
-        log("Galinha botou um ovo em " .. core.pos_to_string(egg_pos))
+        log("A chicken laid an egg in " .. core.pos_to_string(egg_pos))
 
         -- Avisar jogadores próximos
         for _, player in ipairs(core.get_connected_players()) do
             if vector.distance(player:get_pos(), pos) < 10 then
                 core.chat_send_player(
                     player:get_player_name(),
-                    "🥚 Uma galinha botou um ovo!"
+                    S("🥚 A chicken laid an egg!")
                 )
             end
         end
@@ -2016,7 +2018,7 @@ end,
 
 -- Spawn da Galinha (terra/dirt)
 mobs:spawn({
-    name = "nh_mob:galinha",
+    name = "nh_mob:chicken",
     nodes = {"air"},
     neighbors = {"nh_nodes:dirt", "nh_nodes:grass"},  -- Spawna em dirt e grama
     max_light = 15,
@@ -2028,17 +2030,8 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
-register_orb_egg("nh_mob:galinha", "Orbe com Galinha")
+register_orb_egg("nh_mob:chicken", S("Orb with Chicken"))
 
--------------------------------
--- ITEM: OVO
--------------------------------
--- Você pode criar um item de ovo que as galinhas dropam
---core.register_craftitem("nh_mob:chicken_egg", { -- Item precisou estar em nh_nodes:egg
---    description = "Ovo de galinha",
---    inventory_image = "chicken_egg.png",  -- Textura
---    on_use = core.item_eat(2), -- Come o ovo cru (restaura 2 de fome)
---})
 
 -------------------------------
 -- MOB 4: TUBARÃO (Agressivo)
@@ -2050,11 +2043,11 @@ mobs:register_mob("nh_mob:shark", {
     damage = 5,
     attack_type = "dogfight",
     
-    description = "Tubarão",
+    description = S("Shark"),
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
-    specific_attack = {"nh_mob:galinha", "nh_mob:galinha", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:ourico"},
+    specific_attack = {"nh_mob:chicken", "nh_mob:rooster", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:hedgehog"},
     
     hp_min = 20,
     hp_max = 30,
@@ -2121,9 +2114,9 @@ mobs:register_mob("nh_mob:shark", {
             local name = item:get_name()
             
             if name == "nh_nodes:raw_chicken" then
-                core.chat_send_player(clicker:get_player_name(), "O tubarão está com fome!")
+                core.chat_send_player(clicker:get_player_name(), S("The shark is hungry!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "Glub, glub...")
+                core.chat_send_player(clicker:get_player_name(), S("Glub, glub..."))
             end
         end
     end,
@@ -2148,7 +2141,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:shark", "Orbe com Tubarão", "orbspawner.png", 0)
-register_orb_egg("nh_mob:shark", "Orbe com Tubarão")
+register_orb_egg("nh_mob:shark", S("Orb with Shark"))
 
 
 
@@ -2163,7 +2156,7 @@ mobs:register_mob("nh_mob:messagebottle", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Garrafa com Mensagem\n[Item]",
+    description = S("Message Bottle") .. "\n" .. S("[Item]"),
     
     hp_min = 1,
     hp_max = 1,
@@ -2233,9 +2226,9 @@ on_rightclick = function(self, clicker)
             self.object:remove()
 
         elseif name == "nh_nodes:bottle" then
-            core.chat_send_player(clicker:get_player_name(), "Plim! Quase quebrou. Vou ter que esvaziar a mão para pegar...")
+            core.chat_send_player(clicker:get_player_name(), S("Plim! I need to empty my hand to pick it up."))
         else
-            core.chat_send_player(clicker:get_player_name(), "Garrafa com mensagem. Vou ter que esvaziar a mão para pegar...")
+            core.chat_send_player(clicker:get_player_name(), S("Message bottle. I need to empty my hand to pick it up."))
         end
     end
 end,
@@ -2285,7 +2278,7 @@ mobs:register_mob("nh_mob:coconut", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Coco flutuante",
+    description = S("Floating Coconut"),
     
     hp_min = 1,
     hp_max = 1,
@@ -2356,7 +2349,7 @@ mobs:register_mob("nh_mob:coconut", {
             elseif name == "nh_nodes:coconut" then
                 core.chat_send_player(clicker:get_player_name(), "Ploc!")
             else
-                core.chat_send_player(clicker:get_player_name(), "Um coco flutuante! É uma ótima comida pra achar no mar.")
+                core.chat_send_player(clicker:get_player_name(), S("A floating coconut! Great food to find at sea."))
             end
         end
     end,
@@ -2396,7 +2389,7 @@ mobs:register_mob("nh_mob:iceberg", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Gelo Flutuante\n[Plataforma]",
+    description = S("Floating Ice") .. "\n" .. S("[Platform]"),
     
     hp_min = 1,
     hp_max = 1,
@@ -2465,9 +2458,9 @@ mobs:register_mob("nh_mob:iceberg", {
                 self.object:remove()
             
             elseif name == "nh_nodes:ice" then
-                core.chat_send_player(clicker:get_player_name(), "Plim! Preciso esvaziar a mão pra pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Plim! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(), "Gelo flutuante")
+                core.chat_send_player(clicker:get_player_name(), S("Floating ice"))
             end
         end
     end,
@@ -2509,7 +2502,7 @@ mobs:register_mob("nh_mob:iceberg2", {
     damage = 0,
     attack_type = "dogfight",
     
-    description = "Iceberg2\n[Plataforma]",
+    description = S("Iceberg2") .. "\n" .. S("[Platform]"),
     
     hp_min = 8,
     hp_max = 10,
@@ -2622,7 +2615,7 @@ mobs:register_mob("nh_mob:spinningtop", {
     damage = 1,
     attack_type = "dogfight",
     
-    description = "Pião de Carvalho\n[Item]",
+    description = S("Oak Spinning Top") .. "\n" .. S("[Item]"),
     
     hp_min = 1,
     hp_max = 3,
@@ -2689,9 +2682,9 @@ mobs:register_mob("nh_mob:spinningtop", {
                 self.object:remove()
             
             elseif name == "nh_nodes:spinningtop" then
-                core.chat_send_player(clicker:get_player_name(), "Teck! Vou ter que esvaziar a mão para pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Teck! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(), "Pião girando... Vou ter que esvaziar a mão para pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Spinning... I need to empty my hand to pick it up."))
             end
         end
     end,
@@ -2726,7 +2719,7 @@ do_custom = function(self, dtime)
             -- Só manda a mensagem na PRIMEIRA vez que entra no bloco errado
             if not self._on_bad_floor then
                 self._on_bad_floor = true
-                minetest.chat_send_all("Superfície inapropriada. O pião de carvalho está perdendo rotação por atrito...")
+                minetest.chat_send_all(S("Inappropriate surface. The palm spinning top is losing rotation due to friction..."))
             end
             
                         -- Rastreia HP manualmente sem depender do punch
@@ -2739,7 +2732,7 @@ do_custom = function(self, dtime)
 	     
 	    --local hp = self.object:get_hp()
 	     
-            minetest.chat_send_all("Dano ao pião de carvalho! HP: " .. self._tracked_hp)
+            minetest.chat_send_all(S("Oak spinning top damage! HP: ") .. self._tracked_hp)
         else
             -- Resetar quando voltar para bloco permitido
             self._on_bad_floor = false
@@ -2769,7 +2762,7 @@ mobs:register_mob("nh_mob:spinningtop2", {
     damage = 1,
     attack_type = "dogfight",
     
-    description = "Pião de Coqueiro\n[Item]",
+    description = S("Palm Spinning Top") .. "\n" .. S("[Item]"),
     
     hp_min = 1,
     hp_max = 3,
@@ -2836,9 +2829,9 @@ mobs:register_mob("nh_mob:spinningtop2", {
                 self.object:remove()
             
             elseif name == "nh_nodes:spinningtop2" then
-                core.chat_send_player(clicker:get_player_name(), "Teck! Vou ter que esvaziar a mão para pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Teck! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(), "Pião girando... Vou ter que esvaziar a mão para pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Spinning... I need to empty my hand to pick it up."))
             end
         end
     end,
@@ -2873,7 +2866,7 @@ do_custom = function(self, dtime)
             -- Só manda a mensagem na PRIMEIRA vez que entra no bloco errado
             if not self._on_bad_floor then
                 self._on_bad_floor = true
-                minetest.chat_send_all("Superfície inapropriada. O pião de coqueiro está perdendo rotação por atrito...")
+                minetest.chat_send_all(S("Inappropriate surface. The palm spinning top is losing rotation due to friction..."))
             end
             
                         -- Rastreia HP manualmente sem depender do punch
@@ -2886,7 +2879,7 @@ do_custom = function(self, dtime)
 	     
 	    --local hp = self.object:get_hp()
 	     
-            minetest.chat_send_all("Dano ao pião de coqueiro! HP: " .. self._tracked_hp)
+            minetest.chat_send_all(S("Palm spinning top damage! HP: ") .. self._tracked_hp)
         else
             -- Resetar quando voltar para bloco permitido
             self._on_bad_floor = false
@@ -2925,7 +2918,7 @@ mobs:register_mob("nh_mob:spinningtop3", {
     damage = 1,
     attack_type = "dogfight",
     
-    description = "Pião de Pinheiro\n[Item]",
+    description = S("Pine Spinning Top") .. "\n" .. S("[Item]"),
     
     hp_min = 1,
     hp_max = 3,
@@ -2992,9 +2985,9 @@ mobs:register_mob("nh_mob:spinningtop3", {
                 self.object:remove()
             
             elseif name == "nh_nodes:spinningtop3" then
-                core.chat_send_player(clicker:get_player_name(), "Teck! Vou ter que esvaziar a mão para pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Teck! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(), "Pião girando... Vou ter que esvaziar a mão para pegar.")
+                core.chat_send_player(clicker:get_player_name(), S("Spinning... I need to empty my hand to pick it up."))
             end
         end
     end,
@@ -3029,7 +3022,7 @@ do_custom = function(self, dtime)
             -- Só manda a mensagem na PRIMEIRA vez que entra no bloco errado
             if not self._on_bad_floor then
                 self._on_bad_floor = true
-                minetest.chat_send_all("Superfície inapropriada. O pião de pinheiro está perdendo rotação por atrito...")
+                minetest.chat_send_all(S("Inappropriate surface. The pine spinning top is losing rotation due to friction..."))
             end
             
                         -- Rastreia HP manualmente sem depender do punch
@@ -3044,7 +3037,7 @@ do_custom = function(self, dtime)
 	     
 	    --local hp = self.object:get_hp()
 	     
-            minetest.chat_send_all("Dano ao pião de pinheiro! HP: " .. self._tracked_hp)
+            minetest.chat_send_all(S("Pine spinning top damage! HP: ") .. self._tracked_hp)
         else
             -- Resetar quando voltar para bloco permitido
             self._on_bad_floor = false
@@ -3071,7 +3064,7 @@ mobs:register_mob("nh_mob:octopus", {
     damage = 3,
     reach = 1,
     
-    description = "Polvo Obscuro\n[Animal Alterado]",
+    description = S("Dark Octopus") .. "\n" .. S("[Altered Animal]"),
     
     hp_min = 5,
     hp_max = 10,
@@ -3132,7 +3125,7 @@ mobs:register_mob("nh_mob:octopus", {
 
 --mobs:register_egg("nh_mob:octopus", "Orbe com Polvo", "orbspawner.png", 0)
 -- Substitua os register_egg pelos orbes com mesh:
-register_orb_egg("nh_mob:octopus",  "Orbe com Polvo")
+register_orb_egg("nh_mob:octopus",  S("Orb with Dark Octopus"))
 
 
 
@@ -3147,7 +3140,7 @@ mobs:register_mob("nh_mob:exoskull", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
-    description = "Exausto\n[Animal Alterado]",
+    description = S("Exhausted") .. "\n" .. S("[Altered Animal]"),
     
     hp_min = 20,
     hp_max = 30,
@@ -3205,7 +3198,7 @@ mobs:register_mob("nh_mob:exoskull", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O exausto não quer luz!")
+                core.chat_send_player(clicker:get_player_name(), S("The exhausted doesn't want light!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -3253,7 +3246,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:octoskull", "Orbe com Exopolvo", "orbspawner.png", 0)
-register_orb_egg("nh_mob:exoskull", "Orbe com Exopolvo")
+register_orb_egg("nh_mob:exoskull", S("Orb with Exhausted"))
 
 
 -------------------------------
@@ -3267,7 +3260,7 @@ mobs:register_mob("nh_mob:sirenia", {
     attack_type = "dogfight",
     --attack_chance = 8, -- entre 1-10
     
-    description = "Sirenia\n[Animal Fenômeno]",
+    description = S("Sirenia") .. "\n" .. S("[Animal Phenomenon]"),
     
     hp_min = 20,
     hp_max = 30,
@@ -3320,7 +3313,7 @@ mobs:register_mob("nh_mob:sirenia", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+                core.chat_send_player(clicker:get_player_name(), S("The sirenia doesn't want light!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -3358,7 +3351,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:sirenia", "Orbe com Sirenia", "orbspawner.png", 0)
-register_orb_egg("nh_mob:sirenia",  "Orbe com Sirenia")
+register_orb_egg("nh_mob:sirenia",  S("Orb with Sirenia"))
 
 
 -------------------------------
@@ -3371,7 +3364,7 @@ mobs:register_mob("nh_mob:slime", {
     damage = 1,
     attack_type = "dogfight",
     
-    description = "Limu\n[Animal Alterado]",
+    description = S("Limu") .. "\n" .. S("[Altered Animal]"),
     
     hp_min = 10,
     hp_max = 20,
@@ -3480,7 +3473,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:slime", "Orbe com Limu Pequeno", "orbspawner.png", 0)
-register_orb_egg("nh_mob:slime",    "Orbe com Limu Pequeno")
+register_orb_egg("nh_mob:slime",   S("Orb with Small Limu"))
 
 -- MOB 4: PLANARIA SLIME2 (Agressivo)
 -------------------------------
@@ -3491,7 +3484,7 @@ mobs:register_mob("nh_mob:slime2", {
     damage = 3,
     attack_type = "dogfight",
     
-    description = "Limu Médio\n[Animal Alterado]",
+    description = S("Medium Limu") .. "\n" .. S("[Altered Animal]"),
     
     hp_min = 10,
     hp_max = 20,
@@ -3615,7 +3608,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:slime2", "Orbe com Limu Médio", "orbspawner.png", 0)
-register_orb_egg("nh_mob:slime2",    "Orbe com Limu Médio")
+register_orb_egg("nh_mob:slime2",    S("Orb with Medium Limu"))
 
 -- MOB 4: PLANARIA SLIME3 (Agressivo)
 -------------------------------
@@ -3626,7 +3619,7 @@ mobs:register_mob("nh_mob:slime3", {
     damage = 3,
     attack_type = "dogfight",
     
-    description = "Limu Grande\n[Animal Alterado]",
+    description = S("Large Limu") .. "\n" .. S("[Altered Animal]"),
     
     hp_min = 10,
     hp_max = 20,
@@ -3751,7 +3744,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:slime3", "Orbe com Limu Grande", "orbspawner.png", 0)
-register_orb_egg("nh_mob:slime3",    "Orbe com Limu Grande")
+register_orb_egg("nh_mob:slime3",  S("Orb with Large Limu"))
 
 
 -------------------------------
@@ -3764,7 +3757,7 @@ mobs:register_mob("nh_mob:visage", {
     damage = 5,
     attack_type = "dogfight",
     
-    description = "Vulto\n[Fenômeno]",
+    description = S("Visage") .. "\n" .. S("[Phenomenon]"),
     
     hp_min = 1,
     hp_max = 1,
@@ -3820,7 +3813,7 @@ mobs:register_mob("nh_mob:visage", {
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+                core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -3847,7 +3840,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:visage", "Orbe com Vulto", "orbspawner.png", 0)
-register_orb_egg("nh_mob:visage",    "Orbe com Vulto")
+register_orb_egg("nh_mob:visage",  S("Orb with Visage"))
 
 
 -------------------------------
@@ -3860,7 +3853,7 @@ mobs:register_mob("nh_mob:visage2", {
     damage = 5,
     attack_type = "dogfight",
     
-    description = "Vulto\n[Fenômeno]",
+    description = S("Visage") .. "\n" .. S("[Phenomenon]"),
     
     hp_min = 20,
     hp_max = 30,
@@ -3944,7 +3937,7 @@ end,
             local name = item:get_name()
             
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), "O vulto não quer luz!")
+                core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
             else
                 core.chat_send_player(clicker:get_player_name(), "...")
             end
@@ -4030,9 +4023,9 @@ mobs:register_mob("nh_mob:dopel", {
             local name = item:get_name()
 
             if name == "" then
-                core.chat_send_player(clicker:get_player_name(), "Quem é você? Por que se parece comigo?!")
+                core.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "Isso que você tá segurando é meu!")  
+                core.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))  
             end
         end
     end,
@@ -4067,7 +4060,7 @@ mobs:spawn({
 })
 
 --mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
-register_orb_egg("nh_mob:dopel", "Orbe com Dopel")
+register_orb_egg("nh_mob:dopel", S("Orb with Dopel"))
 
 -------------------------------
 -- LOGS FINAIS

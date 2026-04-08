@@ -4,6 +4,8 @@
 -----------------------------
 core.log("action", "[items] init.lua carregado")
 
+local S = minetest.get_translator("nh_items")
+
 -- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}
 
@@ -94,6 +96,7 @@ core.register_globalstep(function()
 end)
 ]]--
 
+--[[
 core.register_craftitem("nh_items:stick", {
     description = "Graveto",
     inventory_image = "graveto.png",
@@ -114,10 +117,11 @@ core.register_craftitem("nh_items:stick", {
         damage_groups = {fleshy = 1},
     },
 })
+]]--
 
 -- Itens necessários para escrever
 core.register_craftitem("nh_items:feather", {
-    description = "Pena",
+    description = S("Feather"),
     inventory_image = "feather.png",
     wield_image = "feather.png",
     wield_scale = {x = 0.2, y = 0.2, z = 0.01},
@@ -197,7 +201,7 @@ end
 
 -- Registro do item Página (em branco)
 core.register_craftitem("nh_items:page", {
-    description = "Página",
+    description = S("Paper"),
     inventory_image = "page.png",
     wield_image = "page.png",
     wield_scale = {x = 0.5, y = 0.5, z = 0.01},
@@ -211,25 +215,25 @@ core.register_craftitem("nh_items:page", {
         local has_feather, has_ink = player_has_writing_tools(user)
         
         if not has_feather or not has_ink then
-            local msg = "Você precisa de "
-            if not has_feather and not has_ink then
-                msg = msg .. "uma pena na hotbar e um frasco de tinta no inventário para escrever."
-            elseif not has_feather then
-                msg = msg .. "uma pena na hotbar para escrever."
-            else
-                msg = msg .. "um frasco de tinta no inventário para escrever."
-            end
-            core.chat_send_player(player_name, msg)
-            return itemstack
-        end
+	    local msg = S("I think I need ")
+	    if not has_feather and not has_ink then
+		msg = msg .. S("a feather in the hotbar and an ink bottle in the inventory to write.")
+	    elseif not has_feather then
+		msg = msg .. S("a feather in the hotbar to write.")
+	    else
+		msg = msg .. S("an ink bottle in the inventory to write.")
+	    end
+	    core.chat_send_player(player_name, msg)
+	    return
+	end
         
         -- Mostrar formspec para escrever
         core.show_formspec(player_name, "nh_items:page_writer",
             "size[8,6]" ..
-            "label[0.3,0;Escrever na Página:]" ..
+            "label[0.3,0;" .. S("Write on the Paper:") .. "]" ..
             "textarea[0.3,0.5;8,4.5;page_text;;]" ..
-            "button[2,5;2,1;save;Salvar]" ..
-            "button[4,5;2,1;cancel;Cancelar]"
+            "button[2,5;2,1;save;" .. S("Save") .. "]" ..
+            "button[4,5;2,1;cancel;" .. S("Cancel") .. "]"
         )
         
         return itemstack
@@ -239,7 +243,7 @@ core.register_craftitem("nh_items:page", {
 
 -- Registro do item Página escrita
 core.register_craftitem("nh_items:writedpage", {
-    description = "Página escrita",
+    description = S("Writed Paper"),
     inventory_image = "writedpage.png",
     wield_image = "writedpage.png",
     wield_scale = {x = 0.5, y = 0.5, z = 0.01},
@@ -255,13 +259,13 @@ core.register_craftitem("nh_items:writedpage", {
         local text = meta:get_string("text")
         
         if text == "" then
-            text = "Página em branco"
+            text = S("Blank Paper")
         end
         
         core.show_formspec(player_name, "nh_items:page_reader",
             "size[8,6]" ..
             "textarea[0.3,0.3;8,5;page_text;;" .. core.formspec_escape(text) .. "]" ..
-            "button_exit[3,5.3;2,1;close;Fechar]"
+            "button_exit[3,5.3;2,1;close;" .. S("Close") .. "]"
         )
         
         return itemstack
@@ -284,14 +288,14 @@ core.register_on_player_receive_fields(function(player, formname, fields)
         local text = fields.page_text
         
         if text == "" then
-            core.chat_send_player(player_name, "Você não escreveu nada!")
+            core.chat_send_player(player_name, S("I didn't write anything!"))
             return
         end
         
         -- Verificar novamente se tem os itens (para evitar exploits)
         local has_feather, has_ink = player_has_writing_tools(player)
         if not has_feather or not has_ink then
-            core.chat_send_player(player_name, "Você não tem mais os itens necessários!")
+            core.chat_send_player(player_name, S("I no longer have the necessary items!"))
             return
         end
         
@@ -312,12 +316,12 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                 local written_page = items.create_page_with_text(text)
                 inv:add_item("main", written_page)
                 
-                core.chat_send_player(player_name, "Página escrita com sucesso!")
+                core.chat_send_player(player_name, S("Paper written successfully!"))
                 return
             end
         end
         
-        core.chat_send_player(player_name, "Você não tem uma página em branco!")
+        core.chat_send_player(player_name, S("I don't have a blank sheet of paper..."))
     end
 end)
 
@@ -326,27 +330,27 @@ function items.create_page_with_text(text)
     local itemstack = ItemStack("nh_items:writedpage")
     local meta = itemstack:get_meta()
     meta:set_string("text", text)
-    meta:set_string("description", "Página: " .. text:sub(1, 30) .. "...")
+    meta:set_string("description", S("Paper: ") .. text:sub(1, 30) .. "...")
     return itemstack
 end
 
 -- Exemplo de diferentes tipos de páginas que podem ser geradas
 page_texts = {
     diary = {
-        "Querido diário, hoje foi um dia interessante nas minas...",
-        "Encontrei uma caverna profunda hoje. Não sei se devo explorar...",
-        "Os cristais brilham de forma estranha à noite.",
+        S("Dear diary, today was an interesting day in the mines..."),
+        S("I found a deep cave today. I'm not sure if I should explore it..."),
+        S("The crystals shine in a strange way at night."),
     },
     recipe = {
-        "A goma de carvalho foi essencial para manter o fogo. Usei ela, a folha de coqueiro, grama e graveto para fazer tochas",
-        "Para criar uma Bancada de Produção, combinei dois tarugos e duas tabuas de carvalho na grade de produção.",
-        "Sobrevivi graças a ovos que encontrei, mas não aguentava mais comer eles crus, fiz uma fogueira com a isca de fogueira feita de palha de coqueiro e goma de carvalho, então coloquei as lenhas de troncos de carvalho nela e fritei os ovos!",
+        S("Oak gum was essential to keep the fire going. I used it, coconut leaf, grass and a stick to make torches."),
+        S("To create a Crafting Table, I combined two ingots and two oak planks in the crafting grid."),
+        S("I survived thanks to eggs I found, but I couldn't stand eating them raw anymore. I made a campfire with a fire starter made of coconut straw and oak gum, then placed oak logs in it and fried the eggs!"),
     },
     message = {
-        "Se você está lendo isso, significa que eu não consegui voltar.",
-        "Criar coisas úteis é uma Especialidade, Use o chão para isso", 
-        "Encontre a tenda de palha e pegue o que quiser.",
-        "Cuidado com as profundezas. Há algo lá embaixo.",
-        "O tesouro está escondido onde o sol nunca alcança.",
+        S("If you're reading this, it means I didn't make it back."),
+        S("Crafting useful things is a Specialty. Use the ground for that."),
+        S("Find the straw tent and take whatever you want."),
+        S("Beware of the depths. There is something down there."),
+        S("The treasure is hidden where the sun never reaches."),
     },
 }

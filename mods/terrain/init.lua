@@ -50,13 +50,14 @@ local c_oakplank = core.get_content_id("nh_nodes:oakplank")
 local c_oakdowel = core.get_content_id("nh_nodes:oakdowel")
 local c_oakchest = core.get_content_id("nh_nodes:oak_chest")
 local c_oakdoor = core.get_content_id("nh_nodes:oakdoor_closed")
+local c_oakbranch  = core.get_content_id("nh_nodes:oakbranch")
 local c_leaves  = core.get_content_id("nh_nodes:leaves")
-local c_appleleaves  = core.get_content_id("nh_nodes:appleleaves")
-local c_blueberryleaves = core.get_content_id("nh_nodes:blueberryleaves")
-local c_leavesblueberry4  = core.get_content_id("nh_nodes:leaves_blueberry4")
 local c_leaves_nut  = core.get_content_id("nh_nodes:leaves_nut")
 local c_leaves_nut2 = core.get_content_id("nh_nodes:leaves_nut2")
 local c_leaves_nut3 = core.get_content_id("nh_nodes:leaves_nut3")
+local c_appleleaves  = core.get_content_id("nh_nodes:appleleaves")
+local c_blueberryleaves = core.get_content_id("nh_nodes:blueberryleaves")
+local c_leavesblueberry4  = core.get_content_id("nh_nodes:leaves_blueberry4")
 local c_leavesapple  = core.get_content_id("nh_nodes:leaves_apple")
 local c_leavesapple2 = core.get_content_id("nh_nodes:leaves_apple2")
 local c_leavesapple3 = core.get_content_id("nh_nodes:leaves_apple3")
@@ -646,7 +647,7 @@ end
 -----------------------------
 -- FUNÇÃO DE SPAWN DE CARVALHO (com variação de tronco)
 -----------------------------
-local function spawn_tree(area, data, pos, wx, wz)
+local function spawn_tree(area, data, param2_data, pos, wx, wz)
     -- Verifica se há espaço (raio de 5 blocos)
     if not can_place_tree(area, data, pos, 5) then
         return  -- Cancela a geração se estiver muito perto de outra árvore
@@ -766,6 +767,38 @@ local function spawn_tree(area, data, pos, wx, wz)
             data[vi_top] = c_leaves
         end
     end
+
+-- =============== GALHOS CARDEAIS (na menor altura da copa) ===============
+local branch_y = top - 2  -- Menor altura onde folhas aparecem (dy = -2)
+local branch_center_x = math.floor(copa_center_x)
+local branch_center_z = math.floor(copa_center_z)
+
+-- param2 facedir: Sul=0, Oeste=1, Norte=2, Leste=3
+local branch_dirs = {
+    { dx =  0, dz = -1, param2 = 0 },  -- Norte  (aponta para sul)
+    { dx =  0, dz =  1, param2 = 2 },  -- Sul    (aponta para norte)
+    { dx = -1, dz =  0, param2 = 3 },  -- Oeste  (aponta para leste)
+    { dx =  1, dz =  0, param2 = 1 },  -- Leste  (aponta para oeste)
+}
+
+for _, dir in ipairs(branch_dirs) do
+    local bx = branch_center_x + dir.dx
+    local bz = branch_center_z + dir.dz
+    local by = branch_y
+
+    if area:contains(bx, by, bz) then
+        local vi = area:index(bx, by, bz)
+        -- Substitui folha ou ar (não sobrescreve tronco)
+        if data[vi] == c_leaves or data[vi] == c_leaves_nut or
+           data[vi] == c_leaves_nut2 or data[vi] == c_leaves_nut3 or
+           data[vi] == c_air then
+            data[vi] = c_oakbranch
+            -- param2 requer a tabela de param2 separada
+            -- (assumindo que vm:set_param2 ou param2_data existe no seu contexto)
+            param2_data[vi] = dir.param2
+        end
+    end
+end
 
 
     -- =============== FALLEN STICK (50% de chance) ===============
@@ -2089,13 +2122,13 @@ end
 -----------------------------
 -- FUNÇÃO DE APLICAÇÃO DAS DECORAÇÕES
 -----------------------------
-local function apply_decorations(area, data, decorations)
+local function apply_decorations(area, data, param2_data, decorations)
     local palm_leaf_rotations = {}
     
     -- Gera árvores
     for _, spawn_data in ipairs(decorations.trees) do
         if spawn_data.type == "tree" then
-            spawn_tree(area, data, spawn_data, spawn_data.wx, spawn_data.wz)
+            spawn_tree(area, data, param2_data, spawn_data, spawn_data.wx, spawn_data.wz)
             
             local rng_page = PseudoRandom(spawn_data.wx * 31337 + spawn_data.wz * 13337)
             if rng_page:next(1, 15) == 1 then
@@ -2390,6 +2423,7 @@ core.register_on_generated(function(minp, maxp)
     local emin, emax = vm:read_from_map(minp, maxp)
     local area = VoxelArea:new {MinEdge = emin, MaxEdge = emax}
     local data = vm:get_data()
+    local param2_data = vm:get_param2_data()
     
     -- Configurações
     local SEA_LEVEL = 0
@@ -2435,7 +2469,7 @@ core.register_on_generated(function(minp, maxp)
     
     
     -- Aplica decorações no terreno
-    local palm_leaf_rotations, pebble_positions = apply_decorations(area, data, decorations)
+    local palm_leaf_rotations, pebble_positions = apply_decorations(area, data, param2_data, decorations)
     
     
     -- Gera torres de obsidiana
@@ -2443,6 +2477,7 @@ core.register_on_generated(function(minp, maxp)
     
     -- Grava dados no voxelmanip
     vm:set_data(data)
+    vm:set_param2_data(param2_data)
     vm:write_to_map()
     vm:update_map()
     
