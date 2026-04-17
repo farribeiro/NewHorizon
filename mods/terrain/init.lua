@@ -52,6 +52,9 @@ local c_oakchest = core.get_content_id("nh_nodes:oak_chest")
 local c_oakdoor = core.get_content_id("nh_nodes:oakdoor_closed")
 local c_oakbranch  = core.get_content_id("nh_nodes:oakbranch")
 local c_leaves  = core.get_content_id("nh_nodes:leaves")
+local c_leavesrelief = core.get_content_id("nh_nodes:leavesrelief")
+local c_kelp    = core.get_content_id("nh_nodes:kelp")
+local c_sentinelstatue    = core.get_content_id("nh_nodes:sentinelstatue")
 local c_leaves_nut  = core.get_content_id("nh_nodes:leaves_nut")
 local c_leaves_nut2 = core.get_content_id("nh_nodes:leaves_nut2")
 local c_leaves_nut3 = core.get_content_id("nh_nodes:leaves_nut3")
@@ -71,6 +74,7 @@ local c_water   = core.get_content_id("nh_nodes:water")
 local c_water2  = core.get_content_id("nh_nodes:water2")
 local c_lava    = core.get_content_id("nh_nodes:lava")
 local c_obsidian = core.get_content_id("nh_nodes:obsidian")
+local c_fireice    = core.get_content_id("nh_nodes:fireice")
 local c_snow    = core.get_content_id("nh_nodes:snow")
 local c_ice    = core.get_content_id("nh_nodes:ice")
 
@@ -96,6 +100,10 @@ local SHIP_SEARCH_RADIUS = 256
 
 local house_generated = false
 local HOUSE_SEARCH_RADIUS = 256
+
+local statue_spawned = false
+local statue_pos = nil
+local sentinel_pos = nil
 
 -----------------------------
 -- NOISES (mantidos para compatibilidade com funções antigas)
@@ -767,6 +775,39 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             data[vi_top] = c_leaves
         end
     end
+    
+    
+-- =============== LEAVESRELIEF (detalhes dentro da copa) ===============
+for dy = -2, 3 do
+    for dx = -crown_radius, crown_radius do
+        for dz = -crown_radius, crown_radius do
+            local dist = (dx*dx + dy*dy + dz*dz)
+            if dist <= (crown_radius + 0.5)*(crown_radius + 0.5) then
+                local check_pos = {
+                    x = math.floor(copa_center_x + dx),
+                    y = top + dy,
+                    z = math.floor(copa_center_z + dz)
+                }
+                if area:contains(check_pos.x, check_pos.y, check_pos.z) then
+                    local vi      = area:index(check_pos.x, check_pos.y, check_pos.z)
+                    local vi_above = area:index(check_pos.x, check_pos.y + 1, check_pos.z)
+
+                    -- O node BASE precisa ser folha, e o de CIMA também folha (age como "líquido")
+                    if data[vi] == c_leaves and data[vi_above] == c_leaves then
+                        local r = rng:next(1, 100)
+                        if r <= 20 then  -- 20% de chance por bloco
+                            data[vi] = c_leavesrelief
+                            -- param2 = altura visual (quantos blocos sobe)
+                            -- 16 = 1 bloco, 32 = 2 blocos
+                            param2_data[vi] = 16
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+    
 
 -- =============== GALHOS CARDEAIS (na menor altura da copa) ===============
 local branch_y = top - 2  -- Menor altura onde folhas aparecem (dy = -2)
@@ -1858,6 +1899,22 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                         data[vi] = c_water
                     end
                 end
+                -- 🔥 Fireice sobre wet_sand entre y -19 e -16 (mesma área das ilhas)    
+	        if y >= -19 and y <= -16
+		    and x <= -500 and x >= -850
+		    and z >= 500  and z <= 850
+	        then
+		    if data[vi] == c_water then
+		        local bvi = area:index(x, y - 1, z)
+		        if area:contains(x, y - 1, z) and data[bvi] == c_wetsand then
+		            -- RNG determinístico por posição para esparsidade
+		            local rng_fi = PseudoRandom(x * 73856093 + y * 19349663 + z * 83492791)
+		            if rng_fi:next(1, 100) <= 1 then  -- ~8% de chance
+		                data[vi] = c_fireice
+		            end
+		        end
+		    end
+	        end
             end
             for y = math.max(minp.y, -50), math.min(maxp.y, height) do
 		local vi = area:index(x, y, z)
@@ -2032,6 +2089,327 @@ local function generate_volcano(area, data, minp, maxp, volcano_pos)
 end
 
 -----------------------------
+-- SPAWN ÚNICO DA ESTÁTUA DO CARANGUEJO (próxima ao vulcão)
+-----------------------------
+ 
+local function try_spawn_crab_statue(minp, maxp, volcano_pos)
+    if statue_spawned then return end
+    if not volcano_pos then return end
+
+    -- Só tenta se este chunk cobre a área do vulcão (margem aumentada para 80)
+    local chunk_center_x = (minp.x + maxp.x) / 2
+    local chunk_center_z = (minp.z + maxp.z) / 2
+    local dist_chunk = math.sqrt(
+        (chunk_center_x - volcano_pos.x)^2 +
+        (chunk_center_z - volcano_pos.z)^2
+    )
+    if dist_chunk > (VOLCANO_RADIUS + BEACH_WIDTH + 80) then return end
+
+    local search_min_r = VOLCANO_RADIUS - 10  -- borda da ilha
+    local search_max_r = VOLCANO_RADIUS + BEACH_WIDTH  -- praia submersa
+
+    -- Duas passagens: 1ª prefere posições com kelp, 2ª aceita qualquer wet_sand
+    for pass = 1, 2 do
+        for attempts = 1, 200 do
+            local angle = (attempts / 200) * math.pi * 2
+            local radius = search_min_r + (attempts % 7) * (search_max_r - search_min_r) / 7
+
+            local cx = math.floor(volcano_pos.x + math.cos(angle) * radius)
+            local cz = math.floor(volcano_pos.z + math.sin(angle) * radius)
+
+            -- Varre Y na mesma faixa de profundidade do kelp (-18 a -13)
+            for cy = -18, -13 do
+                local node = core.get_node({x = cx, y = cy, z = cz})
+
+                if node.name == "nh_nodes:wet_sand" then
+                    -- Bloco acima deve ser água (estamos submersos)
+                    local above = core.get_node({x = cx, y = cy + 1, z = cz})
+                    if above.name == "nh_nodes:water" then
+
+                        local ok = false
+                        if pass == 1 then
+                            -- 1ª passagem: exige kelp por perto
+                            for kx = -3, 3 do
+                                for kz = -3, 3 do
+                                    for ky = -2, 3 do
+                                        if core.get_node({x = cx+kx, y = cy+ky, z = cz+kz}).name == "nh_nodes:kelp" then
+                                            ok = true
+                                            break
+                                        end
+                                    end
+                                    if ok then break end
+                                end
+                                if ok then break end
+                            end
+                        else
+                            -- 2ª passagem: aceita qualquer wet_sand submerso (kelp pode não ter carregado)
+                            ok = true
+                            core.log("action", "[terrain] Estátua do Caranguejo: fallback sem kelp (pass 2)")
+                        end
+
+                        if ok then
+                            core.set_node({x = cx, y = cy , z = cz}, {name = "nh_nodes:giantcrabstatue"})
+                            statue_spawned = true
+                            statue_pos = {x = cx, y = cy , z = cz}
+                            core.log("action", "[terrain] Estátua do Caranguejo colocada em x=" .. cx .. " y=" .. (cy+1) .. " z=" .. cz .. " (pass " .. pass .. ")")
+                            return
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+-----------------------------
+-- ILHAS FLUTUANTES CÔNICAS MELHORES (-X, +Z, y 500-1000)
+-----------------------------
+
+local FLOATING_ISLAND_RADIUS = SNOW_RADIUS
+local FLOATING_ISLANDS = nil
+
+-----------------------------
+-- INICIALIZA ILHAS (AGORA COM 2–3 CONES)
+-----------------------------
+local function init_floating_islands()
+    if FLOATING_ISLANDS then return end
+    FLOATING_ISLANDS = {}
+
+    local rng = PseudoRandom(314159)
+    local count = 12
+
+    for i = 1, count do
+        local angle = rng:next(0, 3141) / 1000.0
+        local t = rng:next(0, 1000) / 1000.0
+        local dist = math.sqrt(t) * FLOATING_ISLAND_RADIUS * 0.9
+
+        local center_x = -MAX_XZ/2
+        local center_z = MAX_XZ/2
+
+        local ix = center_x - math.abs(math.cos(angle) * dist)
+        local iz = center_z + math.abs(math.sin(angle) * dist)
+
+        if ix >= 0 then ix = -(30 + rng:next(0, 50)) end
+        if iz <= 0 then iz =   30 + rng:next(0, 50)  end
+
+        local base_y = rng:next(520, 940)
+        local top_radius = rng:next(18, 45)
+        local cone_height = rng:next(40, 100)
+
+        -- 🔻 2 a 3 cones por ilha
+        local cone_count = rng:next(3, 4)
+        local cones = {}
+        local spread = 0.4 -- afastamento dos cones
+
+        for c = 1, cone_count do
+            local offset_x = rng:next(-top_radius * spread, top_radius * spread)
+	    local offset_z = rng:next(-top_radius * spread, top_radius * spread)
+
+            table.insert(cones, {
+                x = math.floor(ix + offset_x),
+                z = math.floor(iz + offset_z),
+                top_radius = top_radius * (0.7 + rng:next(0,30)/100),
+                cone_height = cone_height * (0.8 + rng:next(0,40)/100)
+            })
+        end
+
+        table.insert(FLOATING_ISLANDS, {
+            base_y = base_y,
+            cones = cones
+        })
+    end
+end
+
+-----------------------------
+-- RELEVO NO TOPO (RUÍDO SIMPLES)
+-----------------------------
+local function get_top_variation(x, z)
+    local n1 = math.sin(x * 0.04 + z * 0.02)
+    local n2 = math.sin(x * 0.09 - z * 0.05) * 0.5
+    local n3 = math.cos(z * 0.06 + x * 0.03) * 0.3
+
+    local n = n1 + n2 + n3
+
+    -- curva suave (flatten peaks)
+    n = n * 2
+
+    return n * 2
+end
+
+-----------------------------
+-- VERIFICA SE PONTO ESTÁ NA ILHA (MÚLTIPLOS CONES)
+-----------------------------
+local function point_in_island(x, y, z, island)
+    local y_top = island.base_y
+
+    if y > y_top then return false end
+    if y < 500 or y > 1000 then return false end
+
+    for _, cone in ipairs(island.cones) do
+        local y_tip = y_top - cone.cone_height
+        if y < y_tip then goto next_cone end
+
+        local t = (y - y_tip) / cone.cone_height
+
+        -- 🔻 laterais menos arredondadas
+        t = t ^ 0.85
+
+	local dx = x - cone.x
+	local dz = z - cone.z
+
+	local angle = math.atan2(dz, dx)
+
+	local base_radius = cone.top_radius * t
+
+	-- ruído angular (irregularidade da borda)
+	local noise =
+	    math.sin(angle * 3 + cone.x * 0.1) * 0.15 +
+	    math.sin(angle * 5 + cone.z * 0.1) * 0.10
+
+	local radius = base_radius * (1 + noise)
+
+	-- limite mínimo (evita buracos feios)
+	if radius < base_radius * 0.6 then
+	    radius = base_radius * 0.6
+	end
+
+        if (dx*dx + dz*dz) <= (radius * radius) then
+            return true
+        end
+
+        ::next_cone::
+    end
+
+    return false
+end
+
+-----------------------------
+-- GERAÇÃO DAS ILHAS
+-----------------------------
+local function generate_floating_islands(area, data, minp, maxp)
+    init_floating_islands()
+
+    if maxp.y < 500 or minp.y > 1000 then return end
+    if maxp.x < MIN_XZ or minp.x > 0 then return end
+    if maxp.z < 0 or minp.z > MAX_XZ then return end
+
+    for _, island in ipairs(FLOATING_ISLANDS) do
+
+        -- 🔻 margem baseada no maior cone
+        local margin = 0
+        for _, cone in ipairs(island.cones) do
+            margin = math.max(margin, cone.top_radius)
+        end
+        margin = margin + 4
+
+        -- checagem de chunk
+        local skip = true
+        for _, cone in ipairs(island.cones) do
+            if not (
+                cone.x + margin < minp.x or
+                cone.x - margin > maxp.x or
+                cone.z + margin < minp.z or
+                cone.z - margin > maxp.z
+            ) then
+                skip = false
+                break
+            end
+        end
+        if skip then goto next_island end
+
+        for y = minp.y, maxp.y do
+            if y < 500 or y > 1000 then goto next_y end
+
+            for z = minp.z, maxp.z do
+                if z <= 0 then goto next_z end
+
+                for x = minp.x, maxp.x do
+                    if x >= 0 then goto next_x end
+                    if not area:contains(x, y, z) then goto next_x end
+
+                    local vi = area:index(x, y, z)
+
+                    if point_in_island(x, y, z, island) then
+
+                        -- 🔻 topo com relevo
+                        local top_variation = math.floor(get_top_variation(x, z))
+                        local effective_top = island.base_y + top_variation
+
+                        if y > effective_top then
+                            data[vi] = c_air
+
+                        elseif y == effective_top then
+                            local has_solid_neighbor = false
+                            local neighbors = {
+                                {x+1,y,z},{x-1,y,z},
+                                {x,y,z+1},{x,y,z-1}
+                            }
+
+                            for _, nb in ipairs(neighbors) do
+                                if area:contains(nb[1], nb[2], nb[3]) then
+                                    local nvi = area:index(nb[1], nb[2], nb[3])
+                                    if data[nvi] ~= c_air then
+                                        has_solid_neighbor = true
+                                        break
+                                    end
+                                end
+                            end
+
+                            data[vi] = has_solid_neighbor and c_topgrass or c_grass
+
+                        elseif y >= effective_top - 6 then
+                            data[vi] = c_dirt
+                        elseif y >= effective_top - 8 then
+                            data[vi] = c_saprolite
+                        else
+                            data[vi] = c_gneiss
+                        end
+                    end
+
+                    ::next_x::
+                end
+                ::next_z::
+            end
+            ::next_y::
+        end
+
+        ::next_island::
+    end
+    
+-- 🗿 Coloca sentinelstatue no topo da ilha mais alta
+    local tallest = nil
+    for _, island in ipairs(FLOATING_ISLANDS) do
+        if not tallest or island.base_y > tallest.base_y then
+            tallest = island
+        end
+    end
+
+    if tallest then
+        -- Usa o primeiro cone como centro principal
+        local main_cone = tallest.cones[1]
+        local sx = main_cone.x
+        local sz = main_cone.z
+
+        -- Calcula o topo efetivo com a mesma variação usada na geração
+        local top_variation = math.floor(get_top_variation(sx, sz))
+        local statue_y = tallest.base_y + top_variation + 1  -- +1 = sobre o dirt
+
+        -- Só coloca se o chunk atual contém essa posição
+        if sx >= minp.x and sx <= maxp.x
+           and sz >= minp.z and sz <= maxp.z
+           and statue_y >= minp.y and statue_y <= maxp.y
+           and area:contains(sx, statue_y, sz)
+        then
+            local vi = area:index(sx, statue_y, sz)
+            data[vi] = c_sentinelstatue
+            -- Salva a posição da estátua do sentinela
+            sentinel_pos = {x = sx, y = statue_y, z = sz}  -- ADICIONE ESTA LINHA
+        end
+    end
+end
+
+-----------------------------
 -- FUNÇÃO DE GERAÇÃO DE DECORAÇÕES (ÁRVORES, PEBBLES, ETC)
 -----------------------------
 local function generate_decorations(minp, maxp, heights, biome_factors, noise_maps)
@@ -2094,6 +2472,22 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
 		    table.insert(palm_positions, {x=x, y=height+1, z=z, wx=wx, wz=wz})
 	        end
 	    end
+	    
+	    -- Kelp (em wet_sand entre altitude -18 e -13)
+	if height >= -18 and height <= -13 and height >= minp.y and height <= maxp.y then
+	    local grassleaves_density = 0.85 
+	    if noise_maps.grassleaves_2d[index_2d] > grassleaves_density then
+		table.insert(grassleaves_positions, {x=x, y=height+1, z=z, is_kelp=true})
+	    end
+	end
+	
+	    -- sobre a wet_sand na altitude -19)
+	if height == -19 and height >= minp.y and height <= maxp.y then
+	    local grassleaves_density = 0.7  -- mesmo threshold das kelps
+	    if noise_maps.grassleaves_2d[index_2d] > grassleaves_density then
+		table.insert(grassleaves_positions, {x=x, y=height+1, z=z, is_wetsand=true})
+	    end
+	end
             
             -- Pebbles
             if height > SEA_LEVEL + 5 and height <= SEA_LEVEL + 6 then
@@ -2207,23 +2601,32 @@ local function apply_decorations(area, data, param2_data, decorations)
 	for _, grass_pos in ipairs(decorations.grassleaves) do
 	    if area:contains(grass_pos.x, grass_pos.y, grass_pos.z) then
 		local vi = area:index(grass_pos.x, grass_pos.y, grass_pos.z)
-		if data[vi] == c_air then
+		if grass_pos.is_kelp then
+		    -- Kelp fica embaixo d'água, então aceita c_water também
+		    if data[vi] == c_water then --data[vi] == c_air or data[vi] == c_water2 or
+		        local height_val = math.random(3, 10)
+		        data[vi] = c_kelp
+		        param2_data[vi] = height_val * 16
+		    end
+		elseif grass_pos.is_wetsand then
+		    -- Kelp fica embaixo d'água, então aceita c_water também
+		    if data[vi] == c_water then --data[vi] == c_air or data[vi] == c_water2 or
+		        data[vi] = c_wetsand
+		    end
+		elseif data[vi] == c_air then
 		    local rng_grass = PseudoRandom(grass_pos.x * 54321 + grass_pos.z * 98765)
 		    local r = rng_grass:next(1, 1000)
-		    -- chance de gerar outras coisas invés de grama
-		    if r <= 1 then  -- 0.001 = 10/10000
+		    if r <= 1 then
 		        data[vi] = c_micaceusfungus
-		    elseif r <= 1 then  -- 0.001 = 10/10000
-		        data[vi] = c_flyamanitafungus
-		    elseif r <= 2 then  -- 0.002 = 20/10000
+		    elseif r <= 2 then
 		        data[vi] = c_rush
-		    elseif r <= 3 then  -- 0.003 = 30/10000
+		    elseif r <= 3 then
 		        data[vi] = c_dandelion
-		    elseif r <= 4 then  -- 0.004 = 40/10000
-		        data[vi] = c_highgrass	
-		    elseif r <= 5 then  -- 0.005 = 50/10000
-		        data[vi] = c_smallgrass		
-		    elseif r <= 250 then  -- 0.25 = 2500/10000
+		    elseif r <= 4 then
+		        data[vi] = c_highgrass
+		    elseif r <= 5 then
+		        data[vi] = c_smallgrass
+		    elseif r <= 250 then
 		        data[vi] = c_grassleavesmedium
 		    else
 		        data[vi] = c_grassleaves
@@ -2416,7 +2819,7 @@ core.register_on_generated(function(minp, maxp)
     init_perlin_maps()
     
     -- Otimização: ignora chunks muito altos ou muito baixos
-    if maxp.y < -100 or minp.y > 200 then return end
+    if maxp.y < -100 or minp.y > 1000 then return end
     
     -- Setup do voxelmanip
     local vm = core.get_voxel_manip()
@@ -2434,7 +2837,6 @@ core.register_on_generated(function(minp, maxp)
 	-- Gera todos os noise maps em batch
 	local noise_maps = generate_noise_maps(minp, maxp)
 
-	-- **ADICIONE ESTAS LINHAS AQUI:**
 	-- Encontra/define posição do vulcão
 	local volcano_pos = find_volcano_position()
 
@@ -2457,6 +2859,9 @@ core.register_on_generated(function(minp, maxp)
     
     -- Gera terreno base
     generate_terrain_base(minp, maxp, area, data, heights, biome_factors, noise_maps)
+    
+    -- Ilhas flutuantes
+    generate_floating_islands(area, data, minp, maxp)
     
     -- Gera ilha vulcânica se o chunk estiver próximo
     if chunk_near_volcano then
@@ -2511,8 +2916,16 @@ core.register_on_generated(function(minp, maxp)
         vm:update_map()
     end
     
+    
+    
     -- Rotaciona folhas de coqueiro e inicializa baús
     core.after(0, function()
+    -- Spawna estátua do caranguejo perto do vulcão (uma única vez)
+    if chunk_near_volcano and not statue_spawned then
+        core.after(0.5, function()
+            try_spawn_crab_statue(minp, maxp, volcano_pos)
+        end)
+    end
         -- Rotação das folhas de palmeira
         for _, leaf_info in ipairs(palm_leaf_rotations) do
             local node = core.get_node(leaf_info.pos)
@@ -2600,7 +3013,7 @@ end)
 -----------------------------
 -- COMANDO PARA ENCONTRAR O VULCÃO
 -----------------------------
-core.register_chatcommand("vulcao", {
+core.register_chatcommand("vulcan", {
     description = "Teleporta para a ilha vulcânica",
     privs = {teleport = true},  -- Requer privilégio de teleporte
     func = function(name)
@@ -2617,9 +3030,9 @@ core.register_chatcommand("vulcao", {
         
         -- Teleporta para o topo do vulcão
         local tp_pos = {
-            x = volcano_pos.x - 2,
-            y = VOLCANO_HEIGHT + 5,  -- Um pouco acima da cratera
-            z = volcano_pos.z - 2
+            x = volcano_pos.x - 8,
+            y = VOLCANO_HEIGHT - 1,  -- Pouco abaixo da altura da cratera
+            z = volcano_pos.z - 8
         }
         
         player:set_pos(tp_pos)
@@ -2629,7 +3042,7 @@ core.register_chatcommand("vulcao", {
 })
 
 -- Comando alternativo sem necessidade de privilégios (para testes)
-core.register_chatcommand("onde_vulcao", {
+core.register_chatcommand("local_vulcan", {
     description = "Mostra as coordenadas da ilha vulcânica",
     func = function(name)
         local volcano_pos = find_volcano_position()
@@ -2639,6 +3052,78 @@ core.register_chatcommand("onde_vulcao", {
         end
         
         return true, "Ilha vulcânica em X:" .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
+    end,
+})
+
+-----------------------------
+-- COMANDO PARA IR ATÉ O CARANGUEJO
+-----------------------------
+core.register_chatcommand("crab", {
+    description = "Teleporta para a estátua do caranguejo gigante",
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, "Jogador não encontrado"
+        end
+ 
+        if not statue_pos then
+            return false, "A estátua do caranguejo ainda não foi gerada. Explore a área do vulcão primeiro!"
+        end
+ 
+        -- Teleporta 2 blocos acima da estátua para não ficar preso na água
+        local tp_pos = {x = statue_pos.x, y = statue_pos.y + 2, z = statue_pos.z}
+        player:set_pos(tp_pos)
+ 
+        return true, "Teleportado para a estátua do caranguejo em X:" .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
+    end,
+})
+ 
+-- Comando para só ver as coordenadas sem teleportar
+core.register_chatcommand("local_crab", {
+    description = "Mostra as coordenadas da estátua do caranguejo",
+    func = function(name)
+        if not statue_pos then
+            return false, "A estátua do caranguejo ainda não foi gerada. Explore a área do vulcão primeiro!"
+        end
+ 
+        return true, "Estátua do caranguejo em X:" .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
+    end,
+})
+
+-----------------------------
+-- COMANDO PARA IR ATÉ O SENTINELA
+-----------------------------
+core.register_chatcommand("sentinel", {
+    description = "Teleporta para a estátua do sentinela",
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, "Jogador não encontrado"
+        end
+
+        if not sentinel_pos then
+            return false, "A estátua do sentinela ainda não foi gerada. Explore as ilhas flutuantes primeiro!"
+        end
+
+        -- Teleporta 2 blocos acima da estátua
+        local tp_pos = {x = sentinel_pos.x, y = sentinel_pos.y + 2, z = sentinel_pos.z}
+        player:set_pos(tp_pos)
+
+        return true, "Teleportado para a estátua do sentinela em X:" .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
+    end,
+})
+
+-- Comando para só ver as coordenadas sem teleportar
+core.register_chatcommand("local_sentinel", {
+    description = "Mostra as coordenadas da estátua do sentinela",
+    func = function(name)
+        if not sentinel_pos then
+            return false, "A estátua do sentinela ainda não foi gerada. Explore as ilhas flutuantes primeiro!"
+        end
+
+        return true, "Estátua do sentinela em X:" .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
     end,
 })
 

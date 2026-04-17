@@ -4457,41 +4457,47 @@ end
 -- admin command to remove untamed mobs around players
 
 core.register_chatcommand("clear_mobs", {
-	params = "",
-	description = "Remove untamed mobs from around players.",
-	privs = {server = true},
+    params = "",
+    description = "Remove untamed mobs from around players.",
+    privs = {server = true},
+    func = function(name, param)
+        local count = 0
+        for _, player in pairs(core.get_connected_players()) do
+            if player then
+                local pos = player:get_pos()
+                local objs = core.get_objects_inside_radius(pos, 28)
+                for _, obj in pairs(objs) do
+                    if obj then
+                        local ent = obj:get_luaentity()
+                        if ent and ent._cmi_is_mob and ent.tamed ~= true then
+                        
+                            -- Remove HUD de boss se tiver
+                            if ent._hud_ids then
+                                for _, p in ipairs(core.get_connected_players()) do
+                                    local pname = p:get_player_name()
+                                    if ent._hud_ids[pname] then
+                                        p:hud_remove(ent._hud_ids[pname].bar)
+                                        p:hud_remove(ent._hud_ids[pname].text)
+                                        ent._hud_ids[pname] = nil
+                                    end
+                                end
+                            end
+                            
+                            -- Remove cúpula se tiver
+                            if ent._dome_nodes then
+                                remove_dome(ent._dome_nodes)
+                                ent._dome_nodes = nil
+                            end
 
-	func = function (name, param)
-
-		local count = 0
-
-		for _, player in pairs(core.get_connected_players()) do
-
-			if player then
-
-				local pos = player:get_pos()
-				local objs = core.get_objects_inside_radius(pos, 28)
-
-				for _, obj in pairs(objs) do
-
-					if obj then
-
-						local ent = obj:get_luaentity()
-
-						-- only remove mobs redo mobs that are not tamed
-						if ent and ent._cmi_is_mob and ent.tamed ~= true then
-
-							remove_mob(ent, true)
-
-							count = count + 1
-						end
-					end
-				end
-			end
-		end
-
-		core.chat_send_player(name, S("@1 mobs removed.", count))
-	end
+                            remove_mob(ent, true)
+                            count = count + 1
+                        end
+                    end
+                end
+            end
+        end
+        core.chat_send_player(name, S("@1 mobs removed.", count))
+    end
 })
 
 -- Is mob hearing enabled, if so override core.sound_play with custom function

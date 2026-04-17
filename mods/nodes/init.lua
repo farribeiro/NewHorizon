@@ -3895,6 +3895,18 @@ core.register_node("nh_nodes:torch_light", {
     groups = {not_in_creative_inventory = 1},
 })
 
+-- Registra a entidade de luz
+core.register_node("nh_nodes:crystal_light", {
+    drawtype = "airlike",  -- invisível, não cria bolsão
+    paramtype = "light",
+    sunlight_propagates = true,
+    walkable = false,
+    pointable = false,
+    buildable_to = true,
+    light_source = 13,
+    groups = {not_in_creative_inventory = 1},
+})
+
 core.register_node("nh_nodes:torch_flame", {
     drawtype = "mesh",
     mesh = "torchflame.obj",  -- Você precisará criar esse mesh
@@ -4133,7 +4145,9 @@ core.register_node("nh_nodes:leaves", {
     description = S("Oak Leaves"),
     drawtype = "liquid",
     waving = 3,
-    tiles = {"oakleaves3.png"}, --tiles = {"folhas.png"},
+    --drawtype = "mesh",
+   -- mesh = "oakleaves.obj",
+    tiles = {"oakleaves3.png"}, 
     groups = {snappy = 3, tree_leaves = 1},
     drop =  {
         items = {
@@ -4154,7 +4168,161 @@ core.register_node("nh_nodes:leaves", {
 
 })
 
--- Folhas de carvalho
+-- Registra uma versão "dentro d'água" (da folha de carvalho)
+core.register_node("nh_nodes:leavesrelief", {
+    description = S("Leaves Relief"),
+    drawtype = "plantlike_rooted",
+    waving = 3,
+    tiles = {"oakleaves3.png"},
+    special_tiles = {{name = "leavesrelief.png", tileable_vertical = true}},
+    inventory_image = "leavesrelief.png",
+    wield_image = "leavesrelief.png",
+    paramtype = "light",
+    paramtype2 = "leveled",
+    use_texture_alpha = "clip",
+    groups = {snappy = 3, tree_leaves = 1},
+    walkable = false,
+    drop = "",  -- não dropa nada
+    node_dig_prediction = "",
+    node_placement_prediction = "",
+
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        minetest.set_node(pos, {name = "nh_nodes:leaves"})
+    end,
+
+on_construct = function(pos)
+    minetest.get_node_timer(pos):start(1.0)
+end,
+
+on_timer = function(pos)
+    local node = minetest.get_node(pos)
+    if node.name ~= "nh_nodes:leavesrelief" then
+        return false
+    end
+
+    -- O node "pai" do plantlike_rooted é o de BAIXO
+    local below = {x = pos.x, y = pos.y + 2, z = pos.z}
+    local below_name = minetest.get_node(below).name
+
+    if below_name ~= "nh_nodes:leaves" and below_name ~= "nh_nodes:leavesrelief" then
+        minetest.remove_node(pos)
+        return false
+    end
+
+    return true
+end,
+})
+
+core.register_node("nh_nodes:leavesrelief", {
+    description = S("Leaves Relief"),
+    drawtype = "plantlike_rooted",
+    waving = 3,
+    tiles = {"oakleaves3.png"},
+    special_tiles = {{name = "leavesrelief.png", tileable_vertical = true}},
+    inventory_image = "leavesrelief.png",
+    wield_image = "leavesrelief.png",
+    paramtype = "light",
+    paramtype2 = "leveled",
+    use_texture_alpha = "clip",
+    groups = {snappy = 3, tree_leaves = 1},
+    walkable = false,
+    drop = "",  -- não dropa nada
+    node_dig_prediction = "",
+    node_placement_prediction = "",
+
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        minetest.set_node(pos, {name = "nh_nodes:leaves"})
+    end,
+
+on_construct = function(pos)
+    minetest.get_node_timer(pos):start(1.0)
+end,
+
+on_timer = function(pos)
+    local node = minetest.get_node(pos)
+    if node.name ~= "nh_nodes:leavesrelief" then
+        return false
+    end
+
+    -- O node "pai" do plantlike_rooted é o de BAIXO
+    local below = {x = pos.x, y = pos.y + 2, z = pos.z}
+    local below_name = minetest.get_node(below).name
+
+    if below_name ~= "nh_nodes:leaves" and below_name ~= "nh_nodes:leavesrelief" then
+        minetest.remove_node(pos)
+        return false
+    end
+
+    return true
+end,
+})
+
+core.register_node("nh_nodes:kelp", {
+    description = S("Kelp") .. "\n" .. S("[Algae]"),
+    drawtype = "plantlike_rooted",
+    waving = 1,
+    tiles = {"areia_molhada.png"},
+    special_tiles = {{name = "kelp.png", tileable_vertical = true}},
+    inventory_image = "kelp.png",
+    wield_image = "kelp.png",
+    paramtype = "light",
+    paramtype2 = "leveled",
+    groups = {snappy = 3},
+    selection_box = {
+        type = "fixed",
+        fixed = {
+                {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+                {-2/16, 0.5, -2/16, 2/16, 3.5, 2/16},
+        },
+    },
+    node_dig_prediction = "nh_nodes:wet_sand",
+    node_placement_prediction = "nh_nodes:wet_sand",
+    --sounds = default.node_sound_sand_defaults({
+    --    dig = {name = "default_dig_snappy", gain = 0.2},
+    --    dug = {name = "default_grass_footstep", gain = 0.25},
+    --}),
+    on_place = function(itemstack, placer, pointed_thing)
+        -- Call on_rightclick if the pointed node defines it
+        if pointed_thing.type == "node" and not (placer and placer:is_player()
+                ) then
+            local node_ptu = minetest.get_node(pointed_thing.under)
+            local def_ptu = minetest.registered_nodes[node_ptu.name]
+            if def_ptu and def_ptu.on_rightclick then
+                return def_ptu.on_rightclick(pointed_thing.under, node_ptu, placer,
+                    itemstack, pointed_thing)
+            end
+        end
+        local pos = pointed_thing.under
+        if minetest.get_node(pos).name ~= "nh_nodes:wet_sand" then
+            return itemstack
+        end
+        local height = math.random(3, 6)
+        local pos_top = {x = pos.x, y = pos.y + height, z = pos.z}
+        local node_top = minetest.get_node(pos_top)
+        local def_top = minetest.registered_nodes[node_top.name]
+        local player_name = placer:get_player_name()
+        if def_top and def_top.liquidtype == "source" and
+                minetest.get_item_group(node_top.name, "water") > 0 then
+            if not minetest.is_protected(pos, player_name) and
+                    not minetest.is_protected(pos_top, player_name) then
+                minetest.set_node(pos, {name = "nh_nodes:kelp",
+                    param2 = height * 16})
+                if not minetest.is_creative_enabled(player_name) then
+                    itemstack:take_item()
+                end
+            else
+                minetest.chat_send_player(player_name, S("Node is protected"))
+                minetest.record_protection_violation(pos, player_name)
+            end
+        end
+        return itemstack
+    end,
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        minetest.set_node(pos, {name = "nh_nodes:wet_sand"})
+    end
+})
+
+-- Folhas de pinheiro
 core.register_node("nh_nodes:pineleaves", {
     description = S("Pine Leaves"),
     drawtype = "mesh",
@@ -4401,6 +4569,212 @@ core.register_node("nh_nodes:leaves_blueberry4", {
             core.set_node(pos, {name = "nh_nodes:blueberryleaves"})
         end
         return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:giantcrabstatue", {
+    description = S("Giant Crab Statue") .. "\n" .. S("[Unknown]"),
+    drawtype = "mesh",
+    mesh = "giantcrabstatue.obj",
+    tiles = {"giantcrabstatue.png"}, --tiles = {{name = "giantcrabstatue.png", glow = 1}},
+    sunlight_propagates = true,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    
+    groups = {falling_node = 1},
+    
+    light_source = 7,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-1.75, -0.5, -1.5, 1.75, 3.75, 1.5}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-1.75, -0.5, -2.5, 1.75, 3.75, 1.5}
+    },
+    
+    on_punch = function(pos, node, puncher, pointed_thing)
+        if not puncher or not puncher:is_player() then return end
+
+        local item = puncher:get_wielded_item()
+        local item_name = item:get_name()
+
+        -- Verifica se o item na mão é a esfera (qualquer variante)
+        if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
+        core.chat_send_player(puncher:get_player_name(), S("This won't work... I need something more powerful"))
+            return
+        end
+
+        -- Efeito de partículas de destruição
+        core.add_particlespawner({
+            amount = 50,
+            time = 2,
+            minpos = {x = pos.x - 2.5, y = pos.y - 0.5, z = pos.z - 2.5},
+            maxpos = {x = pos.x + 2.5, y = pos.y + 4, z = pos.z + 2.5},
+            minvel = {x = -6, y = 6, z = -6},
+            maxvel = {x = 6, y = 12, z = 6},
+            minacc = {x = 0, y = -20, z = 0},
+            maxacc = {x = 0, y = -20, z = 0},
+            minexptime = 0.5,
+            maxexptime = 1.5,
+            minsize = 0.5,
+            maxsize = 2,
+            glow = 14,
+            texture = {
+		    name = "spark_particle.png^[colorize:#76008d:150",  -- purpura
+		},
+        })
+
+        -- Som de destruição (usa o som de dano do caranguejo)
+        --core.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
+
+        -- Remove a estátua
+        core.remove_node(pos)
+
+	-- Coloca areia na posição da estátua imediatamente
+	core.set_node(pos, {name = "nh_nodes:wet_sand"})
+
+        -- Spawna o Giant Crab na posição da estátua
+        -- Spawna o mob após 2 segundos
+        core.after(0.25, function()
+            core.add_entity(pos, "nh_mob:giantcrab")
+        end)
+
+        -- Consome a esfera da mão do jogador
+        local inv = puncher:get_inventory()
+        item:take_item(1)
+        puncher:set_wielded_item(item)
+
+        -- Avisa o jogador
+        core.chat_send_player(puncher:get_player_name(), S("The statue shatters... something awakens!"))
+    end,
+})
+
+core.register_node("nh_nodes:redcrystal", {
+    description = S("Red Crystal") .. "\n" .. S("[Light/Air]") .. "\n" .. S("(Squat down to breathe)"),
+    drawtype = "mesh",
+    mesh = "redcrystal.obj",
+    tiles = {"redcrystal.png"},
+    sunlight_propagates = true,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    
+    groups = {oddly_breakable_by_hand = 1},
+    
+    light_source = 14,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
+    },
+    
+    on_punch = function(pos, node, puncher, pointed_thing)
+        -- Efeito de partículas de destruição
+        core.add_particlespawner({
+            amount = 50,
+            time = 0.5,
+            minpos = {x = pos.x - 2.5, y = pos.y - 0.5, z = pos.z - 2.5},
+            maxpos = {x = pos.x + 2.5, y = pos.y + 4, z = pos.z + 2.5},
+            minvel = {x = -6, y = 6, z = -6},
+            maxvel = {x = 6, y = 12, z = 6},
+            minacc = {x = 0, y = -20, z = 0},
+            maxacc = {x = 0, y = -20, z = 0},
+            minexptime = 0.5,
+            maxexptime = 1.5,
+            minsize = 0.5,
+            maxsize = 2,
+            glow = 14,
+            texture = {
+		    name = "spark_particle.png^[colorize:#76008d:150",  -- purpura
+		},
+        })
+
+        -- Som de destruição (usa o som de dano do caranguejo)
+        --core.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
+    end,
+})
+
+core.register_node("nh_nodes:sentinelstatue", {
+    description = S("Sentinel Statue") .. "\n" .. S("[Unknown]"),
+    drawtype = "mesh",
+    mesh = "skydragon.obj",
+    tiles = {"sentinelstatue.png"}, --tiles = {{name = "giantcrabstatue.png", glow = 1}},
+    sunlight_propagates = true,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    
+    groups = {falling_node = 1},
+    
+    light_source = 7,
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.65, -0.5, -0.65, 0.65, 3.5, 0.65}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.65, -0.5, -0.65, 0.65, 3.5, 0.65}
+    },
+    
+    on_punch = function(pos, node, puncher, pointed_thing)
+        if not puncher or not puncher:is_player() then return end
+
+        local item = puncher:get_wielded_item()
+        local item_name = item:get_name()
+
+        -- Verifica se o item na mão é a esfera (qualquer variante)
+        if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
+        core.chat_send_player(puncher:get_player_name(), S("This won't work... I need something more powerful"))
+            return
+        end
+
+        -- Efeito de partículas de destruição
+        core.add_particlespawner({
+            amount = 50,
+            time = 2,
+            minpos = {x = pos.x - 2.5, y = pos.y - 0.5, z = pos.z - 2.5},
+            maxpos = {x = pos.x + 2.5, y = pos.y + 4, z = pos.z + 2.5},
+            minvel = {x = -6, y = 6, z = -6},
+            maxvel = {x = 6, y = 12, z = 6},
+            minacc = {x = 0, y = -20, z = 0},
+            maxacc = {x = 0, y = -20, z = 0},
+            minexptime = 0.5,
+            maxexptime = 1.5,
+            minsize = 0.5,
+            maxsize = 2,
+            glow = 1,
+            texture = {
+		    name = "spark_particle.png^[colorize:#FF8800:150",  -- dourado
+		},
+        })
+
+        -- Som de destruição (usa o som de dano do caranguejo)
+        --core.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
+
+        -- Remove a estátua
+        core.remove_node(pos)
+
+	-- Coloca grama na posição da estátua imediatamente
+	--core.set_node(pos, {name = "nh_nodes:wet_sand"})
+
+        -- Spawna o Giant Crab na posição da estátua
+        -- Spawna o mob após 2 segundos
+        core.after(0.25, function()
+            core.add_entity(pos, "nh_mob:sentinel")
+        end)
+
+        -- Consome a esfera da mão do jogador
+        local inv = puncher:get_inventory()
+        item:take_item(1)
+        puncher:set_wielded_item(item)
+
+        -- Avisa o jogador
+        core.chat_send_player(puncher:get_player_name(), S("The statue shatters... something awakens!"))
     end,
 })
 
@@ -4854,7 +5228,7 @@ core.register_globalstep(function(dtime)
         local player_name = player:get_player_name()
         local light_pos_base = {x = pos.x, y = pos.y + 1, z = pos.z}
         
-        if wielded:get_name() == "nh_nodes:torch2" then
+        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" then
             -- Cria luz temporária
             if not players_with_torch[player_name] then
                 players_with_torch[player_name] = {}
@@ -4864,7 +5238,7 @@ core.register_globalstep(function(dtime)
             if players_with_torch[player_name].pos then
                 local old_pos = players_with_torch[player_name].pos
                 local node = core.get_node(old_pos)
-                if node.name == "nh_nodes:torch_light" then
+                if node.name == "nh_nodes:torch_light" or node.name == "nh_nodes:crystal_light" then
                     core.remove_node(old_pos)
                 end
             end
@@ -4874,6 +5248,10 @@ core.register_globalstep(function(dtime)
             local node = core.get_node(light_pos)
             if node.name == "air" then
                 core.set_node(light_pos, {name = "nh_nodes:torch_light"})
+                players_with_torch[player_name].pos = light_pos
+            --end
+            elseif node.name == "nh_nodes:water" then
+                core.set_node(light_pos, {name = "nh_nodes:crystal_light"})
                 players_with_torch[player_name].pos = light_pos
             end
         else
@@ -4896,20 +5274,7 @@ core.register_on_leaveplayer(function(player)
     if players_with_torch[player_name] and players_with_torch[player_name].pos then
         local pos = players_with_torch[player_name].pos
         local node = core.get_node(pos)
-        if node.name == "nh_nodes:torch_light" then
-            core.remove_node(pos)
-        end
-        players_with_torch[player_name] = nil
-    end
-end)
-
--- Limpa luz quando jogador sai
-core.register_on_leaveplayer(function(player)
-    local player_name = player:get_player_name()
-    if players_with_torch[player_name] and players_with_torch[player_name].pos then
-        local pos = players_with_torch[player_name].pos
-        local node = core.get_node(pos)
-        if node.name == "nh_nodes:torch_light" then
+        if node.name == "nh_nodes:torch_light" or  node.name == "nh_nodes:crystal_light" then
             core.remove_node(pos)
         end
         players_with_torch[player_name] = nil
@@ -6053,6 +6418,14 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
 })
 
 
+core.register_node("nh_nodes:fireice", {
+    description = S("Fire Ice"),
+    tiles = {"neve.png"},
+    drawtype = "normal",
+    groups = {crumbly = 3, falling_node = 1}, -- como areia, mas sem fluir
+    --sounds = default.node_sound_snow_defaults(),
+})
+
 core.register_node("nh_nodes:snow", {
     description = S("Snow"),
     tiles = {"neve.png"},
@@ -6153,6 +6526,51 @@ core.register_node("nh_nodes:water_flowing", {
     post_effect_color = {a=64, r=0, g=0, b=255},
     drowning = 1,  -- ADICIONEI ESSA LINHA
     groups = {water=1, liquid=1, not_in_creative_inventory=1},
+})
+
+
+core.register_node("nh_nodes:barrier", {
+    description = S("Barrier"),
+    drawtype = "glasslike",
+    tiles = {"ice2.png"}, 
+    groups = {not_in_creative_inventory = 1},
+    --is_ground_content = true,
+    use_texture_alpha = "clip", --blend
+    --alpha = 200,
+    paramtype = "light",
+    
+    walkable = true,
+    pointable = false,          -- não pode ser selecionado
+    diggable = false,           -- inquebrável
+    buildable_to = false,
+    sunlight_propagates = true,   -- deixa a luz passar, como gelo real         -- não flui
+    --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+    --connects_to = {"nh_nodes:ice"},
+})
+
+minetest.register_chatcommand("cleardome", {
+    privs = {server = true},
+    func = function(name)
+        local player = minetest.get_player_by_name(name)
+        local pos = player:get_pos()
+        local count = 0
+        for x = -80, 80 do
+            for y = -80, 80 do
+                for z = -80, 80 do
+                    local p = {
+                        x = math.floor(pos.x + x),
+                        y = math.floor(pos.y + y),
+                        z = math.floor(pos.z + z)
+                    }
+                    if minetest.get_node(p).name == "nh_nodes:barrier" then
+                        minetest.set_node(p, {name = "air"})
+                        count = count + 1
+                    end
+                end
+            end
+        end
+        return true, count .. " barriers removidos."
+    end
 })
 
 -- Gelo
@@ -11082,6 +11500,7 @@ function show_grimoire(player, page, search)
         "size[14,13]",
         "label[0.3,0.3;" .. S("Complete Materialization Grimoire") .. "]",
         "field[0.3,0.9;6,0.8;search;;" .. core.formspec_escape(search) .. "]",
+        "field_close_on_enter[search;false]",
         "button[6.4,0.9;1.2,0.8;do_search;" .. S("Search") .. "]",
         "button[8,0.9;1,0.8;prev;<]",
         "label[9.2,1.05;" .. page .. "/" .. max_page .. "]",
@@ -11194,7 +11613,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
         return
     end
 
-    if fields.do_search then
+    if fields.do_search or fields.key_enter_field == "search" then
         state.search = fields.search or ""
         state.page   = 1
         show_grimoire(player, state.page, state.search)

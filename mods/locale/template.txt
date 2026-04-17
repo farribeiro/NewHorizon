@@ -1,0 +1,4 @@
+# textdomain: nh
+
+New Horizon =
+A simple game, with world travel, unique mechanics and mysteries. =
