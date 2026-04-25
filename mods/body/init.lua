@@ -1,6 +1,7 @@
 print("[body] Mod carregado")
 -- TABELAS GLOBAIS
 --local shadow_objects = {}
+local zeroaxys = { x = 0, y = 0, z = 0 }
 local last_wielded = {}
 local last_wield_index = {}
 local player_states = {}
@@ -107,8 +108,8 @@ local function create_player_body(player)
         body:set_attach(
             player,
             "", -- Bone principal (corpo todo)
-            { x = 0, y = 0, z = 0 },
-            { x = 0, y = 0, z = 0 },
+            zeroaxys,
+            zeroaxys,
             true
         )
         -- ★ SINCRONIZA OS BONES IMEDIATAMENTE ★
@@ -270,7 +271,7 @@ local hand_capabilities = {
 
 core.override_item("", { -- "" é o itemstring da mão sem itens
     wield_image = "",
-    wield_scale = { x = 0, y = 0, z = 0 },
+    wield_scale = zeroaxys,
     range = 3,
     tool_capabilities = hand_capabilities,
 })
@@ -588,13 +589,13 @@ local function update_armor_visuals(player)
         head = {
             bone = "bone_All_Head",
             pos = { x = 0, y = 4.75, z = 0 },
-            rot = { x = 0, y = 0, z = 0 },
+            rot = zeroaxys,
             size = { x = 0.3, y = 0.3, z = 0.3 }
         },
         torso = {
             bone = "bone_TorsoArms",
-            pos = { x = 0, y = 0, z = 0 },
-            rot = { x = 0, y = 0, z = 0 },
+            pos = zeroaxys,
+            rot = zeroaxys,
             size = { x = 0.35, y = 0.35, z = 0.35 }
         },
         waist = {
@@ -605,8 +606,8 @@ local function update_armor_visuals(player)
         },
         legs = {
             bone = "bone_Legs",
-            pos = { x = 0, y = 0, z = 0 },
-            rot = { x = 0, y = 0, z = 0 },
+            pos = zeroaxys,
+            rot = zeroaxys,
             size = { x = 0.3, y = 0.3, z = 0.3 }
         },
         back = {
@@ -618,19 +619,19 @@ local function update_armor_visuals(player)
         arms = {
             bone = "bone_TorsoArms",
             pos = { x = 0, y = -2, z = 0 },
-            rot = { x = 0, y = 0, z = 0 },
+            rot = zeroaxys,
             size = { x = 0.25, y = 0.25, z = 0.25 }
         },
         hands = {
             bone = "bone_RHand",
-            pos = { x = 0, y = 0, z = 0 },
-            rot = { x = 0, y = 0, z = 0 },
+            pos = zeroaxys,
+            rot = zeroaxys,
             size = { x = 0.2, y = 0.2, z = 0.2 }
         },
         feet = {
             bone = "bone_Legs",
             pos = { x = 0, y = -4, z = 0 },
-            rot = { x = 0, y = 0, z = 0 },
+            rot = zeroaxys,
             size = { x = 0.25, y = 0.25, z = 0.25 }
         }
     }
@@ -803,8 +804,8 @@ local function rotate_head_to_look(player)
     head_pitch = math.max(-60, math.min(60, head_pitch))
     player:set_bone_override("bone_All_Head",
         { rotation = { vec = { x = 0, y = head_yaw * 0.01, z = head_pitch * 0.02 } } })
-    player:set_bone_override("bone_TorsoArms", { rotation = { vec = { x = 0, y = 0, z = 0 } } })
-    player:set_bone_override("bone_Legs", { rotation = { vec = { x = 0, y = 0, z = 0 } } })
+    player:set_bone_override("bone_TorsoArms", { rotation = { vec = zeroaxys } })
+    player:set_bone_override("bone_Legs", { rotation = { vec = zeroaxys } })
 end
 
 -- FUNÇÃO PARA DEFINIR ANIMAÇÃO DO PLAYER
