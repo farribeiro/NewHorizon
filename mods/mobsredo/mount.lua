@@ -22,22 +22,6 @@ local abs, cos, floor, sin, sqrt, pi =
 
 -- helper functions
 
-local function node_is(entity)
-
-	if not entity.standing_on then return "other" end
-
-	if entity.standing_on == "air" then return "air" end
-
-	local def = core.registered_nodes[entity.standing_on]
-
-	if def.groups.lava then return "lava" end
-	if def.groups.liquid then return "liquid" end
-	if def.groups.walkable then return "walkable" end
-
-	return "other"
-end
-
-
 local function get_sign(i)
 
 	if not i or i == 0 then return 0 end
@@ -218,11 +202,7 @@ function mobs.detach(player)
 	end)
 end
 
--- vars
-
-local damage_counter = 0
-
--- ride mob like car or horse
+-- ride mob like horse or even a car
 
 function mobs.drive(entity, moving_anim, stand_anim, can_fly, dtime)
 
@@ -267,6 +247,11 @@ function mobs.drive(entity, moving_anim, stand_anim, can_fly, dtime)
 
 		entity.object:set_yaw(horz - entity.rotate)
 
+		-- firing arrows
+		if ctrl.LMB and ctrl.sneak and entity.do_mount_action then
+			entity.do_mount_action(entity, dtime)
+		end
+
 		if can_fly then
 
 			if ctrl.jump then -- fly up
@@ -307,41 +292,10 @@ function mobs.drive(entity, moving_anim, stand_anim, can_fly, dtime)
 		end
 	end
 
-	local ni = node_is(entity)
-
-	-- env damage
-	if ni == "liquid" or ni == "lava" then
-
-		damage_counter = damage_counter + dtime
-
-		if damage_counter > 1 then
-
-			local damage = 0
-
-			if entity.lava_damage > 0 and ni == "lava" then
-				damage = entity.lava_damage
-			elseif entity.water_damage > 0 and ni == "liquid" then
-				damage = entity.water_damage
-			end
-
-			if damage >= 1 then
-
-				entity.object:punch(entity.object, 1.0, {
-					full_punch_interval = 1.0,
-					damage_groups = {fleshy = damage}
-				}, nil)
-			end
-
-			damage_counter = 0
-		end
-	end
-
 	-- if not moving then set animation and return
 	if entity.v == 0 and velo.x == 0 and velo.y == 0 and velo.z == 0 then
 
-		if stand_anim then entity:set_animation(stand_anim) end
-
-		return
+		if stand_anim then entity:set_animation(stand_anim) end ; return
 	end
 
 	-- set moving animation
@@ -368,9 +322,7 @@ function mobs.drive(entity, moving_anim, stand_anim, can_fly, dtime)
 	end
 
 	-- Set position, velocity and acceleration
-	local p = entity.object:get_pos()
-
-	if not p then return end
+	local p = entity.object:get_pos() ; if not p then return end
 
 	local new_acce = {x = 0, y = entity.fall_speed, z = 0}
 
@@ -378,58 +330,17 @@ function mobs.drive(entity, moving_anim, stand_anim, can_fly, dtime)
 
 	local v = entity.v
 
-	if ni == "air" then
-
-		if can_fly then new_acce.y = 0 ; acce_y = 0 end
-
-	elseif ni == "liquid" or ni == "lava" then
-
-		local terrain_type = entity.terrain_type
-
-		if terrain_type == 2 or terrain_type == 3 then
-
-			new_acce.y = 0
-			p.y = p.y + 1
-
-			if core.get_item_group(entity.standing_in, "liquid") ~= 0 then
-
-				if velo.y >= 5 then
-					velo.y = 5
-				elseif velo.y < 0 then
-					new_acce.y = 20
-				else
-					new_acce.y = 5
-				end
-			else
-				if abs(velo.y) < 1 then
-
-					local pos = entity.object:get_pos()
-
-					if not pos then return end
-
-					pos.y = floor(pos.y) + 0.5
-					entity.object:set_pos(pos)
-					velo.y = 0
-				end
-			end
-		else
-			v = v * 0.25
-		end
-	end
-
 	local new_velo = get_velocity(v, yaw - rot_view, velo.y)
 
 	new_acce.y = new_acce.y + acce_y
 
 	entity.object:set_velocity(new_velo)
 	entity.object:set_acceleration(new_acce)
-
-	entity.v2 = v
 end
 
 -- fly mob in facing direction (by D00Med, edited by TenPlus1)
 
-function mobs.fly(entity, _, speed, shoots, arrow, moving_anim, stand_anim)
+function mobs.fly(entity, dtime, speed, shoots, arrow, moving_anim, stand_anim)
 
 	local ctrl = entity.driver:get_player_control() ; if not ctrl then return end
 	local velo = entity.object:get_velocity() ; if not velo then return end

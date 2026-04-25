@@ -47,8 +47,8 @@ local function hunger_timer()
             
             -- Se a fome chegar a 0, causa dano
             if hunger_data[name].level == 0 then
-		player:set_hp(player:get_hp() - 1)
-	    end
+                player:set_hp(player:get_hp() - 1)
+            end
 
             
             -- Regenera vida se a fome estiver alta
@@ -90,28 +90,42 @@ core.register_on_joinplayer(function(player)
         offset = {x = -302, y = -85}
     })   
    
-    -- Cria a nova barra
+    -- Cria a nova barra de saúde
     health_hud[name] = player:hud_add({
         type = "statbar",
         position = {x = 0.5, y = 1},
-        text = "blood.png",   -- Seu coração customizado
-        number = 20,             -- Vida máxima = 20
+        text = "blood.png",
+        number = 20,
         direction = 0,
         size = {x = 24, y = 24},
-        offset = {x = -300, y = -88},  -- Para alinhar ao lado da barra de fome
+        offset = {x = -300, y = -88},
     })
     
+    -- Restaura a vida salva
+    core.after(0.1, function()
+        if not (player and player:is_player()) then return end
+        local meta = player:get_meta()
+        local saved_hp = meta:get_int("hp")
+        if saved_hp > 0 then
+            player:set_hp(saved_hp)
+            if health_hud[name] then
+                player:hud_change(health_hud[name], "number", saved_hp)
+            end
+        end
+    end)
+
     -- INICIALIZA O ESTADO DA HOTBAR
     if not hotbar_state then
         hotbar_state = {}
     end
     hotbar_state[name] = {
-        current_size = 2,  -- Começa com 2 slots
+        current_size = 2,
         needs_update = false
     }
     
     -- Define a hotbar com 2 slots
     core.after(0.1, function()
+        if not (player and player:is_player()) then return end
         player:hud_set_hotbar_itemcount(2)
         player:hud_set_hotbar_image("gui_hotbar3.png")
         player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
@@ -119,42 +133,51 @@ core.register_on_joinplayer(function(player)
     
     -- APLIQUE O STEPHEIGHT DEPOIS
     core.after(0.2, function()
+        if not (player and player:is_player()) then return end
         player:set_physics_override({
             stepheight = 1.1,
             jump = 1.0,
         })
     end)
     
-    -- Adiciona a barra de fome
+    -- Adiciona a barra de fome (carregando valor salvo)
     core.after(0.3, function()
-        -- Inicializa a fome do jogador (20 = máximo)
+        if not (player and player:is_player()) then return end
+        local meta = player:get_meta()
+
+        -- Carrega a fome salva, ou 20 se for a primeira vez
+        local saved_hunger = meta:get_int("hunger_level")
+        if saved_hunger == 0 then saved_hunger = 20 end
+
         hunger_data[name] = {
-            level = 20,
+            level = saved_hunger,
             hud_id = nil
-        }  
+        }
+
+        -- Ícone de fundo da barra de fome
+        hud_icons[name] = player:hud_add({
+            type = "image",
+            position = {x = 0.5, y = 1},
+            text          = "background_bar2.png",
+            scale         = {x = 1.5, y = 1.5},
+            offset = {x = 180, y = -76}
+        })
         
-    hud_icons[name] = player:hud_add({
-        type = "image",
-        position = {x = 0.5, y = 1},
-        text          = "background_bar2.png",
-        scale         = {x = 1.5, y = 1.5},
-        offset = {x = 180, y = -76}
-    })
-    
-    hud_icons[name] = player:hud_add({
-        type = "image",
-        position = {x = 0.495, y = 1},
-        text          = "honeydroplet3.png",
-        scale         = {x = 2, y = 2},
-        offset = {x = 324, y = -85}
-    })  
+        -- Ícone decorativo da fome
+        hud_icons[name] = player:hud_add({
+            type = "image",
+            position = {x = 0.495, y = 1},
+            text          = "honeydroplet3.png",
+            scale         = {x = 2, y = 2},
+            offset = {x = 324, y = -85}
+        })
         
         -- Cria o HUD da barra de fome
         hunger_data[name].hud_id = player:hud_add({
             type = "statbar",
             position = {x = 0.5, y = 1},
             text = "food.png",
-            number = 20,
+            number = saved_hunger,  -- Começa com o valor salvo
             direction = 0,
             size = {x = 24, y = 24},
             offset = {x = 60, y = -88},
@@ -163,6 +186,7 @@ core.register_on_joinplayer(function(player)
     
     -- Adiciona a barra de breath (respiração) ACIMA da fome
     core.after(0.4, function()
+        if not (player and player:is_player()) then return end
         breath_hud[name] = player:hud_add({
             type = "statbar",
             position = {x = 0.5, y = 1},
@@ -173,15 +197,32 @@ core.register_on_joinplayer(function(player)
             offset = {x = 50, y = -116},
         })
     end)
+    
+    core.after(0.5, function()
+        if player and player:is_player() then
+            player:set_armor_groups({ fleshy = 100 })
+        end
+    end)
 end)
 
--- Remove os dados quando o jogador sai
+-- Remove os dados quando o jogador sai (salvando antes)
 core.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
+    local meta = player:get_meta()
+
+    -- Salva a fome
+    if hunger_data[name] then
+        meta:set_int("hunger_level", hunger_data[name].level)
+    end
+
+    -- Salva a vida
+    meta:set_int("hp", player:get_hp())
+
+    -- Limpa as tabelas locais
     hunger_data[name] = nil
     health_hud[name] = nil
     breath_hud[name] = nil
-    hotbar_state[name] = nil  -- Reiniciar hotbar
+    hotbar_state[name] = nil
 end)
 
 -- Função auxiliar para restaurar fome (use ao comer itens)
@@ -196,7 +237,7 @@ end
 -- Adiciona item apenas nos slots visíveis do inventário (1-8)
 function add_item_to_visible_slots(player, itemstack)
     local inv = player:get_inventory()
-    local name = player:get_player_name()  -- ← estava faltando isso
+    local name = player:get_player_name()
     local item_name = itemstack:get_name()
         
     -- DEBUG: mostra o tamanho real do inventário
@@ -240,12 +281,11 @@ local auto_jump_cooldown = {}  -- Evita pulos repetidos muito rápidos
 core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
         local player_name = player:get_player_name()
-        local name = player_name  -- Adiciona esta linha para consistência
+        local name = player_name
         
         
         if hotbar_state[name] then
             local inv = player:get_inventory()
-            --local has_belt_items = false
             
             -- Verifica se há item no slot de armadura da cintura
             local waist_stack = inv:get_stack("armor_waist", 1)
@@ -259,12 +299,10 @@ core.register_globalstep(function(dtime)
                 hotbar_state[name].current_size = needed_size
                 
                 if needed_size == 8 then
-                    -- Expande para 8 slots (padrão Luanti)
                     player:hud_set_hotbar_itemcount(8)
-                    player:hud_set_hotbar_image("gui_hotbar.png")  -- Imagem padrão do Luanti
+                    player:hud_set_hotbar_image("gui_hotbar.png")
                     player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
                 else
-                    -- Volta para 2 slots (customizado)
                     player:hud_set_hotbar_itemcount(2)
                     player:hud_set_hotbar_image("gui_hotbar3.png")
                     player:hud_set_hotbar_selected_image("gui_hotbar_selected.png")
@@ -272,8 +310,7 @@ core.register_globalstep(function(dtime)
             end
         end
         
-        
-                -- Atualiza breath HUD (barra de respiração)
+        -- Atualiza breath HUD (barra de respiração)
         if breath_hud[name] then
             local breath = player:get_breath()
             local head_pos = {
@@ -367,14 +404,13 @@ core.register_globalstep(function(dtime)
                     
                     -- Define quais blocos são "sólidos" (obstáculos)
                     local function is_solid(node_name)
-		            local node_def = core.registered_nodes[node_name]
-	    
-			    -- Se o nó não existe ou não é walkable, não é sólido
-			    if not node_def or not node_def.walkable then
-				return false
-			    end
+                        local node_def = core.registered_nodes[node_name]
+    
+                        -- Se o nó não existe ou não é walkable, não é sólido
+                        if not node_def or not node_def.walkable then
+                            return false
+                        end
 
-                    
                         return node_name ~= "air" and 
                                node_name ~= "nh_nodes:water" and
                                node_name ~= "nh_nodes:water2" and
@@ -447,6 +483,7 @@ local surface_absorption = {
 }
 
 core.register_on_player_hpchange(function(player, hp_change, reason)
+
     -- Primeiro: calcula dano reduzido por queda
     if reason.type == "fall" then
         local pos = player:get_pos()
@@ -474,6 +511,8 @@ core.register_on_player_hpchange(function(player, hp_change, reason)
     return hp_change
 end, true)
 
+
+
 core.register_on_respawnplayer(function(player)
     local name = player:get_player_name()
 
@@ -482,8 +521,8 @@ core.register_on_respawnplayer(function(player)
         hunger_data[name].level = 20
         update_hunger_hud(player, 20)
     end
-
-    return true  -- mantém o respawn padrão
+    
+    --return true  -- mantém o respawn padrão
 end)
 
 core.register_on_dieplayer(function(player)
@@ -512,5 +551,5 @@ core.register_on_dieplayer(function(player)
         end
     end
 
-    return true  -- mantém o comportamento padrão da morte
+    --return true  -- mantém o comportamento padrão da morte
 end)

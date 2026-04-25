@@ -79,30 +79,30 @@ core.register_entity("nh_body:player_body", {
             return
         end
         
-        -- Sincroniza posições dos bones apenas se mudaram
-        local head_pos, head_rot = player:get_bone_position("bone_All_Head")
-        local torso_pos, torso_rot = player:get_bone_position("bone_TorsoArms")
-        local legs_pos, legs_rot = player:get_bone_position("bone_Legs")
+        -- Sincroniza rotações dos bones apenas se mudaram
+        local head_rot  = player:get_bone_override("bone_All_Head").rotation.vec
+        local torso_rot = player:get_bone_override("bone_TorsoArms").rotation.vec
+        local legs_rot  = player:get_bone_override("bone_Legs").rotation.vec
         
-        -- Verifica se a posição da cabeça mudou
+        -- Verifica se a rotação da cabeça mudou
         if not self.last_bone_head or 
            not vector.equals(head_rot, self.last_bone_head.rot) then
-            self.object:set_bone_position("bone_All_Head", head_pos, head_rot)
-            self.last_bone_head = {pos = head_pos, rot = head_rot}
+            self.object:set_bone_override("bone_All_Head", {rotation = {vec = head_rot}})
+            self.last_bone_head = {rot = head_rot}
         end
         
-        -- Verifica se a posição do torso mudou
+        -- Verifica se a rotação do torso mudou
         if not self.last_bone_torso or 
            not vector.equals(torso_rot, self.last_bone_torso.rot) then
-            self.object:set_bone_position("bone_TorsoArms", torso_pos, torso_rot)
-            self.last_bone_torso = {pos = torso_pos, rot = torso_rot}
+            self.object:set_bone_override("bone_TorsoArms", {rotation = {vec = torso_rot}})
+            self.last_bone_torso = {rot = torso_rot}
         end
         
-        -- Verifica se a posição das pernas mudou
+        -- Verifica se a rotação das pernas mudou
         if not self.last_bone_legs or 
            not vector.equals(legs_rot, self.last_bone_legs.rot) then
-            self.object:set_bone_position("bone_Legs", legs_pos, legs_rot)
-            self.last_bone_legs = {pos = legs_pos, rot = legs_rot}
+            self.object:set_bone_override("bone_Legs", {rotation = {vec = legs_rot}})
+            self.last_bone_legs = {rot = legs_rot}
         end
     end,
 })
@@ -142,14 +142,14 @@ local function create_player_body(player)
             if not body or not body:get_luaentity() then return end
             if not player or not player:is_player() then return end
             
-            -- Copia TODAS as posições de bones do player para o corpo
-            local head_pos, head_rot = player:get_bone_position("bone_All_Head")
-            local torso_pos, torso_rot = player:get_bone_position("bone_TorsoArms")
-            local legs_pos, legs_rot = player:get_bone_position("bone_Legs")
+            -- Copia rotações dos bones do player para o corpo
+            local head_rot  = player:get_bone_override("bone_All_Head").rotation.vec
+            local torso_rot = player:get_bone_override("bone_TorsoArms").rotation.vec
+            local legs_rot  = player:get_bone_override("bone_Legs").rotation.vec
             
-            body:set_bone_position("bone_All_Head", head_pos, head_rot)
-            body:set_bone_position("bone_TorsoArms", torso_pos, torso_rot)
-            body:set_bone_position("bone_Legs", legs_pos, legs_rot)
+            body:set_bone_override("bone_All_Head",  {rotation = {vec = head_rot}})
+            body:set_bone_override("bone_TorsoArms", {rotation = {vec = torso_rot}})
+            body:set_bone_override("bone_Legs",      {rotation = {vec = legs_rot}})
             
             -- Força atualização da animação atual
             local state = player_states[player_name]
@@ -1066,7 +1066,7 @@ local function rotate_head_to_look(player)
     local head_pitch = math.deg(-look_pitch)
     local head_yaw_raw = math.deg(-yaw_diff)
     
-    local head_limit = 60
+    local head_limit = 45
     
     local head_yaw
     if is_moving_keys then
@@ -1077,22 +1077,19 @@ local function rotate_head_to_look(player)
     
     head_pitch = math.max(-60, math.min(60, head_pitch))
     
-    player:set_bone_position(
+    player:set_bone_override(
         "bone_All_Head",
-        {x = 0.5, y = 5, z = 0},
-        {x = 0, y = head_yaw * 0.5, z = head_pitch}
+        {rotation = {vec = {x = 0, y = head_yaw * 0.01, z = head_pitch * 0.02}}}
     )
     
-    player:set_bone_position(
+    player:set_bone_override(
         "bone_TorsoArms",
-        {x = 0, y = 0, z = 0},
-        {x = 0, y = 0, z = 0}
+        {rotation = {vec = {x = 0, y = 0, z = 0}}}
     )
     
-    player:set_bone_position(
+    player:set_bone_override(
         "bone_Legs",
-        {x = 0, y = 0, z = 0},
-        {x = 0, y = 0, z = 0}
+        {rotation = {vec = {x = 0, y = 0, z = 0}}}
     )
 end
 
@@ -1209,6 +1206,13 @@ core.register_globalstep(function(dtime)
 
     for _, player in ipairs(core.get_connected_players()) do
         local player_name = player:get_player_name()
+        
+        -- ✅ Garante que fleshy (sofrer dano) nunca seja perdido
+        local armor = player:get_armor_groups()
+        if not armor.fleshy or armor.fleshy == 0 then
+            player:set_armor_groups({ fleshy = 100 })
+        end
+        
         local item = player:get_wielded_item()
         local item_name = item:get_name()
         local has_item = item_name ~= "" and item_name ~= ":"

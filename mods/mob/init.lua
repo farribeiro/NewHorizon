@@ -233,7 +233,7 @@ register_orb_egg("nh_mob:rat", S("Orb with Rat"))
 -------------------------------
 mobs:register_mob("nh_mob:ladybug", {
     type = "animal",
-    passive = false,
+    passive = true,
     reach = 1,
     damage = 0,
     attack_type = "dogfight",
@@ -325,7 +325,7 @@ register_orb_egg("nh_mob:ladybug",  S("Orb with Ladybug"))
 -------------------------------
 mobs:register_mob("nh_mob:cricket", {
     type = "animal",
-    passive = false,
+    passive = true,
     reach = 1,
     damage = 0,
     attack_type = "dogfight",
@@ -338,6 +338,10 @@ mobs:register_mob("nh_mob:cricket", {
     hp_min = 1,
     hp_max = 3,
     armor = 100,
+    
+    -- Grilos fogem de jogadores
+    runaway = true,
+    runaway_from = {"player"},
     
     collisionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1},
     selectionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1},
@@ -521,12 +525,16 @@ register_orb_egg("nh_mob:cicada",  S("Orb with Cicada"))
 -------------------------------
 mobs:register_mob("nh_mob:firefly", {
     type = "animal",
-    passive = false,
+    passive = true,
     reach = 1,
     damage = 0,
     attack_type = "dogfight",
     
     description = S("Firefly"),
+    
+    -- Vagalumes fogem de jogadores
+    runaway = true,
+    runaway_from = {"player"},
     
     blood_texture = "mob_yellowblood.png",  -- sua textura customizada
     blood_amount = 5,                   -- quantidade de partículas
@@ -732,9 +740,11 @@ register_orb_egg("nh_mob:worm", S("Orb with Worm"))
 mobs:register_mob("nh_mob:bull", {
     type = "animal",
     passive = false,
-    reach = 1,
+    reach = 3,
     damage = 7,
     attack_type = "dogfight",
+    attack_chance = 1,
+    
     drops = {
         {name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4},  -- 1-4 couros
         {name = "nh_nodes:cowmeat", chance = 1, min = 2, max = 5},  -- 2-7 carnes (sempre)
@@ -747,7 +757,7 @@ mobs:register_mob("nh_mob:bull", {
     hp_max = 35,
     armor = 100,
     
-    collisionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
+    collisionbox = {-2.3, 0, -2.3, 2.3, 2.6, 2.3},
     selectionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
     physical = true,
     stepheight = 2,
@@ -768,7 +778,7 @@ mobs:register_mob("nh_mob:bull", {
     walk_velocity = 1,
     run_velocity = 6,
     
-    view_range = 8,
+    view_range = 10,
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
@@ -807,8 +817,41 @@ mobs:register_mob("nh_mob:bull", {
 
 on_rightclick = function(self, clicker)
     if not clicker:is_player() then return end
-
     if mobs:protect(self, clicker) then return end
+
+    local item = clicker:get_wielded_item()
+    local name = item:get_name()
+
+    -- ==== ALIMENTAÇÃO PARA REPRODUÇÃO ====
+    if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
+        if not self.bred then
+            self.bred = true
+            item:take_item()
+            clicker:set_wielded_item(item)
+
+            local mob_type = self.name == "nh_mob:bull" and "bull" or "cow"
+            core.chat_send_player(
+                clicker:get_player_name(),
+                S("The bull is ready to breed!")
+            )
+            -- Efeito de coração sobre o mob
+            local pos = self.object:get_pos()
+            minetest.add_particlespawner({
+                amount = 5, time = 1,
+                minpos = {x=pos.x-0.5, y=pos.y+2, z=pos.z-0.5},
+                maxpos = {x=pos.x+0.5, y=pos.y+3, z=pos.z+0.5},
+                minvel = {x=0, y=0.5, z=0}, maxvel = {x=0, y=1, z=0},
+                minexptime = 1, maxexptime = 1.5,
+                minsize = 1, maxsize = 1.5,
+                texture = "heart.png",
+            })
+            return
+        else
+            core.chat_send_player(clicker:get_player_name(), S("Already ready to breed!"))
+            return
+        end
+    end
+    
     if mobs:feed_tame(self, clicker, 1, false, false) then return end
 
     -- Se já tem alguém montado, desmonta
@@ -837,7 +880,7 @@ on_rightclick = function(self, clicker)
         return
     end
 
-	if name == "nh_nodes:grassleaves" or "nh_nodes:grassleavesmedium" then
+	if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
 	    core.chat_send_player(clicker:get_player_name(), S("You fed the bull! Mooo!"))
 	elseif name == "" then
 	    -- mão vazia
@@ -857,7 +900,7 @@ mobs:spawn({
     max_light = 15,
     interval = 120,
     chance = 2000,
-    active_object_count = 3,
+    active_object_count = 1,
     min_height = -20,
     max_height = 30                  
 })
@@ -865,12 +908,282 @@ mobs:spawn({
 --mobs:register_egg("nh_mob:bull", "Orbe com Touro", "orbspawner.png", 0)
 register_orb_egg("nh_mob:bull", S("Orb with Bull"))
 
+mobs:register_mob("nh_mob:cow", {
+    type = "animal",
+    passive = true,
+    reach = 3,
+    damage = 5,
+    attack_type = "dogfight",
+    drops = {
+        {name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4},  -- 1-4 couros
+        {name = "nh_nodes:cowmeat", chance = 1, min = 2, max = 5},  -- 2-7 carnes (sempre)
+        {name = "nh_nodes:bone", chance = 1, min = 2, max = 5},  -- 2-7 ossos (sempre)
+    },
+    
+    description = S("Cow"),
+    
+    hp_min = 25,
+    hp_max = 35,
+    armor = 100,
+    
+    collisionbox = {-2.3, 0, -2.3, 2.3, 2.6, 2.3},
+    selectionbox = {-2.5, 0, -0.7, 0.9, 2.6, 0.7},
+    physical = true,
+    stepheight = 2,
+    fall_speed = -8,
+    fall_damage = 0,
+    floats = 1,
+    
+    visual = "mesh",
+    mesh = "cow.glb",
+    textures = {"cow.png"},
+    --rotate = 180,
+    visual_size = {x = 7.5, y = 7.5},
+    
+    -- PERMITIRIA "VOAR" se não retirasse a capacidade de andar...
+    --fly = true,
+    --fly_in = {"nh_nodes:air"},  -- Pode ser uma lista!
+    
+    walk_velocity = 1,
+    run_velocity = 6,
+    
+    view_range = 10,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    
+    follow = {"nh_nodes:grassleaves"},
+
+    
+    sounds = {
+        random = "BullSound",
+        damage = "BullAngrySound",
+    },
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0.5,
+        stand_end = 0.5,
+        walk_start = 1,
+        walk_end = 5,
+        run_start = 5.25,
+        run_end = 6.25,
+        -- Animação usada ao montar (pode usar a mesma de corrida)
+        ride_start = 5.25,
+        ride_end = 6.25,
+    },
+    
+    -- MONTARIA
+    saddle = "mobs:saddle",           -- item de sela necessário
+    ride_speed = 8,                   -- velocidade montado
+    ride_acceleration = 1.0,          -- aceleração montado
+    ride_friction = 0.8,              -- fricção ao parar
+    
+    -- Offset do jogador sobre o mob (ajuste conforme o visual do touro)
+    driver_attach_at = {x = 0, y = 30, z = -5},
+    driver_eye_offset = {x = 0, y = 3, z = 0},
+    driver_scale_factor = 1,
+
+
+do_custom = function(self, dtime)
+    -- detecta que levou dano comparando HP atual com o anterior
+    if not self.hp_anterior then
+        self.hp_anterior = self.health
+    end
+
+    if self.health < self.hp_anterior then
+        -- levou dano de verdade
+        self.hp_anterior = self.health
+        self.passive = false
+        self.state = ""
+        
+        -- tenta pegar o player mais próximo como alvo
+        local pos = self.object:get_pos()
+        local jogadores = minetest.get_connected_players()
+        local alvo = nil
+        local menor_dist = self.view_range or 10
+
+        for _, p in ipairs(jogadores) do
+            local dist = vector.distance(pos, p:get_pos())
+            if dist < menor_dist then
+                menor_dist = dist
+                alvo = p
+            end
+        end
+
+        if alvo then
+            self:do_attack(alvo)
+        end
+    end
+
+    self.hp_anterior = self.health
+    
+    
+        -- === REPRODUÇÃO ===
+    -- Só verifica se a vaca está pronta
+    if not self.bred then return end
+
+    -- Timer para não checar todo tick
+    self.breed_timer = (self.breed_timer or 0) + dtime
+    if self.breed_timer < 2 then return end  -- checa a cada 2 segundos
+    self.breed_timer = 0
+
+    -- Cooldown pós-reprodução
+    if self.breed_cooldown and self.breed_cooldown > 0 then
+        self.breed_cooldown = self.breed_cooldown - 2
+        return
+    end
+
+    -- Procura touro próximo que também esteja pronto
+    local pos = self.object:get_pos()
+    local touro_ent = nil
+
+    for _, obj in ipairs(minetest.get_objects_inside_radius(pos, 6)) do
+        local ent = obj:get_luaentity()
+        if ent and ent.name == "nh_mob:bull" and ent.bred then
+            touro_ent = ent
+            break
+        end
+    end
+
+    if not touro_ent then return end
+
+    -- Ambos prontos: reseta flags e aplica cooldown
+    self.bred = false
+    touro_ent.bred = false
+    self.breed_cooldown = 300  -- 5 minutos
+
+    -- Spawna filhote: 33% boi, 33% vaca, 33% touro
+    local sorteio = math.random(1, 3) --local sorteio = math.random(1, 4)
+    local filhote
+	if sorteio == 1 then
+	    filhote = "nh_mob:ox"
+	elseif sorteio == 2 then
+	    filhote = "nh_mob:bull"
+	else
+	    filhote = "nh_mob:cow"  -- sorteio 3 = 33%
+	end
+    local spawn_pos = {
+        x = pos.x + math.random(-2, 2),
+        y = pos.y,
+        z = pos.z + math.random(-2, 2)
+    }
+    minetest.add_entity(spawn_pos, filhote)
+
+    -- Partículas de coração no spawn
+    minetest.add_particlespawner({
+        amount = 15, time = 1,
+        minpos = {x=spawn_pos.x-0.5, y=spawn_pos.y, z=spawn_pos.z-0.5},
+        maxpos = {x=spawn_pos.x+0.5, y=spawn_pos.y+1, z=spawn_pos.z+0.5},
+        minvel = {x=-0.5, y=1, z=-0.5},
+        maxvel = {x=0.5, y=2, z=0.5},
+        minexptime = 0.5, maxexptime = 1,
+        minsize = 1, maxsize = 2,
+        texture = "heart.png",
+    })
+
+    minetest.log("action", "[nh_mob] Reprodução: " .. filhote .. " gerado!")
+    minetest.chat_send_all(S("A bovine calf was born!"))
+end,
+
+on_rightclick = function(self, clicker)
+    if not clicker:is_player() then return end
+    if mobs:protect(self, clicker) then return end
+
+    local item = clicker:get_wielded_item()
+    local name = item:get_name()
+
+    -- ==== ALIMENTAÇÃO PARA REPRODUÇÃO ====
+    if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
+        if not self.bred then
+            self.bred = true
+            item:take_item()
+            clicker:set_wielded_item(item)
+
+            local mob_type = self.name == "nh_mob:bull" and "bull" or "cow"
+            core.chat_send_player(
+                clicker:get_player_name(),
+                S("The cow is ready to breed!")
+            )
+            -- Efeito de coração sobre o mob
+            local pos = self.object:get_pos()
+            minetest.add_particlespawner({
+                amount = 5, time = 1,
+                minpos = {x=pos.x-0.5, y=pos.y+2, z=pos.z-0.5},
+                maxpos = {x=pos.x+0.5, y=pos.y+3, z=pos.z+0.5},
+                minvel = {x=0, y=0.5, z=0}, maxvel = {x=0, y=1, z=0},
+                minexptime = 1, maxexptime = 1.5,
+                minsize = 1, maxsize = 1.5,
+                texture = "heart.png",
+            })
+            return
+        else
+            core.chat_send_player(clicker:get_player_name(), S("Already ready to breed!"))
+            return
+        end
+    end
+    
+    if mobs:feed_tame(self, clicker, 1, false, false) then return end
+
+    -- Se já tem alguém montado, desmonta
+    if self.driver then
+        mobs:detach(self.driver, {x=1, y=0, z=0})
+        self.driver = nil
+        return
+    end
+
+    local item = clicker:get_wielded_item()
+    local name = item:get_name()
+
+    -- Coloca a sela E já monta
+    if name == "mobs:saddle" then
+        self.saddled = true  -- flag interna
+        item:take_item()
+        clicker:set_wielded_item(item)
+        core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
+        mobs:attach(self, clicker)  -- já monta na hora
+        return
+    end
+
+    -- Clicou sem sela na mão: monta se já estiver selado
+    if self.saddled then
+        mobs:attach(self, clicker)
+        return
+    end
+
+	if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
+	    core.chat_send_player(clicker:get_player_name(), S("You fed the cow! Mooo!"))
+	elseif name == "" then
+	    -- mão vazia
+	    core.chat_send_player(clicker:get_player_name(), S("You petted the cow. hff, hff..."))
+	else
+	    -- item errado
+	    core.chat_send_player(clicker:get_player_name(), S("The cow is not interested in that..."))
+	end
+end,
+})
+
+-- Spawn do touro (folhas de grama)
+mobs:spawn({
+    name = "nh_mob:cow",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:grassleaves"},
+    max_light = 15,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 2,
+    min_height = -20,
+    max_height = 30                  
+})
+
+--mobs:register_egg("nh_mob:bull", "Orbe com Touro", "orbspawner.png", 0)
+register_orb_egg("nh_mob:cow", S("Orb with Cow"))
 
 mobs:register_mob("nh_mob:ox", {
     type = "animal",
-    passive = false,
+    passive = true,
     reach = 1,
-    damage = 7,
+    damage = 4,
     attack_type = "dogfight",
     drops = {
         {name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4},  -- 1-4 couros
@@ -893,7 +1206,7 @@ mobs:register_mob("nh_mob:ox", {
     floats = 1,
     
     visual = "mesh",
-    mesh = "bull.glb",
+    mesh = "ox.glb",
     textures = {"bull.png"},
     --rotate = 180,
     visual_size = {x = 7.5, y = 7.5},
@@ -942,6 +1255,8 @@ mobs:register_mob("nh_mob:ox", {
     driver_eye_offset = {x = 0, y = 3, z = 0},
     driver_scale_factor = 1,
 
+
+
 on_rightclick = function(self, clicker)
     if not clicker:is_player() then return end
 
@@ -974,7 +1289,7 @@ on_rightclick = function(self, clicker)
         return
     end
 
-	if name == "nh_nodes:grassleaves" or "nh_nodes:grassleavesmedium" then
+	if name == "nh_nodes:grassleaves" or  name == "nh_nodes:grassleavesmedium" then
 	    core.chat_send_player(clicker:get_player_name(), S("You fed the ox! Mooo!"))
 	elseif name == "" then
 	    -- mão vazia
@@ -2115,8 +2430,8 @@ end
 -- SENTINEL (BOSS)
 -------------------------------
 mobs:register_mob("nh_mob:sentinel", {
-    type = "animal",
-    passive = false,
+    type = "monster",
+    --passive = false,
     reach = 1,
     damage = 10,
     attack_type = "dogfight",
@@ -2179,24 +2494,38 @@ mobs:register_mob("nh_mob:sentinel", {
 		return true -- PARA CONTINUAR.
 	    end,
 	    
+	    
 	after_activate = function(self, staticdata, def, dtime)
-	    
-	    -- Procura o jogador mais próximo e simula um soco dele no mob
+	    self.object:set_properties({static_save = true})
+
+	    -- Restaura ataque ao jogador mais próximo sempre (novo spawn OU reload)
+	    minetest.after(0.5, function()
+		if not self.object or not self.object:is_valid() then return end
+		local pos = self.object:get_pos()
+		local nearest_player = nil
+		local nearest_dist = self.view_range or 30
+		for _, player in ipairs(minetest.get_connected_players()) do
+		    local dist = vector.distance(pos, player:get_pos())
+		    if dist < nearest_dist then
+		        nearest_dist = dist
+		        nearest_player = player
+		    end
+		end
+		if nearest_player then self:do_attack(nearest_player) end
+	    end)
+
+	    -- Cúpula e punch simbólico só no PRIMEIRO spawn (staticdata vazio = novo)
+	    if staticdata and staticdata ~= "" then return end
+
+	    minetest.after(0.5, function()
+		if self.object and self.object:is_valid() then
+		    self._dome_nodes = create_dome(self.object:get_pos())
+		end
+	    end)
+
 	    local pos = self.object:get_pos()
-	    
-    -- Gera a cúpula e salva as posições no self
-    -- O after evita travar o servidor na hora do spawn
-    minetest.after(0.5, function()
-        if self.object and self.object:is_valid() then
-            local center = self.object:get_pos()
-            self._dome_nodes = create_dome(center)
-        end
-    end)
-	    
-	    
 	    local nearest_player = nil
-	    local nearest_dist = 20  -- só considera jogadores em até 20 blocos
-	    
+	    local nearest_dist = 20
 	    for _, player in ipairs(minetest.get_connected_players()) do
 		local dist = vector.distance(pos, player:get_pos())
 		if dist < nearest_dist then
@@ -2204,14 +2533,12 @@ mobs:register_mob("nh_mob:sentinel", {
 		    nearest_player = player
 		end
 	    end
-	    
 	    if nearest_player then
-		-- Pequeno delay para o mob terminar de spawnar antes do punch
 		minetest.after(0.2, function()
 		    if self.object:is_valid() then
 		        self.object:punch(nearest_player, 1.0, {
 		            full_punch_interval = 1.0,
-		            damage_groups = {fleshy = 1},  -- 1 de dano simbólico
+		            damage_groups = {fleshy = 1},
 		        }, nil)
 		    end
 		end)
@@ -2689,7 +3016,7 @@ mobs:register_mob("nh_mob:rabbit", {
     
     hp_min = 5,
     hp_max = 8,
-    armor = 80,
+    armor = 100,
     
     collisionbox = {-0.2, 0, -0.3, 0.2, 0.4, 0.3},
     physical = true,
@@ -2704,7 +3031,7 @@ mobs:register_mob("nh_mob:rabbit", {
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 2,
-    run_velocity = 6,         -- Coelhos são rápidos quando assustados
+    run_velocity = 5,         -- Coelhos são rápidos quando assustados
     
     view_range = 8,
     water_damage = 1,
@@ -2727,20 +3054,20 @@ mobs:register_mob("nh_mob:rabbit", {
     
     -- Coelhos pulam ocasionalmente
     jump = true,
-    jump_height = 4,
+    jump_height = 3,
 
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             core.chat_send_player(clicker:get_player_name(), S("The rabbit ran away scared!"))
             -- Faz o coelho pular e fugir
-            self.object:set_velocity({x = 0, y = 6, z = 0})
+            self.object:set_velocity({x = 0, y = 5, z = 0})
         end
     end,
     
     -- Sons (se você tiver arquivos de som)
     sounds = {
         random = "RabbitSound1",
-        damage = "RabbitSound2",
+        damage = "rabbit_hurt",
     },
 })
 
@@ -2822,7 +3149,39 @@ mobs:register_mob("nh_mob:karibo", {
         end
     end,
     
+do_custom = function(self, dtime)
+    -- detecta que levou dano comparando HP atual com o anterior
+    if not self.hp_anterior then
+        self.hp_anterior = self.health
+    end
 
+    if self.health < self.hp_anterior then
+        -- levou dano de verdade
+        self.hp_anterior = self.health
+        self.passive = false
+        self.state = ""
+        
+        -- tenta pegar o player mais próximo como alvo
+        local pos = self.object:get_pos()
+        local jogadores = minetest.get_connected_players()
+        local alvo = nil
+        local menor_dist = self.view_range or 10
+
+        for _, p in ipairs(jogadores) do
+            local dist = vector.distance(pos, p:get_pos())
+            if dist < menor_dist then
+                menor_dist = dist
+                alvo = p
+            end
+        end
+
+        if alvo then
+            self:do_attack(alvo)
+        end
+    end
+
+    self.hp_anterior = self.health
+end,
 })
 
 -- Spawn do karibo
@@ -2854,9 +3213,13 @@ mobs:register_mob("nh_mob:rooster", {
     
     description = S("Rooster"),
     
-        -- lista de mobs que ele vai atacar ativamente
+    -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
     specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
+    
+    
+    --attack_chance = 100,        -- ataca sempre que detecta
+    attack_players = true,    -- ataca jogadores
     
     -- drop com a sintaxe correta
     drops = {
@@ -2890,6 +3253,7 @@ mobs:register_mob("nh_mob:rooster", {
     lava_damage = 5,
     light_damage = 0,
     
+
     animation = {
         speed_normal = 1,
         stand_start = 0.25,
@@ -2905,7 +3269,7 @@ mobs:register_mob("nh_mob:rooster", {
     },
     
     -- Galinhas podem ser alimentadas e seguir o jogador com sementes
-    follow = {"farming:seed_wheat", "nh_nodes:grassleaves"},
+    follow = {"farming:seed_wheat", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium"},
 
 
     on_rightclick = function(self, clicker)
@@ -2914,53 +3278,69 @@ mobs:register_mob("nh_mob:rooster", {
             local name = item:get_name()
             
             -- Se o jogador está segurando sementes, a galinha segue
-            if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" then
+            if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
                 core.chat_send_player(clicker:get_player_name(), S("The rooster is interested in the food!"))
             else
-                core.chat_send_player(clicker:get_player_name(), S("Cocoricó! 🐔"))
+                core.chat_send_player(clicker:get_player_name(), S("Cock-a-doodle-doo!"))
             end
         end
     end,
     
+    
     -- Sons da galinha
     sounds = {
-        random = "galinha_cacarejo",
-        damage = "galinha_hurt",
+        random = "ChickenSound",
+        damage = "ChickenHurt",
     },
     
-    
-        -- Sistema de ovos
-do_custom = function(self, dtime)
-
-    local vel = self.object:get_velocity()
-
-    if not vel then return end
-
-    -- Subindo
-    if vel.y > 0.5 then
-        if self.state ~= "fly_up" then
-            self.state = "fly_up"
-            self:set_animation("fly_up")
-        end
-
-    -- Descendo
-    elseif vel.y < -0.5 then
-        if self.state ~= "fly_down" then
-            self.state = "fly_down"
-            self:set_animation("fly_down")
-        end
-
-    -- Movimento normal
-    else
-        if self.state ~= "walk" then
-            self.state = "walk"
-            self:set_animation("walk")
+        -- Sistema de detecção pra voo
+	do_custom = function(self, dtime)
+	
+	    -- Busca proativa por players no raio de view_range
+    if self.state ~= "attack" then
+        local pos = self.object:get_pos()
+        for _, player in ipairs(core.get_connected_players()) do
+            if vector.distance(pos, player:get_pos()) <= 8 then
+                self.attack = player
+                self.state = "attack"
+                break
+            end
         end
     end
-end,
+	
+	    local vel = self.object:get_velocity()
+	    if not vel then return end
+
+	    -- Nunca interferir se o mob está atacando ou em comportamento especial
+	    if self.state == "attack" or self.state == "runaway" or self.state == "follow" then
+		return
+	    end
+
+	    -- Subindo
+	    if vel.y > 0.5 then
+		if self.state ~= "fly_up" then
+		    self.state = "fly_up"
+		    self:set_animation("fly_up")
+		end
+
+	    -- Descendo
+	    elseif vel.y < -0.5 then
+		if self.state ~= "fly_down" then
+		    self.state = "fly_down"
+		    self:set_animation("fly_down")
+		end
+
+	    -- Movimento normal no chão
+	    else
+		if self.state == "fly_up" or self.state == "fly_down" then
+		    self.state = "walk"
+		    self:set_animation("walk")
+		end
+	    end
+	end,
 })
 
--- Spawn da Galinha (terra/dirt)
+-- Spawn do galo (terra/dirt)
 mobs:spawn({
     name = "nh_mob:rooster",
     nodes = {"air"},
@@ -2987,6 +3367,9 @@ mobs:register_mob("nh_mob:chicken", {
     
     description = S("Chicken"),
     
+    -- Galinhas fogem de jogadores
+    runaway = true,
+    runaway_from = {"player"},
     
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true,        -- permite atacar outros mobs
@@ -3016,7 +3399,7 @@ mobs:register_mob("nh_mob:chicken", {
     visual_size = {x = 15, y = 15},
     
     walk_velocity = 1,
-    run_velocity = 3,
+    run_velocity = 4,
     
     view_range = 8,
     water_damage = 0,
@@ -3038,37 +3421,151 @@ mobs:register_mob("nh_mob:chicken", {
     },
     
     -- Galinhas podem ser alimentadas e seguir o jogador com sementes
-    follow = {"farming:seed_wheat", "nh_nodes:grassleaves"},
+    follow = {"farming:seed_wheat", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium"},
 
 
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            
-            -- Se o jogador está segurando sementes, a galinha segue
-            if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-                core.chat_send_player(clicker:get_player_name(), S("The chicken is interested in the food!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), S("Pó pó! 🐔"))
-            end
+on_rightclick = function(self, clicker)
+    if clicker:is_player() then
+        local item = clicker:get_wielded_item()
+        local name = item:get_name()
+
+        if name == "farming:seed_wheat" then
+            core.chat_send_player(clicker:get_player_name(), S("The chicken is interested in the food!"))
+
+        elseif name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
+            -- Consome 1 unidade do item
+            item:take_item(1)
+            clicker:set_wielded_item(item)
+
+            local pos = self.object:get_pos()
+
+            -- Partículas de coração
+            minetest.add_particlespawner({
+                amount = 15, time = 1,
+                minpos = {x=pos.x-0.5, y=pos.y, z=pos.z-0.5},
+                maxpos = {x=pos.x+0.5, y=pos.y+1, z=pos.z+0.5},
+                minvel = {x=-0.5, y=1, z=-0.5},
+                maxvel = {x=0.5, y=2, z=0.5},
+                minexptime = 0.5, maxexptime = 1,
+                minsize = 1, maxsize = 2,
+                texture = "heart.png",
+            })
+
+            -- Ativa a busca por ovo
+            self.seeking_egg = true
+            self.seek_timer = 0
+
+            core.chat_send_player(clicker:get_player_name(), S("The chicken looks excited and starts looking for an egg!"))
+
+        else
+            core.chat_send_player(clicker:get_player_name(), S("Cluck cluck!"))
         end
-    end,
+    end
+end,
     
     -- Sons da galinha
     sounds = {
         random = "ChickenSound",
-        damage = "galinha_hurt",
+        damage = "ChickenHurt",
     },
     
         -- Sistema de ovos
 do_custom = function(self, dtime)
 
-    -- Timer geral (limita execução)
     self.step_timer = (self.step_timer or 0) + dtime
     if self.step_timer < 1 then return end
     self.step_timer = 0
 
+    -- ═══════════════════════════════════════════
+    -- SISTEMA DE BUSCA POR OVO (ativado ao ser alimentada)
+    -- ═══════════════════════════════════════════
+    if self.seeking_egg then
+        self.seek_timer = (self.seek_timer or 0) + 1
+
+        -- Timeout: desiste após 60 segundos
+        if self.seek_timer > 60 then
+            self.seeking_egg = false
+            self.seek_timer = 0
+        else
+            local pos = self.object:get_pos()
+
+            -- Procura o node nh_nodes:chicken_egg num raio de 10 blocos
+            local egg_nodes = minetest.find_nodes_in_area(
+                {x = pos.x-10, y = pos.y-2, z = pos.z-10},
+                {x = pos.x+10, y = pos.y+2, z = pos.z+10},
+                {"nh_nodes:chicken_egg"}
+            )
+
+            if #egg_nodes > 0 then
+                -- Pega o ovo mais próximo
+                local closest_egg = nil
+                local closest_dist = math.huge
+
+                for _, epos in ipairs(egg_nodes) do
+                    local dist = vector.distance(pos, epos)
+                    if dist < closest_dist then
+                        closest_dist = dist
+                        closest_egg = epos
+                    end
+                end
+
+                if closest_egg then
+                    -- Ainda longe: caminha em direção ao ovo
+                    if closest_dist > 1.5 then
+                        self.object:set_velocity({
+                            x = (closest_egg.x - pos.x) / closest_dist * 2,
+                            y = self.object:get_velocity().y,
+                            z = (closest_egg.z - pos.z) / closest_dist * 2,
+                        })
+                    else
+                        -- Chegou perto do ovo!
+                        -- Remove o node de ovo
+                        minetest.remove_node(closest_egg)
+
+                        -- Spawna o galo no lugar do ovo
+                        local rooster_pos = {
+                            x = closest_egg.x,
+                            y = closest_egg.y,
+                            z = closest_egg.z,
+                        }
+                        minetest.add_entity(rooster_pos, "nh_mob:chick")
+
+                        -- Partículas de coração no spawn do galo
+                        minetest.add_particlespawner({
+                            amount = 15, time = 1,
+                            minpos = {x=rooster_pos.x-0.5, y=rooster_pos.y, z=rooster_pos.z-0.5},
+                            maxpos = {x=rooster_pos.x+0.5, y=rooster_pos.y+1, z=rooster_pos.z+0.5},
+                            minvel = {x=-0.5, y=1, z=-0.5},
+                            maxvel = {x=0.5, y=2, z=0.5},
+                            minexptime = 0.5, maxexptime = 1,
+                            minsize = 1, maxsize = 2,
+                            texture = "heart.png",
+                        })
+
+                        log("A chicken hatched a chick from an egg at " .. core.pos_to_string(rooster_pos))
+
+                        -- Avisa jogadores próximos
+                        for _, player in ipairs(core.get_connected_players()) do
+                            if vector.distance(player:get_pos(), pos) < 15 then
+                                core.chat_send_player(
+                                    player:get_player_name(),
+                                    S("A chick hatched from the egg!")
+                                )
+                            end
+                        end
+
+                        -- Desativa a busca
+                        self.seeking_egg = false
+                        self.seek_timer = 0
+                    end
+                end
+            end
+        end
+    end
+
+    -- ═══════════════════════════════════════════
+    -- SISTEMA DE OVOS (código original)
+    -- ═══════════════════════════════════════════
     -- Inicializa tempo aleatório UMA VEZ
     if not self.next_egg_time then
         self.next_egg_time = math.random(120, 240)  -- 2 a 4 min
@@ -3104,7 +3601,7 @@ do_custom = function(self, dtime)
             if vector.distance(player:get_pos(), pos) < 10 then
                 core.chat_send_player(
                     player:get_player_name(),
-                    S("🥚 A chicken laid an egg!")
+                    S("A chicken laid an egg!")
                 )
             end
         end
@@ -3160,6 +3657,120 @@ mobs:spawn({
 
 --mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
 register_orb_egg("nh_mob:chicken", S("Orb with Chicken"))
+
+
+mobs:register_mob("nh_mob:chick", {
+    type = "animal",
+    passive = true,
+    reach = 1,
+    damage = 0,
+    attack_type = "dogfight",
+    
+    description = S("Chick"),
+    
+        -- lista de mobs que ele vai atacar ativamente
+    attack_animals = true,        -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada"},
+    
+    hp_min = 2,
+    hp_max = 3,
+    armor = 100,
+    
+    collisionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    selectionbox = {-0.1, 0, -0.1, 0.1, 0.1, 0.1}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    physical = true,
+    stepheight = 1.1,
+    fall_speed = -3,          -- Galinhas caem devagar (batem asas)
+    fall_damage = 0,
+    floats = 1,               -- Não nadam bem
+    
+    visual = "mesh",
+    mesh = "chick.glb",     -- Você precisa criar este modelo
+    textures = {"chick.png"}, -- Você precisa criar esta textura
+    --rotate = 180,
+    visual_size = {x = 7, y = 7},
+    
+    walk_velocity = 0.5,
+    run_velocity = 2,
+    
+    view_range = 5,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    
+    animation = {
+        speed_normal = 1,
+        stand_start = 0.0,
+        stand_end = 0.5,
+        walk_start = 0.5,
+        walk_end = 1.5,
+        
+    fly_up_start = 1.65,
+    fly_up_end = 1.85,
+
+    fly_down_start = 1.75,
+    fly_down_end = 1.75,
+    },
+    
+    -- Galinhas podem ser alimentadas e seguir o jogador com sementes
+    follow = {"farming:seed_wheat", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium"},
+
+
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            
+            -- Se o jogador está segurando sementes, a galinha segue
+            if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
+                core.chat_send_player(clicker:get_player_name(), S("The chick is interested in the food!"))
+            else
+                core.chat_send_player(clicker:get_player_name(), S("Peep, peep!"))
+            end
+        end
+    end,
+    
+    -- Sons da galinha
+    sounds = {
+        random = "ChickSound",
+        damage = "ChickHurt",
+    },
+    
+    
+        -- Sistema de ovos
+do_custom = function(self, dtime)
+
+    local vel = self.object:get_velocity()
+
+    if not vel then return end
+
+    -- Subindo
+    if vel.y > 0.5 then
+        if self.state ~= "fly_up" then
+            self.state = "fly_up"
+            self:set_animation("fly_up")
+        end
+
+    -- Descendo
+    elseif vel.y < -0.5 then
+        if self.state ~= "fly_down" then
+            self.state = "fly_down"
+            self:set_animation("fly_down")
+        end
+
+    -- Movimento normal
+    else
+        if self.state ~= "walk" then
+            self.state = "walk"
+            self:set_animation("walk")
+        end
+    end
+end,
+})
+
+--mobs:register_egg("nh_mob:galo", "Orbe com Galo", "orbspawner.png", 0)
+register_orb_egg("nh_mob:chick", S("Orb with Chick"))
+
 
 
 -------------------------------
@@ -4374,7 +4985,7 @@ mobs:register_mob("nh_mob:exoskull", {
 	self:set_animation("punch", false)
 
 	return true -- PARA CONTINUAR.
-	end,	
+    end,	
 	
     on_die = function(self, pos)
         minetest.after(0.1, function()
@@ -4385,7 +4996,7 @@ mobs:register_mob("nh_mob:exoskull", {
     -- if obj then
     --     obj:get_luaentity().state = "attack"
     -- end
-end,
+    end,
 })
 
 -- Spawn do vulto (fundo de cavernas escuras)
@@ -5129,9 +5740,11 @@ end,
 mobs:register_mob("nh_mob:dopel", {
     type = "monster",
     passive = false,
-    reach = 2,
+    reach = 1.75,
     damage = 5,
+    --attack_players = true,  
     attack_type = "dogfight",
+    
     
     description = S("Dopel") .. "\n" .. S("[?]"),
     
@@ -5139,7 +5752,7 @@ mobs:register_mob("nh_mob:dopel", {
     hp_max = 30,
     armor = 100,
     
-    collisionbox = {-0.25, 0, -0.2, 0.3, 2.4, 0.2},
+    collisionbox = {-0.2, 0, -0.2, 0.2, 2.4, 0.2},
     selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
     physical = true,
     stepheight = 2,           -- Consegue subir degraus para conseguir sair da agua (importante!)
@@ -5147,11 +5760,15 @@ mobs:register_mob("nh_mob:dopel", {
     fall_damage = 0,
     floats = 3,
     
+    --pathfinding = true, -- se move em zig-zag
+    
+    static_save = true,
     despawn_by_day = false,
     remove_far = false,
     
+    
     visual = "mesh",
-    mesh = "character3.glb",
+    mesh = "character5.glb",
     textures = {"skin.png"},
     --rotate = 180,
     visual_size = {x = 1, y = 1},
@@ -5173,19 +5790,19 @@ mobs:register_mob("nh_mob:dopel", {
     air_damage = 0,         
     
     animation = {
-        speed_normal = 1,
+        speed_normal = 0.5,
         stand_start = 0,
-        stand_end = 1,
+        stand_end = 1.02,
         walk_start = 1,
         walk_end = 2,
         -- ANIMAÇÃO DE ATAQUE:
-        punch_start = 11.5,    -- Frame inicial do ataque
+        punch_start = 11.75,    -- Frame inicial do ataque
         punch_end = 12,      -- Frame final do ataque
     },
     
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
-    follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
+    --follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
     
     -- ✅ RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     on_rightclick = function(self, clicker)
@@ -5206,15 +5823,18 @@ mobs:register_mob("nh_mob:dopel", {
         damage = "vulto_hurt",
     },
     
-    custom_attack = function(self, to_attack)
-	self.attack_count = (self.attack_count or 0) + 1
-	if self.attack_count < 3 then return end
-	self.attack_count = 0
 
-	self:set_animation("punch", false)
 
-	return true -- PARA CONTINUAR.
-	end,	
+after_activate = function(self, staticdata, def, dtime)
+    self.object:set_properties({static_save = true})
+end,
+--[[
+do_custom = function(self, dtime)
+    self.lifetimer = 20000
+    return true
+end,
+]]--
+
 })
 
 -- Spawn do dopel (casas, blocos de madeiras)
@@ -5239,8 +5859,8 @@ register_orb_egg("nh_mob:dopel", S("Orb with Dopel"))
 mobs:register_mob("nh_mob:giantcrab", {
     type = "monster",
     passive = false,
-    reach = 5,
-    damage = 9,
+    reach = 6,
+    damage = 8,
     attack_type = "dogfight",
     
     description = S("Giant Crab") .. "\n" .. S("[Ancient Animal]"),
@@ -5260,11 +5880,15 @@ mobs:register_mob("nh_mob:giantcrab", {
     collisionbox = {-7, 0, -5, 5, 8.5, 5},
     selectionbox = {-7, 5.5, -5, 5, 8.5, 5},
     physical = true,
-    stepheight = 5,           -- Consegue subir degraus para conseguir sair da agua (importante!)
+    stepheight = 10,           -- Consegue subir degraus para conseguir sair da agua (importante!)
     fall_speed = -15,
     fall_damage = 0,
     floats = 0,
     
+    --pathfinding = true,
+    
+    --tamed = true,
+    static_save = true,
     despawn_by_day = false,
     remove_far = false,
     
@@ -5278,13 +5902,13 @@ mobs:register_mob("nh_mob:giantcrab", {
     glow = 14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
     
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,               -- Permite "voar" na água
-    fly_in = "nh_nodes:water",   -- Voa no ar
+    --fly = true,               -- Permite "voar" na água
+    --fly_in = "nh_nodes:water",   -- Voa no ar
     
     walk_velocity = 5,
     run_velocity = 10,
     
-    view_range = 16,
+    view_range = 50,
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
@@ -5303,7 +5927,7 @@ mobs:register_mob("nh_mob:giantcrab", {
     
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
-    follow = {"nh_nodes:sphere", "nh_nodes:kelp", "nh_nodes:obsidian", "nh_nodes:wet_sand", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:pineraft", "nh_nodes:rowing"},
+    --follow = {"nh_nodes:sphere", "nh_nodes:kelp", "nh_nodes:obsidian", "nh_nodes:wet_sand", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:pineraft", "nh_nodes:rowing"},
     
     -- ✅ RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     on_rightclick = function(self, clicker)
@@ -5334,35 +5958,59 @@ mobs:register_mob("nh_mob:giantcrab", {
 	return true -- PARA CONTINUAR.
     end,
     
-    after_activate = function(self, staticdata, def, dtime)
+after_activate = function(self, staticdata, def, dtime)
+    self.object:set_properties({static_save = true})
     
-    -- Procura o jogador mais próximo e simula um soco dele no mob
-    local pos = self.object:get_pos()
-    local nearest_player = nil
-    local nearest_dist = 20  -- só considera jogadores em até 20 blocos
-    
-    for _, player in ipairs(minetest.get_connected_players()) do
-        local dist = vector.distance(pos, player:get_pos())
-        if dist < nearest_dist then
-            nearest_dist = dist
-            nearest_player = player
-        end
-    end
-    
-    if nearest_player then
-        -- Pequeno delay para o mob terminar de spawnar antes do punch
-        minetest.after(0.2, function()
-            if self.object:is_valid() then
-                self.object:punch(nearest_player, 1.0, {
-                    full_punch_interval = 1.0,
-                    damage_groups = {fleshy = 1},  -- 1 de dano simbólico
-                }, nil)
+    -- Restaura ataque ao jogador mais próximo sempre (novo spawn OU reload)
+    minetest.after(0.5, function()
+        if not self.object:is_valid() then return end
+        
+        local pos = self.object:get_pos()
+        local nearest_player = nil
+        local nearest_dist = self.view_range or 50
+        
+        for _, player in ipairs(minetest.get_connected_players()) do
+            local dist = vector.distance(pos, player:get_pos())
+            if dist < nearest_dist then
+                nearest_dist = dist
+                nearest_player = player
             end
-        end)
-    end
+        end
+        
+        if nearest_player then
+            self:do_attack(nearest_player)
+        end
+    end)
+    
+    -- Punch simbólico só no primeiro spawn
+    if staticdata and staticdata ~= "" then return end
+    
+    minetest.after(0.2, function()
+        if not self.object:is_valid() then return end
+        local pos = self.object:get_pos()
+        local nearest_player = nil
+        local nearest_dist = 20
+        for _, player in ipairs(minetest.get_connected_players()) do
+            local dist = vector.distance(pos, player:get_pos())
+            if dist < nearest_dist then
+                nearest_dist = dist
+                nearest_player = player
+            end
+        end
+        if nearest_player then
+            self.object:punch(nearest_player, 1.0, {
+                full_punch_interval = 1.0,
+                damage_groups = {fleshy = 1},
+            }, nil)
+        end
+    end)
 end,
 
 do_custom = function(self, dtime)
+    -- Impede remoção por distância e lifetimer
+    --self.tamed = true
+    self.lifetimer = 20000
+
     if self._last_hp == nil then
         self._last_hp = self.health  -- AQUI também
         self._hud_timer = 0
@@ -5415,24 +6063,5 @@ register_orb_egg("nh_mob:giantcrab", S("Orb with Giant Crab"))
 -------------------------------
 
 core.register_on_mods_loaded(function()
-    log("===========================================")
-    log("Mod Mob inicializado com sucesso!")
-    log("===========================================")
-    log("")
-    log("OURIÇO:")
-    log("  - Spawn: nh_nodes:grass")
-    log("  - Comportamento: Passivo, mas se defende quando atacado")
-    log("  - Dano: 2 HP")
-    log("")
-    log("COELHO:")
-    log("  - Spawn: nh_nodes:snow")
-    log("  - Comportamento: Totalmente passivo e tímido")
-    log("  - Foge de jogadores")
-    log("")
-    log("GALINHA:")
-    log("  - Spawn: nh_nodes:dirt e nh_nodes:grass")
-    log("  - Comportamento: Passiva, segue jogadores com sementes")
-    log("  - Bota ovos periodicamente")
-    log("")
-    log("===========================================")
+    log("All mobs 'init.lua' initialized successfully!")
 end)
