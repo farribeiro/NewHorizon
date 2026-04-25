@@ -520,17 +520,11 @@ local function get_armor_formspec(player_name)
     else
         formspec = formspec .. "list[current_player;main;0.5,7.9;8,1;]"
     end
-    formspec = formspec ..
-        "listring[current_player;main]" ..
-        "listring[current_player;armor_head]" ..
-        "listring[current_player;armor_torso]" ..
-        "listring[current_player;armor_waist]" ..
-        "listring[current_player;armor_legs]" ..
-        "listring[current_player;armor_back]" ..
-        "listring[current_player;armor_arms]" ..
-        "listring[current_player;armor_hands]" ..
-        "listring[current_player;armor_feet]"
-    return formspec
+    return formspec .. table.concat({ "listring[current_player;main]", "listring[current_player;armor_head]",
+        "listring[current_player;armor_torso]", "listring[current_player;armor_waist]",
+        "listring[current_player;armor_legs]", "listring[current_player;armor_back]",
+        "listring[current_player;armor_arms]", "listring[current_player;armor_hands]",
+        "listring[current_player;armor_feet]" }, " ")
 end
 local function update_player_formspec(player)
     if not player then return end
