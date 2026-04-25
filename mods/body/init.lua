@@ -880,6 +880,9 @@ end)
 local last_lmb = {}
 core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
+        local function setplayeranimation(opts)
+            set_player_animation(player, opts)
+        end
         local player_name = player:get_player_name()
         -- ✅ Garante que fleshy (sofrer dano) nunca seja perdido
         local armor = player:get_armor_groups()
@@ -980,72 +983,57 @@ core.register_globalstep(function(dtime)
                     )
                     local horizontal = { x = vel.x, y = 0, z = vel.z }
                     local speed = vector.length(horizontal)
-                    if speed > 0.1 then
-                        set_player_animation(player, "crawling_walk")
-                    else
-                        set_player_animation(player,
-                            "crawling")
-                    end
+                    if speed > 0.1 then setplayeranimation("crawling_walk") else setplayeranimation("crawling") end
                 elseif ctrl.sneak and vel.x < 0.1 and vel.z < 0.1 then
                     set_player_animation(player, "sneak")
-                    --player:set_properties({
-                    --collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6}
-                    --})
+                    -- player:set_properties({
+                    -- collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6}
+                    -- })
                     player:set_eye_offset(
                         { x = 0, y = 8, z = 10 }, -- ajusta para sneak
                         { x = 0, y = 7, z = -7 }
                     )
                 else
-                    player:set_properties({
-                        collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 },
-                    })
-                    player:set_eye_offset(
-                        { x = 0, y = -1, z = 3 },
-                        { x = 0, y = 7, z = -7 }
-                    )
-
+                    player:set_properties({ collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 }, })
+                    player:set_eye_offset({ x = 0, y = -1, z = 3 }, { x = 0, y = 7, z = -7 })
                     local is_moving_back = ctrl.down
                     local is_moving = ctrl.up or ctrl.left or ctrl.right
                     local horizontal = { x = vel.x, y = 0, z = vel.z }
                     local speed = vector.length(horizontal)
                     if is_moving_back then
                         if ctrl.sneak and speed >= 0.1 then
-                            set_player_animation(player, "sneak_walk_back")
+                            setplayeranimation("sneak_walk_back")
                             player:set_eye_offset(
                                 { x = 0, y = 8, z = 10 }, -- ajusta para sneak
                                 { x = 0, y = 7, z = -7 }
                             )
                         elseif ctrl.aux1 or speed >= 4 then
-                            set_player_animation(player, "run_back")
+                            setplayeranimation("run_back")
                         elseif speed < 4 and speed > 0 then
-                            set_player_animation(player, "walk_back")
+                            setplayeranimation("walk_back")
                         end
                     elseif is_moving then
                         if ctrl.sneak and speed >= 0.1 then
-                            set_player_animation(player, "sneak_walk")
+                            setplayeranimation("sneak_walk")
                             player:set_eye_offset(
                                 { x = 0, y = 8, z = 10 }, -- ajusta para sneak
                                 { x = 0, y = 7, z = -7 }
                             )
                         elseif ctrl.aux1 or speed >= 4 then
-                            set_player_animation(player, "run")
+                            setplayeranimation("run")
                         elseif speed < 4 and speed > 0 then
-                            set_player_animation(player, "walk")
+                            setplayeranimation("walk")
                         end
                     else
-                        player:set_eye_offset(
-                            { x = 0, y = -1, z = 3 },
-                            { x = 0, y = 7, z = -7 }
-                        )
-                        if has_item then set_player_animation(player, "holding") else set_player_animation(player, "idle") end
+                        player:set_eye_offset({ x = 0, y = -1, z = 3 }, { x = 0, y = 7, z = -7 })
+                        if has_item then setplayeranimation("holding") else setplayeranimation("idle") end
                     end
                 end
             end
             ::continue::
         end
     end
-end)
--- EVENTOS DE JOGADOR
+end)-- EVENTOS DE JOGADOR
 core.register_on_joinplayer(function(player)
     player:hud_set_flags({ wielditem = false })
     player:set_lighting({ shadows = { intensity = 0.33 } })
