@@ -61,13 +61,13 @@ core.register_craftitem("nh_items:writedpage", {
     wield_image = "writedpage.png",
     wield_scale = { x = 0.5, y = 0.5, z = 0.01 },
     wielded_bone_position = { -- Configuração mão direita
-        pos = {x = 1, y = 0, z = 0.6},
+        pos = {x = 1.1, y = 0, z = 0.9},
         rot = {x = 90, y = 90, z = 0},
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     
     offhand_bone_position = {
-        pos = {x = 1, y = -0.5, z = -0.2}
+        pos = {x = 1.1, y = -0.5, z = -0.1}
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},

@@ -11452,16 +11452,15 @@ core.register_node("nh_nodes:belt", {
    
        -- Configuração mão direita
     wielded_bone_position = {
-        pos = {x = 0.5, y = 0.5, z = 1.65}
-        --rot = {x = 0, y = 0, z = -110}
+        pos = {x = 0, y = 1, z = 0.6},
+        rot = {x = 0, y = 180, z = 0},
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+     wielded_visual_size = {x = 0.2, y = 0.2, z = 0.2},
     
-    wielded_bone_position = {
-        pos = {x = 0.5, y = 0.5, z = 1.65}
-        --rot = {x = 0, y = 0, z = -110}
+    offhand_bone_position = {
+        pos = {x = 0, y = -0.8, z = -1.6},
+        rot = {x = -90, y = 0, z = 90},
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
 -- Mochila
@@ -11481,6 +11480,12 @@ core.register_node("nh_nodes:backchest", {
     -- Configuração mão direita
     wielded_bone_position = {
         pos = {x = 0.5, y = 0.5, z = 1.7}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+        
+    offhand_bone_position = {
+        pos = {x = -2, y = -1, z = 1.8}
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},

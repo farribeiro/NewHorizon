@@ -3509,7 +3509,7 @@ mobs:register_mob("nh_mob:exoskull", {
         self:set_animation("punch", false)
         return true -- PARA CONTINUAR.
     end,
-    on_die = function(self, pos) core.after(0.1, function() core.add_entity(pos, "nh_mob:octopus") -- exemplo end)
+    on_die = function(self, pos) core.after(0.1, function() core.add_entity(pos, "nh_mob:octopus") end)
         -- Opcional: deixa o novo mob já em modo de ataque
         -- if obj then obj:get_luaentity().state = "attack" end
     end,
