@@ -497,8 +497,9 @@ local function get_armor_formspec(player_name)
             "list[current_player;armor_head;0.5,0.5;1,1;]", "label[0.5,1.6;Tronco]",
             "list[current_player;armor_torso;0.5,1.6;1,1;]", "label[0.5,2.7;Pernas]",
             "list[current_player;armor_legs;0.5,2.7;1,1;]", "label[0.5,3.8;Pés]",
-            "list[current_player;armor_feet;0.5,3.8;1,1;]", "model[1.25,0.5;3,6;player_model;",
-            "character5.glb;skin.png;0,180;false;true]", "label[1.75,4.8;", core.formspec_escape(player_name), "]",
+            "list[current_player;armor_feet;0.5,3.8;1,1;]",
+            "model[1.25,0.5;3,6;player_model;character5.glb;skin.png;0,180;false;true]",
+            "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
             "label[3.5,0.5;Costas]", "list[current_player;armor_back;3.5,0.5;1,1;]", "label[3.5,1.6;Braços]",
             "list[current_player;armor_arms;3.5,1.6;1,1;]", "label[3.5,2.7;Mãos]",
             "list[current_player;armor_hands;3.5,2.7;1,1;]", "label[3.5,3.8;Cintura]" ..
