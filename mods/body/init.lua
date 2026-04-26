@@ -493,22 +493,26 @@ local function get_armor_formspec(player_name)
     local backpack_stack = inv:get_stack("armor_back", 1)
     local has_backpack = not backpack_stack:is_empty() and backpack_stack:get_name() == "nh_nodes:backchest"
     return table.concat(
-        { "size[9,9.5]", "bgcolor[#00000000;true]", "background[0,0;9,9.5;gui_formbg.png]", "label[0.5,0.5;Cabeça]",
-            "list[current_player;armor_head;0.5,0.5;1,1;]", "label[0.5,1.6;Tronco]",
-            "list[current_player;armor_torso;0.5,1.6;1,1;]", "label[0.5,2.7;Pernas]",
-            "list[current_player;armor_legs;0.5,2.7;1,1;]", "label[0.5,3.8;Pés]",
-            "list[current_player;armor_feet;0.5,3.8;1,1;]",
-            "model[1.25,0.5;3,6;player_model;character5.glb;skin.png;0,180;false;true]",
-            "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
-            "label[3.5,0.5;Costas]", "list[current_player;armor_back;3.5,0.5;1,1;]", "label[3.5,1.6;Braços]",
-            "list[current_player;armor_arms;3.5,1.6;1,1;]", "label[3.5,2.7;Mãos]",
-            "list[current_player;armor_hands;3.5,2.7;1,1;]", "label[3.5,3.8;Cintura]" ..
-        "list[current_player;armor_waist;3.5,3.8;1,1;]", has_backpack and "list[current_player;main;0.5,5.7;8,2;8]" or
-        "list[current_player;main;0.5,7.9;8,1;]", "listring[current_player;main]", "listring[current_player;armor_head]",
-            "listring[current_player;armor_torso]", "listring[current_player;armor_waist]",
-            "listring[current_player;armor_legs]", "listring[current_player;armor_back]",
-            "listring[current_player;armor_arms]", "listring[current_player;armor_hands]",
-            "listring[current_player;armor_feet]" }, " ")
+    { "size[9,9.5]", "bgcolor[#00000000;true]", "background[0,0;9,9.5;gui_formbg.png]",
+        "label[0.5,0.5;Cabeça]", "list[current_player;armor_head;0.5,0.5;1,1;]",
+        "label[0.5,1.6;Tronco]", "list[current_player;armor_torso;0.5,1.6;1,1;]",
+        "label[0.5,2.7;Pernas]", "list[current_player;armor_legs;0.5,2.7;1,1;]",
+        "label[0.5,3.8;Pés]", "list[current_player;armor_feet;0.5,3.8;1,1;]",
+        "model[1.25,0.5;3,6;player_model;character5.glb;skin.png;0,180;false;true]",
+        "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
+        "label[3.5,0.5;Costas]", "list[current_player;armor_back;3.5,0.5;1,1;]",
+        "label[3.5,1.6;Braços]", "list[current_player;armor_arms;3.5,1.6;1,1;]",
+        "label[3.5,2.7;Mãos]", "list[current_player;armor_hands;3.5,2.7;1,1;]",
+        "label[3.5,3.8;Cintura]",                              
+        "list[current_player;armor_waist;3.5,3.8;1,1;]",      
+        has_backpack and "list[current_player;main;0.5,5.7;8,2;8] list[current_player;main;0.5,7.9;8,1;]"
+                      or "list[current_player;main;0.5,7.9;8,1;]",
+        "listring[current_player;main]", "listring[current_player;armor_head]",
+        "listring[current_player;armor_torso]", "listring[current_player;armor_waist]",
+        "listring[current_player;armor_legs]", "listring[current_player;armor_back]",
+        "listring[current_player;armor_arms]", "listring[current_player;armor_hands]",
+        "listring[current_player;armor_feet]"
+    }, " ")
 end
 local function update_player_formspec(player)
     if not player then return end
