@@ -70,21 +70,15 @@ core.register_entity("nh_body:player_body", {
         local head_rot  = player:get_bone_override("bone_All_Head").rotation.vec
         local torso_rot = player:get_bone_override("bone_TorsoArms").rotation.vec
         local legs_rot  = player:get_bone_override("bone_Legs").rotation.vec
-        -- Verifica se a rotação da cabeça mudou
-        if not self.last_bone_head or
-            not vector.equals(head_rot, self.last_bone_head.rot) then
+        if not self.last_bone_head or not vector.equals(head_rot, self.last_bone_head.rot) then -- Verifica se a rotação da cabeça mudou
             self.object:set_bone_override("bone_All_Head", { rotation = { vec = head_rot } })
             self.last_bone_head = { rot = head_rot }
         end
-        -- Verifica se a rotação do torso mudou
-        if not self.last_bone_torso or
-            not vector.equals(torso_rot, self.last_bone_torso.rot) then
+        if not self.last_bone_torso or not vector.equals(torso_rot, self.last_bone_torso.rot) then -- Verifica se a rotação do torso mudou
             self.object:set_bone_override("bone_TorsoArms", { rotation = { vec = torso_rot } })
             self.last_bone_torso = { rot = torso_rot }
         end
-        -- Verifica se a rotação das pernas mudou
-        if not self.last_bone_legs or
-            not vector.equals(legs_rot, self.last_bone_legs.rot) then
+        if not self.last_bone_legs or not vector.equals(legs_rot, self.last_bone_legs.rot) then -- Verifica se a rotação das pernas mudou
             self.object:set_bone_override("bone_Legs", { rotation = { vec = legs_rot } })
             self.last_bone_legs = { rot = legs_rot }
         end
@@ -105,27 +99,19 @@ local function create_player_body(player)
         local luaentity = body:get_luaentity()
         luaentity.player_name = player_name
         -- Anexa ao player na mesma posição
-        body:set_attach(
-            player,
-            "", -- Bone principal (corpo todo)
-            zeroaxys,
-            zeroaxys,
-            true
-        )
+        body:set_attach(player, "", -- Bone principal (corpo todo)
+            zeroaxys, zeroaxys, true)
         -- ★ SINCRONIZA OS BONES IMEDIATAMENTE ★
         core.after(0.1, function()
             if not body or not body:get_luaentity() then return end
             if not player or not player:is_player() then return end
-
             -- Copia rotações dos bones do player para o corpo
             local head_rot  = player:get_bone_override("bone_All_Head").rotation.vec
             local torso_rot = player:get_bone_override("bone_TorsoArms").rotation.vec
             local legs_rot  = player:get_bone_override("bone_Legs").rotation.vec
-
             body:set_bone_override("bone_All_Head", { rotation = { vec = head_rot } })
             body:set_bone_override("bone_TorsoArms", { rotation = { vec = torso_rot } })
             body:set_bone_override("bone_Legs", { rotation = { vec = legs_rot } })
-
             -- Força atualização da animação atual
             local state = player_states[player_name]
             if state and state.current_anim then
@@ -159,8 +145,6 @@ local function update_body_textures(player)
     end
     body:set_properties({ textures = textures }) -- Atualiza textura do corpo visível
 end
-
-
 -- REGISTRA A ENTIDADE DO ITEM NA CINTURA
 core.register_entity("nh_body:belt_item", {
     initial_properties = {
@@ -171,13 +155,11 @@ core.register_entity("nh_body:belt_item", {
         pointable = false,
         static_save = false,
     },
-
     on_step = function(self, dtime)
         if not self.player_name then
             self.object:remove()
             return
         end
-
         local player = core.get_player_by_name(self.player_name)
         if not player then
             self.object:remove()
@@ -224,18 +206,8 @@ local function update_belt_items(player)
                     local luaentity = entity:get_luaentity()
                     luaentity.player_name = player_name
                     luaentity.slot_num = slot_num
-                    entity:set_attach(
-                        player,
-                        config.bone,
-                        config.pos,
-                        config.rot,
-                        true
-                    )
-                    entity:set_properties({
-                        wield_item = item_name,
-                        visual = "wielditem",
-                        visual_size = { x = 0.035, y = 0.035, z = 0.035 }
-                    })
+                    entity:set_attach(player, config.bone, config.pos, config.rot, true)
+                    entity:set_properties({ wield_item = item_name, visual = "wielditem", visual_size = { x = 0.035, y = 0.035, z = 0.035 } })
                     belt_entities[player_name][slot_num] = entity
                 end
             end
@@ -256,19 +228,18 @@ local hand_capabilities = {
     },
     damage_groups = { fleshy = 1 },
 }
-
 -- REGISTRA O ITEM DA MÃO (SEM IMAGEM VISÍVEL)
---core.register_craftitem(":", {
---    type = "none",
---    wield_image = "",
---    wield_scale = {x = 0, y = 0, z = 0},
---    range = 4,
---    inventory_image = "",
---    tool_capabilities = hand_capabilities,
---    visual_scale = 0,
---    pointable = false,
---})
-
+-- core.register_craftitem(":",
+--     {
+--         type = "none",
+--         wield_image = "",
+--         wield_scale = zeroaxys,
+--         range = 4,
+--         inventory_image = "",
+--         tool_capabilities = hand_capabilities,
+--         visual_scale = 0,
+--         pointable = false,
+--     })
 core.override_item("", { -- "" é o itemstring da mão sem itens
     wield_image = "",
     wield_scale = zeroaxys,
@@ -297,17 +268,9 @@ local function update_wielded_item(player)
     local final_size = default_size
     -- SOBRESCREVE COM VALORES CUSTOMIZADOS SE EXISTIREM
     if item_def then
-        if item_def.wielded_bone_position then
-            if item_def.wielded_bone_position.pos then
-                final_pos = item_def.wielded_bone_position.pos
-            end
-            if item_def.wielded_bone_position.rot then
-                final_rot = item_def.wielded_bone_position.rot
-            end
-        end
-        if item_def.wielded_visual_size then
-            final_size = item_def.wielded_visual_size
-        end
+        final_pos = item_def.wielded_bone_position.pos or final_pos
+        final_rot = item_def.wielded_bone_position.rot or final_rot
+        final_size = item_def.wielded_visual_size or final_size
     end
     local pos = player:get_pos()
     local entity = core.add_entity(pos, "nh_body:wielded_item")
@@ -315,19 +278,15 @@ local function update_wielded_item(player)
         local luaentity = entity:get_luaentity()
         luaentity.player_name = player_name
         luaentity.item_name = item_name
-        entity:set_attach(
-            player,
-            "bone_RHand",
+        entity:set_attach(player, "bone_RHand",
             final_pos, -- USA POSIÇÃO CUSTOMIZADA
             final_rot, -- USA ROTAÇÃO CUSTOMIZADA
-            true
-        )
+            true)
         entity:set_properties({
             wield_item = item_name,
             visual = "wielditem",
             visual_size = final_size -- USA TAMANHO CUSTOMIZADO
         })
-
         wielded_entities[player_name] = entity
     end
 end
@@ -357,21 +316,15 @@ local function update_offhand_item(player)
     local final_size = default_size
     -- SOBRESCREVE COM VALORES CUSTOMIZADOS SE EXISTIREM
     if item_def then
-        -- Primeiro tenta usar configuração específica de offhand
-        if item_def.offhand_bone_position then
-            if item_def.offhand_bone_position.pos then final_pos = item_def.offhand_bone_position.pos end
-            if item_def.offhand_bone_position.rot then final_rot = item_def.offhand_bone_position.rot end
-            -- Senão, usa a mesma configuração do wielded
-        elseif item_def.wielded_bone_position then
-            if item_def.wielded_bone_position.pos then final_pos = item_def.wielded_bone_position.pos end
-            if item_def.wielded_bone_position.rot then final_rot = item_def.wielded_bone_position.rot end
+        if item_def.offhand_bone_position then -- Primeiro tenta usar configuração específica de offhand
+            final_pos = item_def.offhand_bone_position.pos or final_pos
+            final_rot = item_def.offhand_bone_position.rot or final_rot
+        elseif item_def.wielded_bone_position then -- Senão, usa a mesma configuração do wielded
+            final_pos = item_def.wielded_bone_position.pos or final_pos
+            final_rot = item_def.wielded_bone_position.rot or final_rot
         end
         -- Tamanho pode ser específico de offhand ou compartilhado
-        if item_def.offhand_visual_size then
-            final_size = item_def.offhand_visual_size
-        elseif item_def.wielded_visual_size then
-            final_size = item_def.wielded_visual_size
-        end
+        final_size = item_def.offhand_visual_size and item_def.offhand_visual_size or item_def.wielded_visual_size
     end
     local pos = player:get_pos()
     local entity = core.add_entity(pos, "nh_body:offhand_item")
@@ -380,13 +333,9 @@ local function update_offhand_item(player)
         luaentity.player_name = player_name
         luaentity.item_name = offhand_name
         luaentity.slot_index = offhand_index
-        entity:set_attach(
-            player,
-            "bone_LHand",
-            final_pos, -- USA POSIÇÃO CUSTOMIZADA
-            final_rot, -- USA ROTAÇÃO CUSTOMIZADA
-            true
-        )
+        entity:set_attach(player, "bone_LHand", final_pos, -- USA POSIÇÃO CUSTOMIZADA
+            final_rot,                                     -- USA ROTAÇÃO CUSTOMIZADA
+            true)
         entity:set_properties({
             wield_item = offhand_name,
             visual = "wielditem",
@@ -445,13 +394,10 @@ core.register_entity("nh_body:offhand_item", {
             offhand_entities[self.player_name] = nil
             return
         end
-
         local inv = player:get_inventory()
         local current_item = inv:get_stack("main", self.slot_index):get_name()
         local wield_index = player:get_wield_index()
-        if current_item ~= self.item_name or
-            (wield_index ~= 1 and wield_index ~= 2) or
-            wield_index == self.slot_index then
+        if current_item ~= self.item_name or (wield_index ~= 1 and wield_index ~= 2) or wield_index == self.slot_index then
             update_offhand_item(player)
         end
     end,
@@ -478,14 +424,12 @@ core.register_entity("nh_body:armor_piece", {
         end
     end,
 })
-
 -- INVENTÁRIO DE VESTUÁRIO
 local function create_armor_inventory(player)
     if not player then return end
     local inv = player:get_inventory()
     for slot, _ in pairs(armor_slots) do inv:set_size("armor_" .. slot, 1) end
 end
-
 local function get_armor_formspec(player_name)
     local player = core.get_player_by_name(player_name)
     if not player then return "" end
@@ -528,10 +472,7 @@ core.register_allow_player_inventory_action(function(player, action, inventory, 
             local stack = inventory:get_stack(from_list, inventory_info.from_index)
             local item_name = stack:get_name()
             local item_def = core.registered_items[item_name]
-            if not item_def or not item_def.groups or
-                not item_def.groups["armor_" .. slot_type] then
-                return 0
-            end
+            if not item_def or not item_def.groups or not item_def.groups["armor_" .. slot_type] then return 0 end
             return stack:get_count()
         end
     elseif action == "put" then
@@ -541,10 +482,7 @@ core.register_allow_player_inventory_action(function(player, action, inventory, 
             local stack = inventory_info.stack
             local item_name = stack:get_name()
             local item_def = core.registered_items[item_name]
-            if not item_def or not item_def.groups or
-                not item_def.groups["armor_" .. slot_type] then
-                return 0
-            end
+            if not item_def or not item_def.groups or not item_def.groups["armor_" .. slot_type] then return 0 end
             return stack:get_count()
         end
     end
@@ -572,7 +510,7 @@ local function update_armor_visuals(player)
             bone = "bone_All_Head",
             pos = { x = 0, y = 4.75, z = 0 },
             rot = zeroaxys,
-            size = { x = 0.3, y = 0.3, z = 0.3 }
+            size = { x = 0.3, y = 0.3, z = 0.3 },
         },
         torso = {
             bone = "bone_TorsoArms",
@@ -630,10 +568,10 @@ local function update_armor_visuals(player)
             if item_def then
                 -- Suporte para armor_bone_position
                 if item_def.armor_bone_position then
-                    if item_def.armor_bone_position.pos then final_pos = item_def.armor_bone_position.pos end
-                    if item_def.armor_bone_position.rot then final_rot = item_def.armor_bone_position.rot end
+                    final_pos = item_def.armor_bone_position.pos or final_pos
+                    final_rot = item_def.armor_bone_position.rot or final_rot
                 end
-                if item_def.armor_visual_size then final_size = item_def.armor_visual_size end -- Suporte para armor_visual_size
+                final_size = item_def.armor_visual_size or final_size -- Suporte para armor_visual_size
             end
             local visual_item = item_name
             if item_def and item_def.armor_model then visual_item = item_def.armor_model end
@@ -643,17 +581,14 @@ local function update_armor_visuals(player)
                 local luaentity = entity:get_luaentity()
                 luaentity.player_name = player_name
                 luaentity.slot = slot
-                entity:set_attach(
-                    player,
-                    config.bone,
-                    final_pos, -- USA POSIÇÃO CUSTOMIZADA
-                    final_rot, -- USA ROTAÇÃO CUSTOMIZADA
-                    true
-                )
+                entity:set_attach(player, config.bone, final_pos, -- USA POSIÇÃO CUSTOMIZADA
+                    final_rot,                                    -- USA ROTAÇÃO CUSTOMIZADA
+                    true)
                 entity:set_properties({
                     wield_item = visual_item,
                     visual = "wielditem",
-                    visual_size = final_size -- USA TAMANHO CUSTOMIZADO
+                    visual_size =
+                        final_size -- USA TAMANHO CUSTOMIZADO
                 })
                 armor_entities[player_name][slot] = entity
             end
@@ -669,14 +604,10 @@ local function update_armor_textures(player)
         if not stack:is_empty() then
             local item_name = stack:get_name()
             local item_def = core.registered_items[item_name]
-            if item_def and item_def.armor_texture then
-                table.insert(textures, item_def.armor_texture)
-            end
+            if item_def and item_def.armor_texture then table.insert(textures, item_def.armor_texture) end
         end
     end
-    player:set_properties({
-        textures = textures
-    })
+    player:set_properties({ textures = textures })
     update_armor_visuals(player)
     update_player_formspec(player)
     update_body_textures(player) -- ATUALIZA CORPO VISÍVEL
@@ -685,31 +616,22 @@ core.register_on_player_inventory_action(function(player, action, inventory, inv
     if action == "move" or action == "put" or action == "take" then
         local listname = inventory_info.listname or inventory_info.to_list or inventory_info.from_list
         if listname and listname:match("^armor_") then update_armor_textures(player) end -- ATUALIZA ARMADURAS
-        -- ATUALIZA ITENS NAS MÃOS quando inventário main muda
-        if listname == "main" then
+        if listname == "main" then                                                       -- ATUALIZA ITENS NAS MÃOS quando inventário main muda
             local to_index = inventory_info.to_index or inventory_info.index
             local from_index = inventory_info.from_index
             -- Verifica se a mudança afeta os slots 1 ou 2
-            if (to_index and (to_index == 1 or to_index == 2)) or
-                (from_index and (from_index == 1 or from_index == 2)) then
+            if (to_index and (to_index == 1 or to_index == 2)) or (from_index and (from_index == 1 or from_index == 2)) then
                 update_wielded_item(player)
                 update_offhand_item(player)
             end
         end
     end
 end)
--- FUNÇÃO PARA APLICAR O MODELO INVISÍVEL NO PLAYER
-local function apply_custom_model(player)
+local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVISÍVEL NO PLAYER
     if not player then return end
     local player_name = player:get_player_name()
-    if not player_states[player_name] then
-        player_states[player_name] = {
-            body_yaw = 0,
-            current_anim = nil
-        }
-    end
-    -- Aplica modelo INVISÍVEL (nametag_color com alpha 0)
-    player:set_properties({
+    if not player_states[player_name] then player_states[player_name] = { body_yaw = 0, current_anim = nil } end
+    player:set_properties({ -- Aplica modelo INVISÍVEL (nametag_color com alpha 0)
         visual = "mesh",
         mesh = "character5.glb",
         textures = { "blank.png" }, -- textura vazia, invisivel
@@ -717,15 +639,14 @@ local function apply_custom_model(player)
         collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 },
         stepheight = 0.6,
         eye_height = 2.5,
-        --shaded = true,
+        -- shaded = true,
         -- Torna o modelo do player invisível
         makes_footstep_sound = false,
     })
     player:set_nametag_attributes({ color = { a = 0, r = 255, g = 255, b = 255 } }) -- Torna o nametag invisível (opcional)
     -- Ajusta a câmera para ficar à frente da cabeça
-    player:set_eye_offset(
-        { x = 0, y = -1, z = 3 }, -- Primeira pessoa: move 3 unidades para frente (Z negativo)
-        { x = 0, y = 7, z = -7 }  -- Terceira pessoa
+    player:set_eye_offset({ x = 0, y = -1, z = 3 },                                 -- Primeira pessoa: move 3 unidades para frente (Z negativo)
+        { x = 0, y = 7, z = -7 }                                                    -- Terceira pessoa
     )
     print("[body] Modelo invisível aplicado para " .. player_name)
 end
@@ -789,7 +710,6 @@ local function rotate_head_to_look(player)
     player:set_bone_override("bone_TorsoArms", { rotation = { vec = zeroaxys } })
     player:set_bone_override("bone_Legs", { rotation = { vec = zeroaxys } })
 end
-
 -- FUNÇÃO PARA DEFINIR ANIMAÇÃO DO PLAYER
 set_player_animation = function(player, anim)
     if not player then return end
@@ -839,14 +759,12 @@ set_player_animation = function(player, anim)
         if body and body:get_luaentity() then body:set_animation(anim_data[1], anim_data[2], anim_data[3], anim_data[4]) end
     end
 end
--- ATUALIZA QUANDO O JOGADOR MUDA O ITEM SELECIONADO
-core.register_on_punchnode(function(pos, node, puncher, pointed_thing)
+core.register_on_punchnode(function(pos, node, puncher, pointed_thing) -- ATUALIZA QUANDO O JOGADOR MUDA O ITEM SELECIONADO
     if puncher and puncher:is_player() then
         trigger_punch(puncher)
         update_wielded_item(puncher)
     end
 end)
-
 core.register_on_punchplayer(function(player, hitter) if hitter and hitter:is_player() then trigger_punch(hitter) end end)
 core.register_on_placenode(function(pos, newnode, placer)
     if not placer or not placer:is_player() then return end
@@ -855,7 +773,6 @@ core.register_on_placenode(function(pos, newnode, placer)
     last_place_time[name] = core.get_gametime()
     is_placing[name] = true
     trigger_punch(placer)                                              -- animação única de place
-
     if not punch_loop_timers[name] then trigger_punch_loop(placer) end -- inicia loop se ainda não estiver ativo
 end)
 -- GLOBALSTEP PARA ATUALIZAR ANIMAÇÕES E ROTAÇÕES
@@ -948,8 +865,7 @@ core.register_globalstep(function(dtime)
             update_player_formspec(player)
         end
         if player_states[player_name] then
-            -- não sobrescreve animação durante punch
-            if punch_timers[player_name] then goto continue end
+            if punch_timers[player_name] then goto continue end -- não sobrescreve animação durante punch
             rotate_head_to_look(player)
             local ctrl = player:get_player_control()
             local vel = player:get_velocity()
@@ -968,9 +884,7 @@ core.register_globalstep(function(dtime)
                     if speed > 0.1 then setplayeranimation("crawling_walk") else setplayeranimation("crawling") end
                 elseif ctrl.sneak and vel.x < 0.1 and vel.z < 0.1 then
                     set_player_animation(player, "sneak")
-                    -- player:set_properties({
-                    -- collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6}
-                    -- })
+                    -- player:set_properties({ collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6} })
                     player:set_eye_offset(
                         { x = 0, y = 8, z = 10 }, -- ajusta para sneak
                         { x = 0, y = 7, z = -7 }
@@ -1015,7 +929,7 @@ core.register_globalstep(function(dtime)
             ::continue::
         end
     end
-end)-- EVENTOS DE JOGADOR
+end) -- EVENTOS DE JOGADOR
 core.register_on_joinplayer(function(player)
     player:hud_set_flags({ wielditem = false })
     player:set_lighting({ shadows = { intensity = 0.33 } })
@@ -1061,17 +975,13 @@ core.register_on_leaveplayer(function(player)
     end
     if belt_entities[player_name] then
         for slot_num, entity in pairs(belt_entities[player_name]) do
-            if entity and entity:get_luaentity() then
-                entity:remove()
-            end
+            if entity and entity:get_luaentity() then entity:remove() end
         end
         belt_entities[player_name] = nil
     end
     if armor_entities[player_name] then
         for slot, entity in pairs(armor_entities[player_name]) do
-            if entity and entity:get_luaentity() then
-                entity:remove()
-            end
+            if entity and entity:get_luaentity() then entity:remove() end
         end
         armor_entities[player_name] = nil
     end
@@ -1079,12 +989,11 @@ core.register_on_leaveplayer(function(player)
         body_entities[player_name]:remove()
         body_entities[player_name] = nil
     end
-    --if shadow_objects[player_name] then
-    --   shadow_objects[player_name]:remove()
-    --  shadow_objects[player_name] = nil
-    --end
+    -- if shadow_objects[player_name] then
+    --     shadow_objects[player_name]:remove()
+    --     shadow_objects[player_name] = nil
+    -- end
 end)
-
 core.register_on_dieplayer(function(player)
     local player_name = player:get_player_name()
     if wielded_entities[player_name] then
@@ -1105,10 +1014,10 @@ core.register_on_dieplayer(function(player)
         body_entities[player_name]:remove()
         body_entities[player_name] = nil
     end
-    --if shadow_objects[player_name] then
-    --    shadow_objects[player_name]:remove()
-    --    shadow_objects[player_name] = nil
-    --end
+    -- if shadow_objects[player_name] then
+    --     shadow_objects[player_name]:remove()
+    --     shadow_objects[player_name] = nil
+    -- end
 end)
 core.register_on_respawnplayer(function(player)
     core.after(0.5, function()
