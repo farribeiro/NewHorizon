@@ -1,4 +1,1 @@
-config = {}
-config.MIN_XZ = -1000
-config.MAX_XZ = 1000
-config.VOID_Y = -50
+config = { MIN_XZ = -1000, MAX_XZ = 1000, VOID_Y = -50 }
