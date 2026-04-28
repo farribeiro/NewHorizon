@@ -1716,10 +1716,10 @@ register_craft_station("nh_nodes:top_grass", {
     },
     
     sounds = {
-        footstep = {name = "GrassFootstep", gain = 1},        
-	dug = {name = "GrassDig", gain = 1},
-	dig  = {name = "GrassDig", gain = 1},
-	place = {name = "GrassDig", gain = 1},
+        footstep = {name = "GrassFootstep", gain = 0.5},        
+	dug = {name = "GrassDig", gain = 0.5},
+	dig  = {name = "GrassDig", gain = 0.5},
+	place = {name = "GrassDig", gain = 0.5},
     },
     
     title = S("2x2 Craft on the Grass"),  -- ✅ Campo obrigatório!
@@ -5433,6 +5433,13 @@ core.register_node("nh_nodes:orb_empty", {
     groups = {oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
+            -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 1.8, y = 0, z = 0},
+        --rot = {x = 90, y = 0, z = 90}
+    },
+    wielded_visual_size = {x = 0.2, y = 0.2, z = 0.2},
+    
     collision_box = {
         type = "fixed",
         fixed = {-0.14, -0.5, -0.14, 0.14, 0, 0.14}
@@ -5470,6 +5477,12 @@ function register_orb_egg(mob_name, description, texture)
             type = "fixed",
             fixed = {-0.14, -0.5, -0.14, 0.14, -0.15, 0.14}
         },
+        
+                    -- Configuração mão direita
+    	wielded_bone_position = {
+      		pos = {x = 1.8, y = 0, z = 0},
+    	},
+    	wielded_visual_size = {x = 0.2, y = 0.2, z = 0.2},
         
         -- Ao clicar com o orbe em um node, spawna o mob
 	on_place = function(itemstack, placer, pointed_thing)
@@ -12042,6 +12055,19 @@ core.register_node("nh_nodes:archion", {
     paramtype2 = "facedir",
 
     groups = {snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1},
+
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = -1, z = 1.15},
+        rot = {x = 90, y = 0, z = 90}
+    },
+    wielded_visual_size = {x = 0.2, y = 0.2, z = 0.2},
+    
+    offhand_bone_position = {
+        pos = {x = 0.5, y = -1, z = -1.15},
+        rot = {x = -90, y = 0, z = 270}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 
     collision_box = {
         type  = "fixed",

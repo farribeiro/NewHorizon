@@ -268,9 +268,11 @@ local function update_wielded_item(player)
 	local final_size = default_size
 	-- SOBRESCREVE COM VALORES CUSTOMIZADOS SE EXISTIREM
 	if item_def then
+	    if item_def.wielded_bone_position then
 		final_pos = item_def.wielded_bone_position.pos or final_pos
 		final_rot = item_def.wielded_bone_position.rot or final_rot
-		final_size = item_def.wielded_visual_size or final_size
+	    end
+	    final_size = item_def.wielded_visual_size or final_size
 	end
 	local pos = player:get_pos()
 	local entity = core.add_entity(pos, "nh_body:wielded_item")
