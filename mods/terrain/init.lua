@@ -2074,7 +2074,7 @@ local function generate_volcano(area, data, minp, maxp, volcano_pos)
                 -- Adiciona rugosidade à superfície
                 local noise_x = x * 0.1
                 local noise_z = z * 0.1
-                local roughness = (perlin_roughness:get_2d({x=noise_x, y=noise_z}) + 1) * 2
+                local roughness = (P.perlin_roughness:get_2d({x=noise_x, y=noise_z}) + 1) * 2
                 local volcano_height = SEA_LEVEL + base_height + math.floor(roughness)
                 
                 -- Determina se está na zona de praia (parte baixa do vulcão)
