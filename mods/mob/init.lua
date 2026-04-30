@@ -154,24 +154,23 @@ local function spawn_with_preset(name, preset, extra)
 
 	register_mob_spawn(def)
 end
--- MOB 4: RAT/RATAZANA (Agressivo)
+-- MOB: RAT/RATAZANA (Agressivo)
 mobs:register_mob("nh_mob:rat",
 	{
 		type = "animal",
 		passive = false,
 		reach = 1,
-		damage = 2,
+		damage = 1,
 		attack_type = "dogfight",
 		description = S("Rat"),
-		-- lista de mobs que ele vai atacar ativamente
 		attack_animals = true, -- permite atacar outros mobs
-		specific_attack = { "nh_mob:cricket", "nh_mob:cicada" },
-		follow = { "nh_nodes:chicken_egg", "nh_nodes:friedchickenegg", "nh_nodes:raw_chicken", "nh_nodes:blueberry" },
+		specific_attack = {"player", "nh_mob:cricket", "nh_mob:cicada"}, -- lista de mobs que ele vai atacar ativamente
+		follow = {"nh_nodes:chickenegg", "nh_nodes:friedchickenegg", "nh_nodes:rawchicken", "nh_nodes:rawbeef", "nh_nodes:blueberry"},
 		hp_min = 8,
 		hp_max = 10,
 		armor = 100,
-		collisionbox = { -0.25, 0, -0.2, 0.3, 0.4, 0.2 },
-		selectionbox = { -0.5, 0, -0.2, 0.5, 0.4, 0.2 },
+		collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
+		selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
 		physical = true,
 		stepheight = 3,
 		fall_speed = -8,
@@ -181,17 +180,17 @@ mobs:register_mob("nh_mob:rat",
 		mesh = "rat.glb",
 		textures = { "rat.png" },
 		-- rotate = 180,
-		visual_size = { x = 15, y = 15 },
+		visual_size = {x = 15, y = 15},
 		-- PERMITIRIA "VOAR" DENTRO DAS FOLHAS se não retirasse a capacidade de andar...
 		-- fly = true,
 		-- fly_in = {"nh_nodes:leaves"},  -- Pode ser uma lista!
 		walk_velocity = 3,
-		run_velocity = 6,
+		run_velocity = 5,
 		view_range = 8,
 		water_damage = 0,
 		lava_damage = 5,
 		light_damage = 0,
-		animation = { speed_normal = 1, stand_start = 0.25, stand_end = 1.25, walk_start = 1.5, walk_end = 2.5, },
+		animation = {speed_normal = 1, stand_start = 0.25, stand_end = 1.25, walk_start = 1.5, walk_end = 2.5, },
 		on_rightclick = function(self, clicker)
 			if clicker:is_player() then
 				local item = clicker:get_wielded_item()
@@ -205,7 +204,7 @@ mobs:register_mob("nh_mob:rat",
 				end
 			end
 		end,
-		sounds = { random = "rat_quick", damage = "rat_hurt", },
+		sounds = {random = "rat_quick", damage = "rat_hurt"},
 	})
 -- Spawn da ratazana (grama, perto de árvores/arbustos e cavernas)
 register_mob_spawn({
@@ -513,9 +512,9 @@ mobs:register_mob("nh_mob:worm", {
 	mesh = "worm.glb",
 	textures = { "worm.png" },
 	-- rotate = 180,
-	visual_size = { x = 15, y = 15 },
-	walk_velocity = 1,
-	run_velocity = 2,
+	visual_size = {x = 7, y = 7},
+	walk_velocity = 0.2,
+	run_velocity = 1,
 	view_range = 5,
 	water_damage = 1,
 	lava_damage = 5,
@@ -567,7 +566,7 @@ mobs:register_mob("nh_mob:bull", {
 	attack_chance = 1,
 	drops = {
 		{ name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4 }, -- 1-4 couros
-		{ name = "nh_nodes:cowmeat",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
+		{ name = "nh_nodes:rawbeef",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
 		{ name = "nh_nodes:bone",       chance = 1, min = 2, max = 5 }, -- 2-7 ossos (sempre)
 	},
 	description = S("Bull"),
@@ -672,11 +671,11 @@ mobs:register_mob("nh_mob:bull", {
 			return
 		end
 		if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-			core.chat_send_player(clicker:get_player_name(), S("You fed the bull! Mooo!"))
+			core.chat_send_player(clicker:get_player_name(), S("I fed the bull! Mooo!"))
 			item:take_item(1)
 			clicker:set_wielded_item(item)
 		elseif name == "" then -- mão vazia
-			core.chat_send_player(clicker:get_player_name(), S("You petted the bull. hff, hff..."))
+			core.chat_send_player(clicker:get_player_name(), S("I petted the bull. hff, hff..."))
 		else             -- item errado
 			core.chat_send_player(clicker:get_player_name(), S("The bull is not interested in that..."))
 		end
@@ -699,7 +698,7 @@ mobs:register_mob("nh_mob:cow", {
 	attack_type = "dogfight",
 	drops = {
 		{ name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4 }, -- 1-4 couros
-		{ name = "nh_nodes:cowmeat",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
+		{ name = "nh_nodes:rawbeef",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
 		{ name = "nh_nodes:bone",       chance = 1, min = 2, max = 5 }, -- 2-7 ossos (sempre)
 	},
 	description = S("Cow"),
@@ -885,11 +884,11 @@ mobs:register_mob("nh_mob:cow", {
 		end
  
 		if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-			core.chat_send_player(clicker:get_player_name(), S("You fed the cow! Mooo!"))
+			core.chat_send_player(clicker:get_player_name(), S("I fed the cow! Moo!"))
 			item:take_item(1)
 			clicker:set_wielded_item(item)
 		elseif name == "" then -- mão vazia
-			core.chat_send_player(clicker:get_player_name(), S("You petted the cow. hff, hff..."))
+			core.chat_send_player(clicker:get_player_name(), S("I petted the cow. hff, hff..."))
 		else             -- item errado
 			core.chat_send_player(clicker:get_player_name(), S("The cow is not interested in that..."))
 		end
@@ -912,7 +911,7 @@ mobs:register_mob("nh_mob:ox", {
 	attack_type = "dogfight",
 	drops = {
 		{ name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4 }, -- 1-4 couros
-		{ name = "nh_nodes:cowmeat",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
+		{ name = "nh_nodes:rawbeef",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
 		{ name = "nh_nodes:bone",       chance = 1, min = 2, max = 5 }, -- 2-7 ossos (sempre)
 	},
 	description = S("Ox"),
@@ -990,11 +989,11 @@ mobs:register_mob("nh_mob:ox", {
 			return
 		end
 		if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-			core.chat_send_player(clicker:get_player_name(), S("You fed the ox! Mooo!"))
+			core.chat_send_player(clicker:get_player_name(), S("I fed the ox! Mooo!"))
 			item:take_item(1)
 			clicker:set_wielded_item(item)
 		elseif name == "" then -- mão vazia
-			core.chat_send_player(clicker:get_player_name(), S("You petted the ox. hff, hff..."))
+			core.chat_send_player(clicker:get_player_name(), S("I petted the ox. hff, hff..."))
 		else             -- item errado
 			core.chat_send_player(clicker:get_player_name(), S("The ox is not interested in that..."))
 		end
@@ -1121,18 +1120,18 @@ mobs:register_mob("nh_mob:eagle", bird_def({
 	attack_type  = "dogfight",
 	description  = S("Eagle"),
 	attack_animals  = true,
-	specific_attack = { "nh_mob:rat", "nh_mob:rabbit" },
+	specific_attack = {"nh_mob:rat", "nh_mob:rabbit", "nh_mob:chicken"},
 	hp_min = 10,
 	hp_max = 20,
 	armor  = 100,
-	collisionbox = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
-	selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
+	collisionbox = {-0.5, 0, -0.2, 0.3, 2.4, 0.2},
+	selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
 	visual      = "mesh",
 	mesh        = "eagle.glb",
-	textures    = { "eagle.png" },
-	visual_size = { x = 15, y = 15 },
+	textures    = {"eagle.png"},
+	visual_size = {x = 15, y = 15},
 	floats      = 1,
-	follow      = { "nh_nodes:torch2" },
+	follow      = {"nh_nodes:torch2"},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local name = clicker:get_wielded_item():get_name()
@@ -1150,8 +1149,8 @@ mobs:register_mob("nh_mob:eagle", bird_def({
 -- Spawn da águia (copas de carvalhos)
 register_mob_spawn({
 	name                 = "nh_mob:eagle",
-	nodes                = { "air" },
-	neighbors            = { "nh_nodes:leaves" },
+	nodes                = {"air"},
+	neighbors            = {"nh_nodes:leaves"},
 	max_light            = 15,
 	interval             = 120,
 	chance               = 2000,
@@ -1172,7 +1171,7 @@ mobs:register_mob("nh_mob:blackkite", bird_def({
 	attack_type  = "dogfight",
 	description  = S("Black Kite"),
 	attack_animals  = true,
-	specific_attack = { "nh_mob:rat", "nh_mob:rabbit" },
+	specific_attack = {"nh_mob:rat", "nh_mob:rabbit", "nh_mob:chicken"},
 	hp_min = 10,
 	hp_max = 20,
 	armor  = 100,
@@ -1487,18 +1486,34 @@ mobs:register_mob("nh_mob:tuna", {
 	--rotate = 180,
 	visual_size = {x = 10, y = 10},
 	backface_culling = false, 
-	fly = true,             -- Permite "voar" na água
-	fly_in = "nh_nodes:water", -- Só "voa" dentro de nodes:water
+	swim = true,             -- Permite "voar" na água
+	swim_in = "nh_nodes:water", -- Só "voa" dentro de nodes:water
+	runaway = true,
+	runaway_from = {"player"}, -- Galinhas fogem de jogadores
 	walk_velocity = 4,
 	run_velocity = 7,
 	view_range = 10,
 	air_damage = 1,
 	lava_damage = 5,
 	light_damage = 0,
-	animation = { speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 0, walk_end = 2, run_start = 0, run_end = 2, },
+	animation = {speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 0, walk_end = 2, run_start = 0, run_end = 2},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
-			core.chat_send_player(clicker:get_player_name(), S("I need to be careful if I attack it..."))
+			local item = clicker:get_wielded_item()
+			local name = item:get_name()
+			if name == "" then
+				item:take_item()
+				clicker:set_wielded_item(item)
+				local inv = clicker:get_inventory() -- Define inv ANTES de usar
+				inv:add_item("main", ItemStack("nh_nodes:tuna"))
+				self.object:remove()
+			elseif name == "nh_nodes:worm" then
+				core.chat_send_player(clicker:get_player_name(), S("The tuna ate!"))
+				item:take_item(1)
+				clicker:set_wielded_item(item)
+			else
+				core.chat_send_player(clicker:get_player_name(), S("Glub, glub..."))
+			end
 		end
 	end,
 	do_custom = function(self, dtime)
@@ -1506,20 +1521,21 @@ mobs:register_mob("nh_mob:tuna", {
 		local node = core.get_node(pos)
 		if node.name ~= "nh_nodes:water" then -- Se não está na água, tenta voltar
 			-- Procura por água próxima
-			local water_pos = core.find_node_near(pos, 5, { "nh_nodes:water" })
+			local water_pos = core.find_node_near(pos, 7, {"nh_nodes:water"})
 			if water_pos then
 				-- Move em direção à água
 				local dir = vector.direction(pos, water_pos)
-				self.object:set_velocity(vector.multiply(dir, 2))
+				self.object:set_velocity(vector.multiply(dir, 3))
 			end
 		end
 	end,
+	drops = {{name = "nh_nodes:rawtuna", chance = 1, min = 1, max = 1 },}, -- 1-1 atum
 })
 -- Spawn do Ouriço do mar
 register_mob_spawn({
 	name = "nh_mob:tuna",
-	nodes = { "nh_nodes:water" },
-	neighbors = { "nh_nodes:water" },
+	nodes = {"nh_nodes:water"},
+	neighbors = {"nh_nodes:water"},
 	max_light = 15,
 	interval = 120,
 	chance = 3000,
@@ -1527,7 +1543,6 @@ register_mob_spawn({
 	min_height = -20,
 	max_height = 0
 })
---mobs:register_egg("nh_mob:ourico", "Orbe com Ouriço", "orbspawner.png", 0)
 register_orb_egg("nh_mob:tuna", S("Orb with Tuna"))
 -- Ouriço do mar
 mobs:register_mob("nh_mob:urchin", {
@@ -1970,7 +1985,7 @@ mobs:register_mob("nh_mob:bubble", {
 -- Spawn da bolha (fundo do mar)
 register_mob_spawn({
 	name = "nh_mob:bubble",
-	nodes = { "nh_nodes:water" },    -- nh_nodes = {"nh_nodes:water"},
+	nodes = { "nh_nodes:water" },   
 	neighbors = { "nh_nodes:fireice" }, -- neighbors = {"nh_nodes:wet_sand"},
 	max_light = 15,
 	interval = 30,
@@ -2168,9 +2183,8 @@ mobs:register_mob("nh_mob:karibo", {
 	-- rotate = 180,
 	visual_size = {x = 7, y = 7},
 	backface_culling = false, 
-	-- lista de mobs que ele vai atacar ativamente
 	attack_animals = true, -- permite atacar outros mobs
-	specific_attack = {"nh_mob:rabbit"},
+	specific_attack = {"nh_mob:rabbit"}, -- lista de mobs que ele vai atacar ativamente
 	walk_velocity = 3,
 	run_velocity = 7.5,
 	view_range = 10,
@@ -2221,7 +2235,7 @@ mobs:register_mob("nh_mob:karibo", {
 	end,
 })
 -- Spawn do karibo
-register_mob_spawn({name = "nh_mob:karibo", nodes = { "air" }, neighbors = { "nh_nodes:ice", "nh_nodes:snow" }, max_light = 15, interval = 120, chance = 300, active_object_count = 2, min_height = -10, max_height = 25})
+register_mob_spawn({name = "nh_mob:karibo", nodes = {"air"}, neighbors = {"nh_nodes:ice", "nh_nodes:snow"}, max_light = 15, interval = 120, chance = 300, active_object_count = 2, min_height = -10, max_height = 25})
 register_orb_egg("nh_mob:karibo", S("Orb with Karibo"))
 -- MOB 3: GALO / rooster (Agressivo)
 mobs:register_mob("nh_mob:rooster", {
@@ -2233,13 +2247,13 @@ mobs:register_mob("nh_mob:rooster", {
 	description = S("Rooster"),
 	-- lista de mobs que ele vai atacar ativamente
 	attack_animals = true, -- permite atacar outros mobs
-	specific_attack = { "nh_mob:cricket", "nh_mob:cicada" },
+	specific_attack = {"player", "nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm"},
 	-- attack_chance = 100,   -- ataca sempre que detecta
-	attack_players = true, -- ataca jogadores
+	--attack_players = true, -- ataca jogadores
 	-- drop com a sintaxe correta
 	drops = {
 		{ name = "items:feather",        chance = 1, min = 1, max = 5 }, -- 1-5 penas
-		{ name = "nh_nodes:raw_chicken", chance = 1, min = 1, max = 1 }, -- 1 galinha crua (sempre)
+		{ name = "nh_nodes:rawchicken", chance = 1, min = 1, max = 1 }, -- 1 galinha crua (sempre)
 	},
 	hp_min = 4,
 	hp_max = 8,
@@ -2256,22 +2270,25 @@ mobs:register_mob("nh_mob:rooster", {
 	textures = { "rooster.png" }, -- Você precisa criar esta textura
 	-- rotate = 180,
 	visual_size = { x = 15, y = 15 },
-	walk_velocity = 1,
-	run_velocity = 4,
+	walk_velocity = 0.5,
+	run_velocity = 2,
 	view_range = 8,
 	water_damage = 0,
 	lava_damage = 5,
 	light_damage = 0,
-	animation = { speed_normal = 1, stand_start = 0.25, stand_end = 0.25, walk_start = 0.5, walk_end = 1.5, fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75, },
+	animation = { speed_normal = 1, stand_start = 0.25, stand_end = 0.25, walk_start = 0.5, walk_end = 1.5, punch_speed = 4, punch_start = 0.0, punck_end = 0.5,
+	fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75},
 	-- Galinhas podem ser alimentadas e seguir o jogador com sementes
-	follow = { "farming:seed_wheat", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium" },
+	follow = {"farming:seed_wheat", "nh_nodes:worm"},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
 			local name = item:get_name()
 			-- Se o jogador está segurando sementes, a galinha segue
-			if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-				core.chat_send_player(clicker:get_player_name(), S("The rooster is interested in the food!"))
+			if name == "farming:seed_wheat" or name == "nh_nodes:worm" then
+				core.chat_send_player(clicker:get_player_name(), S("The rooster ate!"))
+				item:take_item(1)
+				clicker:set_wielded_item(item)
 			else
 				core.chat_send_player(clicker:get_player_name(), S("Cock-a-doodle-doo!"))
 			end
@@ -2279,16 +2296,6 @@ mobs:register_mob("nh_mob:rooster", {
 	end,
 	sounds = { random = "ChickenSound", damage = "ChickenHurt", }, -- Sons da galinha
 	do_custom = function(self, dtime)                           -- Sistema de detecção pra voo
-		if self.state ~= "attack" then                          -- Busca proativa por players no raio de view_range
-			local pos = self.object:get_pos()
-			for _, player in ipairs(core.get_connected_players()) do
-				if vector.distance(pos, player:get_pos()) <= 8 then
-					self.attack = player
-					self.state = "attack"
-					break
-				end
-			end
-		end
 		local vel = self.object:get_velocity()
 		if not vel then return end
 		if self.state == "attack" or self.state == "runaway" or self.state == "follow" then return end -- Nunca interferir se o mob está atacando ou em comportamento especial
@@ -2327,24 +2334,25 @@ register_orb_egg("nh_mob:rooster", S("Orb with Rooster"))
 -- MOB 3: GALINHA (Passiva/Põe Ovos)
 mobs:register_mob("nh_mob:chicken", {
 	type = "animal",
-	passive = true,
-	damage = 0,
+	passive = false,
+	damage = 1,
 	description = S("Chicken"),
-	-- Galinhas fogem de jogadores
 	runaway = true,
-	runaway_from = { "player" },
+	runaway_from = {"player"}, -- Galinhas fogem de jogadores
 	-- lista de mobs que ele vai atacar ativamente
 	attack_animals = true, -- permite atacar outros mobs
-	specific_attack = { "nh_mob:cricket", "nh_mob:cicada" },
+	specific_attack = {"nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm"},
+	reach = 1,
+	attack_type = "dogfight",
 	drops = {
 		{ name = "items:feather",        chance = 1, min = 1, max = 5 }, -- 1-5 penas
-		{ name = "nh_nodes:raw_chicken", chance = 1, min = 1, max = 1 }, -- 1 galinha crua (sempre)
+		{ name = "nh_nodes:rawchicken", chance = 1, min = 1, max = 1 }, -- 1 galinha crua (sempre)
 	},
 	hp_min = 4,
 	hp_max = 8,
 	armor = 100,
-	collisionbox = { 0, 0, -0.2, 0.3, 0.4, 0.2 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
-	selectionbox = { 0, 0, -0.2, 0.3, 0.4, 0.2 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+	collisionbox = {-0.2, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+	selectionbox = {-0.2, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
 	physical = true,
 	stepheight = 1.1,
 	fall_speed = -3,           -- Galinhas caem devagar (batem asas)
@@ -2356,20 +2364,22 @@ mobs:register_mob("nh_mob:chicken", {
 	-- rotate = 180,
 	visual_size = { x = 15, y = 15 },
 	walk_velocity = 1,
-	run_velocity = 4,
+	run_velocity = 6,
 	view_range = 8,
 	water_damage = 0,
 	lava_damage = 5,
 	light_damage = 0,
 	animation = { speed_normal = 1, stand_start = 0.25, stand_end = 0.25, walk_start = 0.5, walk_end = 1.5, fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75, },
 	-- Galinhas podem ser alimentadas e seguir o jogador com sementes
-	follow = { "farming:seed_wheat", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium" },
+	follow = { "farming:seed_wheat", "nh_nodes:worm" },
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
 			local name = item:get_name()
-			if name == "farming:seed_wheat" then
-				core.chat_send_player(clicker:get_player_name(), S("The chicken is interested in the food!"))
+			if name == "farming:seed_wheat" or name == "nh_nodes:worm" then
+				core.chat_send_player(clicker:get_player_name(), S("The chicken ate!"))
+				item:take_item(1)
+				clicker:set_wielded_item(item)
 			elseif name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
 				-- Consome 1 unidade do item
 				item:take_item(1)
@@ -2413,9 +2423,9 @@ mobs:register_mob("nh_mob:chicken", {
 				self.seek_timer = 0
 			else
 				local pos = self.object:get_pos()
-				-- Procura o node nh_nodes:chicken_egg num raio de 10 blocos
+				-- Procura o node nh_nodes:chickenegg num raio de 10 blocos
 				local egg_nodes = core.find_nodes_in_area({ x = pos.x - 10, y = pos.y - 2, z = pos.z - 10 },
-					{ x = pos.x + 10, y = pos.y + 2, z = pos.z + 10 }, { "nh_nodes:chicken_egg" })
+					{ x = pos.x + 10, y = pos.y + 2, z = pos.z + 10 }, { "nh_nodes:chickenegg" })
 				if #egg_nodes > 0 then -- Pega o ovo mais próximo
 					local closest_egg = nil
 					local closest_dist = math.huge
@@ -2482,7 +2492,7 @@ mobs:register_mob("nh_mob:chicken", {
 			local back_dir = { x = -math.sin(yaw), y = 0, z = math.cos(yaw) } -- Direção para trás da galinha
 			local egg_pos = vector.add(pos, vector.multiply(back_dir, 0.8))
 			egg_pos.y = egg_pos.y + 0.1
-			core.add_item(egg_pos, "nh_nodes:chicken_egg")
+			core.add_item(egg_pos, "nh_nodes:chickenegg")
 			log("A chicken laid an egg in " .. core.pos_to_string(egg_pos))
 			for _, player in ipairs(core.get_connected_players()) do -- Avisar jogadores próximos
 				if vector.distance(player:get_pos(), pos) < 10 then
@@ -2492,11 +2502,11 @@ mobs:register_mob("nh_mob:chicken", {
 			-- Reset
 			self.egg_timer = 0
 			self.next_egg_time = math.random(120, 240) -- 2 a 4 min
-		end
-		local vel = self.object:get_velocity()
+		end                          
+		local vel = self.object:get_velocity()  -- Sistema de detecção pra voo
 		if not vel then return end
-		-- Subindo
-		if vel.y > 0.5 then
+		if self.state == "attack" or self.state == "runaway" or self.state == "follow" then return end -- Nunca interferir se o mob está atacando ou em comportamento especial
+		if vel.y > 0.5 then                                                                      -- Subindo
 			if self.state ~= "fly_up" then
 				self.state = "fly_up"
 				self:set_animation("fly_up")
@@ -2506,8 +2516,8 @@ mobs:register_mob("nh_mob:chicken", {
 				self.state = "fly_down"
 				self:set_animation("fly_down")
 			end
-		else -- Movimento normal
-			if self.state ~= "walk" then
+		else -- Movimento normal no chão
+			if self.state == "fly_up" or self.state == "fly_down" then
 				self.state = "walk"
 				self:set_animation("walk")
 			end
@@ -2529,21 +2539,21 @@ register_mob_spawn({
 -- mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
 register_orb_egg("nh_mob:chicken", S("Orb with Chicken"))
  
-mobs:register_mob("nh_mob:chick", {
+mobs:register_mob("nh_mob:chick", { -- pintinho
 	type = "animal",
-	passive = true,
-	reach = 1,
-	damage = 0,
+	passive = false,
+	reach = 0.5,
+	damage = 1,
 	attack_type = "dogfight",
 	description = S("Chick"),
 	-- lista de mobs que ele vai atacar ativamente
 	attack_animals = true, -- permite atacar outros mobs
-	specific_attack = { "nh_mob:cricket", "nh_mob:cicada" },
+	specific_attack = {"nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm"},
 	hp_min = 2,
 	hp_max = 3,
 	armor = 100,
-	collisionbox = { -0.1, 0, -0.1, 0.1, 0.1, 0.1 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
-	selectionbox = { -0.1, 0, -0.1, 0.1, 0.1, 0.1 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+	collisionbox = {-0.15, 0, -0.15, 0.15, 0.3, 0.15}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+	selectionbox = {-0.15, 0, -0.15, 0.15, 0.3, 0.15}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
 	physical = true,
 	stepheight = 1.1,
 	fall_speed = -3,         -- Galinhas caem devagar (batem asas)
@@ -2551,35 +2561,38 @@ mobs:register_mob("nh_mob:chick", {
 	floats = 1,              -- Não nadam bem
 	visual = "mesh",
 	mesh = "chick.glb",      -- Você precisa criar este modelo
-	textures = { "chick.png" }, -- Você precisa criar esta textura
+	textures = {"chick.png"}, -- Você precisa criar esta textura
 	-- rotate = 180,
-	visual_size = { x = 7, y = 7 },
+	visual_size = {x = 7, y = 7},
 	walk_velocity = 0.5,
 	run_velocity = 2,
-	view_range = 5,
+	view_range = 8,
 	water_damage = 0,
 	lava_damage = 5,
 	light_damage = 0,
-	animation = { speed_normal = 1, stand_start = 0.0, stand_end = 0.5, walk_start = 0.5, walk_end = 1.5, fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75, },
+	animation = {speed_normal = 0.75, stand_start = 0, stand_end = 0.5, walk_start = 0.5, walk_end = 1.5, fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75},
 	-- Galinhas podem ser alimentadas e seguir o jogador com sementes
-	follow = { "farming:seed_wheat", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium" },
+	follow = {"nh_nodes:worm"},
+	sounds = {random = "ChickSound", damage = "ChickHurt"}, -- Sons da galinha
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
 			local name = item:get_name()
-			if name == "farming:seed_wheat" or name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then -- Se o jogador está segurando sementes, a galinha segue
-				core.chat_send_player(clicker:get_player_name(), S("The chick is interested in the food!"))
+			if name == "nh_nodes:worm" then -- Se o jogador está segurando sementes, a galinha segue
+				core.chat_send_player(clicker:get_player_name(), S("The chick ate!"))
+				item:take_item(1)
+				clicker:set_wielded_item(item)
 			else
 				core.chat_send_player(clicker:get_player_name(), S("Peep, peep!"))
 			end
 		end
 	end,
-	sounds = { random = "ChickSound", damage = "ChickHurt", }, -- Sons da galinha
-	-- Sistema de ovos
-	do_custom = function(self, dtime)
+	-- Sistema de voo
+	do_custom = function(self, dtime)                           -- Sistema de detecção pra voo
 		local vel = self.object:get_velocity()
 		if not vel then return end
-		if vel.y > 0.5 then -- Subindo
+		if self.state == "attack" or self.state == "runaway" or self.state == "follow" then return end -- Nunca interferir se o mob está atacando ou em comportamento especial
+		if vel.y > 0.5 then                                                                      -- Subindo
 			if self.state ~= "fly_up" then
 				self.state = "fly_up"
 				self:set_animation("fly_up")
@@ -2589,8 +2602,8 @@ mobs:register_mob("nh_mob:chick", {
 				self.state = "fly_down"
 				self:set_animation("fly_down")
 			end
-		else -- Movimento normal
-			if self.state ~= "walk" then
+		else -- Movimento normal no chão
+			if self.state == "fly_up" or self.state == "fly_down" then
 				self.state = "walk"
 				self:set_animation("walk")
 			end
@@ -2603,13 +2616,13 @@ register_orb_egg("nh_mob:chick", S("Orb with Chick"))
 mobs:register_mob("nh_mob:shark", {
 	type = "animal",
 	passive = false,
-	reach = 1,
+	reach = 3,
 	damage = 5,
 	attack_type = "dogfight",
 	description = S("Shark"),
 	-- lista de mobs que ele vai atacar ativamente
 	attack_animals = true, -- permite atacar outros mobs
-	specific_attack = {"nh_mob:tuna", "nh_mob:octopus", "nh_mob:chicken", "nh_mob:rooster", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:hedgehog" },
+	specific_attack = {"player", "nh_mob:tuna", "nh_mob:octopus2", "nh_mob:chicken", "nh_mob:rooster", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:hedgehog" },
 	hp_min = 20,
 	hp_max = 30,
 	armor = 100,
@@ -2626,8 +2639,8 @@ mobs:register_mob("nh_mob:shark", {
 	--rotate = 180,
 	visual_size = {x = 20, y = 20},
 	-- Propriedades para manter na água
-	fly = true,             -- Permite "voar" na água
-	fly_in = "nh_nodes:water", -- Só "voa" dentro de nodes:water
+	swim = true,             -- Permite "voar" na água
+	swim_in = "nh_nodes:water", -- Só "voa" dentro de nodes:water
 	walk_velocity = 3,
 	run_velocity = 7,
 	view_range = 16,
@@ -2636,27 +2649,50 @@ mobs:register_mob("nh_mob:shark", {
 	light_damage = 0,
 	air_damage = 2, -- CRÍTICO: Recebe dano fora da água!
 	animation = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 1, },
-	follow = { "nh_nodes:raw_chicken" },
+	follow = {"nh_nodes:rawchicken", "nh_nodes:roastchicken", "nh_nodes:rawbeef", "nh_nodes:roastbeef", "nh_nodes:tuna", "nh_nodes:rawtuna", "nh_nodes:roasttuna"},
 	-- Função para forçar o tubarão a voltar para água
 	do_custom = function(self, dtime)
-		local pos = self.object:get_pos()
-		local node = core.get_node(pos)
-		if node.name ~= "nh_nodes:water" then -- Se não está na água, tenta voltar
-			-- Procura por água próxima
-			local water_pos = core.find_node_near(pos, 5, { "nh_nodes:water" })
-			if water_pos then
-				-- Move em direção à água
-				local dir = vector.direction(pos, water_pos)
-				self.object:set_velocity(vector.multiply(dir, 2))
-			end
+	    local pos = self.object:get_pos()
+
+	    -- Conta quantos nodes de água existem em um raio de 0.3 ao redor do centro
+	    local neighbors = {
+		core.get_node({x = pos.x + 0.5, y = pos.y, z = pos.z}),
+		core.get_node({x = pos.x - 0.5, y = pos.y, z = pos.z}),
+		core.get_node({x = pos.x, y = pos.y, z = pos.z + 0.5}),
+		core.get_node({x = pos.x, y = pos.y, z = pos.z - 0.5}),
+		core.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z}),
+		core.get_node({x = pos.x, y = pos.y - 0.5, z = pos.z}),
+	    }
+
+	    local water_count = 0
+	    for _, node in ipairs(neighbors) do
+		if node.name == "nh_nodes:water" then
+		    water_count = water_count + 1
 		end
+	    end
+
+	    -- Só para de empurrar quando há pelo menos 5 nodes de água ao redor
+	    local fully_submerged = water_count >= 5
+
+	    if not fully_submerged then
+		local water_pos = core.find_node_near(pos, 10, {"nh_nodes:water"})
+		if water_pos then
+		    local dir = vector.direction(pos, water_pos)
+		    self.object:set_velocity({
+		        x = dir.x * 4,
+		        y = dir.y * 4 - 2,
+		        z = dir.z * 4
+		    })
+		end
+	    end
 	end,
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
 			local name = item:get_name()
-			if name == "nh_nodes:raw_chicken" or name == "nh_nodes:cowmeat" or name == "nh_nodes:roastchicken" or name == "nh_nodes:roastbeef" then
-				core.chat_send_player(clicker:get_player_name(), S("The shark is hungry!"))
+			if name == "nh_nodes:rawchicken" or name == "nh_nodes:rawbeef" or name == "nh_nodes:roastchicken" or name == "nh_nodes:roastbeef" 
+			or name == "nh_nodes:tuna" or name == "nh_nodes:rawtuna" or name == "nh_nodes:roasttuna" then
+				core.chat_send_player(clicker:get_player_name(), S("The shark still hungry!"))
 				item:take_item(1)
 				clicker:set_wielded_item(item)
 			elseif name == "" then -- mão vazia
@@ -2720,7 +2756,7 @@ mobs:register_mob("nh_mob:messagebottle", {
 	light_damage = 0,
 	air_damage = 0, -- CRÍTICO: Recebe dano fora da água!
 	-- animation = { speed_normal = 15, stand_start = 0, stand_end = 20, walk_start = 21, walk_end = 40, },
-	-- follow = {"nh_nodes:raw_chicken"},
+	-- follow = {"nh_nodes:rawchicken"},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
@@ -2810,7 +2846,7 @@ mobs:register_mob("nh_mob:coconut", {
 	light_damage = 0,
 	air_damage = 0, -- CRÍTICO: Recebe dano fora da água!
 	-- animation = { speed_normal = 15, stand_start = 0, stand_end = 20, walk_start = 21, walk_end = 40, },
-	-- follow = {"nh_nodes:raw_chicken"},
+	-- follow = {"nh_nodes:rawchicken"},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
@@ -2832,8 +2868,7 @@ mobs:register_mob("nh_mob:coconut", {
 		end
 	end,
 	-- sounds = { random = "tubarao_som", damage = "tubarao_hurt", },
-	drops = { { name = "nh_nodes:coconut", chance = 1, min = 1, max = 1 }, -- 1-1 gelo
-	},
+	drops = { { name = "nh_nodes:coconut", chance = 1, min = 1, max = 1 },}, -- 1-1 gelo
 })
 -- Spawn do iceberg (somente na água)
 register_mob_spawn({
@@ -2885,7 +2920,7 @@ mobs:register_mob("nh_mob:iceberg", {
 	light_damage = 0,
 	air_damage = 0, -- CRÍTICO: Recebe dano fora da água!
 	-- animation = { speed_normal = 15, stand_start = 0, stand_end = 20, walk_start = 21, walk_end = 40, },
-	-- follow = {"nh_nodes:raw_chicken"},
+	-- follow = {"nh_nodes:rawchicken"},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
@@ -2960,7 +2995,7 @@ mobs:register_mob("nh_mob:iceberg2", {
 	light_damage = 0,
 	air_damage = 0, -- CRÍTICO: Recebe dano fora da água!
 	-- animation = { speed_normal = 15, stand_start = 0, stand_end = 20, walk_start = 21, walk_end = 40, },
-	--follow = {"nh_nodes:raw_chicken"},
+	--follow = {"nh_nodes:rawchicken"},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
 			local item = clicker:get_wielded_item()
@@ -3135,17 +3170,16 @@ mobs:register_mob("nh_mob:spinningtop3", spinning_top_def({
 	damage_msg     = S("Pine spinning top damage! HP: "),
 	use_punch      = false, -- usa set_hp em vez de punch
 }))
--- MOB 1: polvo (Defensivo)
 mobs:register_mob("nh_mob:octopus", {
 	type = "animal",
 	passive = true, -- Pode se defender quando atacado
 	damage = 3,
-	reach = 1,
+	reach = 1.2,
 	description = S("Dark Octopus") .. "\n" .. S("[Altered Animal]"),
 	blood_texture = "mob_blueblood.png", -- sua textura customizada
 	blood_amount = 5,                 -- quantidade de partículas
-	hp_min = 5,
-	hp_max = 10,
+	hp_min = 10,
+	hp_max = 12,
 	armor = 100,
 	collisionbox = { -0.3, 0, -0.25, 0.25, 0.4, 0.25 },
 	physical = true,
@@ -3154,11 +3188,10 @@ mobs:register_mob("nh_mob:octopus", {
 	fall_damage = 2,
 	visual = "mesh",
 	mesh = "octopus.glb",
-	textures = { "octopus.png" },
+	textures = {"octopus.png"},
 	-- rotate = 180,
 	visual_size = { x = 15, y = 15 },
-	drops = { { name = "nh_nodes:inksac", chance = 1, min = 1, max = 1 }, -- bolsa de tinta
-	},
+	drops = {{ name = "nh_nodes:inksac", chance = 1, min = 1, max = 1 },}, -- bolsa de tinta
 	-- IMPORTANTE: Propriedades para manter na água
 	fly = true,             -- Permite "voar" na água
 	fly_in = "nh_nodes:water", -- Voa na agua
@@ -3168,7 +3201,7 @@ mobs:register_mob("nh_mob:octopus", {
 	walk_velocity = 0.5,
 	run_velocity = 2,
 	view_range = 10,
-	water_damage = 0,
+	air_damage = 1,
 	lava_damage = 5,
 	light_damage = 0,
 	animation = {
@@ -3184,13 +3217,76 @@ mobs:register_mob("nh_mob:octopus", {
 	},
 	on_rightclick = function(self, clicker)
 		if clicker:is_player() then
-			core.chat_send_player(clicker:get_player_name(), "O polvo é perigoso, cuidado ao atacar!")
+			core.chat_send_player(clicker:get_player_name(), S("This octopus looks dangerous, I have to be careful when attacking!"))
 		end
 	end,
 })
---mobs:register_egg("nh_mob:octopus", "Orbe com Polvo", "orbspawner.png", 0)
--- Substitua os register_egg pelos orbes com mesh:
+register_mob_spawn({
+	name = "nh_mob:octopus",
+	nodes = { "nh_nodes:water" },
+	neighbors = { "nh_nodes:oakwood" },
+	max_light = 15,
+	interval = 120,
+	chance = 2000,
+	active_object_count = 1,
+	min_height = -50,
+	max_height = -1
+})
 register_orb_egg("nh_mob:octopus", S("Orb with Dark Octopus"))
+-- MOB: polvo ferido (Defensivo)
+mobs:register_mob("nh_mob:octopus2", {
+	type = "animal",
+	passive = true, -- Pode se defender quando atacado
+	damage = 1,
+	reach = 1,
+	description = S("Dark Octopus") .. "\n" .. S("(injuried)") .. "\n" .. S("[Altered Animal]"),
+	blood_texture = "mob_blueblood.png", -- sua textura customizada
+	blood_amount = 5,                 -- quantidade de partículas
+	hp_min = 5,
+	hp_max = 6,
+	armor = 100,
+	collisionbox = { -0.3, 0, -0.25, 0.25, 0.4, 0.25 },
+	physical = true,
+	stepheight = 3.1,
+	fall_speed = -8,
+	fall_damage = 2,
+	visual = "mesh",
+	mesh = "octopus2.glb",
+	textures = {"octopus2.png"},
+	-- rotate = 180,
+	visual_size = { x = 15, y = 15 },
+	drops = { { name = "nh_nodes:inksac", chance = 1, min = 1, max = 1 }, -- bolsa de tinta
+	},
+	-- IMPORTANTE: Propriedades para manter na água
+	fly = true,             -- Permite "voar" na água
+	fly_in = "nh_nodes:water", -- Voa na agua
+	-- lista de mobs que ele vai atacar ativamente
+	-- attack_animals = true,        -- permite atacar outros mobs
+	-- specific_attack = {"nh_mob:cricket", "nh_mob:cicada",  "nh_mob:ladybug"},
+	walk_velocity = 0.5,
+	run_velocity = 2,
+	view_range = 10,
+	air_damage = 1,
+	lava_damage = 5,
+	light_damage = 0,
+	animation = {
+		speed_normal = 1,
+		stand_start = 0.38,
+		stand_end = 0.63,
+		walk_start = 0,
+		walk_end = 0.75,
+		run_start = 0,
+		run_end = 0.75,
+		--jump_start = 61,
+		--jump_end = 80
+	},
+	on_rightclick = function(self, clicker)
+		if clicker:is_player() then
+			core.chat_send_player(clicker:get_player_name(), "This octopus is injured")
+		end
+	end,
+})
+register_orb_egg("nh_mob:octopus2", S("Orb with Dark Octopus (injuried)"))
 -- MOB 4: Polvo esqueleto (Agressivo)
 mobs:register_mob("nh_mob:exoskull", {
 	type = "monster",
@@ -3264,7 +3360,7 @@ mobs:register_mob("nh_mob:exoskull", {
 		return true -- PARA CONTINUAR.
 	end,
 	on_die = function(self, pos)
-		core.after(0.1, function() core.add_entity(pos, "nh_mob:octopus") end)
+		core.after(0.1, function() core.add_entity(pos, "nh_mob:octopus2") end)
 		-- Opcional: deixa o novo mob já em modo de ataque
 		-- if obj then obj:get_luaentity().state = "attack" end
 	end,
@@ -3272,7 +3368,7 @@ mobs:register_mob("nh_mob:exoskull", {
 -- Spawn do vulto (fundo de cavernas escuras)
 register_mob_spawn({
 	name = "nh_mob:octoskull",
-	nodes = { "nh_nodes:water" },    -- nh_nodes = {"nh_nodes:water"},
+	nodes = { "nh_nodes:water" },
 	neighbors = { "nh_nodes:oakwood" }, --neighbors = {"nh_nodes:wet_sand"},
 	max_light = 10,
 	interval = 120,
@@ -3352,7 +3448,7 @@ mobs:register_mob("nh_mob:sirenia", {
 -- Spawn do vulto (fundo de cavernas escuras)
 register_mob_spawn({
 	name = "nh_mob:sirenia",
-	nodes = { "air", "nh_nodes:water" }, -- nh_nodes = {"nh_nodes:water"},
+	nodes = { "air", "nh_nodes:water" }, 
 	neighbors = { "nh_nodes:ice" },   --neighbors = {"nh_nodes:obsidian"},
 	max_light = 10,
 	interval = 120,
@@ -3431,7 +3527,7 @@ local function slime_def(extra)
 		light_damage  = 0,
 		air_damage    = 0,
 		animation     = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.63 },
-		follow        = { "nh_nodes:raw_chicken" },
+		follow        = { "nh_nodes:rawchicken" },
 		sounds        = { random = "slime_som", damage = "slime_hurt" },
 		on_die        = extra.on_die,
 		after_activate = function(self, staticdata, def, dtime)
@@ -3440,7 +3536,7 @@ local function slime_def(extra)
 		on_rightclick = function(self, clicker)
 			if not clicker:is_player() then return end
 			local item = clicker:get_wielded_item()
-			if item:get_name() == "nh_nodes:raw_chicken" then
+			if item:get_name() == "nh_nodes:rawchicken" then
 				core.chat_send_player(clicker:get_player_name(), "O slime quer comida!")
 				item:take_item(1)
 				clicker:set_wielded_item(item)
@@ -3716,12 +3812,7 @@ mobs:register_mob("nh_mob:dopel", {
 	lava_damage = 5,
 	light_damage = 0,
 	air_damage = 0,
-	animation = {
-		speed_normal = 0.5,
-		stand_start = 0,
-		stand_end = 1.02,
-		walk_start = 1,
-		walk_end = 2,
+	animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2,
 		-- ANIMAÇÃO DE ATAQUE:
 		punch_start = 11.75, -- Frame inicial do ataque
 		punch_end = 12, -- Frame final do ataque
@@ -3809,16 +3900,7 @@ mobs:register_mob("nh_mob:giantcrab", {
 	lava_damage = 5,
 	light_damage = 0,
 	air_damage = 0,
-	animation = {
-		speed_normal = 1,
-		stand_start = 0,
-		stand_end = 0,
-		walk_start = 0,
-		walk_end = 0.75,
-		-- ANIMAÇÃO DE ATAQUE:
-		punch_start = 0.75, -- Frame inicial do ataque
-		punch_end = 1.25, -- Frame final do ataque
-	},
+	animation = {speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.75, punch_start = 0.75, punch_end = 1.25},
 	-- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
 	-- O seguimento real será feito pelo do_custom abaixo
 	-- follow = {"nh_nodes:sphere", "nh_nodes:kelp", "nh_nodes:obsidian", "nh_nodes:wet_sand", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:pineraft", "nh_nodes:rowing"},

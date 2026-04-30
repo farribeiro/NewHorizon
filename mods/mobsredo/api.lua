@@ -1,5 +1,5 @@
 -- Mobs Redo API
-core.log("action", "[MobsRedo] api.lua carregado")
+core.log("action", "[MobsRedo] api.lua loaded")
 
 local S = core.get_translator("mobs")
 local FS = function(...) return core.formspec_escape(S(...)) end
@@ -18,7 +18,7 @@ end
 -- global table
 
 mobs = {
-	mod = "redo", version = "20260416",
+	mod = "redo", version = "20260421",
 	spawning_mobs = {}, translate = S,
 	node_snow = has(core.registered_aliases["mapgen_snow"])
 			or has("mcl_core:snow") or has("default:snow") or has("nh_nodes:snow") or "air", -- modifiquei aqui
@@ -214,12 +214,6 @@ end
 
 function mob_class:do_attack(player, force)
 
-	if self.name == "nh_mob:dopel" then
-		local alvo = player and (player.get_player_name and player:get_player_name() or "entidade") or "nil"
-		local bloq = (self.state=="attack" or self.state=="die" or self.state=="runaway") and not force
-		print("[DOPEL] do_attack alvo="..alvo.." force="..tostring(force).." state="..tostring(self.state).." bloqueado="..tostring(bloq))
-	end
-
 	if (self.state == "attack" or self.state == "die" or self.state == "runaway")
 	and not force then return end
 
@@ -354,7 +348,9 @@ function mob_class:set_velocity(v)
 
 	-- only slow moving mobs when inside a viscous fluid they cannot swim in
 	-- e.g. fish in water, spiders in cobweb
-	if v > 0 and visc and visc > 0 and not check_for(self.standing_in, self.fly_in) then
+	if v > 0 and visc and visc > 0
+	and not check_for(self.standing_in, self.fly_in)
+	and not check_for(self.standing_in, self.swim_in) then
 		v = v / (visc + 1)
 	end
 
@@ -544,6 +540,11 @@ function mob_class:flight_check()
 	-- are we standing inside what we should be to fly/swim ?
 	if check_for(self.standing_in, self.fly_in) then return true end
 
+	-- swim mobs: check swim_in medium
+	if self.swim and check_for(self.standing_in, self.swim_in or "default:water_source") then
+		return true
+	end
+
 	-- stops mobs getting stuck inside stairs or plantlike nodes
 	return def.drawtype ~= "airlike" and def.drawtype ~= "liquid"
 			and def.drawtype ~= "flowingliquid"
@@ -556,7 +557,7 @@ function mob_class:yaw_to_pos(target, rot)
 	local pos = self.object:get_pos()
 	local vec = vector.subtract(target, pos)
 	local yaw = core.dir_to_yaw(vec) + (rot or 0) - self.rotate
-	return self:set_yaw(yaw, 4)
+	return self:set_yaw(yaw)
 end
 
 -- look for stay_near nodes and move towards them
@@ -678,7 +679,6 @@ function mob_class:update_tag(newname)
 	        .. S("HP: @1", self.health) .. " / " .. prop.hp_max -- Mudei aqui
     		.. ("\n\n" .. S("Entity: @1", self.name)) -- Mudei aqui
     		.. ("\n" .. S("Type: @1", self.type)) -- Mudei aqui
-    		
     		.. (self.owner == "" and "" or "\n" .. S("Owner: @1", self.owner)) .. text
 
 	if self.infotext ~= prop.infotext then
@@ -1087,7 +1087,7 @@ function mob_class:do_jump()
 
 	-- is mob allowed to jump
 	if self.state == "stand" or self.order == "stand" or vel.y ~= 0
-	or self.fly or self.child or self.jump_height == 0 then return end
+	or self.fly or self.swim or self.child or self.jump_height == 0 then return end
 
 	local ndef = core.registered_nodes[self.standing_on]
 
@@ -1701,48 +1701,44 @@ end
 
 function mob_class:general_attack()
 
-	local _d = self.name == "nh_mob:dopel"
-
+	-- return if already attacking, passive or docile during day
 	if self.passive or self.state == "runaway" or self.state == "attack"
 	or self.state == "flop" or self:day_docile() then
-		if _d then print("[DOPEL] general_attack SAIU CEDO state="..tostring(self.state).." passive="..tostring(self.passive).." day_docile="..tostring(self:day_docile())) end
 		return
 	end
 
 	local s = self.object:get_pos() ; if not s then return end
 	local objs = core.get_objects_inside_radius(s, self.view_range)
 
-	if _d then print("[DOPEL] general_attack RODOU objs="..#objs.." damage_enabled="..tostring(damage_enabled).." attack_players="..tostring(self.attack_players).." peaceful_enabled="..tostring(peaceful_player_enabled)) end
-
+	-- remove entities we aren't interested in
 	for n = 1, #objs do
 
 		local ent = objs[n]:get_luaentity()
 
-		if damage_enabled and is_player(objs[n]) then
-
-			local pname = objs[n]:get_player_name()
-			local razao = nil
-			if not self.attack_players            then razao = "attack_players=nil/false"
-			elseif self.owner == pname            then razao = "e o dono"
-			elseif self.type ~= "monster" and self.tamed then razao = "nao-monster+tamed"
-			elseif is_invisible(self, pname)      then razao = "invisivel"
-			elseif is_peaceful_player(objs[n])    then razao = "peaceful_player"
-			elseif self.specific_attack and not check_for("player", self.specific_attack) then razao = "specific_attack" end
-
-			if _d then print("[DOPEL] player="..pname.." removido="..(razao and razao or "NAO, MANTIDO")) end
-			if razao then objs[n] = nil end
-
-		elseif not damage_enabled and is_player(objs[n]) then
-			if _d then print("[DOPEL] player descartado: damage_enabled=false") end
-			objs[n] = nil
+ 		if damage_enabled and is_player(objs[n]) then -- are we a viable player?
+ 		 
+			-- remove player if owner, invisible or just not interesting enough to attack		
+			if not self.attack_players or self.owner == objs[n]:get_player_name()		
+			-- tame npcs and animals will not attack players unless provoked		
+			or (self.type ~= "monster" and self.tamed)		
+			or is_invisible(self, objs[n]:get_player_name())		
+			or is_peaceful_player(objs[n])		
+			or (self.specific_attack and not check_for("player", self.specific_attack)) then		
+				objs[n] = nil		
+			end
+		-- are we a creatura mob?
 		elseif creatura and ent and ent._cmi_is_mob ~= true
 		and ent.hitbox and ent.stand_node then
+			-- monsters attack all creatura mobs, npc and animals will only attack		
+			-- if the animal owner is currently being attacked by creatura mob
 			if self.name == ent.name or (self.type ~= "monster"
 			and self.owner ~= (ent._target and ent._target:get_player_name() or "."))
 			or (self.specific_attack and not check_for(ent.name, self.specific_attack)) then
 				objs[n] = nil
 			end
+		-- or are we a mob?
 		elseif ent and ent._cmi_is_mob then
+			-- remove mobs to not attack
 			if self.name == ent.name or check_for(ent.name, self.attack_ignore)
 			or (not self.attack_animals and ent.type == "animal")
 			or (not self.attack_monsters and ent.type == "monster")
@@ -1750,36 +1746,26 @@ function mob_class:general_attack()
 			or (self.specific_attack and not check_for(ent.name, self.specific_attack)) then
 				objs[n] = nil
 			end
-		else
+		else -- remove all other entities
 			objs[n] = nil
 		end
 	end
 
 	local p, sp, dist, min_player
 	local min_dist = self.view_range + 1
-	local candidatos = 0
-	for _,o in pairs(objs) do if o then candidatos = candidatos + 1 end end
-	if _d then print("[DOPEL] candidatos apos filtro="..candidatos) end
 
 	for _,player in pairs(objs) do
 		p = player:get_pos() ; sp = s
 		dist = get_distance(p, s)
-		p.y = p.y + 1 ; sp.y = sp.y + 1
-		local los = self:line_of_sight(sp, p)
-		if _d then
-			local pn = is_player(player) and player:get_player_name() or "mob"
-			print("[DOPEL] alvo="..pn.." dist="..string.format("%.2f",dist).." min_dist="..string.format("%.2f",min_dist).." los="..tostring(los))
-		end
-		if dist ~= 0 and dist < min_dist and los then
-			min_dist = dist ; min_player = player
+		-- aim higher to make looking up hills more realistic
+		p.y = p.y + 1 ; sp.y = sp.y + 1		
+		-- choose closest entity to attack		
+		if dist ~= 0 and dist < min_dist and self:line_of_sight(sp, p) then		
+			min_dist = dist		
+			min_player = player
 		end
 	end
-
-	if _d then
-		print("[DOPEL] min_player="..(min_player and "SIM" or "NAO").." attack_chance="..tostring(self.attack_chance))
-	end
-
-	if min_player and random(100) > self.attack_chance then
+	if min_player and random(100) > self.attack_chance then -- attack!
 		self:do_attack(min_player)
 	end
 end
@@ -1942,6 +1928,23 @@ function mob_class:follow_flop()
 			self:set_animation("stand") ; return
 
 		elseif self.state == "flop" then self.state = "stand" end
+
+	elseif self.swim then
+
+		-- aquatic mob: redirect away from non-swim_in nodes ahead
+		local swim_medium = self.swim_in or "default:water_source"
+		if not check_for(self.standing_in, swim_medium) then
+			-- out of water entirely: just stop and wait to be corrected by physics
+			self:set_velocity(0)
+			self:set_animation("stand")
+			return
+		end
+		if self.state == "flop" then self.state = "stand" end
+		-- steer away from edge: if node directly in front is not swim medium, turn
+		if not check_for(self.looking_at, swim_medium) then
+			local yaw = self.object:get_yaw() or 0
+			self:set_yaw(yaw + pi * (0.5 + random() * 0.5), 4)
+		end
 	end
 end
 
@@ -1967,12 +1970,6 @@ end
 -- stop attack & reset vars
 
 function mob_class:stop_attack()
-
-	if self.name == "nh_mob:dopel" then
-		local alvo = self.attack and (self.attack.get_player_name and self.attack:get_player_name() or "entidade") or "sem_alvo"
-		print("[DOPEL] stop_attack! state_anterior="..tostring(self.state).." alvo="..alvo)
-	end
-
 	self.attack = nil
 	self.following = nil
 	self.v_start = false ; self.timer = 0 ; self.blinktimer = 0
@@ -2071,7 +2068,7 @@ function mob_class:do_states(dtime)
 
 			self:set_yaw(yaw, 8)
 
-			-- for flying/swimming mobs randomly move up and down also
+			-- for flying mobs randomly move up and down also
 			if self.fly_in and not self.following then
 				self:attempt_flight_correction(true)
 			end
@@ -2081,7 +2078,7 @@ function mob_class:do_states(dtime)
 		if self.facing_fence or self.at_cliff or random(100) <= self.stand_chance then
 
 			-- don't stand if mob flies and keep_flying set
-			if (self.fly and not self.keep_flying) or not self.fly then
+			if (self.fly and not self.keep_flying) or (not self.fly and not self.swim) then
 
 				self:set_velocity(0)
 				self.state = "stand"
@@ -2141,16 +2138,7 @@ function mob_class:do_states(dtime)
 		or (is_player(self.attack)
 		and is_invisible(self, self.attack:get_player_name())) then
 
-			if self.name == "nh_mob:dopel" then
-				local r = "?"
-				if not self.attack                    then r = "self.attack=nil"
-				elseif not self.attack:get_pos()      then r = "alvo sem posicao"
-				elseif self.attack:get_hp() <= 0      then r = "alvo morto hp="..self.attack:get_hp()
-				elseif dist > self.view_range         then r = "fora_alcance dist="..string.format("%.2f",dist).." view="..tostring(self.view_range)
-				else r = "player invisivel" end
-				print("[DOPEL] do_states PAROU ATAQUE: "..r)
-			end
-
+		--print(" ** stop attacking **", self.name, self.health, dist, self.view_range)
 			self:stop_attack() ; return
 		end
 
@@ -2264,8 +2252,9 @@ function mob_class:do_states(dtime)
 		and self:dogswitch() == 0) then
 
 			-- make sure flying mobs are inside proper medium
-			if self.fly and dist > self.reach and self:flight_check() then
+			if (self.fly or self.swim) and dist > self.reach and self:flight_check() then
 
+				local swim_medium = self.swim_in or self.fly_in
 				local s_y, p_y = floor(s.y), floor(p.y + 1) -- self, attacker
 				local v = self.object:get_velocity()
 
@@ -2275,7 +2264,7 @@ function mob_class:do_states(dtime)
 					-- if correct medium above then move up
 					if #core.find_nodes_in_area(
 							{x = s.x, y = s.y + 1, z = s.z},
-							{x = s.x, y = s.y + 1, z = s.z}, self.fly_in) > 0 then
+							{x = s.x, y = s.y + 1, z = s.z}, swim_medium) > 0 then
 
 						self.object:set_velocity({
 								x = v.x, y = self.walk_velocity, z = v.z})
@@ -2289,7 +2278,7 @@ function mob_class:do_states(dtime)
 					-- if correct medium below then move down
 					if #core.find_nodes_in_area(
 							{x = s.x, y = s.y - 1, z = s.z},
-							{x = s.x, y = s.y - 1, z = s.z}, self.fly_in) > 0 then
+							{x = s.x, y = s.y - 1, z = s.z}, swim_medium) > 0 then
 
 						self.object:set_velocity({
 								x = v.x, y = -self.walk_velocity, z = v.z})
@@ -2461,6 +2450,17 @@ end
 function mob_class:falling(pos)
 
 	if self.fly or self.disable_falling then return end
+
+	-- swim mobs: no gravity inside swim medium, normal gravity in air
+	if self.swim then
+		local swim_medium = self.swim_in or "default:water_source"
+		if check_for(self.standing_in, swim_medium) then
+			self.object:set_acceleration({x = 0, y = 0, z = 0})
+		else
+			self.object:set_acceleration({x = 0, y = self.fall_speed, z = 0})
+		end
+		return
+	end
 
 	local v = self.object:get_velocity() ; if not v then return end
 	local fall_speed = self.fall_speed
@@ -3189,19 +3189,6 @@ function mob_class:on_step(dtime, moveresult)
 		-- random mob sound
 		if random(100) == 1 then self:mob_sound(self.sounds.random) end
 
-		if self.name == "nh_mob:dopel" then
-			local np = 0
-			local pos_d = self.object:get_pos()
-			for _,pl in pairs(core.get_connected_players()) do
-				if vector.distance(pl:get_pos(), pos_d) <= (self.view_range or 16) then np = np + 1 end
-			end
-			print("[DOPEL ON_STEP] state="..tostring(self.state)
-				.." pause="..string.format("%.2f",self.pause_timer)
-				.." at_cliff="..tostring(self.at_cliff)
-				.." standing_in="..tostring(self.standing_in)
-				.." players_proximos="..np)
-		end
-
 		self:general_attack()
 		self:breed()
 		self:follow_flop()
@@ -3253,11 +3240,11 @@ function mobs:register_mob(name, def)
 			visual_size = def.visual_size or {x = 1, y = 1},
 			mesh = def.mesh,
 			textures = "",
+			use_texture_alpha = def.use_texture_alpha, -- adicionei aqui
+			backface_culling = def.backface_culling, -- adicionei aqui
 			makes_footstep_sound = def.makes_footstep_sound,
 			stepheight = def.stepheight or 1.1,
 			glow = def.glow,
-			use_texture_alpha = def.use_texture_alpha, -- adicionei aqui
-			backface_culling = def.backface_culling, -- adicionei aqui
 			damage_texture_modifier = def.damage_texture_modifier or "^[colorize:#c9900070",
 		},
 
@@ -3269,6 +3256,8 @@ function mobs:register_mob(name, def)
 		fly = def.fly,
 		fly_in = def.fly_in,
 		keep_flying = def.keep_flying,
+		swim = def.swim,
+		swim_in = def.swim_in,
 		owner = def.owner,
 		order = def.order,
 		jump_height = def.jump_height,
@@ -3330,7 +3319,7 @@ function mobs:register_mob(name, def)
 		texture_mods = def.texture_mods or "",
 		child_texture = def.child_texture,
 		docile_by_day = def.docile_by_day,
-		fear_height = def.fear_height or def.fly and 0 or 2,
+		fear_height = def.fear_height or (def.fly or def.swim) and 0 or 2,
 		runaway = def.runaway,
 		pathfinding = def.pathfinding,
 		immune_to = def.immune_to,

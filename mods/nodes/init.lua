@@ -1,55 +1,156 @@
------------------------------
 -- NODES
------------------------------
-core.log("action", "[nodes] init.lua carregado")
+core.log("action", "[NODES] init.lua loaded")
 
 local S = minetest.get_translator("nh_nodes")
 
-local footstep_timer = {}
+local footstep_timer    = {}
+local lava_damage_timer = {}
+local players_with_torch = {}
+
+local LAVA_NODES = {
+	["nh_nodes:lava"]         = true,
+	["nh_nodes:lava_flowing"] = true,
+}
+
+local LEAF_TYPES = {
+	["nh_nodes:leaves"]        = true,
+	["nh_nodes:leaves_nut"]    = true,
+	["nh_nodes:leaves_nut2"]   = true,
+	["nh_nodes:leaves_nut3"]   = true,
+	["nh_nodes:leaves_apple"]  = true,
+	["nh_nodes:leaves_apple2"] = true,
+	["nh_nodes:leaves_apple3"] = true,
+}
+
+nodes = {}
 
 core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
         local name = player:get_player_name()
+        local pos  = player:get_pos()
+
+        -- ==== PASSOS ====
         footstep_timer[name] = (footstep_timer[name] or 0) + dtime
-        if footstep_timer[name] < 0.4 then goto continue end
-        footstep_timer[name] = 0
-
-        local controls = player:get_player_control()
-        if not (controls.up or controls.down or controls.left or controls.right) then
-            goto continue
+        if footstep_timer[name] >= 0.4 then
+            footstep_timer[name] = 0
+            local controls = player:get_player_control()
+            if controls.up or controls.down or controls.left or controls.right then
+                local props       = player:get_properties()
+                local cb          = props and props.collisionbox
+                local feet_offset = cb and cb[2] or -1
+                local below = {
+                    x = math.floor(pos.x + 0.5),
+                    y = math.floor(pos.y + feet_offset),
+                    z = math.floor(pos.z + 0.5),
+                }
+                local node     = core.get_node(below)
+                local node_def = core.registered_nodes[node.name]
+                if node_def and node_def.sounds and node_def.sounds.footstep then
+                    local snd = node_def.sounds.footstep
+                    core.sound_play(snd.name, {
+                        pos               = pos,
+                        gain              = snd.gain or 0.5,
+                        max_hear_distance = 10,
+                    })
+                end
+            end
         end
 
-        -- Pega a collision box do player para calcular os pés corretamente
-        local props = player:get_properties()
-        local cb = props and props.collisionbox
-        -- cb = {xmin, ymin, zmin, xmax, ymax, zmax}
-        -- ymin é o offset do fundo da collision box em relação ao get_pos()
-        local feet_offset = cb and cb[2] or -1  -- padrão -1 se não tiver
-
-        local pos = player:get_pos()
-        local below = {
-            x = math.floor(pos.x + 0.5),
-            y = math.floor(pos.y + feet_offset), -- - 0.4,  -- nó abaixo dos pés
-            z = math.floor(pos.z + 0.5)
-        }
-
-        local node = core.get_node(below)
-        local node_def = core.registered_nodes[node.name]
-        if node_def and node_def.sounds and node_def.sounds.footstep then
-            local snd = node_def.sounds.footstep
-            core.sound_play(snd.name, {
-                pos = pos,
-                gain = snd.gain or 0.5,
-                max_hear_distance = 10,
-            })
+        -- ==== DANO DA LAVA ====
+        lava_damage_timer[name] = (lava_damage_timer[name] or 0) + dtime
+        if lava_damage_timer[name] >= 1.0 then
+            lava_damage_timer[name] = 0
+            local feet_node = core.get_node({x = pos.x, y = pos.y,     z = pos.z})
+            local head_node = core.get_node({x = pos.x, y = pos.y + 1, z = pos.z})
+            if LAVA_NODES[feet_node.name] or LAVA_NODES[head_node.name] then
+                player:set_hp(player:get_hp() - 22)
+            end
         end
 
-        ::continue::
+        -- ==== DANO DAS FOLHAS CAINDO ====
+        local above_pos = {x = pos.x, y = pos.y + 2, z = pos.z}
+        for _, obj in pairs(core.get_objects_inside_radius(above_pos, 1.5)) do
+            local entity = obj:get_luaentity()
+            if entity and entity.name == "__builtin:falling_node" then
+                local node = entity.node
+                if node and LEAF_TYPES[node.name] then
+                    local velocity = obj:get_velocity()
+                    if velocity and velocity.y < -2 then
+                        player:set_hp(player:get_hp() - 1)
+                    end
+                end
+            end
+        end
+
+        -- ==== TOCHA NA AGUA (troca torch2 por torch3) ====
+        local head_pos  = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local head_node = core.get_node(head_pos)
+        if core.get_item_group(head_node.name, "water") > 0 then
+            local inv = player:get_inventory()
+            for i = 1, inv:get_size("main") do
+                local stack = inv:get_stack("main", i)
+                if stack:get_name() == "nh_nodes:torch2" then
+                    stack:set_name("nh_nodes:torch3")
+                    inv:set_stack("main", i, stack)
+                end
+            end
+        end
+
+        -- ==== LUZ DA TOCHA / CRISTAL ====
+        local wielded        = player:get_wielded_item()
+        local light_pos_base = {x = pos.x, y = pos.y + 1, z = pos.z}
+
+        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" then
+            if not players_with_torch[name] then
+                players_with_torch[name] = {}
+            end
+            -- Remove luz antiga
+            if players_with_torch[name].pos then
+                local old_pos  = players_with_torch[name].pos
+                local old_node = core.get_node(old_pos)
+                if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
+                    core.remove_node(old_pos)
+                end
+            end
+            -- Coloca nova luz invisivel
+            local light_pos  = vector.round(light_pos_base)
+            local light_node = core.get_node(light_pos)
+            if light_node.name == "air" then
+                core.set_node(light_pos, {name = "nh_nodes:torch_light"})
+                players_with_torch[name].pos = light_pos
+            elseif light_node.name == "nh_nodes:water" then
+                core.set_node(light_pos, {name = "nh_nodes:crystal_light"})
+                players_with_torch[name].pos = light_pos
+            end
+        else
+            -- Remove luz se parou de segurar
+            if players_with_torch[name] and players_with_torch[name].pos then
+                local old_pos  = players_with_torch[name].pos
+                local old_node = core.get_node(old_pos)
+                if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
+                    core.remove_node(old_pos)
+                end
+                players_with_torch[name] = nil
+            end
+        end
     end
 end)
 
+-- Limpeza unificada ao deslogar
+core.register_on_leaveplayer(function(player)
+    local name = player:get_player_name()
+    footstep_timer[name]    = nil
+    lava_damage_timer[name] = nil
+    if players_with_torch[name] and players_with_torch[name].pos then
+        local old_pos  = players_with_torch[name].pos
+        local old_node = core.get_node(old_pos)
+        if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
+            core.remove_node(old_pos)
+        end
+        players_with_torch[name] = nil
+    end
+end)
 
-nodes = {}
 
 -----
 -- Receitas
@@ -59,123 +160,119 @@ nodes = {}
 -- RECEITAS BASICAS (2x2)
 -- Usada por: Nodes do chão
 -- Inclui crafts básicos
--- --------------------------------------------------
-
 recipes_floor = {
-    {
-        ingredients = {["nh_nodes:pebble"] = 2},
-        output = "nh_nodes:chippedstone"
-    },
-    {
-        ingredients = {["nh_nodes:pebble_item"] = 2},
-        output = "nh_nodes:chippedstone"
-    },
-    {
-        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1},
-        output = "nh_nodes:stoneaxehead"
-    },
-    {
-        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1},
-        output = "nh_nodes:stonepickaxehead"
-    },
-    {
-        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1},
-        output = "nh_nodes:stonehoehead"
-    },
-    {
-        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1},
-        output = "nh_nodes:stoneadzehead"
-    },
-    {
-        ingredients = {["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1},
-        output = "nh_nodes:rowing"
-    },
-    {
-        ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:stoneaxe"
-    },
-    {
-        ingredients = {["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:stonepickaxe"
-    },
-    {
-        ingredients = {["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:stonehoe"
-    },
-    {
-        ingredients = {["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:stoneadze"
-    },
-    {
-        ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
-        output = "nh_nodes:obsidianblade"
-    },
-    {
-        ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:chippedstoneknife"
-    },
-    {
-        ingredients = {["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:obsidianknife"
-    },
-    {
-        ingredients = {["nh_nodes:pebble"] = 8},
-        output = "nh_nodes:cobblestone"
-    },
-    {
-        ingredients = {["nh_nodes:pebble_item"] = 8},
-        output = "nh_nodes:cobblestone"
-    },
-    {
-        ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
-        output = "nh_nodes:campfiretinder"
-    },
-    {
-        ingredients = {["nh_nodes:oaklog"] = 1},
-        output = "nh_nodes:oakwood",
-        required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
-    },
-    {
-        ingredients = {["nh_nodes:pinelog"] = 1},
-        output = "nh_nodes:pinewood",
-        required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
-    },
-    {
-        ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
-        output = "nh_nodes:torch"
-    },
-    {
-        ingredients = {["nh_nodes:oakwood"] = 1},
-        output = "nh_nodes:oakboard 8"
-    },
-    {
-        ingredients = {["nh_nodes:oakwood"] = 2},
-        output = "nh_nodes:oakplank 4"
-    },
-    {
-        ingredients = {["nh_nodes:oakboard"] = 1},
-        output = "nh_nodes:oakdowel 8"
-    },
-    {
-        ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
-        output = "nh_nodes:craft_table"
-    },
-    {
-        ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
-        output = "nh_nodes:inkbottle"
-    },
-    {
-        ingredients = {["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1},
-        output = "nh_nodes:messagebottle"
-    },
+	{
+		ingredients = {["nh_nodes:pebble"] = 2},
+		output = "nh_nodes:chippedstone"
+	},
+	{
+		ingredients = {["nh_nodes:pebble_item"] = 2},
+		output = "nh_nodes:chippedstone"
+	},
+	{
+		ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1},
+		output = "nh_nodes:stoneaxehead"
+	},
+	{
+		ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1},
+		output = "nh_nodes:stonepickaxehead"
+	},
+	{
+		ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1},
+		output = "nh_nodes:stonehoehead"
+	},
+	{
+		ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1},
+		output = "nh_nodes:stoneadzehead"
+	},
+	{
+		ingredients = {["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1},
+		output = "nh_nodes:rowing"
+	},
+	{
+		ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:stoneaxe"
+	},
+	{
+		ingredients = {["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:stonepickaxe"
+	},
+	{
+		ingredients = {["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:stonehoe"
+	},
+	{
+		ingredients = {["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:stoneadze"
+	},
+	{
+		ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1},
+		output = "nh_nodes:obsidianblade"
+	},
+	{
+		ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:chippedstoneknife"
+	},
+	{
+		ingredients = {["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:obsidianknife"
+	},
+	{
+		ingredients = {["nh_nodes:pebble"] = 8},
+		output = "nh_nodes:cobblestone"
+	},
+	{
+		ingredients = {["nh_nodes:pebble_item"] = 8},
+		output = "nh_nodes:cobblestone"
+	},
+	{
+		ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
+		output = "nh_nodes:campfiretinder"
+	},
+	{
+		ingredients = {["nh_nodes:oaklog"] = 1},
+		output = "nh_nodes:oakwood",
+		required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
+	},
+	{
+		ingredients = {["nh_nodes:pinelog"] = 1},
+		output = "nh_nodes:pinewood",
+		required_tool = "nh_nodes:stoneadze",   -- ← só funciona com isso no slot
+	},
+	{
+		ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
+		output = "nh_nodes:torch"
+	},
+	{
+		ingredients = {["nh_nodes:oakwood"] = 1},
+		output = "nh_nodes:oakboard 8"
+	},
+	{
+		ingredients = {["nh_nodes:oakwood"] = 2},
+		output = "nh_nodes:oakplank 4"
+	},
+	{
+		ingredients = {["nh_nodes:oakboard"] = 1},
+		output = "nh_nodes:oakdowel 8"
+	},
+	{
+		ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
+		output = "nh_nodes:craft_table"
+	},
+	{
+		ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
+		output = "nh_nodes:inkbottle"
+	},
+	{
+		ingredients = {["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1},
+		output = "nh_nodes:messagebottle"
+	},
 }
 
 -- --------------------------------------------------
 -- RECEITAS DA BANCADA DE PRODUÇÃO (2x2x2)
 -- Usada por: craft_table
 -- Inclui tudo do floor + itens avançados (espada, baú, porta, piões...)
--- --------------------------------------------------
-
 recipes_table = {
     {
         ingredients = {["nh_nodes:pebble"] = 2},
@@ -332,21 +429,24 @@ recipes_table = {
 
 
 -- --------------------------------------------------
--- RECEITAS DA FORNALHA (3x3)
--- Usada por: furnace
--- Inclui: carvão, alimentos cozidos, fundição de metais, vidro
--- --------------------------------------------------
+-- RECEITAS DA FOGUEIRA (3x3)
+-- Usada por: campfire
+-- Inclui: alimentos cozidos
 recipes_campfire = {
         {
-            ingredients = {["nh_nodes:chicken_egg"] = 1},
+            ingredients = {["nh_nodes:chickenegg"] = 1},
             output = "nh_nodes:friedchickenegg"
         },
         {
-            ingredients = {["nh_nodes:raw_chicken"] = 1},
+            ingredients = {["nh_nodes:rawchicken"] = 1},
             output = "nh_nodes:roastchicken"
         },
         {
-            ingredients = {["nh_nodes:cowmeat"] = 1},
+            ingredients = {["nh_nodes:rawtuna"] = 1},
+            output = "nh_nodes:roasttuna"
+        },
+        {
+            ingredients = {["nh_nodes:rawbeef"] = 1},
             output = "nh_nodes:roastbeef"
         },
 }
@@ -357,58 +457,62 @@ recipes_campfire = {
 -- Inclui: carvão, alimentos cozidos, fundição de metais, vidro
 -- --------------------------------------------------
 recipes_furnace = {
-    {
-        ingredients = {["nh_nodes:oaklog"] = 1},
-        output = "nh_nodes:charcoal"
-    },
-    {
-        ingredients = {["nh_nodes:pinelog"] = 1},
-        output = "nh_nodes:charcoal"
-    },
-    {
-        ingredients = {["nh_nodes:palmlog"] = 1},
-        output = "nh_nodes:charcoal2"
-    },
-    {
-        ingredients = {["nh_nodes:chicken_egg"] = 1},
-        output = "nh_nodes:friedchickenegg"
-    },
-    {
-        ingredients = {["nh_nodes:raw_chicken"] = 1},
-        output = "nh_nodes:roastchicken"
-    },
-    {
-        ingredients = {["nh_nodes:cowmeat"] = 1},
-        output = "nh_nodes:roastbeef"
-    },
-    {
-        ingredients = {["nh_nodes:coppernugget"] = 3},
-        output = "nh_nodes:copperingot"
-    },
-    {
-        ingredients = {["nh_nodes:copperingot"] = 3},
-        output = "nh_nodes:copperhelmet"
-    },
-    {
-        ingredients = {["nh_nodes:copperingot"] = 8},
-        output = "nh_nodes:copperchestplate"
-    },
-    {
-        ingredients = {["nh_nodes:tinnugget"] = 3},
-        output = "nh_nodes:tiningot"
-    },
-    {
-        ingredients = {["nh_nodes:ironnugget"] = 3},
-        output = "nh_nodes:ironingot"
-    },
-    {
-        ingredients = {["nh_nodes:sand"] = 3},
-        output = "nh_nodes:bottle"
-    },
-    {
-        ingredients = {["default:steel_ingot"] = 9},
-        output = "default:steel_block"
-    },
+	{
+		ingredients = {["nh_nodes:oaklog"] = 1},
+		output = "nh_nodes:charcoal"
+	},
+	{
+		ingredients = {["nh_nodes:pinelog"] = 1},
+		output = "nh_nodes:charcoal"
+	},
+	{
+		ingredients = {["nh_nodes:palmlog"] = 1},
+		output = "nh_nodes:charcoal2"
+	},
+	{
+		ingredients = {["nh_nodes:chickenegg"] = 1},
+		output = "nh_nodes:friedchickenegg"
+	},
+	{
+		ingredients = {["nh_nodes:rawchicken"] = 1},
+		output = "nh_nodes:roastchicken"
+	},
+	{
+		ingredients = {["nh_nodes:rawtuna"] = 1},
+		output = "nh_nodes:roasttuna"
+	},
+	{
+		ingredients = {["nh_nodes:rawbeef"] = 1},
+		output = "nh_nodes:roastbeef"
+	},
+	{
+		ingredients = {["nh_nodes:coppernugget"] = 3},
+		output = "nh_nodes:copperingot"
+	},
+	{
+		ingredients = {["nh_nodes:copperingot"] = 3},
+		output = "nh_nodes:copperhelmet"
+	},
+	{
+		ingredients = {["nh_nodes:copperingot"] = 8},
+		output = "nh_nodes:copperchestplate"
+	},
+	{
+		ingredients = {["nh_nodes:tinnugget"] = 3},
+		output = "nh_nodes:tiningot"
+	},
+	{
+		ingredients = {["nh_nodes:ironnugget"] = 3},
+		output = "nh_nodes:ironingot"
+	},
+	{
+		ingredients = {["nh_nodes:sand"] = 3},
+		output = "nh_nodes:bottle"
+	},
+	{
+		ingredients = {["default:steel_ingot"] = 9},
+		output = "default:steel_block"
+	},
 }
 
 -- ========================================
@@ -463,7 +567,6 @@ core.register_entity("nh_nodes:display_item", {
 
 -- ========================================
 -- FUNÇÕES AUXILIARES
--- ========================================
 
 -- Remove apenas entidades desta estação específica
 local function remove_item_entities(pos)
@@ -2171,26 +2274,6 @@ core.register_node("nh_nodes:saprolite", {
 core.register_node("nh_nodes:basalt", {
     description = S("Basalt"),
     tiles = {"basalt.png"},
-    groups = {cracky = 3},
-    
-        -- Configuração mão direita
-    wielded_bone_position = {
-        pos = {x = 0.5, y = 0.5, z = 1.65}
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    
-    -- Configuração mão esquerda
-    offhand_bone_position = {
-        pos = {x = 1.5, y = 0, z = 0}
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-})
-
-core.register_node("nh_nodes:magma", {
-    description = S("Magma"),
-    tiles = {"magma.png"},
     groups = {cracky = 3},
     
         -- Configuração mão direita
@@ -5657,137 +5740,6 @@ core.register_node("nh_nodes:leaves_nut3", {
 })
 
 
--- Sistema alternativo de dano (caso on_fall_damage não funcione)
--- Verifica folhas caindo e causa dano aos jogadores
-local players_with_torch = {}
-
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
-        local pos = player:get_pos()
-        
-        -- ==== SISTEMA DE DANO DAS FOLHAS ====
-        local above_pos = {x = pos.x, y = pos.y + 2, z = pos.z}
-        local objects = core.get_objects_inside_radius(above_pos, 1.5)
-        for _, obj in pairs(objects) do
-            local entity = obj:get_luaentity()
-            if entity and entity.name == "__builtin:falling_node" then
-                local node = entity.node
-                if node and node.name then
-                    -- Lista de todos os tipos de folhas que podem cair
-                    local leaf_types = {
-                        "nh_nodes:leaves",
-                        "nh_nodes:leaves_nut",
-                        "nh_nodes:leaves_nut2",
-                        "nh_nodes:leaves_nut3",
-                        "nh_nodes:leaves_apple",
-                        "nh_nodes:leaves_apple2",
-                        "nh_nodes:leaves_apple3"
-                    }
-                    
-                    -- Verifica se o node é algum tipo de folha
-                    local is_leaf = false
-                    for _, leaf_name in ipairs(leaf_types) do
-                        if node.name == leaf_name then
-                            is_leaf = true
-                            break
-                        end
-                    end
-                    
-                    if is_leaf then
-                        local velocity = obj:get_velocity()
-                        if velocity and velocity.y < -2 then
-                            player:set_hp(player:get_hp() - 1)
-                        end
-                    end
-                end
-            end
-        end
-        
-        -- Registrar o globalstep para verificar se o player está na água
-	core.register_globalstep(function(dtime)
-	    for _, player in ipairs(core.get_connected_players()) do
-		local pos = player:get_pos()
-		pos.y = pos.y + 1  -- Verifica na altura da cabeça
-		
-		local node = core.get_node(pos)
-		
-		-- Verifica se está na água
-		if core.get_item_group(node.name, "water") > 0 then
-		    local inv = player:get_inventory()
-		    
-		    -- Percorre todo o inventário
-		    for i = 1, inv:get_size("main") do
-		        local stack = inv:get_stack("main", i)
-		        
-		        -- Se encontrar tocha2, troca por tocha3
-		        if stack:get_name() == "nh_nodes:torch2" then
-		            stack:set_name("nh_nodes:torch3")
-		            inv:set_stack("main", i, stack)
-		        end
-		    end
-		end
-	    end
-	end)
-        
-        -- ==== SISTEMA DE LUZ DA TOCHA ====
-        local wielded = player:get_wielded_item()
-        local player_name = player:get_player_name()
-        local light_pos_base = {x = pos.x, y = pos.y + 1, z = pos.z}
-        
-        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" then
-            -- Cria luz temporária
-            if not players_with_torch[player_name] then
-                players_with_torch[player_name] = {}
-            end
-            
-            -- Remove luz antiga
-            if players_with_torch[player_name].pos then
-                local old_pos = players_with_torch[player_name].pos
-                local node = core.get_node(old_pos)
-                if node.name == "nh_nodes:torch_light" or node.name == "nh_nodes:crystal_light" then
-                    core.remove_node(old_pos)
-                end
-            end
-            
-            -- Coloca nova luz invisível
-            local light_pos = vector.round(light_pos_base)
-            local node = core.get_node(light_pos)
-            if node.name == "air" then
-                core.set_node(light_pos, {name = "nh_nodes:torch_light"})
-                players_with_torch[player_name].pos = light_pos
-            --end
-            elseif node.name == "nh_nodes:water" then
-                core.set_node(light_pos, {name = "nh_nodes:crystal_light"})
-                players_with_torch[player_name].pos = light_pos
-            end
-        else
-            -- Remove luz se não está mais segurando
-            if players_with_torch[player_name] and players_with_torch[player_name].pos then
-                local old_pos = players_with_torch[player_name].pos
-                local node = core.get_node(old_pos)
-                if node.name == "nh_nodes:torch_light" then
-                    core.remove_node(old_pos)
-                end
-                players_with_torch[player_name] = nil
-            end
-        end
-    end
-end)
-
--- Limpa luz quando jogador sai
-core.register_on_leaveplayer(function(player)
-    local player_name = player:get_player_name()
-    if players_with_torch[player_name] and players_with_torch[player_name].pos then
-        local pos = players_with_torch[player_name].pos
-        local node = core.get_node(pos)
-        if node.name == "nh_nodes:torch_light" or  node.name == "nh_nodes:crystal_light" then
-            core.remove_node(pos)
-        end
-        players_with_torch[player_name] = nil
-    end
-end)
-
-
 core.register_node("nh_nodes:apple", {
     description = S("Apple") .. "\n" .. S("Nutrition: +2"),
     drawtype = "mesh",
@@ -5846,7 +5798,7 @@ core.register_node("nh_nodes:blueberry", {
     end,
 })
 
-core.register_node("nh_nodes:chicken_egg", {
+core.register_node("nh_nodes:chickenegg", {
     description = S("Chicken Egg") .. "\n" .. S("Nutrition: +1"),
     drawtype = "mesh",
     mesh = "chickenegg.obj",
@@ -5972,7 +5924,7 @@ core.register_node("nh_nodes:chicken", {
 
 })
 
-core.register_node("nh_nodes:raw_chicken", {
+core.register_node("nh_nodes:rawchicken", {
     description = S("Raw Chicken") .. "\n" .. S("Nutrition: +4"),
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
@@ -6045,6 +5997,123 @@ core.register_node("nh_nodes:roastchicken", {
     end,
 })
 
+core.register_node("nh_nodes:tuna", {
+    description = S("Tuna"),
+    drawtype = "mesh",
+    mesh = "rawtuna.obj",
+    tiles = {"tuna.png"},
+    
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    use_texture_alpha = "clip",
+    walkable = false,
+    --sounds = default.node_sound_wood_defaults(),
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
+    },
+    
+    pointabilities = {
+        nodes = {
+            ["nh_nodes:water"]          = true,
+            ["nh_nodes:water_flowing"]  = true,
+            ["nh_nodes:water2"]         = true,
+            ["nh_nodes:water2_flowing"] = true,
+        }
+    },
+
+    -- Spawna o mob ao colocar o node no chão ou na água
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then
+            return itemstack
+        end
+
+        local pos = pointed_thing.above  -- posição onde vai spawnar
+
+        -- Spawna o mob
+        local mob = minetest.add_entity(pos, "nh_mob:tuna")
+        
+        if mob then
+            -- Aplica a rotação do jogador ao mob
+            if placer then
+                local yaw = placer:get_look_horizontal()
+                mob:set_yaw(yaw)
+            end
+            
+            -- Consome o item da mão
+            itemstack:take_item()
+        end
+        
+        return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:rawtuna", {
+    description = S("Raw Tuna") .. "\n" .. S("Nutrition: +4"),
+    drawtype = "mesh",
+    mesh = "rawtuna.obj",
+    tiles = {"rawtuna.png"},
+    
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    use_texture_alpha = "clip",
+    walkable = false,
+    --sounds = default.node_sound_wood_defaults(),
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
+    },
+    --visual_size = {x = 15, y = 15},
+    --wield_scale = {x= 2, y= 2, z= 2},
+    -- Tornar comestível
+    on_use = function(itemstack, user, pointed_thing)
+        restore_hunger(user, 4)
+        itemstack:take_item()
+    end,
+})
+
+core.register_node("nh_nodes:roasttuna", {
+    description = S("Roast Tuna") .. "\n" .. S("Nutrition: +6"),
+    drawtype = "mesh",
+    mesh = "rawtuna.obj",
+    tiles = {"roasttuna.png"},
+    
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    use_texture_alpha = "clip",
+    walkable = false,
+    --sounds = default.node_sound_wood_defaults(),
+    
+    collision_box = {
+        type = "fixed",
+        fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
+    },
+    selection_box = {
+        type = "fixed",
+        fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
+    },
+    --visual_size = {x = 15, y = 15},
+    --wield_scale = {x= 2, y= 2, z= 2},
+    -- Tornar comestível
+    on_use = function(itemstack, user, pointed_thing)
+        restore_hunger(user, 6)
+        itemstack:take_item()
+    end,
+})
+
 core.register_node("nh_nodes:bull", {
     description = S("Bull") .. "\n" .. S("[collectible]"),
  
@@ -6068,7 +6137,7 @@ core.register_node("nh_nodes:bull", {
     
 })
 
-core.register_node("nh_nodes:cowmeat", {
+core.register_node("nh_nodes:rawbeef", {
     description = S("Raw Beef") .. "\n" .. S("Nutrition: +3"),
  
     drawtype = "mesh",
@@ -7194,9 +7263,28 @@ core.register_node("nh_nodes:water2_flowing", {
     drowning = 1,  -- ADICIONE ESTA LINHA
     groups = {water=1, liquid=1, not_in_creative_inventory=1},
 })
+
+core.register_node("nh_nodes:magma", {
+    description = S("Magma"),
+    tiles = {"magma.png"},
+    groups = {cracky = 3, hot = 1},
     
+        -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     
-    core.register_node("nh_nodes:lava", {
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+})  
+    
+core.register_node("nh_nodes:lava", {
     description = S("Lava"),
     drawtype = "liquid",
     tiles = {"lava.png"},
@@ -7214,7 +7302,7 @@ core.register_node("nh_nodes:water2_flowing", {
     liquid_alternative_source = "nh_nodes:lava",
     liquid_viscosity = 1,
     post_effect_color = {a=64, r=255, g=0, b=0},
-    groups = {lava=1, liquid=1},
+    groups = {lava=1, liquid=1, hot = 1},
 })
 
 core.register_node("nh_nodes:lava_flowing", {
@@ -7243,8 +7331,59 @@ core.register_node("nh_nodes:lava_flowing", {
     liquid_alternative_source = "nh_nodes:lava",
     liquid_viscosity = 1,
     post_effect_color = {a=64, r=255, g=0, b=0},
-    groups = {lava=1, liquid=1, not_in_creative_inventory=1},
+    groups = {lava=1, liquid=1, hot = 1, not_in_creative_inventory=1},
 
+})
+
+-- ABM que verifica jogadores próximos ao nó de magma
+core.register_abm({
+    label = "Magma damage",
+    nodenames = {"nh_nodes:magma"},
+    interval = 1.0,   -- checa a cada 1 segundo
+    chance = 1,       -- 100% de chance de executar
+
+    action = function(pos, node)
+        -- Pega todos os objetos em raio de 1 bloco (toca as faces)
+        local objects = core.get_objects_inside_radius(pos, 1.1)
+
+        for _, obj in ipairs(objects) do
+            if obj:is_player() then
+                obj:set_hp(obj:get_hp() - 2) -- tira 1 coração por segundo
+            end
+        end
+    end,
+})
+
+-- Limpa o timer quando jogador sai
+core.register_on_leaveplayer(function(player)
+    lava_damage_timer[player:get_player_name()] = nil
+end)
+
+core.register_abm({
+    label = "Lava damage",
+    nodenames = {"nh_nodes:lava", "nh_nodes:lava_flowing"},
+    interval = 1.0,
+    chance = 1,
+    action = function(pos, node)
+        local objects = core.get_objects_inside_radius(pos, 1.1)
+        for _, obj in ipairs(objects) do
+            if obj:is_player() then
+                -- Evita double damage se já está dentro (coberto pelo globalstep)
+                local ppos = obj:get_pos()
+                local feet = core.get_node({x=ppos.x, y=ppos.y, z=ppos.z})
+                local head = core.get_node({x=ppos.x, y=ppos.y + 1, z=ppos.z})
+                
+                local inside = feet.name == "nh_nodes:lava" or
+                               feet.name == "nh_nodes:lava_flowing" or
+                               head.name == "nh_nodes:lava" or
+                               head.name == "nh_nodes:lava_flowing"
+                
+                if not inside then
+                    obj:set_hp(obj:get_hp() - 11)
+                end
+            end
+        end
+    end,
 })
 
 -------
@@ -8268,13 +8407,17 @@ core.register_craftitem("nh_nodes:pebble_item", {
     },
     wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
 
-    tool_capabilities = {
-        full_punch_interval = 0.9,
-        max_drop_level = 0,
-        groupcaps = { 
-            cracky = {times = {[2] = 2.0, [3] = 1.0}, uses = 20, maxlevel = 1},
-            crumbly = {times = {[1] = 1.5, [2] = 0.9, [3] = 0.5}, uses = 20, maxlevel = 1},
+   tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            choppy = {times = {[1]=25, [2]=20, [3]=15}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
         },
+
         damage_groups = {fleshy = 2},
     },
 
@@ -8656,6 +8799,7 @@ core.register_node("nh_nodes:obsidianpebble", {
         max_drop_level = 1,
 
         groupcaps = {
+            choppy = {times = {[1]=25, [2]=20, [3]=15}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
             snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
             crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
@@ -8711,14 +8855,17 @@ core.register_craftitem("nh_nodes:obsidianpebble_item", {
     },
     wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
 
-    tool_capabilities = {
-        full_punch_interval = 0.9,
-        max_drop_level = 0,
+   tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
         groupcaps = {
-            cracky = {times = {[2] = 2.0, [3] = 1.0}, uses = 20, maxlevel = 1},
-            crumbly = {times = {[1] = 1.5, [2] = 0.9, [3] = 0.5}, uses = 20, maxlevel = 1},
-            snappy = {times = {[2] = 1.0, [3] = 0.5}, uses = 20, maxlevel = 1},
+            choppy = {times = {[1]=25, [2]=20, [3]=15}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
         },
+
         damage_groups = {fleshy = 2},
     },
 
@@ -9540,7 +9687,9 @@ core.register_node("nh_nodes:pebble", {
         max_drop_level = 1,
 
         groupcaps = {
+            choppy = {times = {[1]=25, [2]=20, [3]=15}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
             crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
         },
 
@@ -10520,14 +10669,17 @@ core.register_craftitem("nh_nodes:white_pebble_item", {
     },
     wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
 
-    tool_capabilities = {
-        full_punch_interval = 0.9,
-        max_drop_level = 0,
+   tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
         groupcaps = {
-            cracky = {times = {[2] = 2.0, [3] = 1.0}, uses = 20, maxlevel = 1},
-            crumbly = {times = {[1] = 1.5, [2] = 0.9, [3] = 0.5}, uses = 20, maxlevel = 1},
-            snappy = {times = {[2] = 1.0, [3] = 0.5}, uses = 20, maxlevel = 1},
+            choppy = {times = {[1]=25, [2]=20, [3]=15}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
         },
+
         damage_groups = {fleshy = 2},
     },
 
@@ -10890,6 +11042,20 @@ core.register_node("nh_nodes:white_pebble", {
         fixed = {-0.15, -0.5, -0.2, 0.15, -0.4, 0.15},
     },
     drop = "nh_nodes:white_pebble_item",
+    
+   tool_capabilities = {
+        full_punch_interval = 1.5,
+        max_drop_level = 1,
+
+        groupcaps = {
+            choppy = {times = {[1]=25, [2]=20, [3]=15}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1]=1.30, [2]=0.90, [3]=0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1]=1.40, [2]=1.00, [3]=0.60}, uses = 10, maxlevel = 1},
+        },
+
+        damage_groups = {fleshy = 2},
+    },
     
     on_construct = function(pos)
         core.check_for_falling(pos)
@@ -11844,14 +12010,14 @@ core.register_node("nh_nodes:oakdoor_open", {
 
 
 -----------------------------
--- GRIMÓRIO DE MATERIALIZAÇÃO
------------------------------
+-- GRIMÓRIO DE MATERIALIZAÇÃO - Archion
 
 local ITEMS_PER_PAGE = 40
 local GRID_W = 8
 local GRID_H = 5
 
-local item_cache = {}
+local item_cache      = {}
+local item_desc_index = {}   -- [lang_code][item_name] = {desc_traduzida, desc_original}
 
 local function build_item_cache()
     if next(item_cache) then return end
@@ -11863,21 +12029,71 @@ local function build_item_cache()
     table.sort(item_cache)
 end
 
-local function filter_items(search)
-    build_item_cache()
-    if search == "" or not search then return item_cache end
-    local result = {}
-    search = search:lower()
+local function ensure_desc_index(lang_code)
+    if item_desc_index[lang_code] then return end
+    item_desc_index[lang_code] = {}
+
     for _, name in ipairs(item_cache) do
-        if name:lower():find(search, 1, true) then
-            table.insert(result, name)
+        local def      = core.registered_items[name]
+        local raw_desc = (def and def.description) or ""
+
+        -- Traduz a description completa para o idioma do jogador
+        local translated = core.get_translated_string(lang_code, raw_desc)
+        local original   = raw_desc
+
+        -- Indexa TODAS as linhas (nome principal + subtítulos como [Mob Spawner])
+        local terms = {}
+        for line in (translated .. "\n"):gmatch("([^\n]*)\n") do
+            local trimmed = line:match("^%s*(.-)%s*$")  -- remove espaços
+            if trimmed ~= "" then
+                table.insert(terms, trimmed:lower())
+            end
+        end
+        -- Adiciona também as linhas originais em inglês como fallback
+        for line in (original .. "\n"):gmatch("([^\n]*)\n") do
+            local trimmed = line:match("^%s*(.-)%s*$")
+            if trimmed ~= "" then
+                table.insert(terms, trimmed:lower())
+            end
+        end
+
+        item_desc_index[lang_code][name] = terms
+    end
+end
+
+local function filter_items(search, lang_code)
+    build_item_cache()
+    if not search or search == "" then return item_cache end
+
+    lang_code = lang_code or "en"
+    ensure_desc_index(lang_code)
+
+    local result = {}
+    local term   = search:lower()
+    local index  = item_desc_index[lang_code]
+
+    for _, name in ipairs(item_cache) do
+        local matched = name:lower():find(term, 1, true)
+
+        if not matched and index[name] then
+            for _, desc in ipairs(index[name]) do
+                if desc:find(term, 1, true) then
+                    matched = true
+                    break
+                end
+            end
+        end
+
+        if matched then
+            table.insert(result, name)   -- corrigido: era `matched` por engano
         end
     end
+
     return result
 end
 
 
--- ─── Entidade Grimório ───────────────────────────────────────────────────────
+-- ─── Entidade Grimório ─────────────────────────────────
 
 core.register_entity("nh_nodes:grimoire_entity", {
     initial_properties = {
@@ -11921,7 +12137,7 @@ core.register_entity("nh_nodes:grimoire_entity", {
 })
 
 
--- ─── Helpers de swap ─────────────────────────────────────────────────────────
+-- ─── Helpers de swap ────────────────────────────────────────
 
 -- Guarda: player_name → {entity, node_pos, node_param2}
 local open_grimoires = {}
@@ -11940,8 +12156,14 @@ local function spawn_grimoire_entity(pos, param2, player_name)
     end
 
     -- Aplica a mesma rotação do node (facedir → yaw)
-    local yaw_map = {[0]=0, [1]=math.pi/2, [2]=math.pi, [3]=3*math.pi/2}
-    obj:set_yaw(yaw_map[param2 % 4] or 0)
+local function facedir_to_yaw(param2)
+    -- Pega o vetor de direção frontal do facedir
+    local dir = core.facedir_to_dir(param2)
+    -- Converte o vetor XZ em yaw (atan2 com eixos do Minetest)
+    return math.atan2(-dir.x, dir.z)
+end
+    obj:set_yaw(facedir_to_yaw(param2 % 4))
+
 
     local ent = obj:get_luaentity()
     ent._node_pos   = vector.copy(pos)
@@ -11993,15 +12215,18 @@ local function close_grimoire_entity(player_name)
 end
 
 
--- ─── Formspec ────────────────────────────────────────────────────────────────
+-- ─── Formspec ────────────────────────────────────────────
 
 function show_grimoire(player, page, search)
     page   = page   or 1
     search = search or ""
 
-    local name  = player:get_player_name()
-    local items = filter_items(search)
+    local name      = player:get_player_name()
+    -- Pega o lang_code do jogador (ex: "pt", "en", "de")
+    local info      = core.get_player_information(name)
+    local lang_code = (info and info.lang_code) or "en"
 
+    local items    = filter_items(search, lang_code)   -- <-- passa lang_code
     local max_page = math.max(1, math.ceil(#items / ITEMS_PER_PAGE))
     page = math.min(page, max_page)
 
@@ -12041,7 +12266,7 @@ function show_grimoire(player, page, search)
 end
 
 
--- ─── Node ────────────────────────────────────────────────────────────────────
+-- ─── Node ────────────────────────────────────────────────────────
 
 core.register_node("nh_nodes:archion", {
     description = S("Archion") .. "\n" .. S("Grimoire of Materialization") .. "\n" .. S("(completed)") .. "\n" .. S("[only active in creative mode]"),
@@ -12156,17 +12381,19 @@ core.register_on_player_receive_fields(function(player, formname, fields)
         return
     end
 
-    for field, _ in pairs(fields) do
-        if field:sub(1, 5) == "item_" then
-            local index = tonumber(field:sub(6))
-            local items = filter_items(state.search)
-            local item  = items[index]
-            if item then
-                player:get_inventory():add_item("main", item)
-            end
-            return
-        end
-    end
+	for field, _ in pairs(fields) do
+		if field:sub(1, 5) == "item_" then
+			local index = tonumber(field:sub(6))
+			local info      = core.get_player_information(name)
+			local lang_code = (info and info.lang_code) or "en"
+			local items     = filter_items(state.search, lang_code)
+		    	local item  = items[index]
+			if item then
+				player:get_inventory():add_item("main", item)
+			end
+            		return
+        	end
+    	end
 end)
 
 
