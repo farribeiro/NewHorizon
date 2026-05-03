@@ -2,11 +2,11 @@
   Mod: Mob, baseado no mod Happy Mob
   Versão com múltiplos mobs: Ouriço, Coelho, Galinha, galo, tubarão...
 --]]
-
+ 
 -------------------------------
 -- CONFIGURAÇÕES GLOBAIS
 -------------------------------
-
+ 
 local DEBUG = true
 local function log(msg) if DEBUG then core.log("action", "[Mob] " .. msg) end end
 local S = core.get_translator("nh_mob")
@@ -17,7 +17,7 @@ local S = core.get_translator("nh_mob")
 local SLOT_HEIGHT = 60   -- espaço entre cada barra (pixels)
 local BASE_Y = -968      -- posição Y da primeira barra
 local BASE_TEXT_Y = -990 -- posição Y do texto da primeira barra
-
+ 
 -- Rastreia slots por jogador: _boss_slots[pname] = {[self_id] = slot_index}
 local _boss_slots = {}
 local function get_self_id(self) return tostring(self.object) end
@@ -104,8 +104,8 @@ local function remove_all_boss_hud(self)
 end
 local SPAWN_PRESETS = {
     grass = {
-        nodes = { "air" },
-        neighbors = { "nh_nodes:grassleaves" },
+        nodes = {"air"},
+        neighbors = {"nh_nodes:grassleaves"},
         min_height = 0,
         max_height = 30
     },
@@ -116,8 +116,8 @@ local function register_mob_spawn(def)
     end
 
     local d = {
-        nodes = def.nodes or { "air" },
-        neighbors = def.neighbors or { "nh_nodes:top_grass" },
+        nodes = def.nodes or {"air"},
+        neighbors = def.neighbors or {"nh_nodes:top_grass"},
         max_light = def.max_light or 15,
         interval = def.interval or 60,
         chance = def.chance or 1000,
@@ -163,14 +163,14 @@ mobs:register_mob("nh_mob:rat",
         damage = 1,
         attack_type = "dogfight",
         description = S("Rat"),
-        attack_animals = true,                                             -- permite atacar outros mobs
-        specific_attack = { "player", "nh_mob:cricket", "nh_mob:cicada" }, -- lista de mobs que ele vai atacar ativamente
-        follow = { "nh_nodes:chickenegg", "nh_nodes:friedchickenegg", "nh_nodes:rawchicken", "nh_nodes:rawbeef", "nh_nodes:blueberry" },
+        attack_animals = true, -- permite atacar outros mobs
+        specific_attack = {"player", "nh_mob:cricket", "nh_mob:cicada"}, -- lista de mobs que ele vai atacar ativamente
+        follow = {"nh_nodes:chickenegg", "nh_nodes:friedchickenegg", "nh_nodes:rawchicken", "nh_nodes:rawbeef", "nh_nodes:blueberry"},
         hp_min = 8,
         hp_max = 10,
         armor = 100,
-        collisionbox = { -0.25, 0, -0.2, 0.3, 0.4, 0.2 },
-        selectionbox = { -0.5, 0, -0.2, 0.5, 0.4, 0.2 },
+        collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
+        selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
         physical = true,
         stepheight = 3,
         fall_speed = -8,
@@ -180,7 +180,7 @@ mobs:register_mob("nh_mob:rat",
         mesh = "rat.glb",
         textures = { "rat.png" },
         -- rotate = 180,
-        visual_size = { x = 15, y = 15 },
+        visual_size = {x = 15, y = 15},
         -- PERMITIRIA "VOAR" DENTRO DAS FOLHAS se não retirasse a capacidade de andar...
         -- fly = true,
         -- fly_in = {"nh_nodes:leaves"},  -- Pode ser uma lista!
@@ -190,7 +190,7 @@ mobs:register_mob("nh_mob:rat",
         water_damage = 0,
         lava_damage = 5,
         light_damage = 0,
-        animation = { speed_normal = 1, stand_start = 0.25, stand_end = 1.25, walk_start = 1.5, walk_end = 2.5, },
+        animation = {speed_normal = 1, stand_start = 0.25, stand_end = 1.25, walk_start = 1.5, walk_end = 2.5, },
         on_rightclick = function(self, clicker)
             if clicker:is_player() then
                 local item = clicker:get_wielded_item()
@@ -204,21 +204,87 @@ mobs:register_mob("nh_mob:rat",
                 end
             end
         end,
-        sounds = { random = "rat_quick", damage = "rat_hurt" },
+        sounds = {random = "rat_quick", damage = "rat_hurt"},
     })
 -- Spawn da ratazana (grama, perto de árvores/arbustos e cavernas)
 register_mob_spawn({
     name = "nh_mob:rat",
-    nodes = { "air" },
-    neighbors = { "nh_nodes:grass", "nh_nodes:oaktimber", "nh_nodes:leaves", "nh_nodes:blueberryleaves", "nh_nodes:gneiss" },
+    nodes = {"air"},
+    neighbors = {"nh_nodes:grass", "nh_nodes:oaktimber", "nh_nodes:leaves", "nh_nodes:blueberryleaves", "nh_nodes:gneiss"},
     min_height = -20,
     max_height = 30,
     interval = 120,
     chance = 2000,
     active_object_count = 3
-})
+    })
 --mobs:register_egg("nh_mob:rat", "Orbe com Ratazana", "orbspawner.png", 0)
 register_orb_egg("nh_mob:rat", S("Orb with Rat"))
+-- MOB: crab (fugitivo)
+mobs:register_mob("nh_mob:crab",
+    {
+        type = "animal",
+        passive = true,
+        reach = 1,
+        damage = 1,
+        attack_type = "dogfight",
+        description = S("Crab"),
+        runaway = true,
+        runaway_from = {"player", "nh_mob:bull", "nh_mob:cow", "nh_mob:ox", "nh_mob:shark"}, -- Galinhas fogem de jogadores
+        --attack_animals = true, -- permite atacar outros mobs
+        --specific_attack = {"player", "nh_mob:cricket", "nh_mob:cicada"}, -- lista de mobs que ele vai atacar ativamente
+        follow = {"nh_nodes:chickenegg", "nh_nodes:friedchickenegg", "nh_nodes:rawchicken", "nh_nodes:rawbeef", "nh_nodes:blueberry"},
+        hp_min = 4,
+        hp_max = 5,
+        armor = 100,
+        collisionbox = {-0.25, 0, -0.2, 0.3, 0.4, 0.2},
+        selectionbox = {-0.5, 0, -0.2, 0.5, 0.4, 0.2},
+        physical = true,
+        stepheight = 1.5,
+        fall_speed = -8,
+        fall_damage = 0,
+        floats = 0,
+        visual = "mesh",
+        mesh = "crab.glb",
+        textures = {"crab.png"},
+        -- rotate = 180,
+        visual_size = {x = 15, y = 15},
+        -- PERMITIRIA "VOAR" DENTRO DAS FOLHAS se não retirasse a capacidade de andar...
+        -- fly = true,
+        -- fly_in = {"nh_nodes:leaves"},  -- Pode ser uma lista!
+        walk_velocity = 3,
+        run_velocity = 5,
+        view_range = 8,
+        water_damage = 0,
+        lava_damage = 6,
+        light_damage = 0,
+        animation = {speed_normal = 3, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 1},
+        on_rightclick = function(self, clicker)
+            if clicker:is_player() then
+                local item = clicker:get_wielded_item()
+                local name = item:get_name()
+                if name == "nh_nodes:blueberry" then
+                    core.chat_send_player(clicker:get_player_name(), S("The crab ate!"))
+                    item:take_item(1)
+                    clicker:set_wielded_item(item)
+                else
+                    core.chat_send_player(clicker:get_player_name(), S("..."))
+                end
+            end
+        end,
+        sounds = {random = "rat_quick", damage = "rat_hurt"},
+    })
+-- Spawn da ratazana (grama, perto de árvores/arbustos e cavernas)
+register_mob_spawn({
+    name = "nh_mob:crab",
+    nodes = {"air"},
+    neighbors = {"nh_nodes:sand", "nh_nodes:wet_sand"},
+    min_height = -1,
+    max_height = 10,
+    interval = 120,
+    chance = 2000,
+    active_object_count = 3
+    })
+register_orb_egg("nh_mob:crab", S("Orb with Crab"))
 -- MOB 5: Joaninha
 mobs:register_mob("nh_mob:ladybug", {
     type = "animal",
@@ -228,7 +294,7 @@ mobs:register_mob("nh_mob:ladybug", {
     attack_type = "dogfight",
     description = S("Ladybug"),
     blood_texture = "mob_yellowblood.png", -- sua textura customizada
-    blood_amount = 5,                      -- quantidade de partículas
+    blood_amount = 5,                   -- quantidade de partículas
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -288,7 +354,7 @@ mobs:register_mob("nh_mob:cricket", {
     attack_type = "dogfight",
     description = S("Cricket"),
     blood_texture = "mob_yellowblood.png", -- sua textura customizada
-    blood_amount = 5,                      -- quantidade de partículas
+    blood_amount = 5,                   -- quantidade de partículas
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -323,7 +389,7 @@ mobs:register_mob("nh_mob:cricket", {
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-
+ 
             if name == "nh_nodes:grassleaves" then
                 core.chat_send_player(clicker:get_player_name(), S("The cricket ate the leaves!"))
                 item:take_item(1)
@@ -352,7 +418,7 @@ mobs:register_mob("nh_mob:cicada", {
     attack_type = "dogfight",
     description = S("Cicada"),
     blood_texture = "mob_yellowblood.png", -- sua textura customizada
-    blood_amount = 5,                      -- quantidade de partículas
+    blood_amount = 5,                   -- quantidade de partículas
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -399,7 +465,7 @@ mobs:register_mob("nh_mob:cicada", {
 register_mob_spawn({
     name = "nh_mob:cicada",
     nodes = { "air" },
-    neighbors = { "nh_nodes:leaves" },
+    neighbors = {"nh_nodes:leaves"},
     max_light = 15,
     interval = 120,
     chance = 2000,
@@ -421,7 +487,7 @@ mobs:register_mob("nh_mob:firefly", {
     runaway = true,
     runaway_from = { "player" },
     blood_texture = "mob_yellowblood.png", -- sua textura customizada
-    blood_amount = 5,                      -- quantidade de partículas
+    blood_amount = 5,                   -- quantidade de partículas
     hp_min = 1,
     hp_max = 3,
     armor = 100,
@@ -475,12 +541,12 @@ mobs:register_mob("nh_mob:firefly", {
     end,
     -- sounds = { random = "rat_quick", damage = "rat_hurt", },
 })
-
+ 
 -- Spawn do vagalume (grama perto de árvores)
 register_mob_spawn({
     name = "nh_mob:firefly",
     nodes = { "air" },
-    neighbors = { "nh_nodes:water2", "nh_nodes:grassleaves" },
+    neighbors = {"nh_nodes:water2", "nh_nodes:grassleaves"},
     max_light = 15,
     interval = 120,
     chance = 2000,
@@ -512,7 +578,7 @@ mobs:register_mob("nh_mob:worm", {
     mesh = "worm.glb",
     textures = { "worm.png" },
     -- rotate = 180,
-    visual_size = { x = 7, y = 7 },
+    visual_size = {x = 7, y = 7},
     walk_velocity = 0.2,
     run_velocity = 1,
     view_range = 5,
@@ -546,7 +612,7 @@ mobs:register_mob("nh_mob:worm", {
 register_mob_spawn({
     name = "nh_mob:worm",
     nodes = { "air" },
-    neighbors = { "nh_nodes:dirt" },
+    neighbors = {"nh_nodes:dirt"},
     max_light = 15,
     interval = 120,
     chance = 2000,
@@ -609,10 +675,10 @@ mobs:register_mob("nh_mob:bull", {
         ride_end = 6.25,
     },
     -- MONTARIA
-    saddle = "mobs:saddle",  -- item de sela necessário
-    ride_speed = 8,          -- velocidade montado
+    saddle = "mobs:saddle", -- item de sela necessário
+    ride_speed = 8,       -- velocidade montado
     ride_acceleration = 1.0, -- aceleração montado
-    ride_friction = 0.8,     -- fricção ao parar
+    ride_friction = 0.8,  -- fricção ao parar
     -- Offset do jogador sobre o mob (ajuste conforme o visual do touro)
     driver_attach_at = { x = 0, y = 30, z = -5 },
     driver_eye_offset = { x = 0, y = 3, z = 0 },
@@ -659,7 +725,7 @@ mobs:register_mob("nh_mob:bull", {
         local item = clicker:get_wielded_item()
         local name = item:get_name()
         if name == "mobs:saddle" then -- Coloca a sela E já monta
-            self.saddled = true       -- flag interna
+            self.saddled = true -- flag interna
             item:take_item()
             clicker:set_wielded_item(item)
             core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
@@ -676,7 +742,7 @@ mobs:register_mob("nh_mob:bull", {
             clicker:set_wielded_item(item)
         elseif name == "" then -- mão vazia
             core.chat_send_player(clicker:get_player_name(), S("I petted the bull. hff, hff..."))
-        else                   -- item errado
+        else             -- item errado
             core.chat_send_player(clicker:get_player_name(), S("The bull is not interested in that..."))
         end
     end,
@@ -741,17 +807,17 @@ mobs:register_mob("nh_mob:cow", {
         ride_end = 6.25,
     },
     -- MONTARIA
-    saddle = "mobs:saddle",  -- item de sela necessário
-    ride_speed = 8,          -- velocidade montado
+    saddle = "mobs:saddle", -- item de sela necessário
+    ride_speed = 8,       -- velocidade montado
     ride_acceleration = 1.0, -- aceleração montado
-    ride_friction = 0.8,     -- fricção ao parar
+    ride_friction = 0.8,  -- fricção ao parar
     -- Offset do jogador sobre o mob (ajuste conforme o visual do touro)
     driver_attach_at = { x = 0, y = 30, z = -5 },
     driver_eye_offset = { x = 0, y = 3, z = 0 },
     driver_scale_factor = 1,
     do_custom = function(self, dtime)
         if not self.hp_anterior then self.hp_anterior = self.health end -- detecta que levou dano comparando HP atual com o anterior
-        if self.health < self.hp_anterior then                          -- levou dano de verdade
+        if self.health < self.hp_anterior then                    -- levou dano de verdade
             self.hp_anterior = self.health
             self.passive = false
             self.state = ""
@@ -796,7 +862,7 @@ mobs:register_mob("nh_mob:cow", {
         -- Ambos prontos: reseta flags e aplica cooldown
         self.bred = false
         touro_ent.bred = false
-        self.breed_cooldown = 300         -- 5 minutos
+        self.breed_cooldown = 300   -- 5 minutos
         -- Spawna filhote: 33% boi, 33% vaca, 33% touro
         local sorteio = math.random(1, 3) --local sorteio = math.random(1, 4)
         local filhote
@@ -882,14 +948,14 @@ mobs:register_mob("nh_mob:cow", {
             mobs:attach(self, clicker)
             return
         end
-
+ 
         if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
             core.chat_send_player(clicker:get_player_name(), S("I fed the cow! Moo!"))
             item:take_item(1)
             clicker:set_wielded_item(item)
         elseif name == "" then -- mão vazia
             core.chat_send_player(clicker:get_player_name(), S("I petted the cow. hff, hff..."))
-        else                   -- item errado
+        else             -- item errado
             core.chat_send_player(clicker:get_player_name(), S("The cow is not interested in that..."))
         end
     end,
@@ -954,10 +1020,10 @@ mobs:register_mob("nh_mob:ox", {
         ride_end = 6.25,
     },
     -- MONTARIA
-    saddle = "mobs:saddle",  -- item de sela necessário
-    ride_speed = 8,          -- velocidade montado
+    saddle = "mobs:saddle", -- item de sela necessário
+    ride_speed = 8,       -- velocidade montado
     ride_acceleration = 1.0, -- aceleração montado
-    ride_friction = 0.8,     -- fricção ao parar
+    ride_friction = 0.8,  -- fricção ao parar
     -- Offset do jogador sobre o mob (ajuste conforme o visual do touro)
     driver_attach_at = { x = 0, y = 30, z = -5 },
     driver_eye_offset = { x = 0, y = 3, z = 0 },
@@ -994,7 +1060,7 @@ mobs:register_mob("nh_mob:ox", {
             clicker:set_wielded_item(item)
         elseif name == "" then -- mão vazia
             core.chat_send_player(clicker:get_player_name(), S("I petted the ox. hff, hff..."))
-        else                   -- item errado
+        else             -- item errado
             core.chat_send_player(clicker:get_player_name(), S("The ox is not interested in that..."))
         end
     end,
@@ -1091,10 +1157,10 @@ local function bird_do_custom(self, dtime, perch_node)
                 self.object:set_pos(spot)
                 self.object:set_velocity({ x = 0, y = 0, z = 0 })
                 self.object:set_acceleration({ x = 0, y = 0, z = 0 })
-                self.fly              = false
-                self.walk_velocity    = 0
-                self.run_velocity     = 0
-                self.is_perching      = true
+                self.fly            = false
+                self.walk_velocity  = 0
+                self.run_velocity   = 0
+                self.is_perching    = true
                 self.eagle_anim_state = "perch"
                 self:set_animation("stand")
             end
@@ -1113,26 +1179,26 @@ local function bird_do_custom(self, dtime, perch_node)
 end
 -- MOB 4: Aguia / Águia (Agressivo)
 mobs:register_mob("nh_mob:eagle", bird_def({
-    type            = "animal",
-    passive         = false,
-    reach           = 1,
-    damage          = 2,
-    attack_type     = "dogfight",
-    description     = S("Eagle"),
+    type         = "animal",
+    passive      = false,
+    reach        = 1,
+    damage       = 2,
+    attack_type  = "dogfight",
+    description  = S("Eagle"),
     attack_animals  = true,
-    specific_attack = { "nh_mob:rat", "nh_mob:rabbit", "nh_mob:chicken" },
-    hp_min          = 10,
-    hp_max          = 20,
-    armor           = 100,
-    collisionbox    = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
-    selectionbox    = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
-    visual          = "mesh",
-    mesh            = "eagle.glb",
-    textures        = { "eagle.png" },
-    visual_size     = { x = 15, y = 15 },
-    floats          = 1,
-    follow          = { "nh_nodes:torch2" },
-    on_rightclick   = function(self, clicker)
+    specific_attack = {"nh_mob:rat", "nh_mob:rabbit", "nh_mob:chicken"},
+    hp_min = 10,
+    hp_max = 20,
+    armor  = 100,
+    collisionbox = {-0.5, 0, -0.2, 0.3, 2.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
+    visual      = "mesh",
+    mesh        = "eagle.glb",
+    textures    = {"eagle.png"},
+    visual_size = {x = 15, y = 15},
+    floats      = 1,
+    follow      = {"nh_nodes:torch2"},
+    on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local name = clicker:get_wielded_item():get_name()
             if name == "nh_nodes:torch2" then
@@ -1142,21 +1208,21 @@ mobs:register_mob("nh_mob:eagle", bird_def({
             end
         end
     end,
-    do_custom       = function(self, dtime)
+    do_custom = function(self, dtime)
         bird_do_custom(self, dtime, "nh_nodes:oaktimber")
     end,
 }))
 -- Spawn da águia (copas de carvalhos)
 register_mob_spawn({
-    name                = "nh_mob:eagle",
-    nodes               = { "air" },
-    neighbors           = { "nh_nodes:leaves" },
-    max_light           = 15,
-    interval            = 120,
-    chance              = 2000,
-    active_object_count = 1,
-    min_height          = 10,
-    max_height          = 50,
+    name                 = "nh_mob:eagle",
+    nodes                = {"air"},
+    neighbors            = {"nh_nodes:leaves"},
+    max_light            = 15,
+    interval             = 120,
+    chance               = 2000,
+    active_object_count  = 1,
+    min_height           = 10,
+    max_height           = 50,
 })
 register_orb_egg("nh_mob:eagle", S("Orb with Eagle"))
 
@@ -1164,26 +1230,26 @@ register_orb_egg("nh_mob:eagle", S("Orb with Eagle"))
 -- MOB: BLACK KITE (Milhafre)
 -------------------------------
 mobs:register_mob("nh_mob:blackkite", bird_def({
-    type            = "animal",
-    passive         = false,
-    reach           = 1,
-    damage          = 2,
-    attack_type     = "dogfight",
-    description     = S("Black Kite"),
+    type         = "animal",
+    passive      = false,
+    reach        = 1,
+    damage       = 2,
+    attack_type  = "dogfight",
+    description  = S("Black Kite"),
     attack_animals  = true,
-    specific_attack = { "nh_mob:rat", "nh_mob:rabbit", "nh_mob:chicken" },
-    hp_min          = 10,
-    hp_max          = 20,
-    armor           = 100,
-    collisionbox    = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
-    selectionbox    = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
-    visual          = "mesh",
-    mesh            = "eagle.glb",
-    textures        = { "blackkite.png" },
-    visual_size     = { x = 15, y = 15 },
-    floats          = 1,
-    follow          = { "nh_nodes:torch2" },
-    on_rightclick   = function(self, clicker)
+    specific_attack = {"nh_mob:rat", "nh_mob:rabbit", "nh_mob:chicken"},
+    hp_min = 10,
+    hp_max = 20,
+    armor  = 100,
+    collisionbox = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
+    selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
+    visual      = "mesh",
+    mesh        = "eagle.glb",
+    textures    = { "blackkite.png" },
+    visual_size = { x = 15, y = 15 },
+    floats      = 1,
+    follow      = { "nh_nodes:torch2" },
+    on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local name = clicker:get_wielded_item():get_name()
             if name == "nh_nodes:torch2" then
@@ -1193,7 +1259,7 @@ mobs:register_mob("nh_mob:blackkite", bird_def({
             end
         end
     end,
-    do_custom       = function(self, dtime)
+    do_custom = function(self, dtime)
         bird_do_custom(self, dtime, "nh_nodes:oaktimber")
     end,
 }))
@@ -1215,25 +1281,25 @@ register_orb_egg("nh_mob:blackkite", S("Orb with Black Kite"))
 -- MOB: PHOENIX (Fênix)
 -------------------------------
 mobs:register_mob("nh_mob:phoenix", bird_def({
-    type          = "monster",
-    passive       = false,
-    reach         = 1,
-    damage        = 2,
-    attack_type   = "dogfight",
-    description   = S("Phoenix") .. "\n" .. S("[Altered Animal]"),
-    hp_min        = 10,
-    hp_max        = 20,
-    armor         = 100,
-    collisionbox  = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
-    selectionbox  = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
-    visual        = "mesh",
-    mesh          = "eagle.glb",
-    textures      = { "phoenix.png" },
-    visual_size   = { x = 30, y = 30 },
-    glow          = 14,
-    floats        = 3,
-    follow        = { "nh_nodes:torch2" },
-    animation     = { speed_normal = 0.2 }, -- sobrescreve só speed_normal da base
+    type         = "monster",
+    passive      = false,
+    reach        = 1,
+    damage       = 2,
+    attack_type  = "dogfight",
+    description  = S("Phoenix") .. "\n" .. S("[Altered Animal]"),
+    hp_min = 10,
+    hp_max = 20,
+    armor  = 100,
+    collisionbox = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
+    selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
+    visual      = "mesh",
+    mesh        = "eagle.glb",
+    textures    = { "phoenix.png" },
+    visual_size = { x = 30, y = 30 },
+    glow        = 14,
+    floats      = 3,
+    follow      = { "nh_nodes:torch2" },
+    animation   = { speed_normal = 0.2 }, -- sobrescreve só speed_normal da base
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local name = clicker:get_wielded_item():get_name()
@@ -1244,7 +1310,7 @@ mobs:register_mob("nh_mob:phoenix", bird_def({
             end
         end
     end,
-    do_custom     = function(self, dtime)
+    do_custom = function(self, dtime)
         bird_do_custom(self, dtime, "nh_nodes:magma")
     end,
 }))
@@ -1274,17 +1340,17 @@ register_orb_egg("nh_mob:phoenix", S("Orb with Phoenix"))
 --   get_objects  : função(pos) que retorna a lista de objetos na área de efeito
 --                  se nil, usa get_objects_inside_radius(pos, 1) como padrão
 local function apply_spike_damage(self, dtime, opts)
-    opts                = opts or {}
-    local interval      = opts.interval or 1
-    local damage        = opts.damage or 5
+    opts = opts or {}
+    local interval     = opts.interval or 1
+    local damage       = opts.damage or 5
     local mob_self_name = opts.mob_self_name or self.name
-    local msg           = opts.msg or S("The spines hurt me!")
-    local get_objects   = opts.get_objects
-
-    self._spike_timer   = (self._spike_timer or 0) + dtime
+    local msg          = opts.msg or S("The spines hurt me!")
+    local get_objects  = opts.get_objects
+ 
+    self._spike_timer = (self._spike_timer or 0) + dtime
     if self._spike_timer < interval then return end
     self._spike_timer = 0
-
+ 
     local pos = self.object:get_pos()
     local objetos
     if get_objects then
@@ -1292,7 +1358,7 @@ local function apply_spike_damage(self, dtime, opts)
     else
         objetos = core.get_objects_inside_radius(pos, 1)
     end
-
+ 
     for _, obj in ipairs(objetos) do
         if obj ~= self.object then
             local ent = obj:get_luaentity()
@@ -1310,7 +1376,7 @@ local function apply_spike_damage(self, dtime, opts)
         end
     end
 end
-
+ 
 -- MOB 1: OURIÇO (Defensivo)
 mobs:register_mob("nh_mob:hedgehog", {
     type = "animal",
@@ -1360,7 +1426,7 @@ mobs:register_mob("nh_mob:hedgehog", {
     do_punch = function(self, hitter, tflp, tool_caps, dir, damage)
         -- só age se for jogador de mão vazia
         if not hitter:is_player() then return end -- dano normal pra outros mobs
-
+ 
         local item = hitter:get_wielded_item()
         if item:get_name() == "" then -- machuca o jogador
             hitter:set_hp(hitter:get_hp() - 2)
@@ -1438,7 +1504,7 @@ mobs:register_mob("nh_mob:hedgehogshadow", {
         -- só age se for jogador de mão vazia
         if not hitter:is_player() then return end -- dano normal pra outros mobs
         local item = hitter:get_wielded_item()
-        if item:get_name() == "" then             -- machuca o jogador
+        if item:get_name() == "" then       -- machuca o jogador
             hitter:set_hp(hitter:get_hp() - 2)
             core.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
             return false -- CANCELA o dano no ouriço
@@ -1482,21 +1548,21 @@ mobs:register_mob("nh_mob:tuna", {
     floats = 0,
     visual = "mesh",
     mesh = "tuna.glb",
-    textures = { "tuna.png" },
+    textures = {"tuna.png"},
     --rotate = 180,
-    visual_size = { x = 10, y = 10 },
-    backface_culling = false,
-    swim = true,                 -- Permite "voar" na água
-    swim_in = "nh_nodes:water",  -- Só "voa" dentro de nodes:water
+    visual_size = {x = 10, y = 10},
+    backface_culling = false, 
+    swim = true,             -- Permite "voar" na água
+    swim_in = "nh_nodes:water", -- Só "voa" dentro de nodes:water
     runaway = true,
-    runaway_from = { "player" }, -- Galinhas fogem de jogadores
+    runaway_from = {"player"}, -- Galinhas fogem de jogadores
     walk_velocity = 4,
     run_velocity = 7,
     view_range = 10,
     air_damage = 1,
     lava_damage = 5,
     light_damage = 0,
-    animation = { speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 0, walk_end = 2, run_start = 0, run_end = 2 },
+    animation = {speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 0, walk_end = 2, run_start = 0, run_end = 2},
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
@@ -1521,7 +1587,7 @@ mobs:register_mob("nh_mob:tuna", {
         local node = core.get_node(pos)
         if node.name ~= "nh_nodes:water" then -- Se não está na água, tenta voltar
             -- Procura por água próxima
-            local water_pos = core.find_node_near(pos, 7, { "nh_nodes:water" })
+            local water_pos = core.find_node_near(pos, 7, {"nh_nodes:water"})
             if water_pos then
                 -- Move em direção à água
                 local dir = vector.direction(pos, water_pos)
@@ -1529,13 +1595,13 @@ mobs:register_mob("nh_mob:tuna", {
             end
         end
     end,
-    drops = { { name = "nh_nodes:rawtuna", chance = 1, min = 1, max = 1 }, }, -- 1-1 atum
+    drops = {{name = "nh_nodes:rawtuna", chance = 1, min = 1, max = 1 },}, -- 1-1 atum
 })
 -- Spawn do Ouriço do mar
 register_mob_spawn({
     name = "nh_mob:tuna",
-    nodes = { "nh_nodes:water" },
-    neighbors = { "nh_nodes:water" },
+    nodes = {"nh_nodes:water"},
+    neighbors = {"nh_nodes:water"},
     max_light = 15,
     interval = 120,
     chance = 3000,
@@ -1583,7 +1649,7 @@ mobs:register_mob("nh_mob:urchin", {
         -- só age se for jogador de mão vazia
         if not hitter:is_player() then return end -- dano normal pra outros mobs
         local item = hitter:get_wielded_item()
-        if item:get_name() == "" then             -- machuca o jogador
+        if item:get_name() == "" then       -- machuca o jogador
             hitter:set_hp(hitter:get_hp() - 2)
             core.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
             return false -- CANCELA o dano no ouriço
@@ -1621,7 +1687,7 @@ mobs:register_mob("nh_mob:manowar", {
     -- attack_chance = 8, -- entre 1-10
     description = S("Man o' war"),
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     hp_min = 5,
     hp_max = 7,
     armor = 100,
@@ -1639,7 +1705,7 @@ mobs:register_mob("nh_mob:manowar", {
     visual_size = { x = 15, y = 15 }, -- visual_size = {x = 2.1, y = 2.1},
     after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ backface_culling = false, use_texture_alpha = true, }) end,
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,     -- Permite "voar" na água
+    fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
     run_velocity = 2,
@@ -1670,7 +1736,7 @@ mobs:register_mob("nh_mob:manowar", {
 -- Spawn da aguia (copas de carvalhos)
 register_mob_spawn({
     name = "nh_mob:manowar",
-    nodes = { "air" },                    -- nh_nodes = {"nh_nodes:water"},
+    nodes = { "air" },                 -- nh_nodes = {"nh_nodes:water"},
     neighbors = { "nh_nodes:top_grass" }, --neighbors = {"nh_nodes:wet_sand"},
     max_light = 15,
     interval = 120,
@@ -1710,7 +1776,7 @@ function remove_dome(placed_list)
         if node.name == "nh_nodes:barrier" then core.set_node(pos, { name = "air" }) end
     end
 end
-
+ 
 -- SENTINEL (BOSS)
 mobs:register_mob("nh_mob:sentinel", {
     type = "monster",
@@ -1721,7 +1787,7 @@ mobs:register_mob("nh_mob:sentinel", {
     -- attack_chance = 8, -- entre 1-10
     description = S("Sentinel"),
     blood_texture = "spark_particle.png^[colorize:#FF8800:150", -- textura customizada
-    blood_amount = 3,                                           -- quantidade de partículas
+    blood_amount = 3,                                        -- quantidade de partículas
     hp_min = 50,
     hp_max = 50,
     armor = 100,
@@ -1739,7 +1805,7 @@ mobs:register_mob("nh_mob:sentinel", {
     visual_size = { x = 15, y = 15 }, -- visual_size = {x = 2.1, y = 2.1},
     glow = 14,
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,     -- Permite "voar" na água
+    fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 2,
     run_velocity = 3,
@@ -1910,7 +1976,7 @@ mobs:register_mob("nh_mob:bubble", {
     -- attack_chance = 8,                 -- entre 1-10
     description = S("Bubble"),
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     hp_min = 2,
     hp_max = 3,
     armor = 100,
@@ -1928,7 +1994,7 @@ mobs:register_mob("nh_mob:bubble", {
     visual_size = { x = 15, y = 15 }, -- visual_size = {x = 2.1, y = 2.1},
     after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ use_texture_alpha = true, textures = { "bubblefly.png", "bubblefly.png", }, }) end,
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,     -- Permite "voar" na água
+    fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
     run_velocity = 2,
@@ -1985,7 +2051,7 @@ mobs:register_mob("nh_mob:bubble", {
 -- Spawn da bolha (fundo do mar)
 register_mob_spawn({
     name = "nh_mob:bubble",
-    nodes = { "nh_nodes:water" },
+    nodes = { "nh_nodes:water" },   
     neighbors = { "nh_nodes:fireice" }, -- neighbors = {"nh_nodes:wet_sand"},
     max_light = 15,
     interval = 30,
@@ -1997,7 +2063,7 @@ register_mob_spawn({
 -- Spawn da bolha (ceu)
 register_mob_spawn({
     name = "nh_mob:bubble",
-    nodes = { "air" },                                     -- nh_nodes = {"nh_nodes:water"},
+    nodes = { "air" },                                  -- nh_nodes = {"nh_nodes:water"},
     neighbors = { "nh_nodes:top_grass", "nh_nodes:dirt" }, -- neighbors = {"nh_nodes:wet_sand"},
     max_light = 15,
     interval = 120,
@@ -2018,7 +2084,7 @@ mobs:register_mob("nh_mob:bigbubble", {
     -- attack_chance = 8, -- entre 1-10
     description = S("Big Bubble"),
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     hp_min = 1,
     hp_max = 2,
     armor = 100,
@@ -2036,7 +2102,7 @@ mobs:register_mob("nh_mob:bigbubble", {
     visual_size = { x = 30, y = 30 }, -- visual_size = {x = 2.1, y = 2.1},
     after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ use_texture_alpha = true, textures = { "bubblefly.png", "bubblefly.png", }, }) end,
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,     -- Permite "voar" na água
+    fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
     run_velocity = 2,
@@ -2095,7 +2161,7 @@ mobs:register_mob("nh_mob:bigbubble", {
 -- Spawn da aguia (copas de carvalhos)
 register_mob_spawn({
     name = "nh_mob:bigbubble",
-    nodes = { "air" },                                     -- nh_nodes = {"nh_nodes:water"},
+    nodes = { "air" },                                  -- nh_nodes = {"nh_nodes:water"},
     neighbors = { "nh_nodes:top_grass", "nh_nodes:dirt" }, --neighbors = {"nh_nodes:wet_sand"},
     max_light = 15,
     interval = 120,
@@ -2110,7 +2176,7 @@ register_orb_egg("nh_mob:bigbubble", S("Orb with Big Bubble"))
 mobs:register_mob("nh_mob:rabbit", {
     type = "animal",
     passive = true, -- Totalmente passivo
-    damage = 0,     -- Não causa dano
+    damage = 0,  -- Não causa dano
     description = S("Dwarf Rabbit"),
     hp_min = 5,
     hp_max = 8,
@@ -2153,7 +2219,7 @@ register_mob_spawn({
     neighbors = { "nh_nodes:snow" },
     max_light = 15,
     interval = 120,
-    chance = 2500,           -- Spawn mais frequente
+    chance = 2500,        -- Spawn mais frequente
     active_object_count = 8, -- Mais coelhos podem spawnar
     min_height = 0,
     max_height = 100
@@ -2171,27 +2237,27 @@ mobs:register_mob("nh_mob:karibo", {
     hp_min = 20,
     hp_max = 25,
     armor = 100,
-    collisionbox = { -1.2, 0, -1.2, 1.2, 3.5, 1.2 },
-    selectionbox = { -1.2, 0, -1.2, 1.2, 3.5, 1.2 },
+    collisionbox = {-1.2, 0, -1.2, 1.2, 3.5, 1.2},
+    selectionbox = {-1.2, 0, -1.2, 1.2, 3.5, 1.2},
     physical = true,
-    stepheight = 1.1,
+    stepheight = 3,
     fall_speed = -6,
     fall_damage = 2,
     visual = "mesh",
     mesh = "karibo.glb",
-    textures = { "karibo.png" },
+    textures = {"karibo.png"},
     -- rotate = 180,
-    visual_size = { x = 7, y = 7 },
-    backface_culling = false,
-    attack_animals = true,                 -- permite atacar outros mobs
-    specific_attack = { "nh_mob:rabbit" }, -- lista de mobs que ele vai atacar ativamente
+    visual_size = {x = 7, y = 7},
+    backface_culling = false, 
+    attack_animals = true, -- permite atacar outros mobs
+    specific_attack = {"nh_mob:rabbit"}, -- lista de mobs que ele vai atacar ativamente
     walk_velocity = 3,
     run_velocity = 7.5,
     view_range = 10,
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
-    floats = 1,
+    floats = 0,
     animation = {
         speed_normal = 1.5,
         stand_start = 0,
@@ -2201,7 +2267,7 @@ mobs:register_mob("nh_mob:karibo", {
         run_start = 0,
         run_end = 1,
         punch_start = 1,
-        punch_end = 1.75,
+        punch_end = 1.75, 
         --jump_start = 61,
         --jump_end = 80
     },
@@ -2213,7 +2279,7 @@ mobs:register_mob("nh_mob:karibo", {
     end,
     do_custom = function(self, dtime)
         if not self.hp_anterior then self.hp_anterior = self.health end -- detecta que levou dano comparando HP atual com o anterior
-        if self.health < self.hp_anterior then                          -- levou dano de verdade
+        if self.health < self.hp_anterior then                    -- levou dano de verdade
             self.hp_anterior = self.health
             self.passive = false
             self.state = ""
@@ -2235,7 +2301,7 @@ mobs:register_mob("nh_mob:karibo", {
     end,
 })
 -- Spawn do karibo
-register_mob_spawn({ name = "nh_mob:karibo", nodes = { "air" }, neighbors = { "nh_nodes:ice", "nh_nodes:snow" }, max_light = 15, interval = 120, chance = 300, active_object_count = 2, min_height = -10, max_height = 25 })
+register_mob_spawn({name = "nh_mob:karibo", nodes = {"air"}, neighbors = {"nh_nodes:ice", "nh_nodes:snow"}, max_light = 15, interval = 120, chance = 300, active_object_count = 2, min_height = -10, max_height = 25})
 register_orb_egg("nh_mob:karibo", S("Orb with Karibo"))
 -- MOB 3: GALO / rooster (Agressivo)
 mobs:register_mob("nh_mob:rooster", {
@@ -2247,12 +2313,12 @@ mobs:register_mob("nh_mob:rooster", {
     description = S("Rooster"),
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true, -- permite atacar outros mobs
-    specific_attack = { "player", "nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm" },
+    specific_attack = {"player", "nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm"},
     -- attack_chance = 100,   -- ataca sempre que detecta
     --attack_players = true, -- ataca jogadores
     -- drop com a sintaxe correta
     drops = {
-        { name = "items:feather",       chance = 1, min = 1, max = 5 }, -- 1-5 penas
+        { name = "items:feather",        chance = 1, min = 1, max = 5 }, -- 1-5 penas
         { name = "nh_nodes:rawchicken", chance = 1, min = 1, max = 1 }, -- 1 galinha crua (sempre)
     },
     hp_min = 4,
@@ -2262,11 +2328,11 @@ mobs:register_mob("nh_mob:rooster", {
     selectionbox = { -0.5, 0, -0.2, 0.3, 0.4, 0.2 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
     physical = true,
     stepheight = 1.1,
-    fall_speed = -3,              -- Galinhas caem devagar (batem asas)
+    fall_speed = -3,           -- Galinhas caem devagar (batem asas)
     fall_damage = 0,
-    floats = 1,                   -- Não nadam bem
+    floats = 1,                -- Não nadam bem
     visual = "mesh",
-    mesh = "rooster.glb",         -- Você precisa criar este modelo
+    mesh = "rooster.glb",      -- Você precisa criar este modelo
     textures = { "rooster.png" }, -- Você precisa criar esta textura
     -- rotate = 180,
     visual_size = { x = 15, y = 15 },
@@ -2276,22 +2342,10 @@ mobs:register_mob("nh_mob:rooster", {
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
-    animation = {
-        speed_normal = 1,
-        stand_start = 0.25,
-        stand_end = 0.25,
-        walk_start = 0.5,
-        walk_end = 1.5,
-        punch_speed = 4,
-        punch_start = 0.0,
-        punck_end = 0.5,
-        fly_up_start = 1.65,
-        fly_up_end = 1.85,
-        fly_down_start = 1.75,
-        fly_down_end = 1.75
-    },
+    animation = { speed_normal = 1, stand_start = 0.25, stand_end = 0.25, walk_start = 0.5, walk_end = 1.5, punch_speed = 4, punch_start = 0.0, punck_end = 0.5,
+    fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75},
     -- Galinhas podem ser alimentadas e seguir o jogador com sementes
-    follow = { "farming:seed_wheat", "nh_nodes:worm" },
+    follow = {"farming:seed_wheat", "nh_nodes:worm"},
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
@@ -2307,11 +2361,11 @@ mobs:register_mob("nh_mob:rooster", {
         end
     end,
     sounds = { random = "ChickenSound", damage = "ChickenHurt", }, -- Sons da galinha
-    do_custom = function(self, dtime)                              -- Sistema de detecção pra voo
+    do_custom = function(self, dtime)                           -- Sistema de detecção pra voo
         local vel = self.object:get_velocity()
         if not vel then return end
         if self.state == "attack" or self.state == "runaway" or self.state == "follow" then return end -- Nunca interferir se o mob está atacando ou em comportamento especial
-        if vel.y > 0.5 then                                                                            -- Subindo
+        if vel.y > 0.5 then                                                                      -- Subindo
             if self.state ~= "fly_up" then
                 self.state = "fly_up"
                 self:set_animation("fly_up")
@@ -2336,7 +2390,7 @@ register_mob_spawn({
     neighbors = { "nh_nodes:dirt", "nh_nodes:grass" }, -- Spawna em dirt e grama
     max_light = 15,
     interval = 120,
-    chance = 2000,           -- Spawn frequente
+    chance = 2000,        -- Spawn frequente
     active_object_count = 2, -- 2 galos
     min_height = -10,
     max_height = 50
@@ -2350,28 +2404,28 @@ mobs:register_mob("nh_mob:chicken", {
     damage = 1,
     description = S("Chicken"),
     runaway = true,
-    runaway_from = { "player" }, -- Galinhas fogem de jogadores
+    runaway_from = {"player"}, -- Galinhas fogem de jogadores
     -- lista de mobs que ele vai atacar ativamente
-    attack_animals = true,       -- permite atacar outros mobs
-    specific_attack = { "nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm" },
+    attack_animals = true, -- permite atacar outros mobs
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm"},
     reach = 1,
     attack_type = "dogfight",
     drops = {
-        { name = "items:feather",       chance = 1, min = 1, max = 5 }, -- 1-5 penas
+        { name = "items:feather",        chance = 1, min = 1, max = 5 }, -- 1-5 penas
         { name = "nh_nodes:rawchicken", chance = 1, min = 1, max = 1 }, -- 1 galinha crua (sempre)
     },
     hp_min = 4,
     hp_max = 8,
     armor = 100,
-    collisionbox = { -0.2, 0, -0.2, 0.3, 0.4, 0.2 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
-    selectionbox = { -0.2, 0, -0.2, 0.3, 0.4, 0.2 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    collisionbox = {-0.2, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    selectionbox = {-0.2, 0, -0.2, 0.3, 0.4, 0.2}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
     physical = true,
     stepheight = 1.1,
-    fall_speed = -3,              -- Galinhas caem devagar (batem asas)
+    fall_speed = -3,           -- Galinhas caem devagar (batem asas)
     fall_damage = 0,
-    floats = 1,                   -- Não nadam bem
+    floats = 1,                -- Não nadam bem
     visual = "mesh",
-    mesh = "chicken.glb",         -- Você precisa criar este modelo
+    mesh = "chicken.glb",      -- Você precisa criar este modelo
     textures = { "chicken.png" }, -- Você precisa criar esta textura
     -- rotate = 180,
     visual_size = { x = 15, y = 15 },
@@ -2462,7 +2516,7 @@ mobs:register_mob("nh_mob:chicken", {
                             -- Spawna o galo no lugar do ovo
                             local rooster_pos = { x = closest_egg.x, y = closest_egg.y, z = closest_egg.z, }
                             core.add_entity(rooster_pos, "nh_mob:chick")
-
+ 
                             core.add_particlespawner({ -- Partículas de coração no spawn do galo
                                 amount = 15,
                                 time = 1,
@@ -2497,7 +2551,7 @@ mobs:register_mob("nh_mob:chicken", {
             self.next_egg_time = math.random(120, 240) -- 2 a 4 min
             self.egg_timer = 0
         end
-        self.egg_timer = self.egg_timer + 1          -- Contador de ovos
+        self.egg_timer = self.egg_timer + 1    -- Contador de ovos
         if self.egg_timer >= self.next_egg_time then -- Hora de botar ovo
             local pos = self.object:get_pos()
             local yaw = self.object:get_yaw()
@@ -2513,12 +2567,12 @@ mobs:register_mob("nh_mob:chicken", {
             end
             -- Reset
             self.egg_timer = 0
-            self.next_egg_time = math.random(120, 240)                                                 -- 2 a 4 min
-        end
-        local vel = self.object:get_velocity()                                                         -- Sistema de detecção pra voo
+            self.next_egg_time = math.random(120, 240) -- 2 a 4 min
+        end                          
+        local vel = self.object:get_velocity()  -- Sistema de detecção pra voo
         if not vel then return end
         if self.state == "attack" or self.state == "runaway" or self.state == "follow" then return end -- Nunca interferir se o mob está atacando ou em comportamento especial
-        if vel.y > 0.5 then                                                                            -- Subindo
+        if vel.y > 0.5 then                                                                      -- Subindo
             if self.state ~= "fly_up" then
                 self.state = "fly_up"
                 self:set_animation("fly_up")
@@ -2543,14 +2597,14 @@ register_mob_spawn({
     neighbors = { "nh_nodes:dirt", "nh_nodes:grass" }, -- Spawna em dirt e grama
     max_light = 15,
     interval = 120,
-    chance = 2000,           -- Spawn frequente
+    chance = 2000,        -- Spawn frequente
     active_object_count = 5, -- 5 galinhas
     min_height = -10,
     max_height = 50
 })
 -- mobs:register_egg("nh_mob:galinha", "Orbe com Galinha", "orbspawner.png", 0)
 register_orb_egg("nh_mob:chicken", S("Orb with Chicken"))
-
+ 
 mobs:register_mob("nh_mob:chick", { -- pintinho
     type = "animal",
     passive = false,
@@ -2560,32 +2614,32 @@ mobs:register_mob("nh_mob:chick", { -- pintinho
     description = S("Chick"),
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true, -- permite atacar outros mobs
-    specific_attack = { "nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm" },
+    specific_attack = {"nh_mob:cricket", "nh_mob:cicada", "nh_mob:worm"},
     hp_min = 2,
     hp_max = 3,
     armor = 100,
-    collisionbox = { -0.15, 0, -0.15, 0.15, 0.3, 0.15 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
-    selectionbox = { -0.15, 0, -0.15, 0.15, 0.3, 0.15 }, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    collisionbox = {-0.15, 0, -0.15, 0.15, 0.3, 0.15}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
+    selectionbox = {-0.15, 0, -0.15, 0.15, 0.3, 0.15}, -- X (frente), y (em baixo), z (lateral) / x (traz), y (cima), z (lateral)
     physical = true,
     stepheight = 1.1,
-    fall_speed = -3,            -- Galinhas caem devagar (batem asas)
+    fall_speed = -3,         -- Galinhas caem devagar (batem asas)
     fall_damage = 0,
-    floats = 1,                 -- Não nadam bem
+    floats = 1,              -- Não nadam bem
     visual = "mesh",
-    mesh = "chick.glb",         -- Você precisa criar este modelo
-    textures = { "chick.png" }, -- Você precisa criar esta textura
+    mesh = "chick.glb",      -- Você precisa criar este modelo
+    textures = {"chick.png"}, -- Você precisa criar esta textura
     -- rotate = 180,
-    visual_size = { x = 7, y = 7 },
+    visual_size = {x = 7, y = 7},
     walk_velocity = 0.5,
     run_velocity = 2,
     view_range = 8,
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
-    animation = { speed_normal = 0.75, stand_start = 0, stand_end = 0.5, walk_start = 0.5, walk_end = 1.5, fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75 },
+    animation = {speed_normal = 0.75, stand_start = 0, stand_end = 0.5, walk_start = 0.5, walk_end = 1.5, fly_up_start = 1.65, fly_up_end = 1.85, fly_down_start = 1.75, fly_down_end = 1.75},
     -- Galinhas podem ser alimentadas e seguir o jogador com sementes
-    follow = { "nh_nodes:worm" },
-    sounds = { random = "ChickSound", damage = "ChickHurt" }, -- Sons da galinha
+    follow = {"nh_nodes:worm"},
+    sounds = {random = "ChickSound", damage = "ChickHurt"}, -- Sons da galinha
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
@@ -2600,11 +2654,11 @@ mobs:register_mob("nh_mob:chick", { -- pintinho
         end
     end,
     -- Sistema de voo
-    do_custom = function(self, dtime) -- Sistema de detecção pra voo
+    do_custom = function(self, dtime)                           -- Sistema de detecção pra voo
         local vel = self.object:get_velocity()
         if not vel then return end
         if self.state == "attack" or self.state == "runaway" or self.state == "follow" then return end -- Nunca interferir se o mob está atacando ou em comportamento especial
-        if vel.y > 0.5 then                                                                            -- Subindo
+        if vel.y > 0.5 then                                                                      -- Subindo
             if self.state ~= "fly_up" then
                 self.state = "fly_up"
                 self:set_animation("fly_up")
@@ -2634,7 +2688,7 @@ mobs:register_mob("nh_mob:shark", {
     description = S("Shark"),
     -- lista de mobs que ele vai atacar ativamente
     attack_animals = true, -- permite atacar outros mobs
-    specific_attack = { "player", "nh_mob:tuna", "nh_mob:octopus2", "nh_mob:chicken", "nh_mob:rooster", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:hedgehog" },
+    specific_attack = {"player", "nh_mob:tuna", "nh_mob:octopus2", "nh_mob:chicken", "nh_mob:rooster", "nh_mob:rabbit", "nh_mob:bull", "nh_mob:hedgehog" },
     hp_min = 20,
     hp_max = 30,
     armor = 100,
@@ -2649,9 +2703,9 @@ mobs:register_mob("nh_mob:shark", {
     mesh = "shark.glb",
     textures = { "shark.png" },
     --rotate = 180,
-    visual_size = { x = 20, y = 20 },
+    visual_size = {x = 20, y = 20},
     -- Propriedades para manter na água
-    swim = true,                -- Permite "voar" na água
+    swim = true,             -- Permite "voar" na água
     swim_in = "nh_nodes:water", -- Só "voa" dentro de nodes:water
     walk_velocity = 3,
     run_velocity = 7,
@@ -2661,49 +2715,49 @@ mobs:register_mob("nh_mob:shark", {
     light_damage = 0,
     air_damage = 2, -- CRÍTICO: Recebe dano fora da água!
     animation = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 1, },
-    follow = { "nh_nodes:rawchicken", "nh_nodes:roastchicken", "nh_nodes:rawbeef", "nh_nodes:roastbeef", "nh_nodes:tuna", "nh_nodes:rawtuna", "nh_nodes:roasttuna" },
+    follow = {"nh_nodes:rawchicken", "nh_nodes:roastchicken", "nh_nodes:rawbeef", "nh_nodes:roastbeef", "nh_nodes:tuna", "nh_nodes:rawtuna", "nh_nodes:roasttuna"},
     -- Função para forçar o tubarão a voltar para água
     do_custom = function(self, dtime)
         local pos = self.object:get_pos()
 
         -- Conta quantos nodes de água existem em um raio de 0.3 ao redor do centro
         local neighbors = {
-            core.get_node({ x = pos.x + 0.5, y = pos.y, z = pos.z }),
-            core.get_node({ x = pos.x - 0.5, y = pos.y, z = pos.z }),
-            core.get_node({ x = pos.x, y = pos.y, z = pos.z + 0.5 }),
-            core.get_node({ x = pos.x, y = pos.y, z = pos.z - 0.5 }),
-            core.get_node({ x = pos.x, y = pos.y + 0.5, z = pos.z }),
-            core.get_node({ x = pos.x, y = pos.y - 0.5, z = pos.z }),
+        core.get_node({x = pos.x + 0.5, y = pos.y, z = pos.z}),
+        core.get_node({x = pos.x - 0.5, y = pos.y, z = pos.z}),
+        core.get_node({x = pos.x, y = pos.y, z = pos.z + 0.5}),
+        core.get_node({x = pos.x, y = pos.y, z = pos.z - 0.5}),
+        core.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z}),
+        core.get_node({x = pos.x, y = pos.y - 0.5, z = pos.z}),
         }
 
         local water_count = 0
         for _, node in ipairs(neighbors) do
-            if node.name == "nh_nodes:water" then
-                water_count = water_count + 1
-            end
+        if node.name == "nh_nodes:water" then
+            water_count = water_count + 1
+        end
         end
 
         -- Só para de empurrar quando há pelo menos 5 nodes de água ao redor
         local fully_submerged = water_count >= 5
 
         if not fully_submerged then
-            local water_pos = core.find_node_near(pos, 10, { "nh_nodes:water" })
-            if water_pos then
-                local dir = vector.direction(pos, water_pos)
-                self.object:set_velocity({
-                    x = dir.x * 4,
-                    y = dir.y * 4 - 2,
-                    z = dir.z * 4
-                })
-            end
+        local water_pos = core.find_node_near(pos, 10, {"nh_nodes:water"})
+        if water_pos then
+            local dir = vector.direction(pos, water_pos)
+            self.object:set_velocity({
+                x = dir.x * 4,
+                y = dir.y * 4 - 2,
+                z = dir.z * 4
+            })
+        end
         end
     end,
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "nh_nodes:rawchicken" or name == "nh_nodes:rawbeef" or name == "nh_nodes:roastchicken" or name == "nh_nodes:roastbeef"
-                or name == "nh_nodes:tuna" or name == "nh_nodes:rawtuna" or name == "nh_nodes:roasttuna" then
+            if name == "nh_nodes:rawchicken" or name == "nh_nodes:rawbeef" or name == "nh_nodes:roastchicken" or name == "nh_nodes:roastbeef" 
+            or name == "nh_nodes:tuna" or name == "nh_nodes:rawtuna" or name == "nh_nodes:roasttuna" then
                 core.chat_send_player(clicker:get_player_name(), S("The shark still hungry!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
@@ -2739,7 +2793,7 @@ mobs:register_mob("nh_mob:messagebottle", {
     attack_type = "dogfight",
     description = S("Message Bottle") .. "\n" .. S("[Item]"),
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     hp_min = 1,
     hp_max = 1,
     armor = 100,
@@ -2802,7 +2856,7 @@ mobs:register_mob("nh_mob:messagebottle", {
         local recipes = page_texts.recipe
         local random_text = recipes[math.random(#recipes)]
         local written_page = items.create_page_with_text(random_text)
-
+ 
         -- Dropa o item no chão
         core.add_item(pos, written_page)
     end,
@@ -2829,7 +2883,7 @@ mobs:register_mob("nh_mob:coconut", {
     attack_type = "dogfight",
     description = S("Floating Coconut"),
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     hp_min = 1,
     hp_max = 1,
     armor = 100,
@@ -2880,7 +2934,7 @@ mobs:register_mob("nh_mob:coconut", {
         end
     end,
     -- sounds = { random = "tubarao_som", damage = "tubarao_hurt", },
-    drops = { { name = "nh_nodes:coconut", chance = 1, min = 1, max = 1 }, }, -- 1-1 gelo
+    drops = { { name = "nh_nodes:coconut", chance = 1, min = 1, max = 1 },}, -- 1-1 gelo
 })
 -- Spawn do iceberg (somente na água)
 register_mob_spawn({
@@ -2903,7 +2957,7 @@ mobs:register_mob("nh_mob:iceberg", {
     attack_type = "dogfight",
     description = S("Floating Ice") .. "\n" .. S("[Platform]"),
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     hp_min = 1,
     hp_max = 1,
     armor = 100,
@@ -2977,7 +3031,7 @@ mobs:register_mob("nh_mob:iceberg2", {
     damage = 0,
     attack_type = "dogfight",
     blood_texture = "mob_droplet.png", -- sua textura customizada
-    blood_amount = 8,                  -- quantidade de partículas
+    blood_amount = 8,               -- quantidade de partículas
     description = S("Iceberg") .. "\n" .. S("[Platform]"),
     hp_min = 8,
     hp_max = 10,
@@ -3029,7 +3083,7 @@ mobs:register_mob("nh_mob:iceberg2", {
     end,
     -- sounds = { random = "tubarao_som", damage = "tubarao_hurt", },
     drops = { { name = "nh_nodes:ice", chance = 1, min = 3, max = 5 }, -- 1-1 gelo
-        { name = "nh_nodes:snow", chance = 1, min = 3, max = 5 },      -- 1-1 gelo
+        { name = "nh_nodes:snow", chance = 1, min = 3, max = 5 },   -- 1-1 gelo
     },
 })
 -- Spawn do iceberg (somente na água)
@@ -3051,15 +3105,15 @@ mobs:register_egg("nh_mob:iceberg2", "Iceberg", "ice.png", 0)
 
 -- Nós onde o pião pode girar sem perder HP
 local SPINNING_TOP_ALLOWED_NODES = {
-    ["nh_nodes:oaktimber"]  = true,
-    ["nh_nodes:oakwood"]    = true,
-    ["nh_nodes:oakplank"]   = true,
-    ["nh_nodes:oakboard"]   = true,
+    ["nh_nodes:oaktimber"] = true,
+    ["nh_nodes:oakwood"]   = true,
+    ["nh_nodes:oakplank"]  = true,
+    ["nh_nodes:oakboard"]  = true,
     ["nh_nodes:pinetimber"] = true,
-    ["nh_nodes:gneiss"]     = true,
-    ["nh_nodes:ice"]        = true,
-    ["nh_nodes:ice2"]       = true,
-    ["air"]                 = true,
+    ["nh_nodes:gneiss"]    = true,
+    ["nh_nodes:ice"]       = true,
+    ["nh_nodes:ice2"]      = true,
+    ["air"]                = true,
 }
 -- do_custom compartilhado: aplica dano por fricção em superfície inadequada.
 -- @param friction_msg  mensagem exibida ao entrar em superfície ruim
@@ -3070,9 +3124,9 @@ local function spinning_top_do_custom(self, dtime, friction_msg, damage_msg, use
     if self._damage_timer < 1.0 then return end
     self._damage_timer = 0
 
-    local pos          = self.object:get_pos()
-    local below        = { x = pos.x, y = math.floor(pos.y), z = pos.z }
-    local node         = core.get_node(below)
+    local pos   = self.object:get_pos()
+    local below = { x = pos.x, y = math.floor(pos.y), z = pos.z }
+    local node  = core.get_node(below)
 
     if not SPINNING_TOP_ALLOWED_NODES[node.name] then
         if not self._on_bad_floor then
@@ -3096,40 +3150,40 @@ end
 --               friction_msg, damage_msg, use_punch
 local function spinning_top_def(extra)
     return {
-        type            = "animal",
-        passive         = false,
-        reach           = 1,
-        damage          = 1,
-        attack_type     = "dogfight",
-        description     = extra.description,
-        blood_texture   = "spark_particle.png^[colorize:#000000:200",
-        blood_amount    = 8,
-        hp_min          = 1,
-        hp_max          = 3,
-        armor           = 100,
-        collisionbox    = { -0.1, -0.1, -0.1, 0.1, 0.1, 0.1 },
-        selectionbox    = { -0.1, -0.1, -0.1, 0.1, 0.1, 0.1 },
-        physical        = true,
-        stepheight      = 0, -- NÃO consegue subir degraus
-        fall_speed      = -6,
-        fall_damage     = 1,
-        floats          = 1,
-        visual          = "mesh",
-        mesh            = "piao.glb",
-        textures        = extra.textures,
-        visual_size     = { x = 10, y = 10 },
-        walk_velocity   = 1,
-        run_velocity    = 1,
-        view_range      = 16,
-        water_damage    = 1, -- CRÍTICO: Recebe dano na água!
-        lava_damage     = 1,
-        light_damage    = 0,
-        air_damage      = 0,
-        animation       = { speed_normal = 1, stand_start = 0, stand_end = 0.25, walk_start = 0.25, walk_end = 1.5 },
+        type          = "animal",
+        passive       = false,
+        reach         = 1,
+        damage        = 1,
+        attack_type   = "dogfight",
+        description   = extra.description,
+        blood_texture = "spark_particle.png^[colorize:#000000:200",
+        blood_amount  = 8,
+        hp_min        = 1,
+        hp_max        = 3,
+        armor         = 100,
+        collisionbox  = { -0.1, -0.1, -0.1, 0.1, 0.1, 0.1 },
+        selectionbox  = { -0.1, -0.1, -0.1, 0.1, 0.1, 0.1 },
+        physical      = true,
+        stepheight    = 0, -- NÃO consegue subir degraus
+        fall_speed    = -6,
+        fall_damage   = 1,
+        floats        = 1,
+        visual        = "mesh",
+        mesh          = "piao.glb",
+        textures      = extra.textures,
+        visual_size   = { x = 10, y = 10 },
+        walk_velocity = 1,
+        run_velocity  = 1,
+        view_range    = 16,
+        water_damage  = 1, -- CRÍTICO: Recebe dano na água!
+        lava_damage   = 1,
+        light_damage  = 0,
+        air_damage    = 0,
+        animation     = { speed_normal = 1, stand_start = 0, stand_end = 0.25, walk_start = 0.25, walk_end = 1.5 },
         attack_animals  = true,
         specific_attack = extra.specific_attack,
         drops           = { { name = extra.item, chance = 1, min = 1, max = 1 } },
-        on_rightclick   = function(self, clicker)
+        on_rightclick = function(self, clicker)
             if not clicker:is_player() then return end
             local name = clicker:get_wielded_item():get_name()
             if name == "" then
@@ -3144,7 +3198,7 @@ local function spinning_top_def(extra)
                 core.chat_send_player(clicker:get_player_name(), S("Spinning... I need to empty my hand to pick it up."))
             end
         end,
-        do_custom       = function(self, dtime)
+        do_custom = function(self, dtime)
             spinning_top_do_custom(self, dtime, extra.friction_msg, extra.damage_msg, extra.use_punch)
         end,
     }
@@ -3152,35 +3206,35 @@ end
 
 -- Pião de Carvalho (Oak)
 mobs:register_mob("nh_mob:spinningtop", spinning_top_def({
-    description     = S("Oak Spinning Top") .. "\n" .. S("[Item]"),
-    textures        = { "oakpiao.png" },
-    item            = "nh_nodes:spinningtop",
+    description    = S("Oak Spinning Top") .. "\n" .. S("[Item]"),
+    textures       = { "oakpiao.png" },
+    item           = "nh_nodes:spinningtop",
     specific_attack = { "nh_mob:spinningtop2", "nh_mob:spinningtop3" },
-    friction_msg    = S("Inappropriate surface. The oak spinning top is losing rotation due to friction..."),
-    damage_msg      = S("Oak spinning top damage! HP: "),
-    use_punch       = true,
+    friction_msg   = S("Inappropriate surface. The oak spinning top is losing rotation due to friction..."),
+    damage_msg     = S("Oak spinning top damage! HP: "),
+    use_punch      = true,
 }))
 
 -- Pião de Coqueiro (Palm)
 mobs:register_mob("nh_mob:spinningtop2", spinning_top_def({
-    description     = S("Palm Spinning Top") .. "\n" .. S("[Item]"),
-    textures        = { "palmpiao.png" },
-    item            = "nh_nodes:spinningtop2",
+    description    = S("Palm Spinning Top") .. "\n" .. S("[Item]"),
+    textures       = { "palmpiao.png" },
+    item           = "nh_nodes:spinningtop2",
     specific_attack = { "nh_mob:spinningtop", "nh_mob:spinningtop3" },
-    friction_msg    = S("Inappropriate surface. The palm spinning top is losing rotation due to friction..."),
-    damage_msg      = S("Palm spinning top damage! HP: "),
-    use_punch       = true,
+    friction_msg   = S("Inappropriate surface. The palm spinning top is losing rotation due to friction..."),
+    damage_msg     = S("Palm spinning top damage! HP: "),
+    use_punch      = true,
 }))
 
 -- Pião de Pinheiro (Pine)
 mobs:register_mob("nh_mob:spinningtop3", spinning_top_def({
-    description     = S("Pine Spinning Top") .. "\n" .. S("[Item]"),
-    textures        = { "pinepiao.png" },
-    item            = "nh_nodes:spinningtop3",
+    description    = S("Pine Spinning Top") .. "\n" .. S("[Item]"),
+    textures       = { "pinepiao.png" },
+    item           = "nh_nodes:spinningtop3",
     specific_attack = { "nh_mob:spinningtop", "nh_mob:spinningtop2" },
-    friction_msg    = S("Inappropriate surface. The pine spinning top is losing rotation due to friction..."),
-    damage_msg      = S("Pine spinning top damage! HP: "),
-    use_punch       = false, -- usa set_hp em vez de punch
+    friction_msg   = S("Inappropriate surface. The pine spinning top is losing rotation due to friction..."),
+    damage_msg     = S("Pine spinning top damage! HP: "),
+    use_punch      = false, -- usa set_hp em vez de punch
 }))
 mobs:register_mob("nh_mob:octopus", {
     type = "animal",
@@ -3189,7 +3243,7 @@ mobs:register_mob("nh_mob:octopus", {
     reach = 1.2,
     description = S("Dark Octopus") .. "\n" .. S("[Altered Animal]"),
     blood_texture = "mob_blueblood.png", -- sua textura customizada
-    blood_amount = 5,                    -- quantidade de partículas
+    blood_amount = 5,                 -- quantidade de partículas
     hp_min = 10,
     hp_max = 12,
     armor = 100,
@@ -3200,13 +3254,13 @@ mobs:register_mob("nh_mob:octopus", {
     fall_damage = 2,
     visual = "mesh",
     mesh = "octopus.glb",
-    textures = { "octopus.png" },
+    textures = {"octopus.png"},
     -- rotate = 180,
     visual_size = { x = 15, y = 15 },
-    drops = { { name = "nh_nodes:inksac", chance = 1, min = 1, max = 1 }, }, -- bolsa de tinta
+    drops = {{ name = "nh_nodes:inksac", chance = 1, min = 1, max = 1 },}, -- bolsa de tinta
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,                                                              -- Permite "voar" na água
-    fly_in = "nh_nodes:water",                                               -- Voa na agua
+    fly = true,             -- Permite "voar" na água
+    fly_in = "nh_nodes:water", -- Voa na agua
     -- lista de mobs que ele vai atacar ativamente
     -- attack_animals = true,        -- permite atacar outros mobs
     -- specific_attack = {"nh_mob:cricket", "nh_mob:cicada",  "nh_mob:ladybug"},
@@ -3229,8 +3283,7 @@ mobs:register_mob("nh_mob:octopus", {
     },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(),
-                S("This octopus looks dangerous, I have to be careful when attacking!"))
+            core.chat_send_player(clicker:get_player_name(), S("This octopus looks dangerous, I have to be careful when attacking!"))
         end
     end,
 })
@@ -3254,7 +3307,7 @@ mobs:register_mob("nh_mob:octopus2", {
     reach = 1,
     description = S("Dark Octopus") .. "\n" .. S("(injuried)") .. "\n" .. S("[Altered Animal]"),
     blood_texture = "mob_blueblood.png", -- sua textura customizada
-    blood_amount = 5,                    -- quantidade de partículas
+    blood_amount = 5,                 -- quantidade de partículas
     hp_min = 5,
     hp_max = 6,
     armor = 100,
@@ -3265,13 +3318,13 @@ mobs:register_mob("nh_mob:octopus2", {
     fall_damage = 2,
     visual = "mesh",
     mesh = "octopus2.glb",
-    textures = { "octopus2.png" },
+    textures = {"octopus2.png"},
     -- rotate = 180,
     visual_size = { x = 15, y = 15 },
     drops = { { name = "nh_nodes:inksac", chance = 1, min = 1, max = 1 }, -- bolsa de tinta
     },
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,                -- Permite "voar" na água
+    fly = true,             -- Permite "voar" na água
     fly_in = "nh_nodes:water", -- Voa na agua
     -- lista de mobs que ele vai atacar ativamente
     -- attack_animals = true,        -- permite atacar outros mobs
@@ -3310,7 +3363,7 @@ mobs:register_mob("nh_mob:exoskull", {
     --attack_chance = 8, -- entre 1-10
     description = S("Exhausted") .. "\n" .. S("[Altered Animal]"),
     blood_texture = "mob_blueblood.png", -- sua textura customizada
-    blood_amount = 5,                    -- quantidade de partículas
+    blood_amount = 5,                 -- quantidade de partículas
     hp_min = 20,
     hp_max = 30,
     armor = 100,
@@ -3325,7 +3378,7 @@ mobs:register_mob("nh_mob:exoskull", {
     mesh = "octopusskull.glb",
     textures = { "octopusskull.png" },
     -- rotate = 180,
-    visual_size = { x = 2, y = 2 },                                        -- visual_size = {x = 2.1, y = 2.1},
+    visual_size = { x = 2, y = 2 },                                  -- visual_size = {x = 2.1, y = 2.1},
     drops = {
         { name = "nh_nodes:bone",          chance = 1, min = 2, max = 6 }, -- ossos
         { name = "nh_nodes:rustironsword", chance = 1, min = 0, max = 1 }, -- espada
@@ -3348,10 +3401,10 @@ mobs:register_mob("nh_mob:exoskull", {
         walk_end = 2,
         -- ANIMAÇÃO DE ATAQUE:
         punch_start = 11.54, -- Frame inicial do ataque
-        punch_end = 16,      -- Frame final do ataque
+        punch_end = 16, -- Frame final do ataque
         -- punch_speed = 20, -- vel 1-30
     },
-
+ 
     follow = { "nh_nodes:torch2" },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
@@ -3417,8 +3470,8 @@ mobs:register_mob("nh_mob:sirenia", {
     -- rotate = 180,
     visual_size = { x = 2, y = 2 }, -- visual_size = {x = 2.1, y = 2.1},
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,                     -- Permite "voar" na água
-    fly_in = "nh_nodes:water",      -- Nada na agua
+    fly = true,                  -- Permite "voar" na água
+    fly_in = "nh_nodes:water",   -- Nada na agua
     walk_velocity = 1,
     run_velocity = 4,
     view_range = 16,
@@ -3434,7 +3487,7 @@ mobs:register_mob("nh_mob:sirenia", {
         walk_end = 2,
         -- ANIMAÇÃO DE ATAQUE:
         punch_start = 11.54, -- Frame inicial do ataque
-        punch_end = 16,      -- Frame final do ataque
+        punch_end = 16, -- Frame final do ataque
         -- punch_speed = 20, -- vel 1-30
     },
     follow = { "nh_nodes:torch2" },
@@ -3461,8 +3514,8 @@ mobs:register_mob("nh_mob:sirenia", {
 -- Spawn do vulto (fundo de cavernas escuras)
 register_mob_spawn({
     name = "nh_mob:sirenia",
-    nodes = { "air", "nh_nodes:water" },
-    neighbors = { "nh_nodes:ice" }, --neighbors = {"nh_nodes:obsidian"},
+    nodes = { "air", "nh_nodes:water" }, 
+    neighbors = { "nh_nodes:ice" },   --neighbors = {"nh_nodes:obsidian"},
     max_light = 10,
     interval = 120,
     chance = 2000,
@@ -3509,44 +3562,44 @@ end
 --               selectionbox, stepheight, visual_size, punch_delay, on_die
 local function slime_def(extra)
     return {
-        type           = "monster",
-        passive        = false,
-        reach          = 1,
-        damage         = extra.damage,
-        attack_type    = "dogfight",
-        description    = extra.description,
-        blood_texture  = "mob_droplet.png",
-        blood_amount   = 5,
-        hp_min         = 10,
-        hp_max         = 20,
-        armor          = 100,
-        collisionbox   = extra.collisionbox,
-        selectionbox   = extra.selectionbox,
-        physical       = true,
-        stepheight     = extra.stepheight,
-        fall_speed     = -4,
-        fall_damage    = 0,
-        floats         = 3,
-        visual         = "mesh",
-        mesh           = "planslime.glb",
-        textures       = { "planaria_slime2.png" },
-        visual_size    = extra.visual_size,
-        glow           = 5,
-        walk_velocity  = 1,
-        run_velocity   = 2,
-        view_range     = 7,
-        water_damage   = 0,
-        lava_damage    = 5,
-        light_damage   = 0,
-        air_damage     = 0,
-        animation      = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.63 },
-        follow         = { "nh_nodes:rawchicken" },
-        sounds         = { random = "slime_som", damage = "slime_hurt" },
-        on_die         = extra.on_die,
+        type          = "monster",
+        passive       = false,
+        reach         = 1,
+        damage        = extra.damage,
+        attack_type   = "dogfight",
+        description   = extra.description,
+        blood_texture = "mob_droplet.png",
+        blood_amount  = 5,
+        hp_min        = 10,
+        hp_max        = 20,
+        armor         = 100,
+        collisionbox  = extra.collisionbox,
+        selectionbox  = extra.selectionbox,
+        physical      = true,
+        stepheight    = extra.stepheight,
+        fall_speed    = -4,
+        fall_damage   = 0,
+        floats        = 3,
+        visual        = "mesh",
+        mesh          = "planslime.glb",
+        textures      = { "planaria_slime2.png" },
+        visual_size   = extra.visual_size,
+        glow          = 5,
+        walk_velocity = 1,
+        run_velocity  = 2,
+        view_range    = 7,
+        water_damage  = 0,
+        lava_damage   = 5,
+        light_damage  = 0,
+        air_damage    = 0,
+        animation     = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.63 },
+        follow        = { "nh_nodes:rawchicken" },
+        sounds        = { random = "slime_som", damage = "slime_hurt" },
+        on_die        = extra.on_die,
         after_activate = function(self, staticdata, def, dtime)
             slime_after_activate(self, extra.punch_delay)
         end,
-        on_rightclick  = function(self, clicker)
+        on_rightclick = function(self, clicker)
             if not clicker:is_player() then return end
             local item = clicker:get_wielded_item()
             if item:get_name() == "nh_nodes:rawchicken" then
@@ -3593,7 +3646,7 @@ mobs:register_mob("nh_mob:slime2", slime_def({
     stepheight   = 4,
     visual_size  = { x = 20, y = 20 },
     punch_delay  = 0.4,
-    on_die       = function(self, pos)
+    on_die = function(self, pos)
         core.after(0.1, function() spawn_n(pos, "nh_mob:slime", 6) end)
     end,
 }))
@@ -3619,10 +3672,10 @@ mobs:register_mob("nh_mob:slime3", slime_def({
     stepheight   = 4,
     visual_size  = { x = 40, y = 40 },
     punch_delay  = 0.2,
-    on_die       = function(self, pos)
+    on_die = function(self, pos)
         core.after(0.1, function()
             spawn_n(pos, "nh_mob:slime2", 4)
-            spawn_n(pos, "nh_mob:slime", 2)
+            spawn_n(pos, "nh_mob:slime",  2)
         end)
     end,
 }))
@@ -3647,7 +3700,7 @@ mobs:register_mob("nh_mob:visage", {
     attack_type = "dogfight",
     description = S("Visage") .. "\n" .. S("[Phenomenon]"),
     blood_texture = "spark_particle.png^[colorize:#000000:250", -- sua textura customizada
-    blood_amount = 5,                                           -- quantidade de partículas
+    blood_amount = 5,                                        -- quantidade de partículas
     hp_min = 1,
     hp_max = 1,
     armor = 100,
@@ -3664,7 +3717,7 @@ mobs:register_mob("nh_mob:visage", {
     rotate = 180,
     visual_size = { x = 2, y = 2 },
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,     -- Permite "voar" na água
+    fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
     run_velocity = 4,
@@ -3718,7 +3771,7 @@ mobs:register_mob("nh_mob:visage2", {
     attack_type = "dogfight",
     description = S("Visage") .. "\n" .. S("[Phenomenon]"),
     blood_texture = "spark_particle.png^[colorize:#000000:250", -- sua textura customizada
-    blood_amount = 5,                                           -- quantidade de partículas
+    blood_amount = 5,                                        -- quantidade de partículas
     hp_min = 20,
     hp_max = 30,
     armor = 100,
@@ -3761,7 +3814,7 @@ mobs:register_mob("nh_mob:visage2", {
         end
     end,
     -- IMPORTANTE: Propriedades para manter na água
-    fly = true,     -- Permite "voar" na água
+    fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
     run_velocity = 4,
@@ -3825,21 +3878,16 @@ mobs:register_mob("nh_mob:dopel", {
     lava_damage = 5,
     light_damage = 0,
     air_damage = 0,
-    animation = {
-        speed_normal = 0.5,
-        stand_start = 0,
-        stand_end = 1.02,
-        walk_start = 1,
-        walk_end = 2,
+    animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2,
         -- ANIMAÇÃO DE ATAQUE:
         punch_start = 11.75, -- Frame inicial do ataque
-        punch_end = 12,      -- Frame final do ataque
+        punch_end = 12, -- Frame final do ataque
     },
-
+ 
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
     -- follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
-
+ 
     -- ✅ RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
@@ -3882,7 +3930,7 @@ mobs:register_mob("nh_mob:giantcrab", {
     attack_type = "dogfight",
     description = S("Giant Crab") .. "\n" .. S("[Ancient Animal]"),
     blood_texture = "mob_blueblood.png", -- sua textura customizada
-    blood_amount = 5,                    -- quantidade de partículas
+    blood_amount = 5,                 -- quantidade de partículas
     hp_min = 50,
     hp_max = 50,
     -- armor = 100,
@@ -3918,7 +3966,7 @@ mobs:register_mob("nh_mob:giantcrab", {
     lava_damage = 5,
     light_damage = 0,
     air_damage = 0,
-    animation = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.75, punch_start = 0.75, punch_end = 1.25 },
+    animation = {speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.75, punch_start = 0.75, punch_end = 1.25},
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
     -- follow = {"nh_nodes:sphere", "nh_nodes:kelp", "nh_nodes:obsidian", "nh_nodes:wet_sand", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:pineraft", "nh_nodes:rowing"},
@@ -4005,15 +4053,15 @@ mobs:register_mob("nh_mob:giantcrab", {
 -- Spawn do crab (casas, blocos de madeiras)
 --[[
 register_mob_spawn({
-	name = "nh_mob:giantcrab",
-	nodes = { "nh_nodes:water" },
-	neighbors = { "nh_nodes:kelp" },
-	max_light = 15,
-	interval = 30,
-	chance = 20,
-	active_object_count = 1,
-	min_height = -19,
-	max_height = -16
+    name = "nh_mob:giantcrab",
+    nodes = { "nh_nodes:water" },
+    neighbors = { "nh_nodes:kelp" },
+    max_light = 15,
+    interval = 30,
+    chance = 20,
+    active_object_count = 1,
+    min_height = -19,
+    max_height = -16
 })
 ]] --
 --mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
