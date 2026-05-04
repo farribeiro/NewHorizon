@@ -30,6 +30,18 @@ local punch_loop_timers = {}
 local is_punching = {}
 local is_placing = {}
 local last_place_time = {}
+-- TABELA PARA CONTROLAR ANIMAÇÃO DE SENTAR
+-- Máquina de estados:
+--   "idle"        -> aguardando agachadas
+--   "counting"    -> contando agachadas (sneak pressionado/solto)
+--   "holding"     -> 3ª agachada sendo segurada (aguarda tempo mínimo)
+--   "sit_anim"    -> reproduzindo a animação de transição (12~12.5s do GLB)
+--   "sitting"     -> parado na pose final (frame 12.5s) até tecla de movimento
+local sit_state = {}          -- estado da máquina por player
+local sit_sneak_count = {}    -- quantas vezes agachou nesta sequência
+local sit_sneak_held = {}     -- tempo (em segundos) que a 3ª agachada está sendo segurada
+local sit_last_sneak = {}     -- estado do sneak no step anterior (para detectar borda)
+local sit_anim_timer = {}     -- tempo decorrido dentro da animação de sentar
 -- forward declarations (OBRIGATÓRIO)
 local set_player_animation
 local trigger_punch
@@ -40,7 +52,7 @@ local rotate_head_to_look
 core.register_entity("nh_body:player_body", {
     initial_properties = {
         visual = "mesh",
-        mesh = "character5.glb",
+        mesh = "character9.glb",
         textures = { "skin.png" },
         visual_size = { x = 1, y = 1, z = 1 },
         physical = false,
@@ -444,7 +456,7 @@ local function get_armor_formspec(player_name)
             "label[0.5,1.6;Tronco]", "list[current_player;armor_torso;0.5,1.6;1,1;]",
             "label[0.5,2.7;Pernas]", "list[current_player;armor_legs;0.5,2.7;1,1;]",
             "label[0.5,3.8;Pés]", "list[current_player;armor_feet;0.5,3.8;1,1;]",
-            "model[1.25,0.5;3,6;player_model;character5.glb;skin.png;0,180;false;true]",
+            "model[1.25,0.5;3,6;player_model;character9.glb;skin.png;0,180;false;true]",
             "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
             "label[3.5,0.5;Costas]", "list[current_player;armor_back;3.5,0.5;1,1;]",
             "label[3.5,1.6;Braços]", "list[current_player;armor_arms;3.5,1.6;1,1;]",
@@ -634,7 +646,7 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
     if not player_states[player_name] then player_states[player_name] = { body_yaw = 0, current_anim = nil } end
     player:set_properties({ -- Aplica modelo INVISÍVEL (nametag_color com alpha 0)
         visual = "mesh",
-        mesh = "character5.glb",
+        mesh = "character9.glb",
         textures = { "blank.png" }, -- textura vazia, invisivel
         visual_size = { x = 1, y = 1, z = 1 },
         collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 },
@@ -645,10 +657,10 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
     })
     player:set_nametag_attributes({ color = { a = 0, r = 255, g = 255, b = 255 } }) -- Torna o nametag invisível (opcional)
     -- Ajusta a câmera para ficar à frente da cabeça
-    player:set_eye_offset(
-        { x = 0, y = -1, z = 3 }, -- Primeira pessoa: move 3 unidades para frente (Z negativo)
-        { x = 0, y = 7, z = -7 }  -- Terceira pessoa
-    )
+    --player:set_eye_offset(
+    --    { x = 0, y = -1, z = 3 }, -- Primeira pessoa: move 3 unidades para frente (Z negativo)
+    --    { x = 0, y = 7, z = -7 }  -- Terceira pessoa
+    --)
     print("[body] Modelo invisível aplicado para " .. player_name)
 end
 -- FUNÇÃO PARA A ANIMAÇÃO DE BATER PLAYER
@@ -711,6 +723,13 @@ local function rotate_head_to_look(player)
     player:set_bone_override("bone_TorsoArms", { rotation = { vec = zeroaxys } })
     player:set_bone_override("bone_Legs", { rotation = { vec = zeroaxys } })
 end
+local function apply_eye_offset(player, player_name)
+    if sit_state[player_name] == "sitting" or sit_state[player_name] == "sit_anim" then
+        player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+        return true
+    end
+    return false
+end
 -- FUNÇÃO PARA DEFINIR ANIMAÇÃO DO PLAYER
 set_player_animation = function(player, anim)
     if not player then return end
@@ -752,6 +771,12 @@ set_player_animation = function(player, anim)
         anim_data = { { x = 10.5, y = 11 }, 7, 0, false }
     elseif anim == "punch" then
         anim_data = { { x = 11.54, y = 12 }, 7, 0, false }
+    elseif anim == "sit_down" then
+        -- Faixa 12~12.5s do GLB: animação de sentar (não loop, não repete)
+        anim_data = { { x = 12, y = 12.5 }, 1, 0, false }
+    elseif anim == "sit_idle" then
+        -- Congela no frame 12.5s (pose sentado)
+        anim_data = { { x = 12.5, y = 12.5 }, 1, 0, false }
     end
     if anim_data then
         player:set_animation(anim_data[1], anim_data[2], anim_data[3], anim_data[4]) -- Aplica animação no player invisível
@@ -868,6 +893,122 @@ core.register_globalstep(function(dtime)
             rotate_head_to_look(player)
             local ctrl = player:get_player_control()
             local vel = player:get_velocity()
+
+            -- ══════════════════════════════════════════════════════════════
+            -- SISTEMA DE ANIMAÇÃO DE SENTAR (máquina de estados)
+            -- Gatilho: segurar sneak + pressionar aux1 duas vezes
+            -- ══════════════════════════════════════════════════════════════
+            
+            -- Inicializa estado para este player se ainda não existe
+            if not sit_state[player_name] then
+                sit_state[player_name]       = "idle"
+                sit_sneak_count[player_name] = 0   -- contagem de aux1 enquanto segura sneak
+                sit_sneak_held[player_name]  = 0   -- não usado neste gatilho (mantido para compatibilidade)
+                sit_last_sneak[player_name]  = false
+                sit_anim_timer[player_name]  = 0
+            end
+            -- Reutilizamos sit_sneak_count para contar os cliques de aux1
+            -- e adicionamos sit_last_aux1 para detectar borda do aux1
+            if sit_state[player_name .. "_last_aux1"] == nil then
+                sit_state[player_name .. "_last_aux1"] = false
+            end
+
+            local ss        = sit_state[player_name]
+            local sneak_now = ctrl.sneak
+            local sneak_was = sit_last_sneak[player_name]
+            local aux1_now  = ctrl.aux1
+            local aux1_was  = sit_state[player_name .. "_last_aux1"]
+            -- Borda de descida do aux1 (acabou de pressionar)
+            local aux1_press = aux1_now and not aux1_was
+            -- Borda de descida do sneak (acabou de pressionar — nova pressão)
+            local sneak_press = sneak_now and not sneak_was
+
+            -- Qualquer tecla de movimento cancela o estado de sentar
+            local movement_key = ctrl.up or ctrl.down or ctrl.left or ctrl.right
+                               or ctrl.jump
+
+            -- ── Estado: sentado (pose congelada) ─────────────────────────
+            if ss == "sitting" then
+                -- Sai APENAS por: movimento, pulo, ou nova pressão de sneak
+                -- (segurar sneak continuamente desde antes NÃO cancela)
+                if movement_key or ctrl.jump or sneak_press then
+                    sit_state[player_name]       = "idle"
+                    sit_sneak_count[player_name] = 0
+                    -- A lógica abaixo vai selecionar a animação correta
+                else
+                    -- Mantém pose sentado, bloqueia o resto da lógica
+                    set_player_animation(player, "sit_idle")
+                    player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                    sit_last_sneak[player_name]          = sneak_now
+                    sit_state[player_name .. "_last_aux1"] = aux1_now
+                    goto continue
+                end
+
+            -- ── Estado: reproduzindo animação de sentar (transição) ───────
+            elseif ss == "sit_anim" then
+                -- Mesma regra: só cancela por movimento/pulo/nova pressão sneak
+                if movement_key or ctrl.jump or sneak_press then
+                    sit_state[player_name]       = "idle"
+                    sit_sneak_count[player_name] = 0
+                    -- cai para lógica normal abaixo
+                else
+                    sit_anim_timer[player_name] = sit_anim_timer[player_name] + dtime
+                    -- Animação dura 0.5s (de 12 a 12.5 no GLB → velocidade 1 = 0.5s)
+                    if sit_anim_timer[player_name] >= 0.5 then
+                        -- Transição completa → congela na pose final
+                        sit_state[player_name] = "sitting"
+                        player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                    end
+                    set_player_animation(player, "sit_down")
+                    player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                    sit_last_sneak[player_name]          = sneak_now
+                    sit_state[player_name .. "_last_aux1"] = aux1_now
+                    goto continue
+                end
+
+            -- ── Estado: idle — aguardando o gatilho ───────────────────────
+            elseif ss == "idle" then
+                -- Só inicia contagem se sneak estiver pressionado
+                if sneak_now and aux1_press then
+                    sit_sneak_count[player_name] = 1
+                    sit_state[player_name]       = "counting"
+                end
+                -- Movimento sem sneak reseta tudo (garantia)
+                if movement_key and not sneak_now then
+                    sit_sneak_count[player_name] = 0
+                end
+
+            -- ── Estado: counting — sneak segurado, contando aux1 ─────────
+            elseif ss == "counting" then
+                if not sneak_now then
+                    -- Soltou o sneak antes de completar → reseta
+                    sit_state[player_name]       = "idle"
+                    sit_sneak_count[player_name] = 0
+                elseif movement_key then
+                    -- Moveu → reseta
+                    sit_state[player_name]       = "idle"
+                    sit_sneak_count[player_name] = 0
+                elseif aux1_press then
+                    sit_sneak_count[player_name] = sit_sneak_count[player_name] + 1
+                    if sit_sneak_count[player_name] >= 2 then
+                        -- 2º clique de aux1 com sneak segurado → ativa sentar!
+                        sit_state[player_name]       = "sit_anim"
+                        sit_anim_timer[player_name]  = 0
+                        sit_sneak_count[player_name] = 0
+                        set_player_animation(player, "sit_down")
+                        player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                        sit_last_sneak[player_name]          = sneak_now
+                        sit_state[player_name .. "_last_aux1"] = aux1_now
+                        goto continue
+                    end
+                end
+            end
+
+            sit_last_sneak[player_name]          = sneak_now
+            sit_state[player_name .. "_last_aux1"] = aux1_now
+
+            -- FIM DO SISTEMA DE SENTAR — lógica de animação normal abaixo
+            -- ══════════════════════════════════════════════════════════════
             if ctrl.jump and vel.y >= 0 then
                 set_player_animation(player, "jump")
             else
@@ -920,8 +1061,7 @@ core.register_globalstep(function(dtime)
                             setplayeranimation("walk")
                         end
                     else
-                        player:set_eye_offset({ x = 0, y = -1, z = 3 }, { x = 0, y = 7, z = -7 })
-                        if has_item then setplayeranimation("holding") else setplayeranimation("idle") end
+                        if has_item then setplayeranimation("holding")  else setplayeranimation("idle") end
                     end
                 end
             end
@@ -964,6 +1104,12 @@ core.register_on_leaveplayer(function(player)
     last_belt_items[player_name] = nil
     last_armor_items[player_name] = nil
     last_backpack_state[player_name] = nil
+    -- Limpa estado de sentar
+    sit_state[player_name]       = nil
+    sit_sneak_count[player_name] = nil
+    sit_sneak_held[player_name]  = nil
+    sit_last_sneak[player_name]  = nil
+    sit_anim_timer[player_name]  = nil
     if wielded_entities[player_name] then
         wielded_entities[player_name]:remove()
         wielded_entities[player_name] = nil
@@ -988,10 +1134,6 @@ core.register_on_leaveplayer(function(player)
         body_entities[player_name]:remove()
         body_entities[player_name] = nil
     end
-    -- if shadow_objects[player_name] then
-    --     shadow_objects[player_name]:remove()
-    --     shadow_objects[player_name] = nil
-    -- end
 end)
 core.register_on_dieplayer(function(player)
     local player_name = player:get_player_name()
@@ -1013,10 +1155,6 @@ core.register_on_dieplayer(function(player)
         body_entities[player_name]:remove()
         body_entities[player_name] = nil
     end
-    -- if shadow_objects[player_name] then
-    --     shadow_objects[player_name]:remove()
-    --     shadow_objects[player_name] = nil
-    -- end
 end)
 core.register_on_respawnplayer(function(player)
     core.after(0.5, function()
