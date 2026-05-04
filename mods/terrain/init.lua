@@ -3175,6 +3175,13 @@ local function convert_sand_below(pos)
     end
 end
 
+local function convert_snow_below(pos)
+    local below = {x = pos.x, y = pos.y - 1, z = pos.z}
+    if core.get_node(below).name == "nh_nodes:dirt" then
+        core.set_node(below, {name = "nh_nodes:snow"})
+    end
+end
+
 --local function convert_wetsand_below(pos)
 --    local below = {x = pos.x, y = pos.y - 1, z = pos.z}
 --    if core.get_node(below).name == "nh_nodes:sand" then
@@ -3489,6 +3496,298 @@ core.register_lbm({
         if below.west and not below.east then
             core.set_node(pos, {name="nh_nodes:dirt_ramp", param2=1})
             clear_above(pos)
+            return
+        end
+    end
+})
+
+-----------------------------
+-- LBM: SLOPES DE NEVE (mesma lógica do sand)
+-----------------------------
+core.register_lbm({
+    name = "nh_terrain:snow_conversion",
+    nodenames = {"nh_nodes:snow"},
+    run_at_every_load = true,
+
+    action = function(pos)
+        -- Só converte se houver ar acima
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        if core.get_node(above).name ~= "air" then return end
+
+        local x, y, z = pos.x, pos.y, pos.z
+
+        local solid_types = {
+            ["nh_nodes:snow"]              = true,
+            ["nh_nodes:top_grass"]         = true,
+            ["nh_nodes:top_grass_ramp"]         = true,
+            ["nh_nodes:top_grass_vertix"]       = true,
+            ["nh_nodes:top_grass_insidecorner"] = true,
+            ["nh_nodes:snow_ramp"]         = true,
+            ["nh_nodes:snow_corner"]       = true,
+            ["nh_nodes:snow_insidecorner"] = true,
+        }
+
+        -- Material que indica "borda de queda" — ice/air no mesmo nível = snow está na borda
+        local edge_types = {
+            ["nh_nodes:top_grass"] = true,
+            ["air"]          = true,
+        }
+
+        local function is_solid_below(p)
+            local neighbor = core.get_node(p).name
+            return edge_types[neighbor] == true
+        end
+
+        local function is_solid_same(p)
+            return solid_types[core.get_node(p).name] == true
+        end
+
+        local function is_passthrough(p)
+            local name = core.get_node(p).name
+            if not edge_types[name] then return false end
+            -- abaixo da diagonal pode ser snow OU ice (ambos são "chão válido")
+            local below_diag = core.get_node({x=p.x, y=p.y-1, z=p.z}).name
+            return solid_types[below_diag] == true
+        end
+
+        local below = {
+            north = is_solid_below({x=x,   y=y, z=z-1}),
+            south = is_solid_below({x=x,   y=y, z=z+1}),
+            east  = is_solid_below({x=x+1, y=y, z=z  }),
+            west  = is_solid_below({x=x-1, y=y, z=z  }),
+        }
+
+        local same = {
+            north = is_solid_same({x=x,   y=y, z=z-1}),
+            south = is_solid_same({x=x,   y=y, z=z+1}),
+            east  = is_solid_same({x=x+1, y=y, z=z  }),
+            west  = is_solid_same({x=x-1, y=y, z=z  }),
+        }
+
+        local drops = {}
+        if below.north then table.insert(drops, "south") end
+        if below.south then table.insert(drops, "north") end
+        if below.east  then table.insert(drops, "west")  end
+        if below.west  then table.insert(drops, "east")  end
+
+        local any_below = below.north or below.south or below.east or below.west
+
+        -- =========================
+        -- PRIORIDADE 1: INSIDE CORNER
+        -- =========================
+
+        if not any_below then
+            if same.south and same.west and is_passthrough({x=x-1, y=y, z=z+1}) then
+                core.set_node(pos, {name="nh_nodes:snow_insidecorner", param2=2})
+                return
+            end
+
+            if same.west and same.north and is_passthrough({x=x-1, y=y, z=z-1}) then
+                core.set_node(pos, {name="nh_nodes:snow_insidecorner", param2=1})
+                return
+            end
+
+            if same.north and same.east and is_passthrough({x=x+1, y=y, z=z-1}) then
+                core.set_node(pos, {name="nh_nodes:snow_insidecorner", param2=0})
+                return
+            end
+
+            if same.east and same.south and is_passthrough({x=x+1, y=y, z=z+1}) then
+                core.set_node(pos, {name="nh_nodes:snow_insidecorner", param2=3})
+                return
+            end
+        end
+
+        -- =========================
+        -- PRIORIDADE 2: VERTIX (corner externo)
+        -- =========================
+
+        if #drops == 2 then
+            local a, b = drops[1], drops[2]
+
+            local function match(x1, x2) return (a==x1 and b==x2) or (a==x2 and b==x1) end
+
+            if match("south", "west") then
+                core.set_node(pos, {name="nh_nodes:snow_corner", param2=0})
+                convert_snow_below(pos)
+            elseif match("west", "north") then
+                core.set_node(pos, {name="nh_nodes:snow_corner", param2=3})
+                convert_snow_below(pos)
+            elseif match("north", "east") then
+                core.set_node(pos, {name="nh_nodes:snow_corner", param2=2})
+                convert_snow_below(pos)
+            elseif match("east", "south") then
+                core.set_node(pos, {name="nh_nodes:snow_corner", param2=1})
+                convert_snow_below(pos)
+            end
+            return
+        end
+
+        -- =========================
+        -- PRIORIDADE 3: RAMPAS
+        -- =========================
+
+        if below.north and not below.south then
+            core.set_node(pos, {name="nh_nodes:snow_ramp", param2=0})
+            return
+        end
+
+        if below.south and not below.north then
+            core.set_node(pos, {name="nh_nodes:snow_ramp", param2=2})
+            return
+        end
+
+        if below.east and not below.west then
+            core.set_node(pos, {name="nh_nodes:snow_ramp", param2=3})
+            return
+        end
+
+        if below.west and not below.east then
+            core.set_node(pos, {name="nh_nodes:snow_ramp", param2=1})
+            return
+        end
+    end
+})
+
+-----------------------------
+-- LBM: SLOPES DE NEVE (mesma lógica do sand)
+-----------------------------
+core.register_lbm({
+    name = "nh_terrain:basalt_conversion",
+    nodenames = {"nh_nodes:basalt"},
+    run_at_every_load = true,
+
+    action = function(pos)
+        -- Só converte se houver ar acima
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        if core.get_node(above).name ~= "air" then return end
+
+        local x, y, z = pos.x, pos.y, pos.z
+
+        local solid_types = {
+            ["nh_nodes:basalt"]              = true,
+            ["nh_nodes:basalt_ramp"]         = true,
+            ["nh_nodes:basalt_corner"]       = true,
+            ["nh_nodes:basalt_insidecorner"] = true,
+        }
+
+        -- Material que indica "borda de queda" — wet_sand/air no mesmo nível = snow está na borda
+        local edge_types = {
+            ["nh_nodes:wet_sand"] = true,
+            ["air"]          = true,
+        }
+
+        local function is_solid_below(p)
+            local neighbor = core.get_node(p).name
+            return edge_types[neighbor] == true
+        end
+
+        local function is_solid_same(p)
+            return solid_types[core.get_node(p).name] == true
+        end
+
+        local function is_passthrough(p)
+            local name = core.get_node(p).name
+            if not edge_types[name] then return false end
+            -- abaixo da diagonal pode ser basalt (é "chão válido")
+            local below_diag = core.get_node({x=p.x, y=p.y-1, z=p.z}).name
+            return solid_types[below_diag] == true
+        end
+
+        local below = {
+            north = is_solid_below({x=x,   y=y, z=z-1}),
+            south = is_solid_below({x=x,   y=y, z=z+1}),
+            east  = is_solid_below({x=x+1, y=y, z=z  }),
+            west  = is_solid_below({x=x-1, y=y, z=z  }),
+        }
+
+        local same = {
+            north = is_solid_same({x=x,   y=y, z=z-1}),
+            south = is_solid_same({x=x,   y=y, z=z+1}),
+            east  = is_solid_same({x=x+1, y=y, z=z  }),
+            west  = is_solid_same({x=x-1, y=y, z=z  }),
+        }
+
+        local drops = {}
+        if below.north then table.insert(drops, "south") end
+        if below.south then table.insert(drops, "north") end
+        if below.east  then table.insert(drops, "west")  end
+        if below.west  then table.insert(drops, "east")  end
+
+        local any_below = below.north or below.south or below.east or below.west
+
+        -- =========================
+        -- PRIORIDADE 1: INSIDE CORNER
+        -- =========================
+
+        if not any_below then
+            if same.south and same.west and is_passthrough({x=x-1, y=y, z=z+1}) then
+                core.set_node(pos, {name="nh_nodes:basalt_insidecorner", param2=2})
+                return
+            end
+
+            if same.west and same.north and is_passthrough({x=x-1, y=y, z=z-1}) then
+                core.set_node(pos, {name="nh_nodes:basalt_insidecorner", param2=1})
+                return
+            end
+
+            if same.north and same.east and is_passthrough({x=x+1, y=y, z=z-1}) then
+                core.set_node(pos, {name="nh_nodes:basalt_insidecorner", param2=0})
+                return
+            end
+
+            if same.east and same.south and is_passthrough({x=x+1, y=y, z=z+1}) then
+                core.set_node(pos, {name="nh_nodes:basalt_insidecorner", param2=3})
+                return
+            end
+        end
+
+        -- =========================
+        -- PRIORIDADE 2: VERTIX (corner externo)
+        -- =========================
+
+        if #drops == 2 then
+            local a, b = drops[1], drops[2]
+
+            local function match(x1, x2) return (a==x1 and b==x2) or (a==x2 and b==x1) end
+
+            if match("south", "west") then
+                core.set_node(pos, {name="nh_nodes:basalt_corner", param2=0})
+                --convert_snow_below(pos)
+            elseif match("west", "north") then
+                core.set_node(pos, {name="nh_nodes:basalt_corner", param2=3})
+                --convert_snow_below(pos)
+            elseif match("north", "east") then
+                core.set_node(pos, {name="nh_nodes:basalt_corner", param2=2})
+                --convert_snow_below(pos)
+            elseif match("east", "south") then
+                core.set_node(pos, {name="nh_nodes:basalt_corner", param2=1})
+                --convert_snow_below(pos)
+            end
+            return
+        end
+
+        -- =========================
+        -- PRIORIDADE 3: RAMPAS
+        -- =========================
+
+        if below.north and not below.south then
+            core.set_node(pos, {name="nh_nodes:basalt_ramp", param2=0})
+            return
+        end
+
+        if below.south and not below.north then
+            core.set_node(pos, {name="nh_nodes:basalt_ramp", param2=2})
+            return
+        end
+
+        if below.east and not below.west then
+            core.set_node(pos, {name="nh_nodes:basalt_ramp", param2=3})
+            return
+        end
+
+        if below.west and not below.east then
+            core.set_node(pos, {name="nh_nodes:basalt_ramp", param2=1})
             return
         end
     end
