@@ -22,23 +22,52 @@ Water=Água
 Flowing Water=Água Corrente
 Fresh Water=Água Doce
 Flowing Fresh Water=Água Doce Corrente
-Snow=Neve
-Avalanche=Avalanche
 Ice=Gelo
 
+Snow=Neve
+Snow Ramp=Neve em Rampa
+Snow Corner=Neve em Quina
+Snow Inside Corner=Neve em Quina Interna
+
+Avalanche=Avalanche
+
 Dirt=Terra
+Dirt Ramp=Terra em Rampa
+Dirt Corner=Terra em Quina
+Dirt Inside Corner=Terra em Quina Interna
+
 Wet Dirt=Terra Molhada
 Tilled Dirt=Terra Arada
 Wet Tilled Dirt=Terra Arada Irrigada
+
 Grass=Grama
+Grass Ramp=Grama em Rampa
+Grass Corner=Grama em Quina
+Grass Inside Corner=Grama em Quina Interna
+
 Lawn=Gramado
+
 Sand=Areia
+Sand Ramp=Areia em Rampa
+Sand Corner=Areia em Quina
+Sand Inside Corner=Areia em Quina Interna
+
 Wet Sand=Areia molhada
-Saprolite=Saprólito
+
 Basalt=Basalto
+Basalt Ramp=Basalto em Rampa
+Basalt Corner=Basalto em Quina
+Basalt Inside Corner=Basalto em Quina Interna
+
+Saprolite=Saprólito
 Gneiss=Gnaisse
 
+Lava=Lava
 Flowing Lava=Lava Corrente
+Blue Lava=Lava Azul
+Flowing Blue Lava=Lava Azul Corrente
+
+Magma=Magma
 
 Cobblestone=Pedregulho
 

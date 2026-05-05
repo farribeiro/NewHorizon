@@ -1,4 +1,5 @@
-print("[body] Mod carregado")
+minetest.log("action", "[body] Mod carregado")
+local function sit_log(player_name, msg)   minetest.log("action", "[SIT DEBUG] [" .. player_name .. "] " .. msg) end --aqui
 -- TABELAS GLOBAIS
 --local shadow_objects = {}
 local zeroaxys = { x = 0, y = 0, z = 0 }
@@ -661,8 +662,9 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
     --    { x = 0, y = -1, z = 3 }, -- Primeira pessoa: move 3 unidades para frente (Z negativo)
     --    { x = 0, y = 7, z = -7 }  -- Terceira pessoa
     --)
-    print("[body] Modelo invisível aplicado para " .. player_name)
+    core.log("action", "[BODY MOD] Invisible player body applyed to " .. player_name)
 end
+
 -- FUNÇÃO PARA A ANIMAÇÃO DE BATER PLAYER
 local function trigger_punch(player)
     if not player then return end
@@ -722,13 +724,6 @@ local function rotate_head_to_look(player)
         { rotation = { vec = { x = 0, y = head_yaw * 0.01, z = head_pitch * 0.02 } } })
     player:set_bone_override("bone_TorsoArms", { rotation = { vec = zeroaxys } })
     player:set_bone_override("bone_Legs", { rotation = { vec = zeroaxys } })
-end
-local function apply_eye_offset(player, player_name)
-    if sit_state[player_name] == "sitting" or sit_state[player_name] == "sit_anim" then
-        player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
-        return true
-    end
-    return false
 end
 -- FUNÇÃO PARA DEFINIR ANIMAÇÃO DO PLAYER
 set_player_animation = function(player, anim)
@@ -803,11 +798,11 @@ core.register_on_placenode(function(pos, newnode, placer)
 end)
 -- GLOBALSTEP PARA ATUALIZAR ANIMAÇÕES E ROTAÇÕES
 local last_lmb = {}
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
+core.register_globalstep(function(dtime)     
+    for _, player in ipairs(core.get_connected_players()) do    
         local function setplayeranimation(opts) set_player_animation(player, opts) end
         local player_name = player:get_player_name()
-        -- ✅ Garante que fleshy (sofrer dano) nunca seja perdido
+        -- Garante que fleshy (sofrer dano) nunca seja perdido
         local armor = player:get_armor_groups()
         if not armor.fleshy or armor.fleshy == 0 then player:set_armor_groups({ fleshy = 100 }) end
         local item = player:get_wielded_item()
@@ -926,21 +921,29 @@ core.register_globalstep(function(dtime)
             -- Qualquer tecla de movimento cancela o estado de sentar
             local movement_key = ctrl.up or ctrl.down or ctrl.left or ctrl.right
                                or ctrl.jump
+                               
+                    local eye_first, eye_third = player:get_eye_offset()
+                    local first_str = core.serialize(eye_first)
+                    local third_str = core.serialize(eye_third)
+                    --core.log(player_name, "[SITTING DEBUG] " .. " eye_offset_1st=" .. first_str .. " eye_offset_3rd=" .. third_str) 
 
             -- ── Estado: sentado (pose congelada) ─────────────────────────
             if ss == "sitting" then
+                --core.log(player_name, "IN sitting | sneak_now=" .. tostring(sneak_now) .. " sneak_press=" .. tostring(sneak_press) .. " movement=" .. tostring(movement_key) .. " jump=" .. tostring(ctrl.jump)) -- aqui
                 -- Sai APENAS por: movimento, pulo, ou nova pressão de sneak
                 -- (segurar sneak continuamente desde antes NÃO cancela)
                 if movement_key or ctrl.jump or sneak_press then
                     sit_state[player_name]       = "idle"
                     sit_sneak_count[player_name] = 0
                     -- A lógica abaixo vai selecionar a animação correta
+                    --core.log(player_name, "Applying NORMAL camera")
                 else
                     -- Mantém pose sentado, bloqueia o resto da lógica
                     set_player_animation(player, "sit_idle")
-                    player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
+                    --player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                    --core.log(player_name, "Applying sitting camera (sitting and no movement_key or ctrl.jump or sneak_press)")
                     goto continue
                 end
 
@@ -963,6 +966,7 @@ core.register_globalstep(function(dtime)
                     player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
+                    --core.log(player_name, "Applying sitting camera (sit_anim and no movement_key or ctrl.jump or sneak_press)")
                     goto continue
                 end
 
@@ -999,6 +1003,7 @@ core.register_globalstep(function(dtime)
                         player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
                         sit_last_sneak[player_name]          = sneak_now
                         sit_state[player_name .. "_last_aux1"] = aux1_now
+                        --core.log(player_name, "Applying sitting camera (counting and no movement_key or ctrl.jump or sneak_press)")
                         goto continue
                     end
                 end
@@ -1007,31 +1012,35 @@ core.register_globalstep(function(dtime)
             sit_last_sneak[player_name]          = sneak_now
             sit_state[player_name .. "_last_aux1"] = aux1_now
 
-            -- FIM DO SISTEMA DE SENTAR — lógica de animação normal abaixo
+
+            if ss == "sitting" or ss == "sit_anim" then
+                -- Se estiver sentado, não permitimos que o código abaixo 
+                player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                --core.log(player_name, "Its sitting or sit_anim")
+                goto continue 
+            end
+            
+            -- END OF SITTING SYSTEM — normal animation logic below
             -- ══════════════════════════════════════════════════════════════
+            
             if ctrl.jump and vel.y >= 0 then
                 set_player_animation(player, "jump")
             else
                 local props = player:get_properties()
                 local is_crawling = props.eye_height <= 0.7
                 if is_crawling then
-                    player:set_eye_offset(
-                        { x = 0, y = -0.5, z = 7.5 }, -- ajusta para crawling
-                        { x = 0, y = 7, z = -7 }
-                    )
+                    player:set_eye_offset({ x = 0, y = -0.5, z = 7.5 }, { x = 0, y = 7, z = -7 })-- ajusta para crawling
                     local horizontal = { x = vel.x, y = 0, z = vel.z }
                     local speed = vector.length(horizontal)
                     if speed > 0.1 then setplayeranimation("crawling_walk") else setplayeranimation("crawling") end
                 elseif ctrl.sneak and vel.x < 0.1 and vel.z < 0.1 then
                     set_player_animation(player, "sneak")
                     -- player:set_properties({ collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6} })
-                    player:set_eye_offset(
-                        { x = 0, y = 8, z = 10 }, -- ajusta para sneak
-                        { x = 0, y = 7, z = -7 }
-                    )
+                    player:set_eye_offset({ x = 0, y = 8, z = 10 }, { x = 0, y = 7, z = -7 }) -- ajusta para sneak
                 else
                     player:set_properties({ collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 }, })
                     player:set_eye_offset({ x = 0, y = -1, z = 3 }, { x = 0, y = 7, z = -7 })
+                    --core.log(player_name, "Applying NORMAL camera")
                     local is_moving_back = ctrl.down
                     local is_moving = ctrl.up or ctrl.left or ctrl.right
                     local horizontal = { x = vel.x, y = 0, z = vel.z }
@@ -1039,10 +1048,7 @@ core.register_globalstep(function(dtime)
                     if is_moving_back then
                         if ctrl.sneak and speed >= 0.1 then
                             setplayeranimation("sneak_walk_back")
-                            player:set_eye_offset(
-                                { x = 0, y = 8, z = 10 }, -- ajusta para sneak
-                                { x = 0, y = 7, z = -7 }
-                            )
+                            player:set_eye_offset({ x = 0, y = 8, z = 10 }, { x = 0, y = 7, z = -7 }) -- ajusta para sneak
                         elseif ctrl.aux1 or speed >= 4 then
                             setplayeranimation("run_back")
                         elseif speed < 4 and speed > 0 then
@@ -1051,10 +1057,7 @@ core.register_globalstep(function(dtime)
                     elseif is_moving then
                         if ctrl.sneak and speed >= 0.1 then
                             setplayeranimation("sneak_walk")
-                            player:set_eye_offset(
-                                { x = 0, y = 8, z = 10 }, -- ajusta para sneak
-                                { x = 0, y = 7, z = -7 }
-                            )
+                            player:set_eye_offset({ x = 0, y = 8, z = 10 }, { x = 0, y = 7, z = -7 }) -- ajusta para sneak
                         elseif ctrl.aux1 or speed >= 4 then
                             setplayeranimation("run")
                         elseif speed < 4 and speed > 0 then
@@ -1076,6 +1079,7 @@ core.register_on_joinplayer(function(player)
     player_states[player_name] = { body_yaw = 0, current_anim = nil }
     create_armor_inventory(player)
     player:set_inventory_formspec(get_armor_formspec(player_name))
+
     local check_count = 0
     local max_checks = 10
     local function verify_and_apply()
@@ -1083,16 +1087,28 @@ core.register_on_joinplayer(function(player)
         check_count = check_count + 1
         apply_custom_model(player)
         local props = player:get_properties()
-        if props.eye_height ~= 2.5 and check_count < max_checks then core.after(0.2, verify_and_apply) end
+        if props.eye_height ~= 2.5 and check_count < max_checks then
+            core.after(0.2, verify_and_apply)
+        end
     end
+
+    -- Delay maior para garantir que o mundo carregou no cliente
     core.after(0.3, function()
-        if player and player:is_player() then
-            verify_and_apply()
-            create_player_body(player) -- CRIA CORPO VISÍVEL
-            update_wielded_item(player)
-            update_offhand_item(player)
-            update_armor_visuals(player)
-            update_belt_items(player)
+        if not (player and player:is_player()) then return end
+        verify_and_apply()
+        create_player_body(player)
+        update_wielded_item(player)
+        update_offhand_item(player)
+        update_armor_visuals(player)
+        update_belt_items(player)
+    end)
+
+    -- Segunda tentativa de segurança: recria o corpo se não existir após 3s
+    core.after(2.0, function()
+        if not (player and player:is_player()) then return end
+        if not body_entities[player_name] or not body_entities[player_name]:get_luaentity() then
+            core.log("[BODY MOD] Body not found after 2 seconds, recreating for " .. player_name)
+            create_player_body(player)
         end
     end)
 end)

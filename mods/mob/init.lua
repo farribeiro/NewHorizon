@@ -10,6 +10,7 @@
 local DEBUG = true
 local function log(msg) if DEBUG then core.log("action", "[Mob] " .. msg) end end
 local S = core.get_translator("nh_mob")
+
 --mobs:set_spawn_setting("spawn", true)
 --mobs:set_spawn_setting("remove_far", false)
 -- BOSS BAR

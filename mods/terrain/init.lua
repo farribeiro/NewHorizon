@@ -1,3 +1,6 @@
+-- Terrain
+core.log("action", "[TERRAIN] init.lua carregado")
+local S = core.get_translator("nh_terrain")
 -----------------------------
 -- CONFIGURAÇÕES DO MUNDO
 -----------------------------
@@ -154,6 +157,7 @@ local HOUSE_SEARCH_RADIUS = 256
 local statue_spawned = false
 local statue_pos = nil
 local sentinel_pos = nil
+local lowest_island_pos = nil
 
 -----------------------------
 -- NOISES (mantidos para compatibilidade com funções antigas)
@@ -2484,6 +2488,29 @@ local function generate_floating_islands(area, data, minp, maxp)
             sentinel_pos = {x = sx, y = statue_y, z = sz}  -- ADICIONE ESTA LINHA
         end
     end
+    -- Salva o topo da ilha mais BAIXA para o comando /lowisland
+    local lowest = nil
+    for _, island in ipairs(FLOATING_ISLANDS) do
+        if not lowest or island.base_y < lowest.base_y then
+            lowest = island
+        end
+    end
+
+    if lowest then
+        local main_cone = lowest.cones[1]
+        local lx = main_cone.x
+        local lz = main_cone.z
+        local top_variation = math.floor(get_top_variation(lx, lz))
+        local low_y = lowest.base_y + top_variation + 1
+
+        if lx >= minp.x and lx <= maxp.x
+           and lz >= minp.z and lz <= maxp.z
+           and low_y >= minp.y and low_y <= maxp.y
+           and area:contains(lx, low_y, lz)
+        then
+            lowest_island_pos = {x = lx, y = low_y, z = lz}
+        end
+    end
 end
 
 -----------------------------
@@ -4194,33 +4221,53 @@ core.register_abm({
 
 -- Pré-geração da área
 core.after(1, function()
-    print("[terrain] Pré-gerando área de spawn...")
+    core.log("action", "[terrain] Pré-gerando área de spawn...")
     core.emerge_area(
         {x = -48, y = -16, z = -48},
         {x = 48, y = 80, z = 48},
         function(blockpos, action, calls_remaining)
             if calls_remaining == 0 then
-                print("[terrain] Área de spawn pré-gerada com sucesso!")
+                core.log("action", "[terrain] Área de spawn pré-gerada com sucesso!")
             end
     end)
 end)
 
 -----------------------------
+-- COMANDO PARA VOLTAR A ORIGEM
+-----------------------------
+core.register_chatcommand("origin", {
+    description = S("Teleport to the origin"),
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, S("Player not found")
+        end
+
+        -- Teleporta 2 blocos acima da estátua
+        local tp_pos = {x = 0, y = 50, z = 0}
+        player:set_pos(tp_pos)
+
+        return true, S("Teleported to the origin at X: 0 Y: 50 Z: 0")
+    end,
+})
+
+-----------------------------
 -- COMANDO PARA ENCONTRAR O VULCÃO
 -----------------------------
 core.register_chatcommand("vulcan", {
-    description = "Teleporta para a ilha vulcânica",
+    description = S("Teleport to the volcanic island"),
     privs = {teleport = true},  -- Requer privilégio de teleporte
     func = function(name)
         local player = core.get_player_by_name(name)
         if not player then
-            return false, "Jogador não encontrado"
+            return false, S("Player not found")
         end
         
         local volcano_pos = find_volcano_position()
         
         if not volcano_pos then
-            return false, "Vulcão ainda não foi gerado"
+            return false, S("The volcano has not yet been generated. Please wait a moment")
         end
         
         -- Teleporta para o topo do vulcão
@@ -4232,21 +4279,21 @@ core.register_chatcommand("vulcan", {
         
         player:set_pos(tp_pos)
         
-        return true, "Teleportado para o vulcão em X:" .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
+        return true, S("Teleported to the volcano in X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
     end,
 })
 
 -- Comando alternativo sem necessidade de privilégios (para testes)
 core.register_chatcommand("local_vulcan", {
-    description = "Mostra as coordenadas da ilha vulcânica",
+    description = S("Shows the coordinates of the volcanic island"),
     func = function(name)
         local volcano_pos = find_volcano_position()
         
         if not volcano_pos then
-            return false, "Vulcão ainda não foi gerado"
+            return false, S("The volcano has not yet been generated. Please wait a moment")
         end
         
-        return true, "Ilha vulcânica em X:" .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
+        return true, S("Volcanic island at X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
     end,
 })
 
@@ -4254,35 +4301,85 @@ core.register_chatcommand("local_vulcan", {
 -- COMANDO PARA IR ATÉ O CARANGUEJO
 -----------------------------
 core.register_chatcommand("crab", {
-    description = "Teleporta para a estátua do caranguejo gigante",
+    description = S("Teleport to the giant crab statue"),
     privs = {teleport = true},
     func = function(name)
         local player = core.get_player_by_name(name)
         if not player then
-            return false, "Jogador não encontrado"
+            return false, S("Player not found")
         end
  
         if not statue_pos then
-            return false, "A estátua do caranguejo ainda não foi gerada. Explore a área do vulcão primeiro!"
+            return false, S("The crab statue has not yet been generated. Explore the volcano area first")
         end
  
         -- Teleporta 2 blocos acima da estátua para não ficar preso na água
         local tp_pos = {x = statue_pos.x, y = statue_pos.y + 2, z = statue_pos.z}
         player:set_pos(tp_pos)
  
-        return true, "Teleportado para a estátua do caranguejo em X:" .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
+        return true, S("Teleported to the giant crab statue at X:") .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
     end,
 })
  
 -- Comando para só ver as coordenadas sem teleportar
 core.register_chatcommand("local_crab", {
-    description = "Mostra as coordenadas da estátua do caranguejo",
+    description = S("Show the coordinates of the giant crab statue"),
     func = function(name)
         if not statue_pos then
-            return false, "A estátua do caranguejo ainda não foi gerada. Explore a área do vulcão primeiro!"
+            return false, S("The crab statue has not yet been generated. Explore the volcano area first")
         end
  
-        return true, "Estátua do caranguejo em X:" .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
+        return true, S("Giant crab statue at X:") .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
+    end,
+})
+
+core.register_chatcommand("airsea", {
+    description = S("Teleport to the air sea"),
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, S("Player not found")
+        end
+
+        -- Teleporta 2 blocos acima da estátua
+        local tp_pos = {x = -700, y = 1, z = 700}
+        player:set_pos(tp_pos)
+
+        return true, S("Teleported to the air sea at X: -700, Y = 1, Z = 700")
+    end,
+})
+
+-- COMANDO PARA IR ATÉ A ILHA MAIS BAIXA
+core.register_chatcommand("flyisland", {
+    description = S("Teleport to the fly island"),
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, S("Player not found")
+        end
+
+        if not lowest_island_pos then
+            return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first")
+        end
+
+        local tp_pos = {x = lowest_island_pos.x, y = lowest_island_pos.y + 2, z = lowest_island_pos.z}
+        player:set_pos(tp_pos)
+
+        return true, S("Teleported to the fly island at X:") .. lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z
+    end,
+})
+
+-- Comando para só ver as coordenadas sem teleportar
+core.register_chatcommand("local_flyisland", {
+    description = S("Shows the coordinates of the fly island"),
+    func = function(name)
+        if not lowest_island_pos then
+            return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first")
+        end
+
+        return true, S("Fly island at X:") .. lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z
     end,
 })
 
@@ -4290,36 +4387,36 @@ core.register_chatcommand("local_crab", {
 -- COMANDO PARA IR ATÉ O SENTINELA
 -----------------------------
 core.register_chatcommand("sentinel", {
-    description = "Teleporta para a estátua do sentinela",
+    description = S("Teleport to the sentinel statue"),
     privs = {teleport = true},
     func = function(name)
         local player = core.get_player_by_name(name)
         if not player then
-            return false, "Jogador não encontrado"
+            return false, S("Player not found")
         end
 
         if not sentinel_pos then
-            return false, "A estátua do sentinela ainda não foi gerada. Explore as ilhas flutuantes primeiro!"
+            return false, S("The sentinel statue has not yet spawned. Explore the floating islands first")
         end
 
         -- Teleporta 2 blocos acima da estátua
         local tp_pos = {x = sentinel_pos.x, y = sentinel_pos.y + 2, z = sentinel_pos.z}
         player:set_pos(tp_pos)
 
-        return true, "Teleportado para a estátua do sentinela em X:" .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
+        return true, S("Teleported to the sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
     end,
 })
 
 -- Comando para só ver as coordenadas sem teleportar
 core.register_chatcommand("local_sentinel", {
-    description = "Mostra as coordenadas da estátua do sentinela",
+    description = S("Shows the coordinates of the sentinel statue"),
     func = function(name)
         if not sentinel_pos then
-            return false, "A estátua do sentinela ainda não foi gerada. Explore as ilhas flutuantes primeiro!"
+            return false, S("The sentinel statue has not yet spawned. Explore the floating islands first")
         end
 
-        return true, "Estátua do sentinela em X:" .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
+        return true, S("Sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
     end,
 })
 
-print("[terrain] Geração continental com biomas, árvores e coqueiros carregada (OTIMIZADA COM PERLIN MAPS)")
+core.log("action", "[TERRAIN] Continental generation with biomes, trees, coconut palms and more loaded")

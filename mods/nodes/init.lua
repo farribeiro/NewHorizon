@@ -1,7 +1,7 @@
 -- NODES
 core.log("action", "[NODES] init.lua loaded")
 
-local S = minetest.get_translator("nh_nodes")
+local S = core.get_translator("nh_nodes")
 
 local footstep_timer    = {}
 local lava_damage_timer = {}
@@ -1449,7 +1449,7 @@ end
 
 
 core.register_node("nh_nodes:dirt_ramp", {
-    description = "Grass Ramp",
+    description = "Dirt Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype  = "light",
@@ -1472,15 +1472,13 @@ core.register_node("nh_nodes:dirt_ramp", {
 sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
         {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
     },
 },
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
         {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
@@ -1512,8 +1510,7 @@ core.register_node("nh_nodes:dirt_corner", {
 sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
 
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- Topo 
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5}, -- Base principal
@@ -1522,8 +1519,7 @@ collision_box = {
 
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- topo
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5},  -- Base principal
@@ -1558,25 +1554,15 @@ core.register_node("nh_nodes:dirt_insidecorner", {
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
-        -- Base completa (metade inferior)
-        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
-
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- faixa Z-
-        
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- faixa Z-
-        
-        -- Topo braço 2: faixa lateral (X-)
-        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- faixa X-
-
+        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},-- Base completa (metade inferior)
+        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},-- Topo braço 1: faixa traseira (Z-)
+        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},-- Topo braço 1: faixa traseira (Z-)
+        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},-- Topo braço 2: faixa lateral (X-)
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},
@@ -1965,15 +1951,13 @@ core.register_node("nh_nodes:top_grass_ramp", {
 sunlight_propagates = true,
 
     
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
         {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
     },
 },
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
         {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
@@ -1982,7 +1966,7 @@ collision_box = {
 })
 
 core.register_node("nh_nodes:top_grass_vertix", {
-    description = "Grass Vertix",
+    description = "Grass Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype  = "light",
@@ -2003,8 +1987,7 @@ core.register_node("nh_nodes:top_grass_vertix", {
 
 sunlight_propagates = true,
 
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- Topo 
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5}, -- Base principal
@@ -2013,8 +1996,7 @@ collision_box = {
 
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- topo
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5},  -- Base principal
@@ -2048,25 +2030,15 @@ core.register_node("nh_nodes:top_grass_insidecorner", {
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
-        -- Base completa (metade inferior)
-        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
-
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- faixa Z-
-        
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- faixa Z-
-        
-        -- Topo braço 2: faixa lateral (X-)
-        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- faixa X-
-
+        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5}, -- Base completa (metade inferior)
+        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- Topo braço 1: faixa traseira (Z-
+        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- Topo braço 1: faixa traseira (Z-)
+        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- Topo braço 2: faixa lateral (X-)
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},
@@ -2096,7 +2068,7 @@ register_craft_station("nh_nodes:top_grass", {
     place = {name = "GrassDig", gain = 0.5},
     },
     
-    title = S("2x2 Craft on the Grass"),  -- ✅ Campo obrigatório!
+    title = S("2x2 Craft on the Grass"), 
     groups = {crumbly = 3, soil = 1},
     -- Quando a grama é bloqueada da luz, vira terra
     drop = "nh_nodes:dirt",
@@ -2326,15 +2298,13 @@ core.register_node("nh_nodes:sand_ramp", {
 sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
         {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
     },
 },
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
         {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
@@ -2366,8 +2336,7 @@ core.register_node("nh_nodes:sand_corner", {
 sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
 
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- Topo 
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5}, -- Base principal
@@ -2376,8 +2345,7 @@ collision_box = {
 
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- topo
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5},  -- Base principal
@@ -2411,25 +2379,15 @@ core.register_node("nh_nodes:sand_insidecorner", {
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
-        -- Base completa (metade inferior)
-        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
-
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- faixa Z-
-        
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- faixa Z-
-        
-        -- Topo braço 2: faixa lateral (X-)
-        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- faixa X-
-
+        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5}, -- Base completa (metade inferior)
+        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- Topo braço 1: faixa traseira (Z-)
+        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- Topo braço 1: faixa traseira (Z-)
+        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- Topo braço 2: faixa lateral (X-)
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},
@@ -2467,8 +2425,6 @@ register_craft_station("nh_nodes:sand", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    
-        
     
     positions = {
         {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
@@ -2759,15 +2715,13 @@ core.register_node("nh_nodes:coalnugget", {
     paramtype = "light",
     walkable = false,
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {
             {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
         },
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 })
@@ -2781,15 +2735,13 @@ core.register_node("nh_nodes:charcoalnugget", {
     paramtype = "light",
     walkable = false,
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {
             {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
         },
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 })
@@ -2831,15 +2783,11 @@ core.register_node("nh_nodes:coppernugget", {
     paramtype = "light",
     walkable = false,
     
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
-        },
+    collision_box = {type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 })
@@ -2891,15 +2839,11 @@ core.register_node("nh_nodes:tinnugget", {
     paramtype = "light",
     walkable = false,
     
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
-        },
+    collision_box = {type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 })
@@ -2951,15 +2895,11 @@ core.register_node("nh_nodes:ironnugget", {
     paramtype = "light",
     walkable = false,
     
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
-        },
+    collision_box = {type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
     },
 })
@@ -3144,12 +3084,10 @@ core.register_node("nh_nodes:oakresin", {
     groups = {snappy = 3,
         oddly_breakable_by_hand = 3},
         
-        collision_box = {
-        type = "fixed",
+        collision_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}
     },
 })
@@ -3285,13 +3223,11 @@ core.register_node("nh_nodes:oakbranch", {
     paramtype = "light",
     paramtype2 = "facedir",
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.2, -0.2, -0.5, 0.2, 0.5, 0.5},
     },
 
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.2, -0.2, -0.5, 0.2, 0.5, 0.5},
     },
     
@@ -3329,15 +3265,13 @@ core.register_node("nh_nodes:oaklog", {
     paramtype = "light",
     paramtype2 = "wallmounted",
     
-    selection_box = {
-        type = "wallmounted",
+    selection_box = {type = "wallmounted",
         wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
         wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
         wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
     },
     
-    node_box = {
-        type = "wallmounted",
+    node_box = {type = "wallmounted",
         wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
         wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
         wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
@@ -3376,13 +3310,11 @@ core.register_node("nh_nodes:appletimber", {
     paramtype = "light",
     sunlight_propagates = true,
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.095, -0.5, -0.095, 0.095, 0.5, 0.095},
     },
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.095, -0.5, -0.095, 0.095, 0.5, 0.095},
     },
     
@@ -3691,15 +3623,11 @@ core.register_node("nh_nodes:campfiretinder", {
     use_texture_alpha = "blend",
     paramtype = "light",
     
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
-        },
+    collision_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
     },
 })
@@ -3763,12 +3691,10 @@ core.register_node("nh_nodes:oaktimberslice1", {
     stack_max = 16,
     drop = "nh_nodes:oaktimberslice",
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
     
@@ -3804,12 +3730,10 @@ core.register_node("nh_nodes:oaktimberslice2", {
     stack_max = 16,
     drop = "nh_nodes:oaktimberslice 2",
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
     
@@ -3845,12 +3769,10 @@ core.register_node("nh_nodes:oaktimberslice3", {
     stack_max = 16,
     drop = "nh_nodes:oaktimberslice 3",
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
     
@@ -3892,12 +3814,10 @@ register_craft_station("nh_nodes:campfire", {
         }
     },
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0, 0.5}
     },
 
@@ -4128,12 +4048,10 @@ core.register_node("nh_nodes:spinningtop", {
     paramtype2 = "facedir",
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
     
@@ -4189,12 +4107,10 @@ core.register_node("nh_nodes:spinningtop2", {
     paramtype2 = "facedir",
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
     
@@ -4244,12 +4160,10 @@ core.register_node("nh_nodes:spinningtop3", {
     paramtype2 = "facedir",
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
     
@@ -4344,12 +4258,10 @@ register_craft_station("nh_nodes:furnace", {
     paramtype2 = "facedir",  -- IMPORTANTE: paramtype2, não paramtype
  
         -- Caixas de colisão e seleção
-    collision_box = {
-        type = "fixed",  
+    collision_box = {type = "fixed",  
         fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}
     },
-    selection_box = {
-        type = "fixed",  
+    selection_box = {type = "fixed",  
         fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}
     },
     
@@ -4461,17 +4373,14 @@ core.register_node("nh_nodes:oakboard", {
     paramtype = "light",
     paramtype2 = "facedir",
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, 0.38, 0.5, 0.5, 0.5},
     },
-    
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.03, 0.5, 0.5, 0.5},
     },
     
-            -- Configuração mão direita
+    -- Configuração mão direita
     wielded_bone_position = {
         pos = {x = 0, y = -0.9, z = -0.8}
         --rot = {x = 0, y = 0, z = -110}
@@ -4565,12 +4474,10 @@ core.register_node("nh_nodes:torch", {
     
     groups = {choppy = 2, oddly_breakable_by_hand = 3, flammable = 1}, -- dig_immediate = 3, attached_node = 1
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}
     },
     
@@ -4663,12 +4570,10 @@ core.register_node("nh_nodes:torch2", {
     
     groups = {choppy = 2, oddly_breakable_by_hand = 3, flammable = 1},   -- REMOVIDO: attached_node = 1, dig_immediate = 3
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}
     },
     
@@ -4946,12 +4851,10 @@ core.register_node("nh_nodes:torch3", {
     
     groups = {choppy = 2, oddly_breakable_by_hand = 3, flammable = 1}, -- dig_immediate = 3, attached_node = 1
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}
     },
     
@@ -5098,10 +5001,8 @@ core.register_node("nh_nodes:kelp", {
     paramtype = "light",
     paramtype2 = "leveled",
     groups = {snappy = 3},
-    selection_box = {
-        type = "fixed",
-        fixed = {
-                {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+    selection_box = {type = "fixed",
+        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
                 {-2/16, 0.5, -2/16, 2/16, 3.5, 2/16},
         },
     },
@@ -5415,12 +5316,10 @@ core.register_node("nh_nodes:giantcrabstatue", {
     
     light_source = 7,
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-1.75, -0.5, -1.5, 1.75, 3.75, 1.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-1.75, -0.5, -2.5, 1.75, 3.75, 1.5}
     },
     
@@ -5494,12 +5393,10 @@ core.register_node("nh_nodes:redcrystal", {
     
     light_source = 14,
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
     },
     
@@ -5542,12 +5439,10 @@ core.register_node("nh_nodes:sentinelstatue", {
     
     light_source = 7,
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.65, -0.5, -0.65, 0.65, 3.5, 0.65}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.65, -0.5, -0.65, 0.65, 3.5, 0.65}
     },
     
@@ -5620,12 +5515,10 @@ core.register_node("nh_nodes:sphere", {
     paramtype2 = "facedir",
     groups = {oddly_breakable_by_hand = 1, not_in_creative_inventory = 0},
 
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
     },
 
@@ -5651,12 +5544,10 @@ core.register_node("nh_nodes:sphere_placed", {
     groups = {oddly_breakable_by_hand = 1, not_in_creative_inventory = 1},
     light_source = 9,
 
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}
     },
 
@@ -5777,12 +5668,10 @@ core.register_node("nh_nodes:orb_empty", {
     },
     wielded_visual_size = {x = 0.2, y = 0.2, z = 0.2},
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.14, -0.5, -0.14, 0.14, 0, 0.14}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.14, -0.5, -0.14, 0.14, -0.15, 0.14}
     },
 })
@@ -5806,12 +5695,10 @@ function register_orb_egg(mob_name, description, texture)
         paramtype2 = "facedir",
         groups = {oddly_breakable_by_hand = 1},
         
-        collision_box = {
-            type = "fixed",
+        collision_box = {type = "fixed",
             fixed = {-0.14, -0.5, -0.14, 0.14, 0, 0.14}
         },
-        selection_box = {
-            type = "fixed",
+        selection_box = {type = "fixed",
             fixed = {-0.14, -0.5, -0.14, 0.14, -0.15, 0.14}
         },
         
@@ -5856,12 +5743,10 @@ core.register_node("nh_nodes:nut", {
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.30, 0.08}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.30, 0.08}
     },
     
@@ -6005,12 +5890,10 @@ core.register_node("nh_nodes:apple", {
     paramtype2 = "facedir",
     groups = {snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1, falling_node = 1},
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
     
@@ -6035,12 +5918,10 @@ core.register_node("nh_nodes:blueberry", {
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.03, -0.5, -0.03, 0.03, -0.44, 0.03}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.03, -0.5, -0.03, 0.03, -0.44, 0.03}
     },
     
@@ -6063,12 +5944,10 @@ core.register_node("nh_nodes:chickenegg", {
     groups = {oddly_breakable_by_hand = 1, falling_node = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.25, 0, -0.25, 0.25, 0.1, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.28, 0.08}
     },
     --visual_size = {x = 15, y = 15},
@@ -6091,12 +5970,10 @@ core.register_node("nh_nodes:friedchickenegg", {
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.25, 0, -0.25, 0.25, 0.1, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.08, -0.5, -0.08, 0.08, -0.28, 0.08}
     },
     --visual_size = {x = 15, y = 15},
@@ -6119,12 +5996,10 @@ core.register_node("nh_nodes:worm", {
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, -0.4, 0.1}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.1, -0.5, -0.1, 0.1, -0.4, 0.1}
     },
     visual_size = {x = 15, y = 15},
@@ -6166,12 +6041,10 @@ core.register_node("nh_nodes:chicken", {
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
     },
     visual_size = {x = 15, y = 15},
@@ -6189,12 +6062,10 @@ core.register_node("nh_nodes:rawchicken", {
     groups = {snappy = 3, oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
     },
     --visual_size = {x = 15, y = 15},
@@ -6226,12 +6097,10 @@ core.register_node("nh_nodes:roastchicken", {
     groups = {oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
     },
     visual_size = {x = 15, y = 15},
@@ -6264,12 +6133,10 @@ core.register_node("nh_nodes:tuna", {
     walkable = false,
     --sounds = default.node_sound_wood_defaults(),
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}
     },
     
@@ -7683,14 +7550,11 @@ core.register_node("nh_nodes:basalt", {
 
 core.register_node("nh_nodes:basalt_ramp", {
     description = S("Basalt Ramp"),
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype  = "light",
     paramtype2 = "facedir",
     drawtype = "mesh",
     mesh = "grass_slope.obj",
     tiles = {"basalt_slope.png"},
-    -- Dentro do register_node:
     groups = {cracky=3, soil=1, falling_node = 1, not_blocking_trains=1},
     drop = "nh_nodes:basalt",
 
@@ -7701,9 +7565,9 @@ core.register_node("nh_nodes:basalt_ramp", {
     place = {name = "punchtimber3", gain = 0.5},
     },
 
--- E adicione essa propriedade:
+
 sunlight_propagates = true,
-    --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
+    --sounds = nh_nodes.sounds.dirt,  
     
 selection_box = {
     type = "fixed",
@@ -7743,10 +7607,9 @@ core.register_node("nh_nodes:basalt_corner", {
 
 -- E adicione essa propriedade:
 sunlight_propagates = true,
-    --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
-collision_box = {
-    type = "fixed",
+    --sounds = nh_nodes.sounds.dirt, 
+    
+collision_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- Topo 
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5}, -- Base principal
@@ -7755,8 +7618,7 @@ collision_box = {
 
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- topo
         {-0.5, -0.5, 0.0,  0.0,  0.0,  0.5},  -- Base principal
@@ -7790,31 +7652,19 @@ core.register_node("nh_nodes:basalt_insidecorner", {
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
-        -- Base completa (metade inferior)
-        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
-
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- faixa Z-
-        
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- faixa Z-
-        
-        -- Topo braço 2: faixa lateral (X-)
-        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- faixa X-
-
+        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5}, -- Base completa (metade inferior)
+        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5}, -- Topo braço 1: faixa traseira (Z-)
+        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0}, -- Topo braço 1: faixa traseira (Z-)
+        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5}, -- Topo braço 2: faixa lateral (X-)
     },
 },
-selection_box = {
-    type = "fixed",
-    fixed = {
-        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
+selection_box = {type = "fixed",
+    fixed = {{-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},
         {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},
-        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},
-    },
+        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},},
 },
 })
    
@@ -7952,7 +7802,6 @@ core.register_abm({
     action = function(pos, node)
         -- Pega todos os objetos em raio de 1 bloco (toca as faces)
         local objects = core.get_objects_inside_radius(pos, 1.1)
-
         for _, obj in ipairs(objects) do
             if obj:is_player() then
                 obj:set_hp(obj:get_hp() - 2) -- tira 1 coração por segundo
@@ -8028,15 +7877,11 @@ core.register_node("nh_nodes:page_node", {
         
         local player_name = clicker:get_player_name()
         local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
-        
         if not has_feather or not has_ink then
-        local msg = S("I think I need ")
-        if not has_feather and not has_ink then
-        msg = msg .. S("a feather in the hotbar and an ink bottle in the inventory to write.")
-        elseif not has_feather then
-        msg = msg .. S("a feather in the hotbar to write.")
-        else
-        msg = msg .. S("an ink bottle in the inventory to write.")
+            local msg = S("I think I need ")
+            if not has_feather and not has_ink then msg = msg .. S("a feather in the hotbar and an ink bottle in the inventory to write.")
+            elseif not has_feather then msg = msg .. S("a feather in the hotbar to write.")
+            else msg = msg .. S("an ink bottle in the inventory to write.")
         end
         core.chat_send_player(player_name, msg)
         return
@@ -8233,11 +8078,9 @@ local prefix = "nh_items:page_writer:"
     end
 end)
 
-
 ---------
 -- Baú geral
 --------
-
 -- Função para atualizar itens visuais no baú
 function oak_chest_update_items(pos)
     local node = core.get_node(pos)
@@ -8952,9 +8795,8 @@ end
 ---------------------------
 -- ITEM ARREMESSÁVEL
 ---------------------------
----------------------------
+
 -- FUNÇÃO DE ARREMESSO
----------------------------
 local function throw_pebble(itemstack, placer)
     if not placer or not placer:is_player() then
         return itemstack
@@ -8982,9 +8824,7 @@ local function throw_pebble(itemstack, placer)
     return itemstack
 end
 
----------------------------
 -- ITEM SEIXO ARREMESSÁVEL
----------------------------
 local function update_neighbors(pos)
     local offsets = {
         {x=0, y=1, z=0},
@@ -9208,8 +9048,7 @@ core.register_entity("nh_nodes:pebble_entity", {
             end
         end
 
-        -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
-        local objs = core.get_objects_inside_radius(pos, 1.2)
+        local objs = core.get_objects_inside_radius(pos, 1.2) -- Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
@@ -9218,7 +9057,7 @@ core.register_entity("nh_nodes:pebble_entity", {
 
                 if not is_target then
                     local ent = obj:get_luaentity()
-                    -- ✅ Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    -- Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
                     if ent and ent.name ~= "nh_nodes:pebble_entity" then
                         local hp = obj:get_hp()
                         if hp and hp > 0 then
@@ -9301,22 +9140,15 @@ core.register_node("nh_nodes:stick", {
     drawtype = "mesh",
     mesh = "stick.obj",
     tiles = {"stick.png"},
-
     range = 4,
-
     groups = {oddly_breakable_by_hand = 1, flammable = 2, falling_node = 1},
-
     paramtype = "light",
     
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07},
-        },
+    collision_box = {type = "fixed",
+        fixed = {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07},
     },
 
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07},
     },
     
@@ -12371,12 +12203,10 @@ core.register_node("nh_nodes:copperhelmet", {
         
     walkable = false,
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
     
@@ -12411,12 +12241,10 @@ core.register_node("nh_nodes:copperchestplate", {
         
     walkable = false,
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
     
@@ -12447,12 +12275,10 @@ core.register_node("nh_nodes:fauld", {
         
     walkable = false,
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
     
@@ -12483,12 +12309,10 @@ core.register_node("nh_nodes:leggings", {
         
     walkable = false,
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.3, -0.5, -0.3, 0.3, 0.1, 0.3}
     },
     
@@ -12528,13 +12352,11 @@ core.register_node("nh_nodes:oakdoor_closed", {
     groups = {choppy = 3, door = 1},
     --sounds = default.node_sound_wood_defaults(),
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, -0.375}  -- 3 blocos de altura, fina
     },
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.3, 0.5, 2.5, 0.05}
     },
     
@@ -12580,13 +12402,11 @@ core.register_node("nh_nodes:oakdoor_open", {
     
     walkable = false,
     
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.38, -0.375, 2.5, 0.63}  -- Porta na lateral quando aberta
     },
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, -0.38, -0.375, 2.5, 0.63}  -- Colisão fina na lateral
     },
     

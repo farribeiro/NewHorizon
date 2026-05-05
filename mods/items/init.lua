@@ -1,6 +1,6 @@
 -- ITEMS
 core.log("action", "[items] init.lua carregado")
-local S = minetest.get_translator("nh_items")
+local S = core.get_translator("nh_items")
 -- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}
 -- Itens necessários para escrever
