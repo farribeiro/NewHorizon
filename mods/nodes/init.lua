@@ -1593,79 +1593,76 @@ register_craft_station("nh_nodes:dirt", {
         pos = {x = 0.5, y = 0.5, z = 1.65}
         --rot = {x = 0, y = 0, z = -110}
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    
     offhand_bone_position = {
         pos = {x = 1.5, y = 0, z = 0}
         --rot = {x = 0, y = 0, z = -110}
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
   
-on_construct = function(pos)
-    local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-    local node_above = core.get_node(above).name
-    local light = core.get_node_light(above)
+  
+    on_construct = function(pos)
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local node_above = core.get_node(above).name
+        local light = core.get_node_light(above)
     
-    --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
-   -- core.chat_send_all("   Bloco acima: " .. node_above)
+        --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
+       -- core.chat_send_all("   Bloco acima: " .. node_above)
 
-    if  light and light > 4 then
-        core.get_node_timer(pos):start(math.random(30, 60))
-       -- core.chat_send_all("   ✅ Timer iniciado!")
-    else
+        if  light and light > 4 then
+            core.get_node_timer(pos):start(math.random(30, 60))
+           -- core.chat_send_all("   ✅ Timer iniciado!")
+        else
         --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
-    end
-end,
+        end
+    end,
 
-on_timer = function(pos, elapsed)
-    local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-    local node_above = core.get_node(above).name
-    local light = core.get_node_light(above)
+    on_timer = function(pos, elapsed)
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local node_above = core.get_node(above).name
+        local light = core.get_node_light(above)
 
-    -- Bloco líquido ou lava acima impede virar grama
-    local blocked_nodes = {
-        ["nh_nodes:water"]    = true,
-        ["nh_nodes:water_flowing"]    = true,
-        ["nh_nodes:water2"]   = true,
-        ["nh_nodes:water2_flowing"]    = true,
-        ["nh_nodes:lava"]     = true,
-        ["nh_nodes:lava_flowing"]    = true,
-        ["nh_nodes:bluelava"] = true,
-        ["nh_nodes:bluelava_flowing"]    = true,
-    }
-
-    if blocked_nodes[node_above] then
-        return false  -- Para o timer; terra fica como terra
-    end
-
-    if light and light <= 4 then
-        return false
-    end
-
-    if light and light > 4 then
-        local neighbors = {
-            -- (todo o seu código de vizinhos permanece igual)
-            {x = pos.x + 1, y = pos.y, z = pos.z},
-            -- ...
+        -- Bloco líquido ou lava acima impede virar grama
+        local blocked_nodes = {
+            ["nh_nodes:water"]    = true,
+            ["nh_nodes:water_flowing"]    = true,
+            ["nh_nodes:water2"]   = true,
+            ["nh_nodes:water2_flowing"]    = true,
+            ["nh_nodes:lava"]     = true,
+            ["nh_nodes:lava_flowing"]    = true,
+            ["nh_nodes:bluelava"] = true,
+            ["nh_nodes:bluelava_flowing"]    = true,
         }
 
-        local has_grass_neighbor = false
-        for _, npos in ipairs(neighbors) do
-            local neighbor_name = core.get_node(npos).name
-            if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
-                has_grass_neighbor = true
-                break
+        if blocked_nodes[node_above] then
+            return false  -- Para o timer; terra fica como terra
+        end
+
+        if light and light <= 4 then
+            return false
+        end
+
+        if light and light > 4 then
+            local neighbors = {
+                -- (todo o seu código de vizinhos permanece igual)
+                {x = pos.x + 1, y = pos.y, z = pos.z},
+            }
+
+            local has_grass_neighbor = false
+            for _, npos in ipairs(neighbors) do
+                local neighbor_name = core.get_node(npos).name
+                if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
+                    has_grass_neighbor = true
+                    break
+                end
+            end
+
+            if has_grass_neighbor then
+                core.set_node(pos, {name = "nh_nodes:top_grass"})
+                return false
             end
         end
 
-        if has_grass_neighbor then
-            core.set_node(pos, {name = "nh_nodes:top_grass"})
-            return false
-        end
-    end
-
-    return true
-end,
+        return true
+    end,
   
     
     title = S("2x2 Craft on the Dirt"),  -- Campo obrigatório!
@@ -8082,15 +8079,22 @@ end)
 -- Baú geral
 --------
 -- Função para atualizar itens visuais no baú
-function oak_chest_update_items(pos)
+-- Mapa de node aberto → nome da entidade do baú correspondente
+local CHEST_ENTITY_BY_NODE = {
+    ["nh_nodes:oak_chest_open"]  = "nh_nodes:oak_chest_entity",
+    ["nh_nodes:back_chest_open"] = "nh_nodes:back_chest_entity",
+}
+
+function chest_update_items(pos)
     local node = core.get_node(pos)
-    if node.name ~= "nh_nodes:oak_chest_open" then
+    local entity_name = CHEST_ENTITY_BY_NODE[node.name]
+    if not entity_name then
         return
     end
-    
+
     local meta = core.get_meta(pos)
-    local inv = meta:get_inventory()
-    
+    local inv  = meta:get_inventory()
+
     -- Remover entidades de itens antigas
     local objects = core.get_objects_inside_radius(pos, 1)
     for _, obj in ipairs(objects) do
@@ -8098,35 +8102,34 @@ function oak_chest_update_items(pos)
             obj:remove()
         end
     end
-    
+
     -- Procurar a entidade do baú aberto para anexar os itens
     local chest_entity = nil
     for _, obj in ipairs(objects) do
         local luaent = obj:get_luaentity()
-        if luaent and luaent.name == "nh_nodes:oak_chest_entity" then
+        if luaent and luaent.name == entity_name then
             chest_entity = obj
             break
         end
     end
-    
+
     -- Se não houver entidade do baú, criar uma invisível para servir de base
     if not chest_entity then
-        chest_entity = core.add_entity(pos, "nh_nodes:oak_chest_entity")
+        chest_entity = core.add_entity(pos, entity_name)
         if chest_entity and chest_entity:get_luaentity() then
             local luaent = chest_entity:get_luaentity()
-            luaent.node_pos = pos
+            luaent.node_pos    = pos
             luaent.is_invisible = true
-            
             -- Aplicar rotação
             local yaw = core.facedir_to_dir(node.param2)
             chest_entity:set_yaw(core.dir_to_yaw(yaw))
         end
     end
-    
+
     if not chest_entity then
         return
     end
-    
+
     -- Criar novas entidades para cada item (máximo 16 bones)
     for i = 1, math.min(16, inv:get_size("main")) do
         local stack = inv:get_stack("main", i)
@@ -8134,10 +8137,9 @@ function oak_chest_update_items(pos)
             local entity = core.add_entity(pos, "nh_nodes:chest_item")
             if entity and entity:get_luaentity() then
                 local luaent = entity:get_luaentity()
-                luaent.chest_pos = pos
+                luaent.chest_pos  = pos
                 luaent.slot_index = i
                 luaent:update_item(stack:get_name())
-                
                 -- Anexar ao bone correspondente do baú
                 entity:set_attach(chest_entity, "bone"..i, {x=0, y=0, z=0}, {x=0, y=0, z=0})
             end
@@ -8145,12 +8147,16 @@ function oak_chest_update_items(pos)
     end
 end
 
+-- Aliases para compatibilidade retroativa (redirecionam para chest_update_items)
+oak_chest_update_items  = chest_update_items
+back_chest_update_items = chest_update_items
+
 -- Entidade para representar itens no baú
 core.register_entity("nh_nodes:chest_item", {
     initial_properties = {
         visual = "wielditem",
         wield_item = "air",
-        visual_size = {x=0.1, y=0.1},  -- Tamanho reduzido (era 0.25)
+        visual_size = {x=0.15, y=0.15},  -- Tamanho reduzido (o tamanho do modelo é 10 e dos bones 1)
         physical = false,
         collide_with_objects = false,
         pointable = false,
@@ -8178,7 +8184,7 @@ core.register_entity("nh_nodes:chest_item", {
         end
         
         local node = core.get_node(self.chest_pos)
-        if node.name ~= "nh_nodes:oak_chest_open" then
+        if node.name ~= "nh_nodes:oak_chest_open" and node.name ~= "nh_nodes:back_chest_open" then
             self.object:remove()
         end
     end,
@@ -8267,8 +8273,8 @@ core.register_node("nh_nodes:oakchest", {
         meta:set_string("formspec",
             "size[8,9]"..
             "list[current_name;main;0,0.3;8,2;]"..
-            "list[current_player;main;0,4.85;8,1;]"..
-            "list[current_player;main;0,6.08;8,3;8]"..
+            "list[current_player;main;0,5.85;8,2;8]"..
+            "list[current_player;main;0,8.05;8,1;]"..
             "listring[current_name;main]"..
             "listring[current_player;main]"
         )
@@ -8432,8 +8438,8 @@ core.register_node("nh_nodes:oak_chest", {
         meta:set_string("formspec",
             "size[8,9]"..
             "list[current_name;main;0,0.3;8,2;]"..
-            "list[current_player;main;0,4.85;8,1;]"..
-            "list[current_player;main;0,6.08;8,3;8]"..
+            "list[current_player;main;0,5.85;8,2;8]"..
+            "list[current_player;main;0,8.05;8,1;]"..
             "listring[current_name;main]"..
             "listring[current_player;main]"
         )
@@ -12082,31 +12088,433 @@ core.register_node("nh_nodes:belt", {
 })
 
 -- Mochila
+-- ============================================================
+-- BACKCHEST – funciona exatamente como o oakchest
+-- ============================================================
+
+-- =============================================================
+-- Tabela global: armazena conteúdo de backchests quebrados
+-- Chave: ID único (string) gravado no meta do item dropado
+-- =============================================================
+backchest_stored_items = backchest_stored_items or {}
+
+local function backchest_new_id()
+    -- ID baseado em tempo + número aleatório para ser único
+    return tostring(os.time()) .. "_" .. tostring(math.random(1, 999999))
+end
+
+local function backchest_save_inv(pos)
+    local meta = core.get_meta(pos)
+    local inv  = meta:get_inventory()
+    local slots = {}
+    for i = 1, inv:get_size("main") do
+        local stack = inv:get_stack("main", i)
+        -- Salva todos os slots (vazios como ""), preservando posições exatas
+        slots[i] = stack:to_string()
+    end
+    return slots
+end
+
+local function backchest_restore_inv(pos, slots)
+    local meta = core.get_meta(pos)
+    local inv  = meta:get_inventory()
+    for i, item_str in ipairs(slots) do
+        inv:set_stack("main", i, ItemStack(item_str))
+    end
+end
+
+-- Função auxiliar: atualiza itens visuais no backchest aberto
+
+
+-- Node: backchest aberto (estado intermediário)
+core.register_node("nh_nodes:back_chest_open", {
+    drawtype  = "mesh",
+    mesh      = "backchest_open.obj",
+    tiles     = {"BackChest.png"},
+    walkable  = true,
+    pointable = true,
+    paramtype  = "light",
+    paramtype2 = "facedir",
+
+    selection_box = {type = "fixed", fixed = {-0.5,-0.5,-0.5, 0.5,0.5,0.5}},
+    collision_box = {type = "fixed", fixed = {-0.5,-0.5,-0.5, 0.5,0.5,0.5}},
+
+    groups = {not_in_creative_inventory = 1},
+
+    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        local meta        = core.get_meta(pos)
+        local player_name = clicker:get_player_name()
+        meta:set_string("current_user", player_name)
+        core.show_formspec(player_name,
+            "nh_nodes:back_chest_"..core.pos_to_string(pos),
+            meta:get_string("formspec"))
+        return itemstack
+    end,
+
+    on_construct = function(pos)
+        core.after(0.1, function() back_chest_update_items(pos) end)
+    end,
+
+    after_place_node = function(pos, placer, itemstack, pointed_thing)
+        core.after(0.1, function() back_chest_update_items(pos) end)
+    end,
+
+    -- Permite quebrar o baú mesmo estando aberto
+    can_dig = function(pos, player)
+        return true
+    end,
+
+    -- Mesma lógica de salvamento do node fechado
+    on_dig = function(pos, node, digger)
+        local meta = core.get_meta(pos)
+        local inv  = meta:get_inventory()
+        local has_items = not inv:is_empty("main")
+
+        local chest_id = meta:get_string("chest_id")
+        if chest_id == "" then
+            chest_id = backchest_new_id()
+        end
+
+        if has_items then
+            backchest_stored_items[chest_id] = backchest_save_inv(pos)
+        else
+            backchest_stored_items[chest_id] = nil
+            chest_id = ""
+        end
+
+        local drop = ItemStack("nh_nodes:backchest")
+        if chest_id ~= "" then
+            local drop_meta = drop:get_meta()
+            drop_meta:set_string("chest_id", chest_id)
+            drop_meta:set_string("description",
+                S("Backpack Chest") .. "\n" .. S("(contains items)"))
+        end
+
+        core.remove_node(pos)
+        core.add_item(pos, drop)
+
+        -- Remove todas as entidades visuais ligadas ao baú aberto
+        for _, obj in ipairs(core.get_objects_inside_radius(pos, 1)) do
+            local ent = obj:get_luaentity()
+            if ent and (
+                ent.name == "nh_nodes:chest_item" or
+                ent.name == "nh_nodes:back_chest_entity" or
+                ent.name == "nh_nodes:back_chest_close_entity"
+            ) then
+                obj:remove()
+            end
+        end
+    end,
+})
+
+-- Entidade de animação de abertura do backchest
+core.register_entity("nh_nodes:back_chest_entity", {
+    initial_properties = {
+        visual               = "mesh",
+        mesh                 = "backchest.glb",
+        textures             = {"BackChest.png"},
+        visual_size          = {x=1, y=1, z=1},
+        physical             = false,
+        collide_with_objects = false,
+        pointable            = false,
+        static_save          = false,
+        paramtype            = "light",
+        paramtype2           = "facedir",
+    },
+
+    node_pos           = nil,
+    original_param2    = 0,
+    timer              = 0,
+    animation_finished = false,
+    is_invisible       = false,
+
+    on_activate = function(self, staticdata)
+        self.object:set_armor_groups({immortal=1})
+    end,
+
+    on_step = function(self, dtime)
+        if self.is_invisible then return end
+        self.timer = self.timer + dtime
+        if self.timer > 0.3 and not self.animation_finished then
+            self.animation_finished = true
+            self.object:set_animation({x=0.25, y=0.25}, 0, 0, false)
+        end
+    end,
+})
+
+-- Entidade de animação de fechamento do backchest
+core.register_entity("nh_nodes:back_chest_close_entity", {
+    initial_properties = {
+        visual               = "mesh",
+        mesh                 = "backchest.glb",
+        textures             = {"BackChest.png"},
+        visual_size          = {x=1, y=1, z=1},
+        physical             = false,
+        collide_with_objects = false,
+        pointable            = false,
+        static_save          = false,
+        paramtype            = "light",
+        paramtype2           = "facedir",
+    },
+
+    node_pos        = nil,
+    original_param2 = 0,
+    timer           = 0,
+
+    on_activate = function(self, staticdata)
+        self.object:set_armor_groups({immortal=1})
+    end,
+
+    on_step = function(self, dtime)
+        self.timer = self.timer + dtime
+        if self.timer > 0.3 then
+            -- Remove itens visuais
+            if self.node_pos then
+                local objects = core.get_objects_inside_radius(self.node_pos, 1)
+                for _, obj in ipairs(objects) do
+                    local luaent = obj:get_luaentity()
+                    if luaent and luaent.name == "nh_nodes:chest_item" then
+                        obj:remove()
+                    end
+                end
+            end
+
+            self.object:remove()
+
+            -- Troca de volta para node fechado
+            if self.node_pos then
+                local node = core.get_node(self.node_pos)
+                if node.name == "nh_nodes:back_chest_open" then
+                    core.swap_node(self.node_pos,
+                        {name = "nh_nodes:backchest", param2 = self.original_param2})
+                end
+            end
+        end
+    end,
+})
+
+-- Detectar fechamento do formspec do backchest
+core.register_on_player_receive_fields(function(player, formname, fields)
+    local prefix = "nh_nodes:back_chest_"
+    if formname:sub(1, #prefix) ~= prefix then return end
+
+    local pos_string = formname:sub(#prefix + 1)
+    local pos        = core.string_to_pos(pos_string)
+    if not pos then return end
+
+    local node = core.get_node(pos)
+    if node.name ~= "nh_nodes:back_chest_open" then return end
+
+    local meta         = core.get_meta(pos)
+    local current_user = meta:get_string("current_user")
+    local player_name  = player:get_player_name()
+
+    if current_user ~= player_name then return end
+
+    meta:set_string("current_user", "")
+
+    local objects      = core.get_objects_inside_radius(pos, 0.5)
+    local chest_entity = nil
+    for _, obj in ipairs(objects) do
+        local luaent = obj:get_luaentity()
+        if luaent and luaent.name == "nh_nodes:back_chest_entity" then
+            chest_entity = obj
+            break
+        end
+    end
+
+    local close_entity = core.add_entity(pos, "nh_nodes:back_chest_close_entity")
+    if close_entity and close_entity:get_luaentity() then
+        local luaentity         = close_entity:get_luaentity()
+        luaentity.node_pos      = pos
+        luaentity.original_param2 = node.param2
+
+        if chest_entity then
+            for _, obj in ipairs(objects) do
+                local luaent = obj:get_luaentity()
+                if luaent and luaent.name == "nh_nodes:chest_item" then
+                    local slot = luaent.slot_index
+                    obj:set_attach(close_entity, "bone"..slot, {x=0,y=0,z=0}, {x=0,y=0,z=0})
+                end
+            end
+            chest_entity:remove()
+        end
+
+        local yaw = core.facedir_to_dir(node.param2)
+        close_entity:set_yaw(core.dir_to_yaw(yaw) + math.pi)
+        close_entity:set_animation({x=0.25, y=0}, 30, 0, false)
+    end
+end)
+
+-- Detectar mudanças no inventário do backchest (atualiza itens visuais)
+core.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
+    if action ~= "move" and action ~= "put" and action ~= "take" then return end
+    if inventory_info.to_list ~= "main" and inventory_info.from_list ~= "main" then return end
+
+    local player_name = player:get_player_name()
+    local player_pos  = player:get_pos()
+    if not player_pos then return end
+
+    for _, obj in ipairs(core.get_objects_inside_radius(player_pos, 10)) do
+        if obj:is_player() then goto backcontinue end
+        local pos = obj:get_pos()
+        if not pos then goto backcontinue end
+        local node = core.get_node_or_nil(pos)
+        if not node then goto backcontinue end
+        if node.name == "nh_nodes:back_chest_open" then
+            local meta = core.get_meta(pos)
+            if meta:get_string("current_user") == player_name then
+                back_chest_update_items(pos)
+            end
+        end
+        ::backcontinue::
+    end
+end)
+
+-- Node principal: backchest (fechado)
 core.register_node("nh_nodes:backchest", {
     description = S("Backpack Chest"),
-    drawtype = "mesh",
-    mesh = "backchest.obj",
-    tiles = {"BackChest.png"},
-    --inventory_image = "bag_basic.png",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, armor_back = 1},
-    stack_max = 1,  -- limita a 1 por slot
-    visual = "wielditem",
-    visual_size = {x=0.5, y=0.5, z=0.5},
-    paramtype = "light",
+    drawtype    = "mesh",
+    mesh        = "backchest.obj",
+    tiles       = {"BackChest.png"},
+    walkable    = true,
+    pointable   = true,
+
+    paramtype  = "light",
     paramtype2 = "facedir",
-    
+    groups     = {snappy = 3, oddly_breakable_by_hand = 1, armor_back = 1},
+    stack_max  = 1,
+
     -- Configuração mão direita
     wielded_bone_position = {
         pos = {x = 0.5, y = 0.5, z = 1.7}
-        --rot = {x = 0, y = 0, z = -110}
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-        
     offhand_bone_position = {
-        pos = {x = -2, y = -1, z = 1.8}
-        --rot = {x = 0, y = 0, z = -110}
+        pos = {x = -1, y = -0.5, z = 1.8}
     },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+
+    collision_box = {type = "fixed", fixed = {-0.5,-0.5,-0.5, 0.5,0.5,0.5}},
+    selection_box = {type = "fixed", fixed = {-0.5,-0.5,-0.5, 0.5,0.5,0.5}},
+
+    -- Criar inventário ao construir
+    on_construct = function(pos)
+        local meta = core.get_meta(pos)
+        local inv  = meta:get_inventory()
+        inv:set_size("main", 8*2)
+        meta:set_string("formspec",
+            "size[8,9]"..
+            "list[current_name;main;0,0.3;8,2;]"..
+            "list[current_player;main;0,5.85;8,2;8]"..
+            "list[current_player;main;0,8.05;8,1;]"..
+            "listring[current_name;main]"..
+            "listring[current_player;main]"
+        )
+        meta:set_string("infotext", S("Backpack Chest"))
+    end,
+
+    -- Permite quebrar mesmo com itens dentro
+    can_dig = function(pos, player)
+        return true
+    end,
+
+    -- Ao quebrar: salva o conteúdo na tabela global e grava o ID no item dropado
+    on_dig = function(pos, node, digger)
+        local meta = core.get_meta(pos)
+        local inv  = meta:get_inventory()
+        local has_items = not inv:is_empty("main")
+
+        -- Gera ou reutiliza ID existente (caso o baú já tenha sido colocado antes)
+        local chest_id = meta:get_string("chest_id")
+        if chest_id == "" then
+            chest_id = backchest_new_id()
+        end
+
+        if has_items then
+            -- Salva todos os slots na tabela global
+            backchest_stored_items[chest_id] = backchest_save_inv(pos)
+        else
+            -- Sem itens: limpa entrada antiga se existir
+            backchest_stored_items[chest_id] = nil
+            chest_id = ""
+        end
+
+        -- Remove o node e dropa o item
+        local drop = ItemStack("nh_nodes:backchest")
+        if chest_id ~= "" then
+            local drop_meta = drop:get_meta()
+            drop_meta:set_string("chest_id", chest_id)
+            -- Mostra indicação visual no item de que tem conteúdo
+            drop_meta:set_string("description",
+                S("Backpack Chest") .. "\n" .. S("(contains items)"))
+        end
+
+        core.remove_node(pos)
+        core.add_item(pos, drop)
+
+        -- Remove entidades visuais que possam ter sobrado
+        for _, obj in ipairs(core.get_objects_inside_radius(pos, 1)) do
+            local ent = obj:get_luaentity()
+            if ent and (
+                ent.name == "nh_nodes:chest_item" or
+                ent.name == "nh_nodes:back_chest_entity" or
+                ent.name == "nh_nodes:back_chest_close_entity"
+            ) then
+                obj:remove()
+            end
+        end
+    end,
+
+    -- Abrir baú ao clicar
+    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        local current_node = core.get_node(pos)
+        core.swap_node(pos, {name = "nh_nodes:back_chest_open", param2 = current_node.param2})
+
+        -- Remove entidades de animação antigas
+        local objects = core.get_objects_inside_radius(pos, 0.5)
+        for _, obj in ipairs(objects) do
+            if obj:get_luaentity() and obj:get_luaentity().name == "nh_nodes:back_chest_entity" then
+                obj:remove()
+            end
+        end
+
+        -- Cria entidade de animação de abertura
+        local entity = core.add_entity(pos, "nh_nodes:back_chest_entity")
+        if entity and entity:get_luaentity() then
+            local luaentity           = entity:get_luaentity()
+            luaentity.node_pos        = pos
+            luaentity.original_param2 = current_node.param2
+            local yaw = core.facedir_to_dir(current_node.param2)
+            entity:set_yaw(core.dir_to_yaw(yaw) + math.pi)
+            entity:set_animation({x=0, y=0.25}, 1, 0, false)
+        end
+
+        local meta        = core.get_meta(pos)
+        local player_name = clicker:get_player_name()
+        meta:set_string("current_user", player_name)
+
+        back_chest_update_items(pos)
+
+        core.show_formspec(player_name,
+            "nh_nodes:back_chest_"..core.pos_to_string(pos),
+            meta:get_string("formspec"))
+
+        return itemstack
+    end,
+
+    -- Ao colocar: restaura inventário a partir da tabela global via ID do item
+    after_place_node = function(pos, placer, itemstack, pointed_thing)
+        local item_meta = itemstack:get_meta()
+        local chest_id  = item_meta:get_string("chest_id")
+
+        if chest_id ~= "" and backchest_stored_items[chest_id] then
+            local meta = core.get_meta(pos)
+            -- Grava o mesmo ID no node para futuras quebras
+            meta:set_string("chest_id", chest_id)
+            backchest_restore_inv(pos, backchest_stored_items[chest_id])
+            -- Libera da tabela: agora o inventário vive no node
+            backchest_stored_items[chest_id] = nil
+        end
+    end,
 })
 
 
@@ -12848,21 +13256,27 @@ core.register_on_newplayer(function(player)
     local meta = page:get_meta()
     meta:set_string("text",
         S("--- THE NEW HORIZON ---") .. "\n\n" ..
+        S("If you're reading this, it's because you've lost your memory or perhaps you've never experienced this before...") .. "\n\n" ..
+        S("Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore.") .. "\n" ..
+        S("Anywhere you can also:") .. "\n" ..    
+        "- " .. S("Crawl (press sneak + hold sneak)") .. "\n" ..  
+        "- " .. S("Sit (hold sneak + 2x Aux1 / E)") .. "\n" ..  
+        "- " .. S("Lie down (sitting press: 2x Aux1 / E) [Return to sitting: 2x Aux1 / E]") .. "\n\n" ..  
         S("General guide:") .. "\n\n" ..
         "- " .. S("Collect pebbles on the ground to craft a tool") .. "\n" ..
         "- " .. S("Some pebbles create sparks when struck together") .. "\n" ..
         "- " .. S("Try to make fire by spreading a spark onto nearby material") .. "\n" ..
         "- " .. S("Light torches by using them on fire") .. "\n" ..
-        "- " .. S("Activate your mind (Aux1 / E) and touch ground blocks to idealize crafts") .. "\n" ..
-        "- " .. S("Crafts do not depend on material arrangement, only quantities") .. "\n" ..
-        "- " .. S("Check the other pages if in doubt") .. "\n" ..
+        "- " .. S("Activate your observation (Aux1 / E) and touch ground blocks to idealize crafts") .. "\n" ..
+        "- " .. S("Crafting doesn't depend on the arrangement of the items. Just spread the correct quantities across the grid slots.") .. "\n" ..
         "- " .. S("There are hidden chests around the world, but don't expect great rewards") .. "\n" ..
         "- " .. S("They say there is a lost book called Archion that can grant everything this world has to offer") .. "\n" ..
         "- " .. S("Someone could have summoned the book using their unlimited creative power by saying: '/grantme all' and '/giveme nh_nodes:archion'") .. "\n" ..
         "- " .. S("According to legend, there are also creatures that only appear in specific locations") .. "\n" ..
-        "- " .. S("Some tried to escape, but couldn't — this world seems to have no limits.") .. "\n\n" ..
-        S("Good luck...") .. "\n\n\n\n\n\n\n\n" ..
-        "                                                                                     9"
+        "- " .. S("Some tried to escape, but couldn't — this world seems to have no limits.") .. "\n" ..
+        "- " .. S("Check the other pages if in doubt") .. "\n\n" ..
+        S("Good luck...") .. "\n\n" ..
+        "                                                                                                 9"
     )
 
     inv:set_stack("main", 2, page)

@@ -1,0 +1,12 @@
+# textdomain: nh_body
+
+head=cabeça
+torso=tronco
+arms=braços
+legs=pernas
+back=costas
+waist=cintura
+hands=mãos
+feet=pés
+
+I can't put a backpack chest inside itself, nor another one inside this one on my back while I'm wearing it...=Não consigo colocar uma mochila baú dentro dela mesma, nem outra dentro dessa nas minhas costas enquanto vestida...

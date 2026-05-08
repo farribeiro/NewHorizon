@@ -1,4 +1,5 @@
 minetest.log("action", "[body] Mod carregado")
+local S = core.get_translator("nh_body")
 local function sit_log(player_name, msg)   minetest.log("action", "[SIT DEBUG] [" .. player_name .. "] " .. msg) end --aqui
 -- TABELAS GLOBAIS
 --local shadow_objects = {}
@@ -15,15 +16,91 @@ local last_armor_items = {}
 local last_sneak = {}
 local last_backpack_state = {}
 local body_entities = {}
+
+-- ═══════════════════════════════════════════════════════════════════
+-- BACKCHEST ↔ SLOTS main[9..24]
+--   A fonte da verdade são os slots main[9..24] enquanto equipada.
+--   Ao desequipar, copiamos para backchest_stored_items e ZERAMOS
+--   os slots imediatamente e de forma síncrona no globalstep,
+--   garantindo que qualquer formspec externo (baús, etc.) já veja
+--   os slots vazios sem precisar de core.after.
+-- ═══════════════════════════════════════════════════════════════════
+local BC_OFFSET = 8   -- main[9] .. main[24]
+local BC_COUNT  = 16
+local bc_sync_lock = {}   -- evita loops recursivos por player
+
+local function bc_has_backchest(player)
+    local stack = player:get_inventory():get_stack("armor_back", 1)
+    return not stack:is_empty() and stack:get_name() == "nh_nodes:backchest"
+end
+
+-- Lê slots 9..24 e persiste na backchest equipada (tabela global + meta do item)
+local function bc_save(player)
+    if not bc_has_backchest(player) then return end
+    local inv   = player:get_inventory()
+    local stack = inv:get_stack("armor_back", 1)
+    local meta  = stack:get_meta()
+
+    local chest_id = meta:get_string("chest_id")
+    if chest_id == "" then
+        chest_id = tostring(os.time()) .. "_" .. tostring(math.random(1, 999999))
+        meta:set_string("chest_id", chest_id)
+    end
+
+    if not backchest_stored_items then backchest_stored_items = {} end
+
+    local slots, has = {}, false
+    for i = 1, BC_COUNT do
+        local s = inv:get_stack("main", BC_OFFSET + i)
+        slots[i] = s:to_string()
+        if not s:is_empty() then has = true end
+    end
+
+    if has then
+        backchest_stored_items[chest_id] = slots
+        meta:set_string("description", "Backpack Chest\n(contains items)")
+    else
+        backchest_stored_items[chest_id] = nil
+        meta:set_string("description", "")
+        meta:set_string("chest_id", "")
+    end
+    inv:set_stack("armor_back", 1, stack)
+end
+
+-- Carrega conteúdo da backchest equipada → slots main[9..24]
+local function bc_load(player)
+    if bc_sync_lock[player:get_player_name()] then return end
+    bc_sync_lock[player:get_player_name()] = true
+    local inv   = player:get_inventory()
+    local stack = inv:get_stack("armor_back", 1)
+    local chest_id = stack:get_meta():get_string("chest_id")
+    local stored = (chest_id ~= "" and backchest_stored_items and backchest_stored_items[chest_id]) or {}
+    for i = 1, BC_COUNT do
+        inv:set_stack("main", BC_OFFSET + i, ItemStack(stored[i] or ""))
+    end
+    bc_sync_lock[player:get_player_name()] = false
+end
+
+-- Salva e zera os slots main[9..24] IMEDIATAMENTE (síncrono)
+local function bc_unload(player)
+    if bc_sync_lock[player:get_player_name()] then return end
+    bc_sync_lock[player:get_player_name()] = true
+    bc_save(player)   -- persiste antes de apagar
+    local inv = player:get_inventory()
+    for i = 1, BC_COUNT do
+        inv:set_stack("main", BC_OFFSET + i, ItemStack(""))
+    end
+    bc_sync_lock[player:get_player_name()] = false
+end
 local armor_slots = {
-    head = "Cabeça",
-    torso = "Tronco",
-    arms = "Braços",
-    legs = "Pernas",
-    back = "Costas",
-    waist = "Cintura",
-    hands = "Mãos",
-    feet = "Pés"
+    head = S("head"),
+    torso = S("torso"),
+    arms = S("arms"),
+    legs = S("legs"),
+    back = S("back"),
+    waist = S("waist"),
+    hands = S("hands"),
+    feet = S("feet")
 }
 -- TABELA PARA CONTROLAR ANIMAÇÕES DE SOCO
 local punch_timers = {}
@@ -38,6 +115,8 @@ local last_place_time = {}
 --   "holding"     -> 3ª agachada sendo segurada (aguarda tempo mínimo)
 --   "sit_anim"    -> reproduzindo a animação de transição (12~12.5s do GLB)
 --   "sitting"     -> parado na pose final (frame 12.5s) até tecla de movimento
+--   "lie_anim"    -> reproduzindo a animação de deitar (12.5~13s do GLB)
+--   "lying"       -> parado na pose deitado (frame 13s) até tecla de saída
 local sit_state = {}          -- estado da máquina por player
 local sit_sneak_count = {}    -- quantas vezes agachou nesta sequência
 local sit_sneak_held = {}     -- tempo (em segundos) que a 3ª agachada está sendo segurada
@@ -134,9 +213,9 @@ local function create_player_body(player)
             end
         end)
         body_entities[player_name] = body
-        print("[body] Corpo visível criado para " .. player_name)
+        core.log("action", "[body] Visible body created for " .. player_name)
     else
-        print("[body] ERRO: Não foi possível criar corpo visível para " .. player_name)
+        core.log("action", "[body] ERROR: Could not create visible body for " .. player_name)
     end
 end
 -- FUNÇÃO PARA ATUALIZAR TEXTURAS DO CORPO VISÍVEL
@@ -391,7 +470,7 @@ core.register_entity("nh_body:wielded_item", {
 core.register_entity("nh_body:offhand_item", {
     initial_properties = {
         visual = "wielditem",
-        visual_size = { x = 0.25, y = 0.25, z = 0.25 },
+        visual_size = { x = 0.15, y = 0.15, z = 0.15 },
         physical = false,
         collide_with_objects = false,
         pointable = false,
@@ -479,35 +558,62 @@ local function update_player_formspec(player)
     player:set_inventory_formspec(get_armor_formspec(player_name))
 end
 core.register_allow_player_inventory_action(function(player, action, inventory, inventory_info)
+    -- Bloqueia os slots main[9..24] quando não há backchest equipada
+    local function is_bc_slot(list, idx)
+        return list == "main" and idx >= BC_OFFSET + 1 and idx <= BC_OFFSET + BC_COUNT
+    end
+
+    -- Bloqueia mover o próprio backchest para dentro dos slots 9..24,
+    -- independente de estar equipado (o bloqueio de armor_back → main[9..24]
+    -- ocorreria só DEPOIS da ação, causando o bug)
     if action == "move" then
-        local from_list = inventory_info.from_list
+        if is_bc_slot(inventory_info.to_list, inventory_info.to_index) then
+            local moving = inventory:get_stack(inventory_info.from_list, inventory_info.from_index)
+            if moving:get_name() == "nh_nodes:backchest" then
+            core.chat_send_player(player:get_player_name(), S("I can't put a backpack chest inside itself, nor another one inside this one on my back while I'm wearing it..."))
+            return 0 end
+        end
+    elseif action == "put" then
+        if is_bc_slot(inventory_info.listname or "", inventory_info.index or 0) then
+            local putting = inventory_info.stack
+            if putting and putting:get_name() == "nh_nodes:backchest" then return 0 end
+        end
+    end
+
+    if not bc_has_backchest(player) then
+        if action == "move" then
+            if is_bc_slot(inventory_info.from_list, inventory_info.from_index) or
+               is_bc_slot(inventory_info.to_list,   inventory_info.to_index) then
+                return 0
+            end
+        elseif action == "put" then
+            if is_bc_slot(inventory_info.listname or "", inventory_info.index or 0) then return 0 end
+        elseif action == "take" then
+            if is_bc_slot(inventory_info.listname or "", inventory_info.index or 0) then return 0 end
+        end
+    end
+    -- Validação de slot de armadura
+    if action == "move" then
         local to_list = inventory_info.to_list
         if to_list:match("^armor_") then
             local slot_type = to_list:gsub("armor_", "")
-            local stack = inventory:get_stack(from_list, inventory_info.from_index)
-            local item_name = stack:get_name()
-            local item_def = core.registered_items[item_name]
+            local stack = inventory:get_stack(inventory_info.from_list, inventory_info.from_index)
+            local item_def = core.registered_items[stack:get_name()]
             if not item_def or not item_def.groups or not item_def.groups["armor_" .. slot_type] then return 0 end
             return stack:get_count()
         end
     elseif action == "put" then
         local listname = inventory_info.listname
-        if listname:match("^armor_") then
+        if listname and listname:match("^armor_") then
             local slot_type = listname:gsub("armor_", "")
-            local stack = inventory_info.stack
-            local item_name = stack:get_name()
-            local item_def = core.registered_items[item_name]
+            local item_def = core.registered_items[inventory_info.stack:get_name()]
             if not item_def or not item_def.groups or not item_def.groups["armor_" .. slot_type] then return 0 end
-            return stack:get_count()
+            return inventory_info.stack:get_count()
         end
     end
-    if inventory_info.count then
-        return inventory_info.count
-    elseif inventory_info.stack then
-        return inventory_info.stack:get_count()
-    else
-        return 1
-    end
+    if inventory_info.count then return inventory_info.count
+    elseif inventory_info.stack then return inventory_info.stack:get_count()
+    else return 1 end
 end)
 local function update_armor_visuals(player)
     if not player then return end
@@ -628,13 +734,43 @@ local function update_armor_textures(player)
 end
 core.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
     if action == "move" or action == "put" or action == "take" then
-        local listname = inventory_info.listname or inventory_info.to_list or inventory_info.from_list
-        if listname and listname:match("^armor_") then update_armor_textures(player) end -- ATUALIZA ARMADURAS
-        if listname == "main" then                                                       -- ATUALIZA ITENS NAS MÃOS quando inventário main muda
-            local to_index = inventory_info.to_index or inventory_info.index
-            local from_index = inventory_info.from_index
-            -- Verifica se a mudança afeta os slots 1 ou 2
-            if (to_index and (to_index == 1 or to_index == 2)) or (from_index and (from_index == 1 or from_index == 2)) then
+        local listname   = inventory_info.listname or inventory_info.to_list or inventory_info.from_list
+        local player_name = player:get_player_name()
+
+        -- Armadura: atualiza visuais
+        if listname and listname:match("^armor_") then
+            update_armor_textures(player)
+            -- Detecta equipar/desequipar backchest de forma SÍNCRONA
+            -- (o slot já foi alterado aqui, pois on_* roda após a ação)
+            if listname == "armor_back" then
+                if bc_has_backchest(player) then
+                    bc_load(player)
+                else
+                    -- bc_unload não pode ser chamado aqui pois a armadura já foi removida,
+                    -- logo bc_save não encontraria mais o item. Os slots foram zerados
+                    -- no globalstep abaixo no tick anterior. Força limpeza imediata:
+                    if not bc_sync_lock[player_name] then
+                        bc_sync_lock[player_name] = true
+                        local inv = player:get_inventory()
+                        for i = 1, BC_COUNT do
+                            inv:set_stack("main", BC_OFFSET + i, ItemStack(""))
+                        end
+                        bc_sync_lock[player_name] = false
+                    end
+                end
+                update_player_formspec(player)
+            end
+        end
+
+        -- main: persiste mudança em slots da backchest; atualiza mãos se slot 1/2
+        if listname == "main" and not bc_sync_lock[player_name] then
+            local idx = inventory_info.to_index or inventory_info.from_index or inventory_info.index
+            if idx and idx >= BC_OFFSET + 1 and idx <= BC_OFFSET + BC_COUNT then
+                bc_save(player)
+            end
+            if (inventory_info.to_index == 1 or inventory_info.to_index == 2 or
+                inventory_info.from_index == 1 or inventory_info.from_index == 2 or
+                inventory_info.index == 1 or inventory_info.index == 2) then
                 update_wielded_item(player)
                 update_offhand_item(player)
             end
@@ -652,7 +788,7 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
         visual_size = { x = 1, y = 1, z = 1 },
         collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 },
         stepheight = 0.6,
-        eye_height = 2.5,
+        eye_height = 2.6,
         -- shaded = true,
         makes_footstep_sound = false,                                               -- Torna o modelo do player invisível
     })
@@ -772,6 +908,12 @@ set_player_animation = function(player, anim)
     elseif anim == "sit_idle" then
         -- Congela no frame 12.5s (pose sentado)
         anim_data = { { x = 12.5, y = 12.5 }, 1, 0, false }
+    elseif anim == "lie_down" then
+        -- Faixa 12.5~13s do GLB: animação de deitar (não loop, não repete)
+        anim_data = { { x = 12.5, y = 13 }, 1, 0, false }
+    elseif anim == "lie_idle" then
+        -- Congela no frame 13s (pose deitado)
+        anim_data = { { x = 13, y = 13 }, 1, 0, false }
     end
     if anim_data then
         player:set_animation(anim_data[1], anim_data[2], anim_data[3], anim_data[4]) -- Aplica animação no player invisível
@@ -798,6 +940,10 @@ core.register_on_placenode(function(pos, newnode, placer)
 end)
 -- GLOBALSTEP PARA ATUALIZAR ANIMAÇÕES E ROTAÇÕES
 local last_lmb = {}
+local eye_sit =  {x=0, y=-0.2, z=3.5}
+local eye_sit3 = {x=0, y=4, z=-7}
+local eye_lie =  {x=0, y=-0.7, z=-6}
+local eye_lie3 = {x=0, y=4, z=-7}
 core.register_globalstep(function(dtime)     
     for _, player in ipairs(core.get_connected_players()) do    
         local function setplayeranimation(opts) set_player_animation(player, opts) end
@@ -875,12 +1021,69 @@ core.register_globalstep(function(dtime)
             last_belt_items[player_name] = current_belt
             if not armor_changed then update_belt_items(player) end -- Só chama se armor_changed não chamou antes
         end
-        -- VERIFICA MUDANÇA NA MOCHILA (sempre executa)
+        -- VERIFICA MUDANÇA NA MOCHILA — síncrono, sem core.after
         local backpack_stack = inv:get_stack("armor_back", 1)
         local has_backpack = not backpack_stack:is_empty() and backpack_stack:get_name() == "nh_nodes:backchest"
         if last_backpack_state[player_name] == nil then last_backpack_state[player_name] = false end
         if last_backpack_state[player_name] ~= has_backpack then
             last_backpack_state[player_name] = has_backpack
+            if has_backpack then
+                bc_load(player)
+            else
+                -- Salva antes: neste ponto o item ainda está no inventário do player
+                -- como drop (foi para o inventário principal), então buscamos pelo
+                -- chest_id diretamente nos slots main[9..24] já preenchidos
+                if not bc_sync_lock[player_name] then
+                    bc_sync_lock[player_name] = true
+                    -- Encontra o item backchest recem retirado no inventario do player
+                    -- para poder salvar com o chest_id correto
+                    local found_stack = nil
+                    for si = 1, inv:get_size("main") do
+                        local s = inv:get_stack("main", si)
+                        if s:get_name() == "nh_nodes:backchest" then
+                            found_stack = s
+                            break
+                        end
+                    end
+                    -- Persiste usando o item encontrado
+                    if found_stack then
+                        local meta     = found_stack:get_meta()
+                        local chest_id = meta:get_string("chest_id")
+                        if chest_id == "" then
+                            chest_id = tostring(os.time()) .. "_" .. tostring(math.random(1, 999999))
+                            meta:set_string("chest_id", chest_id)
+                        end
+                        if not backchest_stored_items then backchest_stored_items = {} end
+                        local slots, has = {}, false
+                        for i = 1, BC_COUNT do
+                            local s = inv:get_stack("main", BC_OFFSET + i)
+                            slots[i] = s:to_string()
+                            if not s:is_empty() then has = true end
+                        end
+                        if has then
+                            backchest_stored_items[chest_id] = slots
+                            meta:set_string("description", "Backpack Chest\n(contains items)")
+                        else
+                            backchest_stored_items[chest_id] = nil
+                            meta:set_string("description", "")
+                            meta:set_string("chest_id", "")
+                        end
+                        -- Regrava o item no inventário com o meta atualizado
+                        for si = 1, inv:get_size("main") do
+                            local s = inv:get_stack("main", si)
+                            if s:get_name() == "nh_nodes:backchest" then
+                                inv:set_stack("main", si, found_stack)
+                                break
+                            end
+                        end
+                    end
+                    -- Zera os slots imediatamente
+                    for i = 1, BC_COUNT do
+                        inv:set_stack("main", BC_OFFSET + i, ItemStack(""))
+                    end
+                    bc_sync_lock[player_name] = false
+                end
+            end
             update_player_formspec(player)
         end
         if player_states[player_name] then
@@ -937,13 +1140,89 @@ core.register_globalstep(function(dtime)
                     sit_sneak_count[player_name] = 0
                     -- A lógica abaixo vai selecionar a animação correta
                     --core.log(player_name, "Applying NORMAL camera")
+                elseif aux1_press then
+                    -- Conta duplo clique de aux1 para deitar
+                    sit_sneak_count[player_name] = (sit_sneak_count[player_name] or 0) + 1
+                    if sit_sneak_count[player_name] >= 2 then
+                        -- Duplo aux1 no sitting → inicia animação de deitar
+                        sit_state[player_name]       = "lie_anim"
+                        sit_anim_timer[player_name]  = 0
+                        sit_sneak_count[player_name] = 0
+                        set_player_animation(player, "lie_down")
+                        sit_last_sneak[player_name]          = sneak_now
+                        sit_state[player_name .. "_last_aux1"] = aux1_now
+                        goto continue
+                    end
+                    set_player_animation(player, "sit_idle")
+                    sit_last_sneak[player_name]          = sneak_now
+                    sit_state[player_name .. "_last_aux1"] = aux1_now
+                    player:set_properties({eye_height = 1.2})
+                    player:set_eye_offset(eye_sit, eye_sit3)
+                    goto continue
                 else
                     -- Mantém pose sentado, bloqueia o resto da lógica
                     set_player_animation(player, "sit_idle")
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
-                    --player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                    player:set_properties({eye_height = 1.2})
+                    player:set_eye_offset(eye_sit,eye_sit3)
                     --core.log(player_name, "Applying sitting camera (sitting and no movement_key or ctrl.jump or sneak_press)")
+                    goto continue
+                end
+
+            -- ── Estado: reproduzindo animação de deitar (transição) ───────
+            elseif ss == "lie_anim" then
+                if movement_key or ctrl.jump or sneak_press then
+                    sit_state[player_name]       = "idle"
+                    sit_sneak_count[player_name] = 0
+                else
+                    sit_anim_timer[player_name] = sit_anim_timer[player_name] + dtime
+                    -- Animação de deitar dura 0.5s (12.5~13s no GLB)
+                    if sit_anim_timer[player_name] >= 0.5 then
+                        sit_state[player_name] = "lying"
+                    end
+                    set_player_animation(player, "lie_down")
+                    player:set_properties({eye_height = 0.7})
+                    player:set_eye_offset(eye_lie, eye_lie3)
+                    sit_last_sneak[player_name]          = sneak_now
+                    sit_state[player_name .. "_last_aux1"] = aux1_now
+                    goto continue
+                end
+
+            -- ── Estado: deitado (pose congelada) ──────────────────────────
+            elseif ss == "lying" then
+                -- Sai pelas mesmas teclas que saem do sitting:
+                -- movimento, pulo, nova pressão de sneak, ou duplo aux1
+                if movement_key or ctrl.jump or sneak_press then
+                    sit_state[player_name]       = "idle"
+                    sit_sneak_count[player_name] = 0
+                elseif aux1_press then
+                    -- Conta duplo clique de aux1 para voltar ao sitting
+                    sit_sneak_count[player_name] = (sit_sneak_count[player_name] or 0) + 1
+                    if sit_sneak_count[player_name] >= 2 then
+                        -- Duplo aux1 no lying → volta ao sitting
+                        sit_state[player_name]       = "sitting"
+                        sit_sneak_count[player_name] = 0
+                        set_player_animation(player, "sit_idle")
+                        sit_last_sneak[player_name]          = sneak_now
+                        sit_state[player_name .. "_last_aux1"] = aux1_now
+                        player:set_properties({eye_height = 1.2})
+                        player:set_eye_offset(eye_sit, eye_sit3)
+                        goto continue
+                    end
+                    set_player_animation(player, "lie_idle")
+                    sit_last_sneak[player_name]          = sneak_now
+                    sit_state[player_name .. "_last_aux1"] = aux1_now
+                    player:set_properties({eye_height = 0.7})
+                    player:set_eye_offset(eye_lie, eye_lie3)
+                    goto continue
+                else
+                    -- Mantém pose deitado
+                    set_player_animation(player, "lie_idle")
+                    sit_last_sneak[player_name]          = sneak_now
+                    sit_state[player_name .. "_last_aux1"] = aux1_now
+                    player:set_properties({eye_height = 0.7})
+                    player:set_eye_offset(eye_lie, eye_lie3)
                     goto continue
                 end
 
@@ -959,11 +1238,12 @@ core.register_globalstep(function(dtime)
                     -- Animação dura 0.5s (de 12 a 12.5 no GLB → velocidade 1 = 0.5s)
                     if sit_anim_timer[player_name] >= 0.5 then
                         -- Transição completa → congela na pose final
-                        sit_state[player_name] = "sitting"
-                        player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                        sit_state[player_name]       = "sitting"
+                        sit_sneak_count[player_name] = 0  -- reseta contador para o duplo aux1
+                        player:set_eye_offset(eye_sit,eye_sit3)
                     end
                     set_player_animation(player, "sit_down")
-                    player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                    player:set_eye_offset(eye_sit,eye_sit3)
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
                     --core.log(player_name, "Applying sitting camera (sit_anim and no movement_key or ctrl.jump or sneak_press)")
@@ -1000,7 +1280,7 @@ core.register_globalstep(function(dtime)
                         sit_anim_timer[player_name]  = 0
                         sit_sneak_count[player_name] = 0
                         set_player_animation(player, "sit_down")
-                        player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
+                        player:set_eye_offset(eye_offset_first, eye_offset_third)
                         sit_last_sneak[player_name]          = sneak_now
                         sit_state[player_name .. "_last_aux1"] = aux1_now
                         --core.log(player_name, "Applying sitting camera (counting and no movement_key or ctrl.jump or sneak_press)")
@@ -1011,14 +1291,6 @@ core.register_globalstep(function(dtime)
 
             sit_last_sneak[player_name]          = sneak_now
             sit_state[player_name .. "_last_aux1"] = aux1_now
-
-
-            if ss == "sitting" or ss == "sit_anim" then
-                -- Se estiver sentado, não permitimos que o código abaixo 
-                player:set_eye_offset({ x = 0, y = -0.2, z = 3 }, { x = 0, y = 7, z = -7 })
-                --core.log(player_name, "Its sitting or sit_anim")
-                goto continue 
-            end
             
             -- END OF SITTING SYSTEM — normal animation logic below
             -- ══════════════════════════════════════════════════════════════
@@ -1028,27 +1300,22 @@ core.register_globalstep(function(dtime)
             else
                 local props = player:get_properties()
                 local is_crawling = props.eye_height <= 0.7
+                local horizontal = {x = vel.x, y = 0, z = vel.z}
+                local speed = vector.length(horizontal)
+                local is_moving_back = ctrl.down
+                local is_moving = ctrl.up or ctrl.left or ctrl.right
+
+                -- ANIMAÇÕES
                 if is_crawling then
-                    player:set_eye_offset({ x = 0, y = -0.5, z = 7.5 }, { x = 0, y = 7, z = -7 })-- ajusta para crawling
-                    local horizontal = { x = vel.x, y = 0, z = vel.z }
-                    local speed = vector.length(horizontal)
                     if speed > 0.1 then setplayeranimation("crawling_walk") else setplayeranimation("crawling") end
                 elseif ctrl.sneak and vel.x < 0.1 and vel.z < 0.1 then
                     set_player_animation(player, "sneak")
                     -- player:set_properties({ collisionbox = {-0.6, 0.0, -0.6, 0.6, 2.7, 0.6} })
-                    player:set_eye_offset({ x = 0, y = 8, z = 10 }, { x = 0, y = 7, z = -7 }) -- ajusta para sneak
                 else
-                    player:set_properties({ collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 }, })
-                    player:set_eye_offset({ x = 0, y = -1, z = 3 }, { x = 0, y = 7, z = -7 })
-                    --core.log(player_name, "Applying NORMAL camera")
-                    local is_moving_back = ctrl.down
-                    local is_moving = ctrl.up or ctrl.left or ctrl.right
-                    local horizontal = { x = vel.x, y = 0, z = vel.z }
-                    local speed = vector.length(horizontal)
+                    player:set_properties({ collisionbox = {-0.45, 0.0, -0.45, 0.45, 2.7, 0.45 }})
                     if is_moving_back then
                         if ctrl.sneak and speed >= 0.1 then
                             setplayeranimation("sneak_walk_back")
-                            player:set_eye_offset({ x = 0, y = 8, z = 10 }, { x = 0, y = 7, z = -7 }) -- ajusta para sneak
                         elseif ctrl.aux1 or speed >= 4 then
                             setplayeranimation("run_back")
                         elseif speed < 4 and speed > 0 then
@@ -1057,16 +1324,28 @@ core.register_globalstep(function(dtime)
                     elseif is_moving then
                         if ctrl.sneak and speed >= 0.1 then
                             setplayeranimation("sneak_walk")
-                            player:set_eye_offset({ x = 0, y = 8, z = 10 }, { x = 0, y = 7, z = -7 }) -- ajusta para sneak
                         elseif ctrl.aux1 or speed >= 4 then
                             setplayeranimation("run")
                         elseif speed < 4 and speed > 0 then
                             setplayeranimation("walk")
                         end
                     else
-                        if has_item then setplayeranimation("holding")  else setplayeranimation("idle") end
+                        if has_item then setplayeranimation("holding") else setplayeranimation("idle") end
                     end
                 end
+
+                -- EYE OFFSET: definido uma única vez, após determinar o estado
+                local eye_offset_first
+                local eye_offset_third = {x=0, y=6, z=-7}
+                if is_crawling then
+                    eye_offset_first = {x=0, y =-0.5, z=7.5}
+                elseif ctrl.sneak then 
+                    eye_offset_first = {x=0, y=9, z=9}
+                else
+                    player:set_properties({eye_height = 2.6})
+                    eye_offset_first = {x=0, y=-0.2, z=3.5}
+                end
+                player:set_eye_offset(eye_offset_first, eye_offset_third)
             end
             ::continue::
         end
@@ -1087,7 +1366,7 @@ core.register_on_joinplayer(function(player)
         check_count = check_count + 1
         apply_custom_model(player)
         local props = player:get_properties()
-        if props.eye_height ~= 2.5 and check_count < max_checks then
+        if props.eye_height ~= 2.6 and check_count < max_checks then
             core.after(0.2, verify_and_apply)
         end
     end
@@ -1101,19 +1380,29 @@ core.register_on_joinplayer(function(player)
         update_offhand_item(player)
         update_armor_visuals(player)
         update_belt_items(player)
+        -- Restaura itens da backchest se estiver equipada
+        if bc_has_backchest(player) then bc_load(player) end
     end)
 
     -- Segunda tentativa de segurança: recria o corpo se não existir após 3s
     core.after(2.0, function()
         if not (player and player:is_player()) then return end
         if not body_entities[player_name] or not body_entities[player_name]:get_luaentity() then
-            core.log("[BODY MOD] Body not found after 2 seconds, recreating for " .. player_name)
+            core.log("action", "[BODY MOD] Body not found after 2 seconds, recreating for " .. player_name)
             create_player_body(player)
         end
     end)
 end)
 core.register_on_leaveplayer(function(player)
     local player_name = player:get_player_name()
+    -- Persiste itens da backchest e limpa os slots antes de sair
+    if bc_has_backchest(player) then
+        bc_save(player)
+        local inv = player:get_inventory()
+        for i = 1, BC_COUNT do
+            inv:set_stack("main", BC_OFFSET + i, ItemStack(""))
+        end
+    end
     player_states[player_name] = nil
     last_wielded[player_name] = nil
     last_wield_index[player_name] = nil
