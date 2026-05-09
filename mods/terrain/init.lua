@@ -189,7 +189,7 @@ PM_nomes = nil
 -- CONFIGURAÇÃO DOS NOISES
 local NOISE = {}
 
-NOISE.noise_continent = {
+NOISE.continent = {
     offset = 0,
     scale = 0.5,
     spread = {x = 300, y = 300, z = 300}, -- MUITO grande
@@ -198,7 +198,7 @@ NOISE.noise_continent = {
     persist = 0.5,
 }
 
-NOISE.noise_mountain = {
+NOISE.mountain = {
     offset = 0,
     scale = 1,  
     spread = {x = 80, y = 80, z = 80},
@@ -207,7 +207,7 @@ NOISE.noise_mountain = {
     persist = 0.6,
 }
 
-NOISE.noise_hills = {
+NOISE.hills = {
     offset = 0,
     scale = 0.5,
     spread = {x = 150, y = 150, z = 150},
@@ -216,7 +216,7 @@ NOISE.noise_hills = {
     persist = 0.5,
 }
 
-NOISE.noise_plains = {
+NOISE.plains = {
     offset = 0,
     scale = 0.5,
     spread = {x = 180, y = 180, z = 180},
@@ -226,7 +226,7 @@ NOISE.noise_plains = {
 }
 
 
-NOISE.noise_caves = {
+NOISE.caves = {
     offset = 0,
     scale = 1,
     spread = {x = 50, y = 20, z = 50},
@@ -236,7 +236,7 @@ NOISE.noise_caves = {
 }
 
 -- Para cavernas de lava
-NOISE.noise_caves_lava = {
+NOISE.caves_lava = {
     offset = 0,
     scale = 1,
     spread = {x = 40, y = 80, z = 40},   -- spread maior em Y = cavernas mais verticais
@@ -246,7 +246,7 @@ NOISE.noise_caves_lava = {
 }
 
 -- Para cavernas de água (seed diferente!)
-NOISE.noise_caves_water = {
+NOISE.caves_water = {
     offset = 0,
     scale = 1,
     spread = {x = 60, y = 30, z = 60},   -- spread menor em Y = cavernas mais horizontais
@@ -255,7 +255,7 @@ NOISE.noise_caves_water = {
     persist = 0.5,
 }
 
-NOISE.noise_cave_size = {
+NOISE.cave_size = {
     offset = 0,
     scale = 1,
     spread = {x = 50, y = 50, z = 50},  -- Varia o tamanho das cavernas por região
@@ -265,7 +265,7 @@ NOISE.noise_cave_size = {
 }
 
 
-NOISE.noise_roughness = {
+NOISE.roughness = {
     offset = 0,
     scale = 0.5,
     spread = {x = 25, y = 25, z = 25},
@@ -274,7 +274,7 @@ NOISE.noise_roughness = {
     persist = 0.6,
 }
 
-NOISE.noise_biome = {
+NOISE.biome = {
     offset = 0,
     scale = 0.5,
     spread = {x = 150, y = 150, z = 150},
@@ -284,7 +284,7 @@ NOISE.noise_biome = {
 }
 
 
-NOISE.noise_saprolite = {
+NOISE.saprolite = {
     offset = 0,
     scale = 1,
     spread = {x = 40, y = 40, z = 40},
@@ -294,7 +294,7 @@ NOISE.noise_saprolite = {
     lacunarity = 2.0
 }
 
-NOISE.noise_grassleaves = {
+NOISE.grassleaves = {
     offset = 0,
     scale = 10,
     spread = {x = 20, y = 20, z = 20},  -- Spread maior = mais espaçadas (era 10)
@@ -303,7 +303,7 @@ NOISE.noise_grassleaves = {
     persist = 0.5,
 }
 
-NOISE.noise_trees = {
+NOISE.trees = {
     offset = 0,
     scale = 0.6,
     spread = {x = 10, y = 10, z = 10},  -- Spread maior = mais espaçadas (era 10)
@@ -312,7 +312,7 @@ NOISE.noise_trees = {
     persist = 0.5,
 }
 
-NOISE.noise_bushes = {
+NOISE.bushes = {
     offset = 0,
     scale = 0.6,
     spread = {x = 8, y = 8, z = 8},
@@ -334,7 +334,7 @@ NOISE.noise_bushes = {
 -----------------------------
 -- CONFIGURAÇÃO DOS NOISES DE MINÉRIOS
 -----------------------------
-NOISE.noise_ore_master = {
+NOISE.ore_master = {
     offset = 0,
     scale = 1,
     spread = {x = 30, y = 30, z = 30},
@@ -345,7 +345,7 @@ NOISE.noise_ore_master = {
 }
 
 
-NOISE.noise_coal = {
+NOISE.coal = {
     offset = 0,
     scale = 0.5,
     spread = {x = 30, y = 30, z = 30},
@@ -354,7 +354,7 @@ NOISE.noise_coal = {
     persist = 0.6,
 }
 
-NOISE.noise_copper = {
+NOISE.copper = {
     offset = 0,
     scale = 0.5,
     spread = {x = 35, y = 35, z = 35},
@@ -363,7 +363,7 @@ NOISE.noise_copper = {
     persist = 0.6,
 }
 
-NOISE.noise_tin = {
+NOISE.tin = {
     offset = 0,
     scale = 0.5,
     spread = {x = 32, y = 32, z = 32},
@@ -372,7 +372,7 @@ NOISE.noise_tin = {
     persist = 0.6,
 }
 
-NOISE.noise_iron = {
+NOISE.iron = {
     offset = 0,
     scale = 0.5,
     spread = {x = 28, y = 28, z = 28},
@@ -381,7 +381,7 @@ NOISE.noise_iron = {
     persist = 0.6,
 }
 
-NOISE.noise_nickel = {
+NOISE.nickel = {
     offset = 0,
     scale = 0.5,
     spread = {x = 25, y = 25, z = 25},
@@ -390,7 +390,7 @@ NOISE.noise_nickel = {
     persist = 0.6,
 }
 
-NOISE.noise_manganese = {
+NOISE.manganese = {
     offset = 0,
     scale = 0.5,
     spread = {x = 22, y = 22, z = 22},
@@ -399,7 +399,7 @@ NOISE.noise_manganese = {
     persist = 0.6,
 }
 
-NOISE.noise_chromium = {
+NOISE.chromium = {
     offset = 0,
     scale = 0.5,
     spread = {x = 20, y = 20, z = 20},
@@ -1680,41 +1680,41 @@ local function init_perlin_maps()
     end
     
     -- Mantém os perlins antigos para compatibilidade com funções que ainda os usam
-    P.continent = core.get_perlin(NOISE.noise_continent)
-    P.mountain     = core.get_perlin(NOISE.noise_mountain)
-    P.hills        = core.get_perlin(NOISE.noise_hills)
-    P.plains       = core.get_perlin(NOISE.noise_plains)
-    P.caves        = core.get_perlin(NOISE.noise_caves)
-    P.caves_lava   = core.get_perlin(NOISE.noise_caves_lava)
-    P.caves_water  = core.get_perlin(NOISE.noise_caves_water)
-    P.cave_size    = core.get_perlin(NOISE.noise_cave_size)
-    P.roughness    = core.get_perlin(NOISE.noise_roughness)
-    P.biome        = core.get_perlin(NOISE.noise_biome)
-    P.grassleaves  = core.get_perlin(NOISE.noise_grassleaves)
-    P.trees        = core.get_perlin(NOISE.noise_trees)
-    P.bushes       = core.get_perlin(NOISE.noise_bushes)
-    P.saprolite    = core.get_perlin(NOISE.noise_saprolite)
-    P.ore_master = core.get_perlin(NOISE.noise_ore_master)
+    P.continent = core.get_perlin(NOISE.continent)
+    P.mountain     = core.get_perlin(NOISE.mountain)
+    P.hills        = core.get_perlin(NOISE.hills)
+    P.plains       = core.get_perlin(NOISE.plains)
+    P.caves        = core.get_perlin(NOISE.caves)
+    P.caves_lava   = core.get_perlin(NOISE.caves_lava)
+    P.caves_water  = core.get_perlin(NOISE.caves_water)
+    P.cave_size    = core.get_perlin(NOISE.cave_size)
+    P.roughness    = core.get_perlin(NOISE.roughness)
+    P.biome        = core.get_perlin(NOISE.biome)
+    P.grassleaves  = core.get_perlin(NOISE.grassleaves)
+    P.trees        = core.get_perlin(NOISE.trees)
+    P.bushes       = core.get_perlin(NOISE.bushes)
+    P.saprolite    = core.get_perlin(NOISE.saprolite)
+    P.ore_master = core.get_perlin(NOISE.ore_master)
     
 
     
     -- NOVOS PERLIN MAPS OTIMIZADOS
     local chunksize = {x = 80, y = 80, z = 80}
-    PM.continent = core.get_perlin_map(NOISE.noise_continent, chunksize)
-    PM.biome = core.get_perlin_map(NOISE.noise_biome, chunksize)
-    PM.mountain = core.get_perlin_map(NOISE.noise_mountain, chunksize)
-    PM.hills = core.get_perlin_map(NOISE.noise_hills, chunksize)
-    PM.plains = core.get_perlin_map(NOISE.noise_plains, chunksize)
-    PM.roughness = core.get_perlin_map(NOISE.noise_roughness, chunksize)
-    PM.caves = core.get_perlin_map(NOISE.noise_caves, chunksize)
-    PM.caves_lava = core.get_perlin_map(NOISE.noise_caves_lava, chunksize)
-    PM.caves_water = core.get_perlin_map(NOISE.noise_caves_water, chunksize)
-    PM.cave_size = core.get_perlin_map(NOISE.noise_cave_size, chunksize)
-    PM.grassleaves = core.get_perlin_map(NOISE.noise_grassleaves, chunksize)
-    PM.trees = core.get_perlin_map(NOISE.noise_trees, chunksize)
-    PM.bushes = core.get_perlin_map(NOISE.noise_bushes, chunksize)
-    PM.saprolite = core.get_perlin_map(NOISE.noise_saprolite, chunksize)
-    PM.ore_master = core.get_perlin_map(NOISE.noise_ore_master, chunksize)
+    PM.continent = core.get_perlin_map(NOISE.continent, chunksize)
+    PM.biome = core.get_perlin_map(NOISE.biome, chunksize)
+    PM.mountain = core.get_perlin_map(NOISE.mountain, chunksize)
+    PM.hills = core.get_perlin_map(NOISE.hills, chunksize)
+    PM.plains = core.get_perlin_map(NOISE.plains, chunksize)
+    PM.roughness = core.get_perlin_map(NOISE.roughness, chunksize)
+    PM.caves = core.get_perlin_map(NOISE.caves, chunksize)
+    PM.caves_lava = core.get_perlin_map(NOISE.caves_lava, chunksize)
+    PM.caves_water = core.get_perlin_map(NOISE.caves_water, chunksize)
+    PM.cave_size = core.get_perlin_map(NOISE.cave_size, chunksize)
+    PM.grassleaves = core.get_perlin_map(NOISE.grassleaves, chunksize)
+    PM.trees = core.get_perlin_map(NOISE.trees, chunksize)
+    PM.bushes = core.get_perlin_map(NOISE.bushes, chunksize)
+    PM.saprolite = core.get_perlin_map(NOISE.saprolite, chunksize)
+    PM.ore_master = core.get_perlin_map(NOISE.ore_master, chunksize)
 
     core.log("action", "[terrain] Perlins e Perlin Maps inicializados")
 end
