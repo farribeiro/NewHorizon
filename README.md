@@ -22,11 +22,11 @@
 
 ## Differentiators
 
-## Worlds
+### Worlds
 
 🌐 Walk around the world in a straight line and traverse the world by digging (press V to open the map to see this better) 
 
-## Moves
+### Moves
 
 🧱 Wall kick jump: Jump 2 blocks wall (space 2x)
 
@@ -34,7 +34,7 @@
 
 🏃 Run (W two times)
 
-## Colisions
+### Colisions
 
 🍂 Falling on water, leaves and dry sand reduces damage
 
@@ -44,13 +44,13 @@
 
 🌳 Trees fall when cut down, so it's best to run
 
-## Characters
+### Characters
 
 👤 Model and skin slightly similar to Hytale, but taller
 
 🐾 Some animals and monstrs will spawn in some places and interact with you (without animations yet)
 
-## Interactions
+### Interactions
 
 🛠️ Craft itens in the floor (e + right click)
 
@@ -60,7 +60,7 @@
 
 📖 Grimoire of creative (/grantme give → /giveme nh_nodes:archion) 
 
-## Objects
+### Objects
 
 🍎 3D placeble fruits
 🪙 3D placeble ores
