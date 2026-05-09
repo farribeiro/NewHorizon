@@ -93,97 +93,76 @@ local DIRT_SOLID  = {}
 local DIRT_EDGE   = {}
 local SAND_SOLID  = {}
 local SAND_EDGE   = {}
-
-
 local function init_slope_tables()
     GRASS_SOLID[C.topgrass]          = true
     GRASS_SOLID[C.top_grass_ramp]    = true
     GRASS_SOLID[C.top_grass_vertix]  = true
     GRASS_SOLID[C.grassinsidecorner] = true
-
-    GRASS_PASS[C.air]              = true
-    GRASS_PASS[C.grassleaves]      = true
-    GRASS_PASS[C.grassleavesmedium]= true
-
-    DIRT_SOLID[C.dirt] = true
-    DIRT_EDGE[C.sand]  = true
-    DIRT_EDGE[C.air]   = true
-
-    SAND_SOLID[C.sand]    = true
-    SAND_EDGE[C.wetsand]  = true
-    SAND_EDGE[C.air]      = true
+    GRASS_PASS[C.air]                = true
+    GRASS_PASS[C.grassleaves]        = true
+    GRASS_PASS[C.grassleavesmedium]  = true
+    DIRT_SOLID[C.dirt]               = true
+    DIRT_EDGE[C.sand]                = true
+    DIRT_EDGE[C.air]                 = true
+    SAND_SOLID[C.sand]               = true
+    SAND_EDGE[C.wetsand]             = true
+    SAND_EDGE[C.air]                 = true
 end
 init_slope_tables()
-
 -- Função auxiliar global (sem local function dentro de loop)
 local slope_area, slope_data, slope_p2, slope_y
-
 local function slope_get(x, z)
-    if slope_area:contains(x, slope_y, z) then
-        return slope_data[slope_area:index(x, slope_y, z)]
-    end
+    if slope_area:contains(x, slope_y, z) then return slope_data[slope_area:index(x, slope_y, z)] end
     return C.ignore
 end
-
 local function slope_get_below(x, z)
-    if slope_area:contains(x, slope_y - 1, z) then
-        return slope_data[slope_area:index(x, slope_y - 1, z)]
-    end
+    if slope_area:contains(x, slope_y - 1, z) then return slope_data[slope_area:index(x, slope_y - 1, z)] end
     return C.ignore
 end
-
 print("[terrain] content_ids obtidos")
-
 local entity_positions = {}
 local tent_generated = false
 local TENT_SEARCH_RADIUS = 256
-
 local ship_generated = false
 local SHIP_SEARCH_RADIUS = 256
-
 local house_generated = false
 local HOUSE_SEARCH_RADIUS = 256
-
 local statue_spawned = false
 local statue_pos = nil
 local sentinel_pos = nil
 local lowest_island_pos = nil
-
------------------------------
 -- NOISES (mantidos para compatibilidade com funções antigas)
------------------------------
-
+local P_nomes = {
+    perlin_continent,
+    perlin_biome,
+    perlin_mountain,
+    perlin_hills,
+    perlin_plains,
+    perlin_roughness,
+    perlin_caves,
+    perlin_caves_lava,
+    perlin_caves_water,
+    perlin_cave_size,
+    perlin_grassleaves,
+    perlin_trees,
+    perlin_bushes,
+    -- perlin_palms,
+    perlin_saprolite,
+    -- NOISES PARA MINÉRIOS (adicionar após os noises existentes)
+    perlin_ore_master,
+    perlin_coal,
+    perlin_copper,
+    perlin_tin,
+    perlin_iron,
+    perlin_nickel,
+    perlin_manganes,
+    perlin_chromium
+}
 local P = {}
-
-P.perlin_continent = nil
-P.perlin_biome = nil
-P.perlin_mountain = nil
-P.perlin_hills = nil
-P.perlin_plains = nil
-P.perlin_roughness = nil
-P.perlin_caves = nil
-P.perlin_caves_lava = nil
-P.perlin_caves_water = nil
-P.perlin_cave_size = nil
-P.perlin_grassleaves = nil
-P.perlin_trees = nil
-P.perlin_bushes = nil
---P.perlin_palms = nil
-P.perlin_saprolite = nil
-
-
------------------------------
--- NOISES PARA MINÉRIOS (adicionar após os noises existentes)
------------------------------
-P.perlin_ore_master = nil
-P.perlin_coal = nil
-P.perlin_copper = nil
-P.perlin_tin = nil
-P.perlin_iron = nil
-P.perlin_nickel = nil
-P.perlin_manganese = nil
-P.perlin_chromium = nil
-
+for _, nome in ipairs(P_nomes) do
+    P[nome] = nil -- (Ou um valor inicial padrão)
+end
+P_nomes = nil
 -----------------------------
 -- PERLIN MAPS (OTIMIZAÇÃO)
 -----------------------------
