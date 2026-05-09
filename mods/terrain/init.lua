@@ -132,9 +132,10 @@ local statue_pos = nil
 local sentinel_pos = nil
 local lowest_island_pos = nil
 -- NOISES (mantidos para compatibilidade com funções antigas)
-local function populate_Pall(names, father)
+local function populate_Pall(names)
+    local father = {}
     for _, name in ipairs(names) do father[name] = nil end
-    names = nil
+    return father
 end
 local P_nomes = {
     continent,
@@ -162,8 +163,7 @@ local P_nomes = {
     manganes,
     chromium
 }
-local P = {}
-populate_Pall(P_nomes, P)
+local P = populate_Pall(P_nomes)
 P_nomes = nil
 -- PERLIN MAPS (OTIMIZAÇÃO)
 local PM_nomes = {
@@ -183,8 +183,7 @@ local PM_nomes = {
     saprolite,
     ore_master,
 }
-PM = {}
-populate_Pall(PM_nomes, PM)
+PM = populate_Pall(PM_nomes)
 PM_nomes = nil
 -- CONFIGURAÇÃO DOS NOISES
 local NOISE = {}
