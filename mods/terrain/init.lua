@@ -133,9 +133,7 @@ local sentinel_pos = nil
 local lowest_island_pos = nil
 -- NOISES (mantidos para compatibilidade com funções antigas)
 local function populate_Pall(names, father)
-    for _, name in ipairs(names) do
-        father[name] = nil -- (Ou um valor inicial padrão)
-    end
+    for _, name in ipairs(names) do father[name] = nil end
     names = nil
 end
 local P_nomes = {
