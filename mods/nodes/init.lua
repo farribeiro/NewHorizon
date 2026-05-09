@@ -8078,6 +8078,40 @@ end)
 ---------
 -- Baú geral
 --------
+-- Verifica se o jogador tem o backchest equipado no slot de costas
+local function player_has_backchest_equipped(player)
+    local inv = player:get_inventory()
+    local back_list = inv:get_list("armor_back")
+    if not back_list then return false end
+    for _, stack in ipairs(back_list) do
+        if stack:get_name() == "nh_nodes:backchest" then
+            return true
+        end
+    end
+    return false
+end
+
+-- Monta o formspec do baú dinamicamente conforme o backchest estar equipado
+local function build_chest_formspec(clicker)
+    local chest_slots = "list[current_name;main;0,0.3;8,2;]"
+    local player_slots
+
+    if player_has_backchest_equipped(clicker) then
+        player_slots =
+            "list[current_player;main;0,5.85;8,2;8]"..
+            "list[current_player;main;0,8.05;8,1;]"..
+            "listring[current_name;main]"..
+            "listring[current_player;main]"
+    else
+        player_slots =
+            "list[current_player;main;0,8.05;8,1;]"..
+            "listring[current_name;main]"..
+            "listring[current_player;main]"
+    end
+
+    return "size[8,9]".. chest_slots .. player_slots
+end
+
 -- Função para atualizar itens visuais no baú
 -- Mapa de node aberto → nome da entidade do baú correspondente
 local CHEST_ENTITY_BY_NODE = {
@@ -8218,8 +8252,8 @@ core.register_node("nh_nodes:oak_chest_open", {
         -- Marcar que o jogador está usando o baú
         meta:set_string("current_user", player_name)
         
-        core.show_formspec(player_name, "nh_nodes:oak_chest_"..core.pos_to_string(pos),
-            meta:get_string("formspec"))
+    core.show_formspec(player_name, "nh_nodes:oak_chest_"..core.pos_to_string(pos),
+        build_chest_formspec(clicker))
         
         return itemstack
     end,
@@ -8333,7 +8367,7 @@ core.register_node("nh_nodes:oakchest", {
         oak_chest_update_items(pos)
         
         core.show_formspec(player_name, "nh_nodes:oak_chest_"..core.pos_to_string(pos),
-            meta:get_string("formspec"))
+            build_chest_formspec(clicker))
         
         return itemstack
     end,
@@ -8498,7 +8532,7 @@ core.register_node("nh_nodes:oak_chest", {
         oak_chest_update_items(pos)
         
         core.show_formspec(player_name, "nh_nodes:oak_chest_"..core.pos_to_string(pos),
-            meta:get_string("formspec"))
+            build_chest_formspec(clicker))
         
         return itemstack
     end,
@@ -12146,7 +12180,7 @@ core.register_node("nh_nodes:back_chest_open", {
         meta:set_string("current_user", player_name)
         core.show_formspec(player_name,
             "nh_nodes:back_chest_"..core.pos_to_string(pos),
-            meta:get_string("formspec"))
+            build_chest_formspec(clicker))
         return itemstack
     end,
 
@@ -12495,7 +12529,7 @@ core.register_node("nh_nodes:backchest", {
 
         core.show_formspec(player_name,
             "nh_nodes:back_chest_"..core.pos_to_string(pos),
-            meta:get_string("formspec"))
+            build_chest_formspec(clicker))
 
         return itemstack
     end,
