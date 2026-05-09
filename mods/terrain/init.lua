@@ -186,227 +186,203 @@ local PM_nomes = {
 PM = populate_Pall(PM_nomes)
 PM_nomes = nil
 -- CONFIGURAÇÃO DOS NOISES
-local NOISE = {}
+local NOISE = {
+    continent = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 300, y = 300, z = 300 }, -- MUITO grande
+        seed = 24680,
+        octaves = 2,
+        persist = 0.5,
+    },
+    mountain = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 80, y = 80, z = 80 },
+        seed = 12345,
+        octaves = 5,
+        persist = 0.6,
+    },
+    hills = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 150, y = 150, z = 150 },
+        seed = 67890,
+        octaves = 3,
+        persist = 0.5,
+    },
+    plains = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 180, y = 180, z = 180 },
+        seed = 99999,
+        octaves = 2,
+        persist = 0.4,
+    },
+    caves = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 50, y = 20, z = 50 },
+        seed = 121212,
+        octaves = 3,
+        persist = 0.5,
+    },
+    -- Para cavernas de lava
+    caves_lava = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 40, y = 80, z = 40 }, -- spread maior em Y = cavernas mais verticais
+        seed = 424242,                       -- seed diferente
+        octaves = 3,
+        persist = 0.5,
+    },
+    -- Para cavernas de água (seed diferente!)
+    caves_water = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 60, y = 30, z = 60 }, -- spread menor em Y = cavernas mais horizontais
+        seed = 777888,                       -- outra seed DIFERENTE
+        octaves = 3,
+        persist = 0.5,
+    },
+    cave_size = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 50, y = 50, z = 50 }, -- Varia o tamanho das cavernas por região
+        seed = 131313,
+        octaves = 2,
+        persist = 0.4,
+    },
+    roughness = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 25, y = 25, z = 25 },
+        seed = 11111,
+        octaves = 2,
+        persist = 0.6,
+    },
+    biome = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 150, y = 150, z = 150 },
+        seed = 77777,
+        octaves = 3,
+        persist = 0.6,
+    },
+    saprolite = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 40, y = 40, z = 40 },
+        seed = 9876,
+        octaves = 2,
+        persist = 0.5,
+        lacunarity = 2.0
+    },
+    grassleaves = {
+        offset = 0,
+        scale = 10,
+        spread = { x = 20, y = 20, z = 20 }, -- Spread maior = mais espaçadas (era 10)
+        seed = 12312,
+        octaves = 3,
+        persist = 0.5,
+    },
+    trees = {
+        offset = 0,
+        scale = 0.6,
+        spread = { x = 10, y = 10, z = 10 }, -- Spread maior = mais espaçadas (era 10)
+        seed = 54321,
+        octaves = 3,
+        persist = 0.5,
+    },
+    bushes = {
+        offset = 0,
+        scale = 0.6,
+        spread = { x = 8, y = 8, z = 8 },
+        seed = 98765,
+        octaves = 2,
+        persist = 0.4,
+    },
+    -- noise_palms = {
+    --    offset = 0,
+    --    scale = 0.6,
+    --    spread = {x = 15, y = 15, z = 15},
+    --    seed = 33333,
+    --    octaves = 2,
+    --    persist = 0.4,
+    --},
+    -- CONFIGURAÇÃO DOS NOISES DE MINÉRIOS
+    ore_master = {
+        offset = 0,
+        scale = 1,
+        spread = { x = 30, y = 30, z = 30 },
+        seed = 9130,
+        octaves = 3,
+        persist = 0.6,
+        lacunarity = 2.0,
+    },
+    coal = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 30, y = 30, z = 30 },
+        seed = 19283,
+        octaves = 3,
+        persist = 0.6,
+    },
 
-NOISE.continent = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 300, y = 300, z = 300}, -- MUITO grande
-    seed = 24680,
-    octaves = 2,
-    persist = 0.5,
+    copper = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 35, y = 35, z = 35 },
+        seed = 28374,
+        octaves = 3,
+        persist = 0.6,
+    },
+
+    tin = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 32, y = 32, z = 32 },
+        seed = 37465,
+        octaves = 3,
+        persist = 0.6,
+    },
+
+    iron = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 28, y = 28, z = 28 },
+        seed = 46556,
+        octaves = 3,
+        persist = 0.6,
+    },
+
+    nickel = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 25, y = 25, z = 25 },
+        seed = 55647,
+        octaves = 3,
+        persist = 0.6,
+    },
+
+    manganese = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 22, y = 22, z = 22 },
+        seed = 64738,
+        octaves = 3,
+        persist = 0.6,
+    },
+
+    chromium = {
+        offset = 0,
+        scale = 0.5,
+        spread = { x = 20, y = 20, z = 20 },
+        seed = 73829,
+        octaves = 3,
+        persist = 0.6,
+    }
 }
-
-NOISE.mountain = {
-    offset = 0,
-    scale = 1,  
-    spread = {x = 80, y = 80, z = 80},
-    seed = 12345,
-    octaves = 5,
-    persist = 0.6,
-}
-
-NOISE.hills = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 150, y = 150, z = 150},
-    seed = 67890,
-    octaves = 3,
-    persist = 0.5,
-}
-
-NOISE.plains = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 180, y = 180, z = 180},
-    seed = 99999,
-    octaves = 2,
-    persist = 0.4,
-}
-
-
-NOISE.caves = {
-    offset = 0,
-    scale = 1,
-    spread = {x = 50, y = 20, z = 50},
-    seed = 121212,
-    octaves = 3,
-    persist = 0.5,
-}
-
--- Para cavernas de lava
-NOISE.caves_lava = {
-    offset = 0,
-    scale = 1,
-    spread = {x = 40, y = 80, z = 40},   -- spread maior em Y = cavernas mais verticais
-    seed = 424242,  -- seed diferente
-    octaves = 3,
-    persist = 0.5,
-}
-
--- Para cavernas de água (seed diferente!)
-NOISE.caves_water = {
-    offset = 0,
-    scale = 1,
-    spread = {x = 60, y = 30, z = 60},   -- spread menor em Y = cavernas mais horizontais
-    seed = 777888,  -- outra seed DIFERENTE
-    octaves = 3,
-    persist = 0.5,
-}
-
-NOISE.cave_size = {
-    offset = 0,
-    scale = 1,
-    spread = {x = 50, y = 50, z = 50},  -- Varia o tamanho das cavernas por região
-    seed = 131313,
-    octaves = 2,
-    persist = 0.4,
-}
-
-
-NOISE.roughness = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 25, y = 25, z = 25},
-    seed = 11111,
-    octaves = 2,
-    persist = 0.6,
-}
-
-NOISE.biome = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 150, y = 150, z = 150},
-    seed = 77777,
-    octaves = 3,
-    persist = 0.6,
-}
-
-
-NOISE.saprolite = {
-    offset = 0,
-    scale = 1,
-    spread = {x = 40, y = 40, z = 40},
-    seed = 9876,
-    octaves = 2,
-    persist = 0.5,
-    lacunarity = 2.0
-}
-
-NOISE.grassleaves = {
-    offset = 0,
-    scale = 10,
-    spread = {x = 20, y = 20, z = 20},  -- Spread maior = mais espaçadas (era 10)
-    seed = 12312,
-    octaves = 3,
-    persist = 0.5,
-}
-
-NOISE.trees = {
-    offset = 0,
-    scale = 0.6,
-    spread = {x = 10, y = 10, z = 10},  -- Spread maior = mais espaçadas (era 10)
-    seed = 54321,
-    octaves = 3,
-    persist = 0.5,
-}
-
-NOISE.bushes = {
-    offset = 0,
-    scale = 0.6,
-    spread = {x = 8, y = 8, z = 8},
-    seed = 98765,
-    octaves = 2,
-    persist = 0.4,
-}
-
---NOISE.noise_palms = {
---    offset = 0,
---    scale = 0.6,
---    spread = {x = 15, y = 15, z = 15},
---    seed = 33333,
---    octaves = 2,
---    persist = 0.4,
---}
-
-
------------------------------
--- CONFIGURAÇÃO DOS NOISES DE MINÉRIOS
------------------------------
-NOISE.ore_master = {
-    offset = 0,
-    scale = 1,
-    spread = {x = 30, y = 30, z = 30},
-    seed = 9130,
-    octaves = 3,
-    persist = 0.6,
-    lacunarity = 2.0,
-}
-
-
-NOISE.coal = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 30, y = 30, z = 30},
-    seed = 19283,
-    octaves = 3,
-    persist = 0.6,
-}
-
-NOISE.copper = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 35, y = 35, z = 35},
-    seed = 28374,
-    octaves = 3,
-    persist = 0.6,
-}
-
-NOISE.tin = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 32, y = 32, z = 32},
-    seed = 37465,
-    octaves = 3,
-    persist = 0.6,
-}
-
-NOISE.iron = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 28, y = 28, z = 28},
-    seed = 46556,
-    octaves = 3,
-    persist = 0.6,
-}
-
-NOISE.nickel = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 25, y = 25, z = 25},
-    seed = 55647,
-    octaves = 3,
-    persist = 0.6,
-}
-
-NOISE.manganese = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 22, y = 22, z = 22},
-    seed = 64738,
-    octaves = 3,
-    persist = 0.6,
-}
-
-NOISE.chromium = {
-    offset = 0,
-    scale = 0.5,
-    spread = {x = 20, y = 20, z = 20},
-    seed = 73829,
-    octaves = 3,
-    persist = 0.6,
-}
-
 -----------------------------
 -- FUNÇÃO PARA VERIFICAR SE DEVE GERAR MINÉRIO
 -----------------------------
