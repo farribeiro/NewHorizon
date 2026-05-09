@@ -132,6 +132,10 @@ local statue_pos = nil
 local sentinel_pos = nil
 local lowest_island_pos = nil
 -- NOISES (mantidos para compatibilidade com funções antigas)
+local function populate_Pall(names, father)
+    for _, name in ipairs(names) do father[name] = nil end
+    names = nil
+end
 local P_nomes = {
     perlin_continent,
     perlin_biome,
@@ -159,34 +163,30 @@ local P_nomes = {
     perlin_chromium
 }
 local P = {}
-for _, nome in ipairs(P_nomes) do
-    P[nome] = nil -- (Ou um valor inicial padrão)
-end
+populate_Pall(P_nomes, P)
 P_nomes = nil
------------------------------
 -- PERLIN MAPS (OTIMIZAÇÃO)
------------------------------
-local PM = {}
-
-PM.perlin_continent_map = nil
-PM.perlin_biome_map = nil
-PM.perlin_mountain_map = nil
-PM.perlin_hills_map = nil
-PM.perlin_plains_map = nil
-PM.perlin_roughness_map = nil
-PM.perlin_caves_map = nil
-PM.perlin_caves_lava_map = nil
-PM.perlin_caves_water_map = nil
-PM.perlin_cave_size_map = nil
-PM.perlin_grassleaves_map = nil
-PM.perlin_trees_map = nil
-PM.perlin_bushes_map = nil
-PM.perlin_saprolite_map = nil
-PM.perlin_ore_master_map = nil
-
------------------------------
+local PM_nomes = {
+    perlin_continent_map,
+    perlin_biome_map,
+    perlin_mountain_map,
+    perlin_hills_map,
+    perlin_plains_map,
+    perlin_roughness_map,
+    perlin_caves_map,
+    perlin_caves_lava_map,
+    perlin_caves_water_map,
+    perlin_cave_size_map,
+    perlin_grassleaves_map,
+    perlin_trees_map,
+    perlin_bushes_map,
+    perlin_saprolite_map,
+    perlin_ore_master_map,
+}
+PM = {}
+populate_Pall(PM_nomes, PM)
+PM_nomes = nil
 -- CONFIGURAÇÃO DOS NOISES
------------------------------
 local NOISE = {}
 
 NOISE.noise_continent = {
