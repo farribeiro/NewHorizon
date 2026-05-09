@@ -1,101 +1,91 @@
 -- Terrain
 core.log("action", "[TERRAIN] init.lua carregado")
 local S = core.get_translator("nh_terrain")
------------------------------
 -- CONFIGURAÇÕES DO MUNDO
------------------------------
 local MIN_XZ = config.MIN_XZ
 local MAX_XZ = config.MAX_XZ
 local VOID_Y = config.VOID_Y
-
 local SIZE = MAX_XZ - MIN_XZ + 1
-
------------------------------
 -- DESATIVAR MAPGEN NATIVO
------------------------------
 core.set_mapgen_setting("mg_name", "singlenode", true)
+local function gcid(id) core.get_content_id(id) end
 
------------------------------
 -- REGISTRO DOS IDS
------------------------------
-local C = {}  -- uma única local no lugar de ~80
-
-C.ignore      = core.CONTENT_IGNORE
-C.air         = core.CONTENT_AIR
-
-C.grass             = core.get_content_id("nh_nodes:grass")
-C.topgrass          = core.get_content_id("nh_nodes:top_grass")
-C.top_grass_ramp    = core.get_content_id("nh_nodes:top_grass_ramp")
-C.top_grass_vertix  = core.get_content_id("nh_nodes:top_grass_vertix")
-C.grassinsidecorner = core.get_content_id("nh_nodes:top_grass_insidecorner")
-C.grassleaves       = core.get_content_id("nh_nodes:grassleaves")
-C.grassleavesmedium = core.get_content_id("nh_nodes:grassleavesmedium")
-C.smallgrass        = core.get_content_id("nh_nodes:smallgrass")
-C.highgrass         = core.get_content_id("nh_nodes:highgrass")
-C.rush              = core.get_content_id("nh_nodes:rush")
-C.dandelion         = core.get_content_id("nh_nodes:dandelion")
-C.micaceusfungus    = core.get_content_id("nh_nodes:micaceusfungus")
-C.flyamanitafungus  = core.get_content_id("nh_nodes:flyamanitafungus")
-C.dirt              = core.get_content_id("nh_nodes:dirt")
-C.pebble            = core.get_content_id("nh_nodes:pebble")
-C.whitepebble       = core.get_content_id("nh_nodes:white_pebble")
-C.sand              = core.get_content_id("nh_nodes:sand")
-C.wetsand           = core.get_content_id("nh_nodes:wet_sand")
-C.saprolite         = core.get_content_id("nh_nodes:saprolite")
-C.gneiss            = core.get_content_id("nh_nodes:gneiss")
-C.cobblestone       = core.get_content_id("nh_nodes:cobblestone")
-C.basalt            = core.get_content_id("nh_nodes:basalt")
-C.magma             = core.get_content_id("nh_nodes:magma")
-C.peridotite        = core.get_content_id("nh_nodes:peridotite")
-C.bedrock           = core.get_content_id("nh_nodes:bedrock")
-C.redrock           = core.get_content_id("nh_nodes:redrock")
-C.oaktimber         = core.get_content_id("nh_nodes:oaktimber")
-C.fallenstick       = core.get_content_id("nh_nodes:fallenstick")
-C.appletimber       = core.get_content_id("nh_nodes:appletimber")
-C.pinetimber        = core.get_content_id("nh_nodes:pinetimber")
-C.pineleaves        = core.get_content_id("nh_nodes:pineleaves")
-C.oakwood           = core.get_content_id("nh_nodes:oakwood")
-C.oakplank          = core.get_content_id("nh_nodes:oakplank")
-C.oakdowel          = core.get_content_id("nh_nodes:oakdowel")
-C.oakchest          = core.get_content_id("nh_nodes:oak_chest")
-C.oakdoor           = core.get_content_id("nh_nodes:oakdoor_closed")
-C.oakbranch         = core.get_content_id("nh_nodes:oakbranch")
-C.leaves            = core.get_content_id("nh_nodes:leaves")
-C.leavesrelief      = core.get_content_id("nh_nodes:leavesrelief")
-C.kelp              = core.get_content_id("nh_nodes:kelp")
-C.sentinelstatue    = core.get_content_id("nh_nodes:sentinelstatue")
-C.leaves_nut        = core.get_content_id("nh_nodes:leaves_nut")
-C.leaves_nut2       = core.get_content_id("nh_nodes:leaves_nut2")
-C.leaves_nut3       = core.get_content_id("nh_nodes:leaves_nut3")
-C.appleleaves       = core.get_content_id("nh_nodes:appleleaves")
-C.blueberryleaves   = core.get_content_id("nh_nodes:blueberryleaves")
-C.leavesblueberry4  = core.get_content_id("nh_nodes:leaves_blueberry4")
-C.leavesapple       = core.get_content_id("nh_nodes:leaves_apple")
-C.leavesapple2      = core.get_content_id("nh_nodes:leaves_apple2")
-C.leavesapple3      = core.get_content_id("nh_nodes:leaves_apple3")
-C.palmtimber        = core.get_content_id("nh_nodes:palmtimber")
-C.palmstraws        = core.get_content_id("nh_nodes:palmstraws")
-C.palmleafstalks    = core.get_content_id("nh_nodes:palmleafstalks")
-C.palmleaf          = core.get_content_id("nh_nodes:palmleaf")
-C.palmstraw         = core.get_content_id("nh_nodes:palmstraw")
-C.coconut           = core.get_content_id("nh_nodes:coconutlinked")
-C.water             = core.get_content_id("nh_nodes:water")
-C.water2            = core.get_content_id("nh_nodes:water2")
-C.lava              = core.get_content_id("nh_nodes:lava")
-C.obsidian          = core.get_content_id("nh_nodes:obsidian")
-C.fireice           = core.get_content_id("nh_nodes:fireice")
-C.snow              = core.get_content_id("nh_nodes:snow")
-C.ice               = core.get_content_id("nh_nodes:ice")
-C.sphere            = core.get_content_id("nh_nodes:sphere")
-C.coal              = core.get_content_id("nh_nodes:coal")
-C.copper            = core.get_content_id("nh_nodes:copper")
-C.tin               = core.get_content_id("nh_nodes:tin")
-C.iron              = core.get_content_id("nh_nodes:iron")
-C.nickel            = core.get_content_id("nh_nodes:nickel")
-C.manganese         = core.get_content_id("nh_nodes:manganese")
-C.chromium          = core.get_content_id("nh_nodes:chromium")
-
-
+local C           = { -- uma única local no lugar de ~80
+    ignore            = core.CONTENT_IGNORE,
+    air               = core.CONTENT_AIR,
+    grass             = gcid("nh_nodes:grass"),
+    topgrass          = gcid("nh_nodes:top_grass"),
+    top_grass_ramp    = gcid("nh_nodes:top_grass_ramp"),
+    top_grass_vertix  = gcid("nh_nodes:top_grass_vertix"),
+    grassinsidecorner = gcid("nh_nodes:top_grass_insidecorner"),
+    grassleaves       = gcid("nh_nodes:grassleaves"),
+    grassleavesmedium = gcid("nh_nodes:grassleavesmedium"),
+    smallgrass        = gcid("nh_nodes:smallgrass"),
+    highgrass         = gcid("nh_nodes:highgrass"),
+    rush              = gcid("nh_nodes:rush"),
+    dandelion         = gcid("nh_nodes:dandelion"),
+    micaceusfungus    = gcid("nh_nodes:micaceusfungus"),
+    flyamanitafungus  = gcid("nh_nodes:flyamanitafungus"),
+    dirt              = gcid("nh_nodes:dirt"),
+    pebble            = gcid("nh_nodes:pebble"),
+    whitepebble       = gcid("nh_nodes:white_pebble"),
+    sand              = gcid("nh_nodes:sand"),
+    wetsand           = gcid("nh_nodes:wet_sand"),
+    saprolite         = gcid("nh_nodes:saprolite"),
+    gneiss            = gcid("nh_nodes:gneiss"),
+    cobblestone       = gcid("nh_nodes:cobblestone"),
+    basalt            = gcid("nh_nodes:basalt"),
+    magma             = gcid("nh_nodes:magma"),
+    peridotite        = gcid("nh_nodes:peridotite"),
+    bedrock           = gcid("nh_nodes:bedrock"),
+    redrock           = gcid("nh_nodes:redrock"),
+    oaktimber         = gcid("nh_nodes:oaktimber"),
+    fallenstick       = gcid("nh_nodes:fallenstick"),
+    appletimber       = gcid("nh_nodes:appletimber"),
+    pinetimber        = gcid("nh_nodes:pinetimber"),
+    pineleaves        = gcid("nh_nodes:pineleaves"),
+    oakwood           = gcid("nh_nodes:oakwood"),
+    oakplank          = gcid("nh_nodes:oakplank"),
+    oakdowel          = gcid("nh_nodes:oakdowel"),
+    oakchest          = gcid("nh_nodes:oak_chest"),
+    oakdoor           = gcid("nh_nodes:oakdoor_closed"),
+    oakbranch         = gcid("nh_nodes:oakbranch"),
+    leaves            = gcid("nh_nodes:leaves"),
+    leavesrelief      = gcid("nh_nodes:leavesrelief"),
+    kelp              = gcid("nh_nodes:kelp"),
+    sentinelstatue    = gcid("nh_nodes:sentinelstatue"),
+    leaves_nut        = gcid("nh_nodes:leaves_nut"),
+    leaves_nut2       = gcid("nh_nodes:leaves_nut2"),
+    leaves_nut3       = gcid("nh_nodes:leaves_nut3"),
+    appleleaves       = gcid("nh_nodes:appleleaves"),
+    blueberryleaves   = gcid("nh_nodes:blueberryleaves"),
+    leavesblueberry4  = gcid("nh_nodes:leaves_blueberry4"),
+    leavesapple       = gcid("nh_nodes:leaves_apple"),
+    leavesapple2      = gcid("nh_nodes:leaves_apple2"),
+    leavesapple3      = gcid("nh_nodes:leaves_apple3"),
+    palmtimber        = gcid("nh_nodes:palmtimber"),
+    palmstraws        = gcid("nh_nodes:palmstraws"),
+    palmleafstalks    = gcid("nh_nodes:palmleafstalks"),
+    palmleaf          = gcid("nh_nodes:palmleaf"),
+    palmstraw         = gcid("nh_nodes:palmstraw"),
+    coconut           = gcid("nh_nodes:coconutlinked"),
+    water             = gcid("nh_nodes:water"),
+    water2            = gcid("nh_nodes:water2"),
+    lava              = gcid("nh_nodes:lava"),
+    obsidian          = gcid("nh_nodes:obsidian"),
+    fireice           = gcid("nh_nodes:fireice"),
+    snow              = gcid("nh_nodes:snow"),
+    ice               = gcid("nh_nodes:ice"),
+    sphere            = gcid("nh_nodes:sphere"),
+    coal              = gcid("nh_nodes:coal"),
+    copper            = gcid("nh_nodes:copper"),
+    tin               = gcid("nh_nodes:tin"),
+    iron              = gcid("nh_nodes:iron"),
+    nickel            = gcid("nh_nodes:nickel"),
+    manganese         = gcid("nh_nodes:manganese"),
+    chromium          = gcid("nh_nodes:chromium"),
+}
 -- Tabelas de tipo, definidas UMA VEZ no escopo do módulo (fora de qualquer função)
 local GRASS_SOLID = {} -- preenchido após os content_ids serem obtidos
 local GRASS_PASS  = {}
