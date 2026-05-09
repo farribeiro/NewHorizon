@@ -137,51 +137,51 @@ local function populate_Pall(names, father)
     names = nil
 end
 local P_nomes = {
-    perlin_continent,
-    perlin_biome,
-    perlin_mountain,
-    perlin_hills,
-    perlin_plains,
-    perlin_roughness,
-    perlin_caves,
-    perlin_caves_lava,
-    perlin_caves_water,
-    perlin_cave_size,
-    perlin_grassleaves,
-    perlin_trees,
-    perlin_bushes,
+    continent,
+    biome,
+    mountain,
+    hills,
+    plains,
+    roughness,
+    caves,
+    caves_lava,
+    caves_water,
+    cave_size,
+    grassleaves,
+    trees,
+    bushes,
     -- perlin_palms,
-    perlin_saprolite,
+    saprolite,
     -- NOISES PARA MINÉRIOS (adicionar após os noises existentes)
-    perlin_ore_master,
-    perlin_coal,
-    perlin_copper,
-    perlin_tin,
-    perlin_iron,
-    perlin_nickel,
-    perlin_manganes,
-    perlin_chromium
+    ore_master,
+    coal,
+    copper,
+    tin,
+    iron,
+    nickel,
+    manganes,
+    chromium
 }
 local P = {}
 populate_Pall(P_nomes, P)
 P_nomes = nil
 -- PERLIN MAPS (OTIMIZAÇÃO)
 local PM_nomes = {
-    perlin_continent_map,
-    perlin_biome_map,
-    perlin_mountain_map,
-    perlin_hills_map,
-    perlin_plains_map,
-    perlin_roughness_map,
-    perlin_caves_map,
-    perlin_caves_lava_map,
-    perlin_caves_water_map,
-    perlin_cave_size_map,
-    perlin_grassleaves_map,
-    perlin_trees_map,
-    perlin_bushes_map,
-    perlin_saprolite_map,
-    perlin_ore_master_map,
+    continent,
+    biome,
+    mountain,
+    hills,
+    plains,
+    roughness,
+    caves,
+    caves_lava,
+    caves_water,
+    cave_size,
+    grassleaves,
+    trees,
+    bushes,
+    saprolite,
+    ore_master,
 }
 PM = {}
 populate_Pall(PM_nomes, PM)
@@ -1675,46 +1675,46 @@ end
 -- FUNÇÃO DE INICIALIZAÇÃO DOS PERLIN MAPS
 -----------------------------
 local function init_perlin_maps()
-    if perlin_biome then
+    if biome then
         return -- Já inicializados
     end
     
     -- Mantém os perlins antigos para compatibilidade com funções que ainda os usam
-    P.perlin_continent = core.get_perlin(NOISE.noise_continent)
-    P.perlin_mountain     = core.get_perlin(NOISE.noise_mountain)
-    P.perlin_hills        = core.get_perlin(NOISE.noise_hills)
-    P.perlin_plains       = core.get_perlin(NOISE.noise_plains)
-    P.perlin_caves        = core.get_perlin(NOISE.noise_caves)
-    P.perlin_caves_lava   = core.get_perlin(NOISE.noise_caves_lava)
-    P.perlin_caves_water  = core.get_perlin(NOISE.noise_caves_water)
-    P.perlin_cave_size    = core.get_perlin(NOISE.noise_cave_size)
-    P.perlin_roughness    = core.get_perlin(NOISE.noise_roughness)
-    P.perlin_biome        = core.get_perlin(NOISE.noise_biome)
-    P.perlin_grassleaves  = core.get_perlin(NOISE.noise_grassleaves)
-    P.perlin_trees        = core.get_perlin(NOISE.noise_trees)
-    P.perlin_bushes       = core.get_perlin(NOISE.noise_bushes)
-    P.perlin_saprolite    = core.get_perlin(NOISE.noise_saprolite)
-    P.perlin_ore_master = core.get_perlin(NOISE.noise_ore_master)
+    P.continent = core.get_perlin(NOISE.noise_continent)
+    P.mountain     = core.get_perlin(NOISE.noise_mountain)
+    P.hills        = core.get_perlin(NOISE.noise_hills)
+    P.plains       = core.get_perlin(NOISE.noise_plains)
+    P.caves        = core.get_perlin(NOISE.noise_caves)
+    P.caves_lava   = core.get_perlin(NOISE.noise_caves_lava)
+    P.caves_water  = core.get_perlin(NOISE.noise_caves_water)
+    P.cave_size    = core.get_perlin(NOISE.noise_cave_size)
+    P.roughness    = core.get_perlin(NOISE.noise_roughness)
+    P.biome        = core.get_perlin(NOISE.noise_biome)
+    P.grassleaves  = core.get_perlin(NOISE.noise_grassleaves)
+    P.trees        = core.get_perlin(NOISE.noise_trees)
+    P.bushes       = core.get_perlin(NOISE.noise_bushes)
+    P.saprolite    = core.get_perlin(NOISE.noise_saprolite)
+    P.ore_master = core.get_perlin(NOISE.noise_ore_master)
     
 
     
     -- NOVOS PERLIN MAPS OTIMIZADOS
     local chunksize = {x = 80, y = 80, z = 80}
-    PM.perlin_continent_map = core.get_perlin_map(NOISE.noise_continent, chunksize)
-    PM.perlin_biome_map = core.get_perlin_map(NOISE.noise_biome, chunksize)
-    PM.perlin_mountain_map = core.get_perlin_map(NOISE.noise_mountain, chunksize)
-    PM.perlin_hills_map = core.get_perlin_map(NOISE.noise_hills, chunksize)
-    PM.perlin_plains_map = core.get_perlin_map(NOISE.noise_plains, chunksize)
-    PM.perlin_roughness_map = core.get_perlin_map(NOISE.noise_roughness, chunksize)
-    PM.perlin_caves_map = core.get_perlin_map(NOISE.noise_caves, chunksize)
-    PM.perlin_caves_lava_map = core.get_perlin_map(NOISE.noise_caves_lava, chunksize)
-    PM.perlin_caves_water_map = core.get_perlin_map(NOISE.noise_caves_water, chunksize)
-    PM.perlin_cave_size_map = core.get_perlin_map(NOISE.noise_cave_size, chunksize)
-    PM.perlin_grassleaves_map = core.get_perlin_map(NOISE.noise_grassleaves, chunksize)
-    PM.perlin_trees_map = core.get_perlin_map(NOISE.noise_trees, chunksize)
-    PM.perlin_bushes_map = core.get_perlin_map(NOISE.noise_bushes, chunksize)
-    PM.perlin_saprolite_map = core.get_perlin_map(NOISE.noise_saprolite, chunksize)
-    PM.perlin_ore_master_map = core.get_perlin_map(NOISE.noise_ore_master, chunksize)
+    PM.continent = core.get_perlin_map(NOISE.noise_continent, chunksize)
+    PM.biome = core.get_perlin_map(NOISE.noise_biome, chunksize)
+    PM.mountain = core.get_perlin_map(NOISE.noise_mountain, chunksize)
+    PM.hills = core.get_perlin_map(NOISE.noise_hills, chunksize)
+    PM.plains = core.get_perlin_map(NOISE.noise_plains, chunksize)
+    PM.roughness = core.get_perlin_map(NOISE.noise_roughness, chunksize)
+    PM.caves = core.get_perlin_map(NOISE.noise_caves, chunksize)
+    PM.caves_lava = core.get_perlin_map(NOISE.noise_caves_lava, chunksize)
+    PM.caves_water = core.get_perlin_map(NOISE.noise_caves_water, chunksize)
+    PM.cave_size = core.get_perlin_map(NOISE.noise_cave_size, chunksize)
+    PM.grassleaves = core.get_perlin_map(NOISE.noise_grassleaves, chunksize)
+    PM.trees = core.get_perlin_map(NOISE.noise_trees, chunksize)
+    PM.bushes = core.get_perlin_map(NOISE.noise_bushes, chunksize)
+    PM.saprolite = core.get_perlin_map(NOISE.noise_saprolite, chunksize)
+    PM.ore_master = core.get_perlin_map(NOISE.noise_ore_master, chunksize)
 
     core.log("action", "[terrain] Perlins e Perlin Maps inicializados")
 end
@@ -1726,23 +1726,23 @@ local function generate_noise_maps(minp, maxp)
     local minposxz = {x = minp.x, y = minp.z}
     
     -- Noise maps 2D (para altura do terreno)
-    local continent_2d = PM.perlin_continent_map:get_2d_map_flat(minposxz)
-    local biome_2d = PM.perlin_biome_map:get_2d_map_flat(minposxz)
-    local mountain_2d = PM.perlin_mountain_map:get_2d_map_flat(minposxz)
-    local hills_2d = PM.perlin_hills_map:get_2d_map_flat(minposxz)
-    local plains_2d = PM.perlin_plains_map:get_2d_map_flat(minposxz)
-    local rough_2d = PM.perlin_roughness_map:get_2d_map_flat(minposxz)
-    local grassleaves_2d = PM.perlin_grassleaves_map:get_2d_map_flat(minposxz)
-    local trees_2d = PM.perlin_trees_map:get_2d_map_flat(minposxz)
-    local bushes_2d = PM.perlin_bushes_map:get_2d_map_flat(minposxz)
+    local continent_2d = PM.continent:get_2d_map_flat(minposxz)
+    local biome_2d = PM.biome:get_2d_map_flat(minposxz)
+    local mountain_2d = PM.mountain:get_2d_map_flat(minposxz)
+    local hills_2d = PM.hills:get_2d_map_flat(minposxz)
+    local plains_2d = PM.plains:get_2d_map_flat(minposxz)
+    local rough_2d = PM.roughness:get_2d_map_flat(minposxz)
+    local grassleaves_2d = PM.grassleaves:get_2d_map_flat(minposxz)
+    local trees_2d = PM.trees:get_2d_map_flat(minposxz)
+    local bushes_2d = PM.bushes:get_2d_map_flat(minposxz)
     
     -- Noise maps 3D (para cavernas e minérios)
-    local caves_3d = PM.perlin_caves_map:get_3d_map_flat(minp)
-    local caves_lava_3d = PM.perlin_caves_lava_map:get_3d_map_flat(minp)
-    local caves_water_3d = PM.perlin_caves_water_map:get_3d_map_flat(minp)
-    local cave_size_3d = PM.perlin_cave_size_map:get_3d_map_flat(minp)
-    local saprolite_3d = PM.perlin_saprolite_map:get_3d_map_flat(minp)
-    local ore_master_3d = PM.perlin_ore_master_map:get_3d_map_flat(minp)
+    local caves_3d = PM.caves:get_3d_map_flat(minp)
+    local caves_lava_3d = PM.caves_lava:get_3d_map_flat(minp)
+    local caves_water_3d = PM.caves_water:get_3d_map_flat(minp)
+    local cave_size_3d = PM.cave_size:get_3d_map_flat(minp)
+    local saprolite_3d = PM.saprolite:get_3d_map_flat(minp)
+    local ore_master_3d = PM.ore_master:get_3d_map_flat(minp)
     
     return {
         -- 2D maps
@@ -1880,7 +1880,7 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     end
                 elseif y <= height - 4 then
                     -- Saprolite
-                    local saprolite_2d_value = P.perlin_saprolite:get_2d({x=wx, y=wz})
+                    local saprolite_2d_value = P.saprolite:get_2d({x=wx, y=wz})
                     local saprolite_thickness = math.floor((saprolite_2d_value + 1) * 1.5 + 0.5)
                     
                     if y > height - 4 - saprolite_thickness then
@@ -2047,7 +2047,7 @@ local function generate_volcano(area, data, minp, maxp, volcano_pos)
                 -- Adiciona rugosidade à superfície
                 local noise_x = x * 0.1
                 local noise_z = z * 0.1
-                local roughness = (P.perlin_roughness:get_2d({x=noise_x, y=noise_z}) + 1) * 2
+                local roughness = (P.roughness:get_2d({x=noise_x, y=noise_z}) + 1) * 2
                 local volcano_height = SEA_LEVEL + base_height + math.floor(roughness)
                 
                 -- Determina se está na zona de praia (parte baixa do vulcão)
