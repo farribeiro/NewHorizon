@@ -11732,7 +11732,6 @@ core.register_node("nh_nodes:grassleavesmedium", {
         tiles = {"grassleavesbasic2.png"},
     
     waving = 1,
-    
     paramtype = "light",
     walkable = false,
     buildable_to = true,
@@ -11805,7 +11804,7 @@ core.register_node("nh_nodes:smallgrass", {
         --tiles = {"grassleavesbasic2.png"},
     
     waving = 1,
-    
+    use_texture_alpha = "clip",
     paramtype = "light",
     walkable = false,
     --buildable_to = true,
@@ -11875,7 +11874,7 @@ core.register_node("nh_nodes:highgrass", {
         --tiles = {"grassleavesbasic2.png"},
     
     waving = 1,
-    
+    use_texture_alpha = "clip",
     paramtype = "light",
     walkable = false,
     --buildable_to = true,
