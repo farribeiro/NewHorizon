@@ -2634,19 +2634,15 @@ core.register_lbm({
         local same = {
             north = is_solid_same({ x = x, y = y, z = z - 1 }),
             south = is_solid_same({ x = x, y = y, z = z + 1 }),
-            east  = is_solid_same({ x = x + 1, y = y, z = z }),
-            west  = is_solid_same({ x = x - 1, y = y, z = z }),
+            east = is_solid_same({ x = x + 1, y = y, z = z }),
+            west = is_solid_same({ x = x - 1, y = y, z = z }),
         }
-
         local drops = {}
         if below.north then table.insert(drops, "south") end
         if below.south then table.insert(drops, "north") end
         if below.east then table.insert(drops, "west") end
         if below.west then table.insert(drops, "east") end
-
         local any_below = below.north or below.south or below.east or below.west
-
-        --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
         if not any_below then
@@ -2671,11 +2667,8 @@ core.register_lbm({
                 return
             end
         end
-
         -- Lógica de ramp/corner só roda para top_grass
         --if current ~= "nh_nodes:top_grass" then return end
-
-        --
         -- PRIORIDADE 2: corner
         if #drops == 2 then
             local a, b = drops[1], drops[2]
@@ -2699,8 +2692,6 @@ core.register_lbm({
             end
             return
         end
-
-        --
         -- PRIORIDADE 3: RAMPAS
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:dirt_ramp", param2 = 0 })
@@ -2724,48 +2715,33 @@ core.register_lbm({
         end
     end
 })
-
------------------------------
 -- LBM: SLOPES DE NEVE (mesma lógica do sand)
------------------------------
 core.register_lbm({
     name = "nh_terrain:snow_conversion",
     nodenames = { "nh_nodes:snow" },
     run_at_every_load = true,
-
     action = function(pos)
         -- Só converte se houver ar acima
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         if core.get_node(above).name ~= "air" then return end
-
         local x, y, z = pos.x, pos.y, pos.z
-
         local solid_types = {
-            ["nh_nodes:snow"]                   = true,
-            ["nh_nodes:top_grass"]              = true,
-            ["nh_nodes:top_grass_ramp"]         = true,
-            ["nh_nodes:top_grass_corner"]       = true,
-            ["nh_nodes:top_grass_insidecorner"] = true,
-            ["nh_nodes:snow_ramp"]              = true,
-            ["nh_nodes:snow_corner"]            = true,
-            ["nh_nodes:snow_insidecorner"]      = true,
-        }
-
-        -- Material que indica "borda de queda" — ice/air no mesmo nível = snow está na borda
-        local edge_types = {
+            ["nh_nodes:snow"] = true,
             ["nh_nodes:top_grass"] = true,
-            ["air"]                = true,
+            ["nh_nodes:top_grass_ramp"] = true,
+            ["nh_nodes:top_grass_corner"] = true,
+            ["nh_nodes:top_grass_insidecorner"] = true,
+            ["nh_nodes:snow_ramp"] = true,
+            ["nh_nodes:snow_corner"] = true,
+            ["nh_nodes:snow_insidecorner"] = true,
         }
-
+        -- Material que indica "borda de queda" — ice/air no mesmo nível = snow está na borda
+        local edge_types = { ["nh_nodes:top_grass"] = true, ["air"] = true, }
         local function is_solid_below(p)
             local neighbor = core.get_node(p).name
             return edge_types[neighbor] == true
         end
-
-        local function is_solid_same(p)
-            return solid_types[core.get_node(p).name] == true
-        end
-
+        local function is_solid_same(p) return solid_types[core.get_node(p).name] == true end
         local function is_passthrough(p)
             local name = core.get_node(p).name
             if not edge_types[name] then return false end
