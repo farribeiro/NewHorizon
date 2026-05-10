@@ -15,6 +15,7 @@ local C           = { -- uma única local no lugar de ~80
     air               = core.CONTENT_AIR,
     grass             = gcid "nh_nodes:grass",
     topgrass          = gcid "nh_nodes:top_grass",
+    topgrass2         = gcid "nh_nodes:top_grass2",
     top_grass_ramp    = gcid "nh_nodes:top_grass_ramp",
     top_grass_vertix  = gcid "nh_nodes:top_grass_vertix",
     grassinsidecorner = gcid "nh_nodes:top_grass_insidecorner",
@@ -2403,7 +2404,7 @@ end
 local function convert_dirt_below(pos)
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
     if core.get_node(below).name == "nh_nodes:dirt" then
-        core.set_node(below, { name = "nh_nodes:grass" })
+        core.set_node(below, { name = "nh_nodes:top_grass2" })
     end
 end
 
@@ -2431,7 +2432,7 @@ end
 
 core.register_lbm({
     name = "nh_terrain:grass_conversion",
-    nodenames = { "nh_nodes:top_grass", "nh_nodes:grass" },
+    nodenames = { "nh_nodes:top_grass", "nh_nodes:top_grass2" },
     run_at_every_load = true, --run_at_every_load = true,
 
     action = function(pos)
@@ -2579,6 +2580,8 @@ core.register_lbm({
         end
     end
 })
+
+
 
 core.register_lbm({
     name = "nh_terrain:dirt_conversion",
@@ -3032,98 +3035,6 @@ core.register_lbm({
     end
 })
 
-core.register_abm({
-    name = "nh_terrain:grass_conversion2",
-    nodenames = { "nh_nodes:grass" },
-    interval = 4,
-    chance = 25,
-    catch_up = false,
-    action = function(pos, node)
-        local x, y, z = pos.x, pos.y, pos.z
-        local current = core.get_node(pos).name
-
-        local solid_types = {
-            ["nh_nodes:top_grass"]              = true,
-            ["nh_nodes:top_grass_ramp"]         = true,
-            ["nh_nodes:top_grass_vertix"]       = true,
-            ["nh_nodes:top_grass_insidecorner"] = true,
-        }
-
-        local function is_solid_below(p)
-            return solid_types[core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name] == true
-        end
-
-        local function is_solid_same(p)
-            return solid_types[core.get_node(p).name] == true
-        end
-
-        local function is_passthrough(p)
-            local name = core.get_node(p).name
-            local is_pass = name == "air"
-                or name == "nh_nodes:grassleaves"
-                or name == "nh_nodes:grassleavesmedium"
-
-            if not is_pass then return false end
-
-            local below_diag = core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name
-            return solid_types[below_diag] == true
-        end
-
-        local below = {
-            north = is_solid_below({ x = x, y = y, z = z - 1 }),
-            south = is_solid_below({ x = x, y = y, z = z + 1 }),
-            east  = is_solid_below({ x = x + 1, y = y, z = z }),
-            west  = is_solid_below({ x = x - 1, y = y, z = z }),
-        }
-
-        local same = {
-            north = is_solid_same({ x = x, y = y, z = z - 1 }),
-            south = is_solid_same({ x = x, y = y, z = z + 1 }),
-            east  = is_solid_same({ x = x + 1, y = y, z = z }),
-            west  = is_solid_same({ x = x - 1, y = y, z = z }),
-        }
-
-        local drops = {}
-        if below.north then table.insert(drops, "south") end
-        if below.south then table.insert(drops, "north") end
-        if below.east then table.insert(drops, "west") end
-        if below.west then table.insert(drops, "east") end
-
-        local any_below = below.north or below.south or below.east or below.west
-
-        --
-        -- PRIORIDADE 1: INSIDE CORNER
-        -- Roda para top_grass e grass
-        --
-
-        if not any_below then
-            if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
-                clear_above(pos)
-                return
-            end
-
-            if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
-                clear_above(pos)
-                return
-            end
-
-            if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
-                clear_above(pos)
-                return
-            end
-
-            if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
-                clear_above(pos)
-                return
-            end
-        end
-    end
-})
-
 core.register_lbm({
     name = "nh_terrain:sand_conversion",
     nodenames = { "nh_nodes:sand" },
@@ -3285,11 +3196,26 @@ core.register_lbm({
 })
 
 core.register_abm({
-    name = "nh_terrain:grass_conversion2",
-    nodenames = { "nh_nodes:grass" },
-    interval = 4,
-    chance = 25,
+    name = "nh_terrain:vertix_dirt_conversion",
+    nodenames = { "nh_nodes:top_grass_vertix" },
+    interval = 1,
+    chance = 1,
     catch_up = false,
+
+    action = function(pos, node)
+        local below = { x = pos.x, y = pos.y - 1, z = pos.z }
+        if core.get_node(below).name == "nh_nodes:dirt" then
+            core.set_node(below, { name = "nh_nodes:top_grass2" })
+        end
+    end
+})
+
+core.register_abm({
+    name = "nh_terrain:grass_conversion2",
+    nodenames = { "nh_nodes:top_grass2" },
+    interval = 3,
+    chance = 1,
+    catch_up = true,
     action = function(pos, node)
         local x, y, z = pos.x, pos.y, pos.z
         local current = core.get_node(pos).name
@@ -3343,10 +3269,10 @@ core.register_abm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-
+        --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3376,20 +3302,6 @@ core.register_abm({
     end
 })
 
-core.register_abm({
-    name = "nh_terrain:vertix_dirt_conversion",
-    nodenames = { "nh_nodes:top_grass_vertix" },
-    interval = 4,
-    chance = 25,
-    catch_up = false,
-
-    action = function(pos, node)
-        local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-        if core.get_node(below).name == "nh_nodes:dirt" then
-            core.set_node(below, { name = "nh_nodes:grass" })
-        end
-    end
-})
 
 -----------------------------
 -- LBM: LIMPA DECORAÇÕES SOBRE NODES DE TRANSIÇÃO
