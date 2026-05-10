@@ -2140,6 +2140,99 @@ register_craft_station("nh_nodes:top_grass", {
 })
 
 
+register_craft_station("nh_nodes:top_grass2", {
+    description = S("Grass"),
+    -- 6 texturas → top, bottom, right, left, back, front
+    tiles = {
+        "grama.png",      -- topo (0)
+        "terra.png",           -- embaixo (1)
+        "terra.png",     -- lado direito (2)
+        "terra.png",     -- lado esquerdo (3)
+        "terra.png",     -- lado atrás (4)
+        "terra.png"      -- lado frente (5)
+    },
+    
+    sounds = {
+        footstep = {name = "GrassFootstep", gain = 0.5},        
+    dug = {name = "GrassDig", gain = 0.5},
+    dig  = {name = "GrassDig", gain = 0.5},
+    place = {name = "GrassDig", gain = 0.5},
+    },
+    
+    title = S("2x2 Craft on the Grass"), 
+    groups = {crumbly = 3, soil = 1},
+    -- Quando a grama é bloqueada da luz, vira terra
+    drop = "nh_nodes:dirt",
+    
+    -- Configuração mão direita
+    wielded_bone_position = {
+        pos = {x = 0.5, y = 0.5, z = 1.65}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    -- Configuração mão esquerda
+    offhand_bone_position = {
+        pos = {x = 1.5, y = 0, z = 0}
+        --rot = {x = 0, y = 0, z = -110}
+    },
+    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    
+    on_timer = function(pos, elapsed)
+        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local node_above = core.get_node(above).name
+
+        -- Bloco líquido ou lava acima faz virar terra imediatamente
+        local blocked_nodes = {
+            ["nh_nodes:water"]             = true,
+            ["nh_nodes:water_flowing"]     = true,
+            ["nh_nodes:water2"]            = true,
+            ["nh_nodes:water2_flowing"]    = true,
+            ["nh_nodes:lava"]              = true,
+            ["nh_nodes:lava_flowing"]      = true,
+            ["nh_nodes:bluelava"]          = true,
+            ["nh_nodes:bluelava_flowing"]  = true,
+        }
+
+        if blocked_nodes[node_above] then
+            core.set_node(pos, {name = "nh_nodes:dirt"})
+            return false  -- Grama virou terra, para o timer
+        end
+
+        -- Se NÃO é ar, verifica luz
+        if node_above ~= "air" then
+            local light = core.get_node_light(above)
+
+            if light and light <= 4 then
+                core.set_node(pos, {name = "nh_nodes:dirt"})
+                return false
+            end
+        else
+            return false  -- Ar acima, sem ameaça, para o timer
+        end
+
+        return false
+    end,
+    
+    
+        grid_size = 4,
+    
+    positions = {
+        {x=-0.2, y=0.9, z=-0.2}, {x=0.2, y=0.9, z=-0.2},
+        {x=-0.2, y=0.9, z=0.2},  {x=0.2, y=0.9, z=0.2},
+    },
+    
+    tool_slot_pos = {x = 3.1, y = 1},  -- ajusta x e y até ficar no lugar certo
+    
+    output_position = {x=0, y=1.4, z=0},
+    
+    layers = {
+        {name=S("2x2 Grid"), x=0.5, width=2, height=2, start_index=0},
+    },
+    
+    recipes = recipes_floor
+})
+
 register_craft_station("nh_nodes:grass", {
     description = S("Lawn"),
     tiles = {"grama.png"},
