@@ -137,7 +137,7 @@ local function populate_Pall(names)
     for _, name in ipairs(names) do father[name] = nil end
     return father
 end
-local P_nomes = {
+local P = populate_Pall({
     continent,
     biome,
     mountain,
@@ -162,11 +162,9 @@ local P_nomes = {
     nickel,
     manganes,
     chromium
-}
-local P = populate_Pall(P_nomes)
-P_nomes = nil
+})
 -- PERLIN MAPS (OTIMIZAÇÃO)
-local PM_nomes = {
+PM = populate_Pall({
     continent,
     biome,
     mountain,
@@ -182,9 +180,7 @@ local PM_nomes = {
     bushes,
     saprolite,
     ore_master,
-}
-PM = populate_Pall(PM_nomes)
-PM_nomes = nil
+})
 -- CONFIGURAÇÃO DOS NOISES
 local NOISE = {
     continent = {
