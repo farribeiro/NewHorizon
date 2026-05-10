@@ -1,5 +1,5 @@
 -- Terrain
-core.log("action", "[TERRAIN] init.lua carregado")
+core.log("action", "[TERRAIN] init.lua loaded")
 local S = core.get_translator "nh_terrain"
 -- CONFIGURAÇÕES DO MUNDO
 local MIN_XZ = config.MIN_XZ
@@ -1679,7 +1679,7 @@ local function init_perlin_maps()
     PM.saprolite = core.get_perlin_map(NOISE.saprolite, chunksize)
     PM.ore_master = core.get_perlin_map(NOISE.ore_master, chunksize)
 end
-    core.log("action", "[terrain] Perlins e Perlin Maps inicializados")
+    core.log("action", "[terrain] Perlin and Perlin Maps initialized")
 
 -----------------------------
 -- FUNÇÃO DE GERAÇÃO DOS NOISE MAPS EM BATCH
@@ -1776,7 +1776,7 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     goto skip_block
                 end
                 
-    -- ⭐ OTIMIZAÇÃO 2 - CACHE DE CAVERNAS ⭐
+    -- OTIMIZAÇÃO - CACHE DE CAVERNAS
     local is_cave = false
     local is_cave_lava = false
     local is_cave_water = false
@@ -1894,7 +1894,7 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     data[vi] = C.air
                 end
                 
-                ::skip_block::  -- ⭐ LABEL NO FINAL DO LOOP Y
+                ::skip_block:: 
             end
             
             -- Preenche com água todos os blocos de ar abaixo do nível do mar
@@ -1910,7 +1910,7 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                         data[vi] = C.water
                     end
                 end
-                -- 🔥 Fireice sobre wet_sand entre y -19 e -16 (mesma área das ilhas)    
+                -- Fireice sobre wet_sand entre y -19 e -16 (mesma área das ilhas)    
 	        if y >= -19 and y <= -16
 		    and x <= -500 and x >= -850
 		    and z >= 500  and z <= 850
@@ -1978,7 +1978,7 @@ local function find_volcano_position()
         z = CENTER_Z + math.sin(angle) * distance
     }
     
-    core.log("action", "[terrain] Vulcão gerado em: x=" .. VOLCANO_POS.x .. ", z=" .. VOLCANO_POS.z)
+    core.log("action", "[terrain] Volcano generated in: x=" .. VOLCANO_POS.x .. ", z=" .. VOLCANO_POS.z)
     
     return VOLCANO_POS
 end
@@ -2156,14 +2156,14 @@ local function try_spawn_crab_statue(minp, maxp, volcano_pos)
                         else
                             -- 2ª passagem: aceita qualquer wet_sand submerso (kelp pode não ter carregado)
                             ok = true
-                            core.log("action", "[terrain] Estátua do Caranguejo: fallback sem kelp (pass 2)")
+                            core.log("action", "[terrain] Crab Statue: Fallback without kelp (pass 2)")
                         end
 
                         if ok then
                             core.set_node({x = cx, y = cy , z = cz}, {name = "nh_nodes:giantcrabstatue"})
                             statue_spawned = true
                             statue_pos = {x = cx, y = cy , z = cz}
-                            core.log("action", "[terrain] Estátua do Caranguejo colocada em x=" .. cx .. " y=" .. (cy+1) .. " z=" .. cz .. " (pass " .. pass .. ")")
+                            core.log("action", "[terrain] Crab statue placed in x=" .. cx .. " y=" .. (cy+1) .. " z=" .. cz .. " (pass " .. pass .. ")")
                             return
                         end
                     end
@@ -2175,7 +2175,7 @@ end
 
 
 -----------------------------
--- ILHAS FLUTUANTES CÔNICAS MELHORES (-X, +Z, y 500-1000)
+-- ILHAS FLUTUANTES (-X, +Z, y 500-1000)
 -----------------------------
 
 local FLOATING_ISLAND_RADIUS = SNOW_RADIUS
@@ -3089,7 +3089,7 @@ end) -- FIM do register_on_generated
 
 
 if not core.registered_nodes["nh_nodes:grass"] then
-    core.log("warning", "[terrain] nh_nodes:top_grass não está registrado.")
+    core.log("warning", "[terrain] nh_nodes:top_grass is not registered.")
 end
 
 
@@ -4151,13 +4151,13 @@ core.register_abm({
 
 -- Pré-geração da área
 core.after(1, function()
-    core.log("action", "[terrain] Pré-gerando área de spawn...")
+    core.log("action", "[terrain] Pre-generating spawn area...")
     core.emerge_area(
         {x = -48, y = -16, z = -48},
         {x = 48, y = 80, z = 48},
         function(blockpos, action, calls_remaining)
             if calls_remaining == 0 then
-                core.log("action", "[terrain] Área de spawn pré-gerada com sucesso!")
+                core.log("action", "[terrain] Spawn area successfully pre-generated")
             end
     end)
 end)
