@@ -1,5 +1,5 @@
 -- ITEMS
-core.log("action", "[items] init.lua carregado")
+core.log("action", "[items] init.lua loaded")
 local S = core.get_translator("nh_items")
 -- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}
