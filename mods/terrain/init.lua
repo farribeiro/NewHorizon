@@ -9,7 +9,6 @@ local SIZE = MAX_XZ - MIN_XZ + 1
 -- DESATIVAR MAPGEN NATIVO
 core.set_mapgen_setting("mg_name", "singlenode", true)
 local gcid        = core.get_content_id
-
 -- REGISTRO DOS IDS
 local C           = { -- uma única local no lugar de ~80
     ignore            = core.CONTENT_IGNORE,
@@ -119,7 +118,6 @@ local function slope_get_below(x, z)
     if slope_area:contains(x, slope_y - 1, z) then return slope_data[slope_area:index(x, slope_y - 1, z)] end
     return C.ignore
 end
-
 local entity_positions = {}
 local tent_generated = false
 local TENT_SEARCH_RADIUS = 256
@@ -324,7 +322,6 @@ local NOISE = {
         octaves = 3,
         persist = 0.6,
     },
-
     copper = {
         offset = 0,
         scale = 0.5,
@@ -333,7 +330,6 @@ local NOISE = {
         octaves = 3,
         persist = 0.6,
     },
-
     tin = {
         offset = 0,
         scale = 0.5,
@@ -342,7 +338,6 @@ local NOISE = {
         octaves = 3,
         persist = 0.6,
     },
-
     iron = {
         offset = 0,
         scale = 0.5,
@@ -351,7 +346,6 @@ local NOISE = {
         octaves = 3,
         persist = 0.6,
     },
-
     nickel = {
         offset = 0,
         scale = 0.5,
@@ -360,7 +354,6 @@ local NOISE = {
         octaves = 3,
         persist = 0.6,
     },
-
     manganese = {
         offset = 0,
         scale = 0.5,
@@ -369,7 +362,6 @@ local NOISE = {
         octaves = 3,
         persist = 0.6,
     },
-
     chromium = {
         offset = 0,
         scale = 0.5,
@@ -379,110 +371,72 @@ local NOISE = {
         persist = 0.6,
     }
 }
------------------------------
 -- FUNÇÃO PARA VERIFICAR SE DEVE GERAR MINÉRIO
------------------------------
 local function check_ore(x, y, z, perlin_ore, threshold, min_y, max_y)
     -- Verifica se está na faixa de altura correta
-    if y < min_y or y > max_y then
-        return false
-    end
-
+    if y < min_y or y > max_y then return false end
     -- Noise 3D para criar veios
     local ore_noise = perlin_ore:get_3d({ x = x, y = y, z = z })
-
     -- Normaliza para 0-1
     local ore_value = (ore_noise + 1) / 2
-
     -- Se o valor for maior que o threshold, gera o minério
     return ore_value > threshold
 end
-
-
-
-
-
------------------------------
 -- FUNÇÃO PARA VERIFICAR SE HÁ ESPAÇO PARA A ÁRVORE
------------------------------
 local function can_place_tree(area, data, pos, radius)
     -- Verifica se há espaço ao redor da base da árvore
     for dx = -radius, radius do
         for dz = -radius, radius do
             local check_x = pos.x + dx
             local check_z = pos.z + dz
-
             -- Verifica se a posição está dentro do chunk
             if area:contains(check_x, pos.y, check_z) then
                 local vi = area:index(check_x, pos.y, check_z)
-
                 -- Se já tem madeira ou folhas, não pode colocar
-                if data[vi] == C.oaktimber or data[vi] == C.leaves or data[vi] == C.palmtimber or data[vi] == C.palmleaf then
-                    return false
-                end
+                if data[vi] == C.oaktimber or data[vi] == C.leaves or data[vi] == C.palmtimber or data[vi] == C.palmleaf then return false end
             end
         end
     end
     return true
 end
-
------------------------------
 -- FUNÇÃO DE SPAWN DE COQUEIRO
------------------------------
 local function spawn_palm_tree(area, data, pos, wx, wz)
     -- Verifica se há espaço
-    if not can_place_tree(area, data, pos, 3) then
-        return
-    end
-
+    if not can_place_tree(area, data, pos, 3) then return end
     -- Verifica se há areia abaixo do ponto de spawn
     local below_pos = { x = pos.x, y = pos.y - 1, z = pos.z }
     if area:contains(below_pos.x, below_pos.y, below_pos.z) then
         local vi_below = area:index(below_pos.x, below_pos.y, below_pos.z)
-        if data[vi_below] ~= C.sand then
-            return -- Cancela se não tiver areia embaixo
-        end
+        -- Cancela se não tiver areia embaixo
+        if data[vi_below] ~= C.sand then return end
     else
         return -- Cancela se a posição abaixo não está no chunk
     end
-
     -- RNG determinístico por posição
     local seed = wx * 55555 + wz * 88888
     local rng = PseudoRandom(seed)
-
     -- Altura do tronco: 6 a 9 blocos
     local height = rng:next(6, 9)
-
-    -- =============== TRONCO ===============
+    --  TRONCO
     for y = 0, height do
         local check_pos = { x = pos.x, y = pos.y + y, z = pos.z }
-
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
             if data[vi] == C.air then
                 -- Na altura dos cocos (bottom_layer - 1 = pos.y + height), usa C.palmstraws
-                if y == height then
-                    data[vi] = C.palmstraws
-                else
-                    data[vi] = C.palmtimber
-                end
+                if y == height then data[vi] = C.palmstraws else data[vi] = C.palmtimber end
             end
         end
     end
-
-    -- =============== PALMLEAFSTALKS NO TOPO DO TRONCO ===============
+    --  PALMLEAFSTALKS NO TOPO DO TRONCO
     local stalk_pos = { x = pos.x, y = pos.y + height + 1, z = pos.z }
     if area:contains(stalk_pos.x, stalk_pos.y, stalk_pos.z) then
         local vi = area:index(stalk_pos.x, stalk_pos.y, stalk_pos.z)
-        if data[vi] == C.air then
-            data[vi] = C.palmleafstalks
-        end
+        if data[vi] == C.air then data[vi] = C.palmleafstalks end
     end
-
     -- Camadas das folhas
     local bottom_layer = pos.y + height + 1
     local top_layer    = pos.y + height + 2
-
     -- Direções em cruz
     local directions   = {
         { x = 0,  z = -1, rotation = 0 }, -- Norte
@@ -490,68 +444,36 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
         { x = 0,  z = 1,  rotation = 2 }, -- Sul
         { x = -1, z = 0,  rotation = 3 }, -- Oeste
     }
-
     -- Registro opcional de folhas (se você realmente usa isso depois)
     local leaf_nodes   = {}
-
-
-    -- =============== FOLHAS EM CRUZ - CAMADA INFERIOR ===============
+    --  FOLHAS EM CRUZ - CAMADA INFERIOR
     for _, dir in ipairs(directions) do
         for i = 1, 3 do
-            local leaf_pos = {
-                x = pos.x + dir.x * i,
-                y = bottom_layer,
-                z = pos.z + dir.z * i
-            }
-
-            if not area:contains(leaf_pos.x, leaf_pos.y, leaf_pos.z) then
-                break
-            end
-
+            local leaf_pos = { x = pos.x + dir.x * i, y = bottom_layer, z = pos.z + dir.z * i }
+            if not area:contains(leaf_pos.x, leaf_pos.y, leaf_pos.z) then break end
             local vi = area:index(leaf_pos.x, leaf_pos.y, leaf_pos.z)
-
             -- SE NÃO FOR AR → PARA ESSA DIREÇÃO
-            if data[vi] ~= C.air then
-                break
-            end
-
+            if data[vi] ~= C.air then break end
             -- Caso contrário, coloca a folha
             data[vi] = C.palmleaf
-            table.insert(leaf_nodes, {
-                pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z },
-                rotation = dir.rotation
-            })
+            table.insert(leaf_nodes,
+                { pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z }, rotation = dir.rotation })
         end
     end
-
-    -- =============== FOLHAS EM CRUZ - CAMADA SUPERIOR ===============
+    --  FOLHAS EM CRUZ - CAMADA SUPERIOR
     for _, dir in ipairs(directions) do
         for i = 1, 2 do
-            local leaf_pos = {
-                x = pos.x + dir.x * i,
-                y = top_layer,
-                z = pos.z + dir.z * i
-            }
-
-            if not area:contains(leaf_pos.x, leaf_pos.y, leaf_pos.z) then
-                break
-            end
-
+            local leaf_pos = { x = pos.x + dir.x * i, y = top_layer, z = pos.z + dir.z * i }
+            if not area:contains(leaf_pos.x, leaf_pos.y, leaf_pos.z) then break end
             local vi = area:index(leaf_pos.x, leaf_pos.y, leaf_pos.z)
-
-            if data[vi] ~= C.air then
-                break
-            end
-
+            if data[vi] ~= C.air then break end
             data[vi] = C.palmleaf
-            table.insert(leaf_nodes, {
-                pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z },
-                rotation = dir.rotation
-            })
+            table.insert(leaf_nodes,
+                { pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z }, rotation = dir.rotation })
         end
     end
 
-    -- =============== COCOS (0 a 4 aleatórios) ===============
+    --  COCOS (0 a 4 aleatórios)
     local num_coconuts = rng:next(0, 4)
 
     -- Posições possíveis para cocos (embaixo das folhas da camada inferior)
@@ -561,80 +483,57 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
         { x = pos.x,     y = bottom_layer - 1, z = pos.z + 1, rotation = 0 }, -- Sul
         { x = pos.x,     y = bottom_layer - 1, z = pos.z - 1, rotation = 2 }, -- Norte
     }
-
     -- Embaralha as posições
     for i = #possible_positions, 2, -1 do
         local j = rng:next(1, i)
         possible_positions[i], possible_positions[j] = possible_positions[j], possible_positions[i]
     end
-
     -- Coloca os cocos
     for i = 1, math.min(num_coconuts, #possible_positions) do
         local coco_pos = possible_positions[i]
-
         if area:contains(coco_pos.x, coco_pos.y, coco_pos.z) then
             local vi = area:index(coco_pos.x, coco_pos.y, coco_pos.z)
             if data[vi] == C.air then
                 data[vi] = C.coconut
-                table.insert(leaf_nodes, {
-                    pos = { x = coco_pos.x, y = coco_pos.y, z = coco_pos.z },
-                    rotation = coco_pos.rotation
-                })
+                table.insert(leaf_nodes,
+                    { pos = { x = coco_pos.x, y = coco_pos.y, z = coco_pos.z }, rotation = coco_pos.rotation })
             end
         end
     end
-
     -- Retorna lista de folhas para rotacionar depois (via core.set_node)
     return leaf_nodes
 end
-
------------------------------
 -- FUNÇÃO DE SPAWN DE ARBUSTO (só folhas)
------------------------------
 local function spawn_bush(area, data, pos, wx, wz)
     -- Verifica se há espaço (raio menor que árvores)
-    if not can_place_tree(area, data, pos, 2) then
-        return -- Cancela se estiver muito perto
-    end
-
+    -- Cancela se estiver muito perto
+    if not can_place_tree(area, data, pos, 2) then return end
     -- RNG determinístico por posição (seed diferente das árvores)
     local seed = wx * 91823 + wz * 45678
     local rng = PseudoRandom(seed)
-
     -- Altura do arbusto: 1 ou 2 blocos
     local height = rng:next(1, 2)
-
     -- Raio do arbusto: 1 a 3 blocos
     local radius = rng:next(1, 3)
-
     -- Contador para limitar substituições especiais
     local max_swaps = 2
     local swaps = 0
-
-    -- =============== GERA ARBUSTO ESFÉRICO ===============
+    --  GERA ARBUSTO ESFÉRICO
     for y = 0, height do
         for dx = -radius, radius do
             for dz = -radius, radius do
                 -- Calcula distância do centro (formato mais orgânico)
                 local dist = (dx * dx + (y * 0.8) * (y * 0.8) + dz * dz) --local dist = math.sqrt(dx * dx + (y * 0.8) * (y * 0.8) + dz * dz)
-
                 -- Adiciona aleatoriedade nas bordas
-                local randomness = rng:next(-10, 10) / 20.0 -- -0.5 a +0.5
-
+                local randomness = rng:next(-10, 10) / 20.0              -- -0.5 a +0.5
                 -- Se estiver dentro do raio (com variação)
                 if dist <= (radius + randomness) * (radius + randomness) then
-                    local check_pos = {
-                        x = pos.x + dx,
-                        y = pos.y + y,
-                        z = pos.z + dz
-                    }
-
+                    local check_pos = { x = pos.x + dx, y = pos.y + y, z = pos.z + dz }
                     if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                         local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
                         -- Só substitui ar
                         if data[vi] == C.air then
                             data[vi] = C.blueberryleaves
-
                             -- Chance de substituir por folhas com blueberry
                             if swaps < max_swaps then
                                 local r = rng:next(1, 100) -- 1 a 100
@@ -651,37 +550,28 @@ local function spawn_bush(area, data, pos, wx, wz)
         end
     end
 end
-
------------------------------
 -- FUNÇÃO DE SPAWN DE CARVALHO (com variação de tronco)
------------------------------
 local function spawn_tree(area, data, param2_data, pos, wx, wz)
     -- Verifica se há espaço (raio de 5 blocos)
-    if not can_place_tree(area, data, pos, 5) then
-        return -- Cancela a geração se estiver muito perto de outra árvore
-    end
-
+    -- Cancela a geração se estiver muito perto de outra árvore
+    if not can_place_tree(area, data, pos, 5) then return end
     -- VERIFICAÇÃO: Verifica se há grama abaixo do ponto de spawn ***
     local below_pos = { x = pos.x, y = pos.y - 1, z = pos.z }
     if area:contains(below_pos.x, below_pos.y, below_pos.z) then
         local vi_below = area:index(below_pos.x, below_pos.y, below_pos.z)
-        if data[vi_below] ~= C.topgrass and data[vi_below] ~= C.grass then
-            return -- Cancela se não tiver grama embaixo
-        end
+        -- Cancela se não tiver grama embaixo
+        if data[vi_below] ~= C.topgrass and data[vi_below] ~= C.grass then return end
     else
         return -- Cancela se a posição abaixo não está no chunk
     end
-
     -- RNG determinístico por posição
     local seed = wx * 73856093 + wz * 19349663
     local rng = PseudoRandom(seed)
     local height = rng:next(6, 9)
     local crown_radius = rng:next(3, 4)
-
-    -- =============== DETERMINA TAMANHO DO TRONCO ===============
+    --  DETERMINA TAMANHO DO TRONCO
     local trunk_type = rng:next(2, 4) -- Sorteava entre 1 e 4
     local trunk_dx, trunk_dz
-
     if trunk_type == 1 then
         -- 1x1 (tronco único)
         trunk_dx = 0
@@ -699,8 +589,7 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
         trunk_dx = 1
         trunk_dz = 1
     end
-
-    -- =============== RAIZ SUBTERRÂNEA (1 camada abaixo do solo) ===============
+    --  RAIZ SUBTERRÂNEA (1 camada abaixo do solo)
     for dx = 0, trunk_dx do
         for dz = 0, trunk_dz do
             local root_pos = { x = pos.x + dx, y = pos.y - 1, z = pos.z + dz }
@@ -711,33 +600,26 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             end
         end
     end
-
-    -- =============== TRONCO (tamanho variável) ===============
+    --  TRONCO (tamanho variável)
     for y = 0, height do
         for dx = 0, trunk_dx do
             for dz = 0, trunk_dz do
                 local check_pos = { x = pos.x + dx, y = pos.y + y, z = pos.z + dz }
-
                 if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                     local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
                     -- Só substitui ar ou folhas
-                    if data[vi] == C.air or data[vi] == C.leaves then
-                        data[vi] = C.oaktimber
-                    end
+                    if data[vi] == C.air or data[vi] == C.leaves then data[vi] = C.oaktimber end
                 end
             end
         end
     end
-
-    -- =============== COPA (esférica) ===============
+    --  COPA (esférica)
     local max_swaps = 3
     local swaps = 0
-
     local top = pos.y + height
     -- Ajusta centro da copa para troncos maiores
     local copa_center_x = pos.x + (trunk_dx / 2)
     local copa_center_z = pos.z + (trunk_dz / 2)
-
     for dy = -2, 3 do
         for dx = -crown_radius, crown_radius do
             for dz = -crown_radius, crown_radius do
@@ -777,19 +659,14 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             end
         end
     end
-
     -- Folha no topo (centralizada)
     local top_x = math.floor(copa_center_x)
     local top_z = math.floor(copa_center_z)
     if area:contains(top_x, top + 3, top_z) then
         local vi_top = area:index(top_x, top + 3, top_z)
-        if data[vi_top] == C.air then
-            data[vi_top] = C.leaves
-        end
+        if data[vi_top] == C.air then data[vi_top] = C.leaves end
     end
-
-
-    -- =============== LEAVESRELIEF (detalhes dentro da copa) ===============
+    --  LEAVESRELIEF (detalhes dentro da copa)
     for dy = -2, 3 do
         for dx = -crown_radius, crown_radius do
             for dz = -crown_radius, crown_radius do
@@ -803,7 +680,6 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
                     if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                         local vi       = area:index(check_pos.x, check_pos.y, check_pos.z)
                         local vi_above = area:index(check_pos.x, check_pos.y + 1, check_pos.z)
-
                         -- O node BASE precisa ser folha, e o de CIMA também folha (age como "líquido")
                         if data[vi] == C.leaves and data[vi_above] == C.leaves then
                             local r = rng:next(1, 100)
@@ -819,13 +695,10 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             end
         end
     end
-
-
-    -- =============== GALHOS CARDEAIS (na menor altura da copa) ===============
+    --  GALHOS CARDEAIS (na menor altura da copa)
     local branch_y = top - 2 -- Menor altura onde folhas aparecem (dy = -2)
     local branch_center_x = math.floor(copa_center_x)
     local branch_center_z = math.floor(copa_center_z)
-
     -- param2 facedir: Sul=0, Oeste=1, Norte=2, Leste=3
     local branch_dirs = {
         { dx = 0,  dz = -1, param2 = 0 }, -- Norte  (aponta para sul)
@@ -833,7 +706,6 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
         { dx = -1, dz = 0,  param2 = 3 }, -- Oeste  (aponta para leste)
         { dx = 1,  dz = 0,  param2 = 1 }, -- Leste  (aponta para oeste)
     }
-
     for _, dir in ipairs(branch_dirs) do
         local bx = branch_center_x + dir.dx
         local bz = branch_center_z + dir.dz
@@ -852,35 +724,27 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             end
         end
     end
-
-
-    -- =============== FALLEN STICK (50% de chance) ===============
+    --  FALLEN STICK (50% de chance)
     --if math.random() < 0.40 then
-
     local rng_stick = PseudoRandom(wx * 12345 + wz * 67890)
     if rng_stick:next(1, 1000) <= 400 then -- 40% = 400/1000
         local attempts = 0
         local max_attempts = 10            -- Mais tentativas para encontrar chão válido (era 50 por arvore)
-
         while attempts < max_attempts do
             -- Gera posição aleatória em um raio maior (incluindo área além da copa)
             local stick_dx = rng_stick:next(-crown_radius - 2, crown_radius + 2)
             local stick_dz = rng_stick:next(-crown_radius - 2, crown_radius + 2)
-
             local stick_x = math.floor(copa_center_x + stick_dx)
             local stick_z = math.floor(copa_center_z + stick_dz)
-
             -- Busca o chão real descendo a partir da altura da árvore
             local found_ground = false
             local ground_y = nil
-
             -- Desce a partir do topo da árvore até alguns blocos abaixo da base
             for y = pos.y + height, pos.y - 5, -1 do
                 if area:contains(stick_x, y, stick_z) and
                     area:contains(stick_x, y + 1, stick_z) then
                     local vi_ground = area:index(stick_x, y, stick_z)
                     local vi_above = area:index(stick_x, y + 1, stick_z)
-
                     -- Verifica se encontrou um bloco sólido válido com ar acima
                     if (data[vi_ground] == C.topgrass or
                             data[vi_ground] == C.grass or
@@ -892,151 +756,103 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
                     end
                 end
             end
-
             -- Se encontrou um chão válido, coloca o graveto
             if found_ground and ground_y then
                 local vi_stick = area:index(stick_x, ground_y, stick_z)
                 data[vi_stick] = C.fallenstick
                 break -- Graveto colocado com sucesso!
             end
-
             attempts = attempts + 1
         end
     end
     --]]--
 end
-
------------------------------
 -- FUNÇÃO DE SPAWN DE PINHEIRO
------------------------------
 local function spawn_pine_tree(area, data, pos, wx, wz)
     -- Verifica se há espaço (raio de 4 blocos)
-    if not can_place_tree(area, data, pos, 4) then
-        return
-    end
-
+    if not can_place_tree(area, data, pos, 4) then return end
     -- RNG determinístico por posição
     local seed = wx * 73856093 + wz * 19349663
     local rng = PseudoRandom(seed)
     local height = rng:next(8, 12) -- Pinheiros mais altos
-
-    -- =============== RAIZ SUBTERRÂNEA (1 camada abaixo do solo) ===============
+    --  RAIZ SUBTERRÂNEA (1 camada abaixo do solo)
     local pine_root_pos = { x = pos.x, y = pos.y - 1, z = pos.z }
     if area:contains(pine_root_pos.x, pine_root_pos.y, pine_root_pos.z) then
         local vi = area:index(pine_root_pos.x, pine_root_pos.y, pine_root_pos.z)
         -- Substitui qualquer node de terreno pelo tronco
         data[vi] = C.pinetimber
     end
-
-    -- =============== TRONCO (sempre 1x1) ===============
+    --  TRONCO (sempre 1x1)
     for y = 0, height do
         local check_pos = { x = pos.x, y = pos.y + y, z = pos.z }
-
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
-            if data[vi] == C.air or data[vi] == C.pineleaves then
-                data[vi] = C.pinetimber
-            end
+            if data[vi] == C.air or data[vi] == C.pineleaves then data[vi] = C.pinetimber end
         end
     end
-
-    -- =============== COPA CÔNICA (base mais baixa) ===============
+    --  COPA CÔNICA (base mais baixa)
     local top           = pos.y + height
-
     local canopy_start  = pos.y + math.floor(height * 0.25) -- começa mais baixo
     local canopy_end    = top + 3                           -- estende acima do topo
     local canopy_height = canopy_end - canopy_start
-
     local max_radius    = 4
-
     for y = canopy_end, canopy_start, -1 do
         local layer = canopy_end - y
         local t = layer / canopy_height -- 0 no topo, 1 na base
-
         -- Raio cresce suavemente para baixo
         local radius = math.floor(t * max_radius)
         if radius < 1 then radius = 1 end
-
         for dx = -radius, radius do
             for dz = -radius, radius do
                 local dist = (dx * dx + dz * dz) --local dist = math.sqrt(dx * dx + dz * dz)
-
                 -- Cone mais fechado no topo
                 local limit = radius - (1 - t) * 0.25
-
                 -- Irregularidade leve
                 local noise = rng:next(0, 100) / 350
-
                 if dist <= (limit + noise) * (limit + noise) then
-                    local check_pos = {
-                        x = pos.x + dx,
-                        y = y,
-                        z = pos.z + dz
-                    }
-
+                    local check_pos = { x = pos.x + dx, y = y, z = pos.z + dz }
                     if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                         local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
-                        if data[vi] == C.air then
-                            data[vi] = C.pineleaves
-                        end
+                        if data[vi] == C.air then data[vi] = C.pineleaves end
                     end
                 end
             end
         end
     end
 end
-
-
-
------------------------------
 -- FUNÇÃO DE SPAWN DE MACIEIRA
------------------------------
 local function spawn_apple_tree(area, data, pos, wx, wz)
     -- Verifica se há espaço (raio de 4 blocos)
-    if not can_place_tree(area, data, pos, 4) then
-        return
-    end
-
+    if not can_place_tree(area, data, pos, 4) then return end
     -- VERIFICAÇÃO: Verifica se há dirt abaixo do ponto de spawn ***
     local below_pos = { x = pos.x, y = pos.y - 1, z = pos.z }
     if area:contains(below_pos.x, below_pos.y, below_pos.z) then
         local vi_below = area:index(below_pos.x, below_pos.y, below_pos.z)
-        if data[vi_below] ~= C.dirt then
-            return -- Cancela se não tiver grama embaixo
-        end
+        -- Cancela se não tiver grama embaixo
+        if data[vi_below] ~= C.dirt then return end
     else
         return -- Cancela se a posição abaixo não está no chunk
     end
-
     -- RNG determinístico por posição
     local seed = wx * 73856093 + wz * 19349663
     local rng = PseudoRandom(seed)
     local height = rng:next(3, 6) -- macieiras mais altos
-
-    -- =============== TRONCO (sempre 1x1) ===============
+    --  TRONCO (sempre 1x1)
     for y = 0, height do
         local check_pos = { x = pos.x, y = pos.y + y, z = pos.z }
-
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
-            if data[vi] == C.air or data[vi] == C.appleleaves then
-                data[vi] = C.appletimber
-            end
+            if data[vi] == C.air or data[vi] == C.appleleaves then data[vi] = C.appletimber end
         end
     end
-
-    -- =============== COPA (esférica) ===============
+    --  COPA (esférica)
     local max_swaps = 3
     local swaps = 0
-
-
     local top = pos.y + height
     -- Ajusta centro da copa para troncos maiores
     local copa_center_x = pos.x
     local copa_center_z = pos.z
     local crown_radius = rng:next(1, 2)
-
-
     for dy = -2, 3 do
         for dx = -crown_radius, crown_radius do
             for dz = -crown_radius, crown_radius do
@@ -1051,7 +867,6 @@ local function spawn_apple_tree(area, data, pos, wx, wz)
                         local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
                         if data[vi] == C.air then
                             data[vi] = C.appleleaves
-
                             -- Chance de substituir por folhas especiais
                             -- (mais pressão para NÃO trocar → distribuição enviesada)
                             if swaps < max_swaps then
@@ -1080,68 +895,54 @@ local function spawn_apple_tree(area, data, pos, wx, wz)
     local top_z = math.floor(copa_center_z)
     if area:contains(top_x, top + 2, top_z) then
         local vi_top = area:index(top_x, top + 2, top_z)
-        if data[vi_top] == C.air then
-            data[vi_top] = C.leavesapple
-        end
+        if data[vi_top] == C.air then data[vi_top] = C.leavesapple end
     end
 end
 
------------------------------
 -- FUNÇÃO DE CÁLCULO DE ALTURA (OTIMIZADA COM ARRAYS)
------------------------------
 local MAX_TERRAIN_Y = 80
-local function calculate_height_batch(minp, maxp, SEA_LEVEL, CENTER_X, CENTER_Z, MAX_RADIUS,
-                                      continent_2d, biome_2d, mountain_2d, hills_2d, plains_2d, rough_2d)
+local function calculate_height_batch(minp, maxp, SEA_LEVEL, CENTER_X, CENTER_Z, MAX_RADIUS, continent_2d, biome_2d,
+                                      mountain_2d, hills_2d, plains_2d, rough_2d)
     local heights = {}
     local biome_factors = {}
     local sidelen = maxp.x - minp.x + 1
-
     local index = 1
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
             -- Coordenadas toroidais
             local wx = ((x - MIN_XZ) % SIZE) + MIN_XZ
             local wz = ((z - MIN_XZ) % SIZE) + MIN_XZ
-
             -- Distância do centro
             local dx = wx - CENTER_X
             local dz = wz - CENTER_Z
             local dist_from_center_sq = dx * dx + dz * dz -- quadrado
             local MAX_RADIUS_SQ = MAX_RADIUS * MAX_RADIUS
-
             -- Fator continental (normalizado de 0 a 1)
             local continent_factor = math.max(0, 1.0 - (dist_from_center_sq / MAX_RADIUS_SQ))
-
             -- FORÇAR bordas a serem oceano
             -- Quando dist > 0.85 * MAX_RADIUS, começar a afundar drasticamente
             local edge_threshold = MAX_RADIUS * 0.5 -- fator de terra firme: até 30% do raio
             local edge_threshold_sq = edge_threshold * edge_threshold
-
             if dist_from_center_sq > edge_threshold_sq then
                 local edge_factor = (dist_from_center_sq - edge_threshold_sq) / (MAX_RADIUS_SQ - edge_threshold_sq)
                 continent_factor = continent_factor * (1.0 - edge_factor * 0.8)
             end
-
             -- Fator continental dos noise maps (já normalizados)
             local cont_noise = (continent_2d[index] + 1) / 2
             local continent_lands = math.pow(cont_noise, 1.8)
-
             -- Bioma
             local biome_noise = biome_2d[index]
             local biome_factor = (biome_noise + 1) / 2
-
             -- Noises já normalizados
             local mountain_noise = mountain_2d[index]
             local hills_noise = hills_2d[index]
             local plains_noise = plains_2d[index]
             local rough_noise = rough_2d[index]
-
             local mn = (mountain_noise + 1) / 2
             local hn = (hills_noise + 1) / 2
             local pn = (plains_noise + 1) / 2
             local rn = (rough_noise + 1) / 2
             local cl = continent_lands
-
             -- Mistura baseada no bioma
             local terrain_height
             if biome_factor > 0.7 then
@@ -1153,219 +954,143 @@ local function calculate_height_batch(minp, maxp, SEA_LEVEL, CENTER_X, CENTER_Z,
             else
                 terrain_height = hn * 0.6 + pn * 0.2 + rn * 0.2 + cl * 0.1
             end
-
             -- Aplica fator continental
             local final_height = terrain_height * continent_factor
             local height = math.floor(final_height * 65 + SEA_LEVEL - 19)
-
             -- Limites
             if height > MAX_TERRAIN_Y then height = MAX_TERRAIN_Y end
             if height < -20 then height = -20 end
-
             heights[index] = height
             biome_factors[index] = biome_factor
-
             index = index + 1
         end
     end
-
     return heights, biome_factors
 end
-
------------------------------
 -- FUNÇÃO PARA VERIFICAR SE É CAVERNA (OTIMIZADA COM ARRAYS 3D)
------------------------------
 local function is_cave_lava_batch(x, y, z, cave_lava_3d, cave_size_3d, area, minp)
     -- Apenas gera cavernas na camada de gneiss (ajustado conforme a minha lógica)
-    if y > 23 or y < -37 then
-        return false
-    end
-
+    if y > 23 or y < -37 then return false end
     -- Calcula índice no array 3D
     local vi = area:index(x, y, z)
-
     -- Noise 3D principal para cavernas
     local cave_noise = cave_lava_3d[vi]
-
     -- Noise para variar o tamanho das cavernas
     local size_noise = cave_size_3d[vi]
     local size_factor = (size_noise + 1) / 2 -- Normaliza para 0-1
-
     -- Threshold dinâmico: ajusta a "abertura" das cavernas
     -- Valores menores = cavernas maiores
     -- Valores maiores = cavernas menores/raras
     local threshold = 0.6 + (size_factor * 0.7) -- Varia entre 0.6 e 0.8
-
     -- Se o noise absoluto for maior que o threshold, é caverna
     return math.abs(cave_noise) > threshold
 end
-
 local function is_cave_water_batch(x, y, z, cave_water_3d, cave_size_3d, area, minp)
     -- Apenas gera cavernas na camada de gneiss (ajustado conforme a minha lógica)
-    if y > 23 or y < -37 then
-        return false
-    end
-
+    if y > 23 or y < -37 then return false end
     -- Calcula índice no array 3D
     local vi = area:index(x, y, z)
-
     -- Noise 3D principal para cavernas
     local cave_noise = cave_water_3d[vi]
-
     -- Noise para variar o tamanho das cavernas
     local size_noise = cave_size_3d[vi]
     local size_factor = (size_noise + 1) / 2 -- Normaliza para 0-1
-
     -- Threshold dinâmico: ajusta a "abertura" das cavernas
     -- Valores menores = cavernas maiores
     -- Valores maiores = cavernas menores/raras
     local threshold = 0.6 + (size_factor * 0.5) -- Varia entre 0.6 e 0.8
-
     -- Se o noise absoluto for maior que o threshold, é caverna
     return math.abs(cave_noise) > threshold
 end
-
 local function is_cave_batch(x, y, z, cave_3d, cave_size_3d, area, minp)
     -- Apenas gera cavernas na camada de gneiss (ajustado conforme a minha lógica)
-    if y > 23 or y < -37 then
-        return false
-    end
-
+    if y > 23 or y < -37 then return false end
     -- Calcula índice no array 3D
     local vi = area:index(x, y, z)
-
     -- Noise 3D principal para cavernas
     local cave_noise = cave_3d[vi]
-
     -- Noise para variar o tamanho das cavernas
     local size_noise = cave_size_3d[vi]
     local size_factor = (size_noise + 1) / 2 -- Normaliza para 0-1
-
     -- Threshold dinâmico: ajusta a "abertura" das cavernas
     -- Valores menores = cavernas maiores
     -- Valores maiores = cavernas menores/raras
     local threshold = 0.6 + (size_factor * 0.2) -- Varia entre 0.6 e 0.8
-
     -- Se o noise absoluto for maior que o threshold, é caverna
     return math.abs(cave_noise) > threshold
 end
-
 -- Modelo da tenda de coqueiro
 local function can_spawn_tent(area, data, base_pos)
     local width = 4
     local depth = 5
     local height = 4 -- 3 troncos + teto
-
     -- chão: areia molhada
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
             local vi = area:index(base_pos.x + dx, base_pos.y - 1, base_pos.z + dz)
-            if data[vi] ~= C.wetsand then
-                return false
-            end
+            if data[vi] ~= C.wetsand then return false end
         end
     end
-
     -- volume livre
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
             for dy = 0, height do
                 local vi = area:index(base_pos.x + dx, base_pos.y + dy, base_pos.z + dz)
-                if data[vi] ~= C.air then
-                    return false
-                end
+                if data[vi] ~= C.air then return false end
             end
         end
     end
-
     return true
 end
-
 local function spawn_tent(area, data, base_pos)
     local width = 4
     local depth = 5
     local trunk_height = 3
     local roof_y = base_pos.y + trunk_height
-
-    local corners = {
-        { 0, 0 },
-        { 3, 0 },
-        { 0, 4 },
-        { 3, 4 },
-    }
-
+    local corners = { { 0, 0 }, { 3, 0 }, { 0, 4 }, { 3, 4 }, }
     -- troncos
     for _, c in ipairs(corners) do
         for y = 0, trunk_height - 1 do
-            data[area:index(
-                base_pos.x + c[1],
-                base_pos.y + y,
-                base_pos.z + c[2]
-            )] = C.palmtimber
+            data[area:index(base_pos.x + c[1], base_pos.y + y, base_pos.z + c[2])] = C.palmtimber
         end
     end
-
     -- teto
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
-            data[area:index(
-                base_pos.x + dx,
-                roof_y,
-                base_pos.z + dz
-            )] = C.palmstraw
+            data[area:index(base_pos.x + dx, roof_y, base_pos.z + dz)] = C.palmstraw
         end
     end
 end
-
-
 -- Modelo do navio afundado
 local function can_spawn_ship(area, data, base_pos)
     local width = 4
     local depth = 8
     local height = 4 -- 3 blocs paredes + teto
-
     -- chão: areia molhada
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
             local vi = area:index(base_pos.x + dx, base_pos.y - 1, base_pos.z + dz)
-            if data[vi] ~= C.wetsand then
-                return false
-            end
+            if data[vi] ~= C.wetsand then return false end
         end
     end
-
     -- volume livre
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
             for dy = 0, height do
                 local vi = area:index(base_pos.x + dx, base_pos.y + dy, base_pos.z + dz)
-                if data[vi] ~= C.water then
-                    return false
-                end
+                if data[vi] ~= C.water then return false end
             end
         end
     end
-
     return true
 end
-
----
 --Barco
----
-
 local function spawn_ship(area, data, base_pos)
     local width = 5
     local depth = 8
     local pillar_height = 3
     local roof_y = base_pos.y + pillar_height
-
-    local corners = {
-        { 0,         0 },
-        { width - 1, 0 },
-        { 0,         depth - 1 },
-        { width - 1, depth - 1 },
-    }
-
+    local corners = { { 0, 0 }, { width - 1, 0 }, { 0, depth - 1 }, { width - 1, depth - 1 }, }
     -- conves
     for dx = -2, width + 1 do
         for dz = -3, depth + 3 do
@@ -1376,15 +1101,10 @@ local function spawn_ship(area, data, base_pos)
             )] = C.oakwood
         end
     end
-
     -- teto
     for dx = 0, width - 1 do
         for dz = 0, depth - 3 do
-            data[area:index(
-                base_pos.x + dx,
-                roof_y + 1,
-                base_pos.z + dz
-            )] = C.oakwood
+            data[area:index(base_pos.x + dx, roof_y + 1, base_pos.z + dz)] = C.oakwood
         end
     end
     -- parede frontal janela (dz = 0)
@@ -1393,21 +1113,14 @@ local function spawn_ship(area, data, base_pos)
             data[area:index(base_pos.x + dx, base_pos.y + y, base_pos.z)] = C.oakwood
         end
     end
-
     -- parede traseira porta
     for dx = 0, width - 3 do
         for y = 0, pillar_height do
             data[area:index(base_pos.x + dx, base_pos.y + y, base_pos.z + depth - 3)] = C.oakwood
         end
     end
-
     -- porta traseira (gap em dx = width-2, dz = depth-3)
-    local door_pos = {
-        x = base_pos.x + width - 2,
-        y = base_pos.y + 1,
-        z = base_pos.z + depth - 3
-    }
-
+    local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
     core.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
         core.set_node(door_pos, {
@@ -1415,138 +1128,88 @@ local function spawn_ship(area, data, base_pos)
             param2 = 2                          -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
         })
     end)
-
     -- parede lateral esquerda fechada (dx = 0)
     for dz = 0, depth - 3 do
         for y = 0, pillar_height do
             data[area:index(base_pos.x, base_pos.y + y, base_pos.z + dz)] = C.oakwood
         end
     end
-
     -- parede lateral direita fechada (dx = width-1)
     for dz = 0, depth - 3 do
         for y = 0, pillar_height do
             data[area:index(base_pos.x + width - 1, base_pos.y + y, base_pos.z + dz)] = C.oakwood
         end
     end
-
     -- parede do fundo (dz = depth-1) fica ABERTA — entrada da cabine
 end
-
 local function place_tent_chest(area, data, base_pos)
     local candidates = {}
     for dx = 1, 2 do
-        for dz = 1, 3 do
-            table.insert(candidates, { dx = dx, dz = dz })
-        end
+        for dz = 1, 3 do table.insert(candidates, { dx = dx, dz = dz }) end
     end
     if #candidates == 0 then return end
-
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
     local idx = rng_chest:next(1, #candidates)
     local c = candidates[idx]
-
-    local chest_pos = {
-        x = base_pos.x + c.dx,
-        y = base_pos.y,
-        z = base_pos.z + c.dz
-    }
-
+    local chest_pos = { x = base_pos.x + c.dx, y = base_pos.y, z = base_pos.z + c.dz }
     -- Passa chest_pos como argumento ao core.after para evitar
     -- condição de corrida entre threads de emerge paralelos
     core.after(0, function(pos)
         core.set_node(pos, { name = "nh_nodes:oak_chest", param2 = 2 })
         local def = core.registered_nodes["nh_nodes:oak_chest"]
-        if def and def.on_construct then
-            def.on_construct(pos)
-        end
+        if def and def.on_construct then def.on_construct(pos) end
     end, chest_pos)
 end
-
 local function safe_index(area, x, y, z, minp, maxp)
-    if x < minp.x or x > maxp.x or
-        y < minp.y or y > maxp.y or
-        z < minp.z or z > maxp.z then
-        return nil
-    end
+    if x < minp.x or x > maxp.x or y < minp.y or y > maxp.y or z < minp.z or z > maxp.z then return nil end
     return area:index(x, y, z)
 end
-
-
----
 --Casa
----
-
 -- Modelo da casa
 local function can_spawn_house(area, data, base_pos)
     local width = 5
     local depth = 8
     local height = 5 -- pillar_height (3) + teto + margem
-
     -- chão: precisa ser C.grass ou C.topgrass diretamente abaixo
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
             local vi_floor = area:index(base_pos.x + dx, base_pos.y - 1, base_pos.z + dz)
             local floor_node = data[vi_floor]
-            if floor_node ~= C.grass and floor_node ~= C.topgrass then
-                return false
-            end
+            if floor_node ~= C.grass and floor_node ~= C.topgrass then return false end
         end
     end
-
     -- volume acima deve ser apenas air, grassleaves ou grassleavesmedium
     local allowed = {
         [C.air]               = true,
         [C.grassleaves]       = true,
         [C.grassleavesmedium] = true,
     }
-
     for dx = 0, width - 1 do
         for dz = 0, depth - 1 do
             for dy = 0, height do
                 local vi = area:index(base_pos.x + dx, base_pos.y + dy, base_pos.z + dz)
-                if not allowed[data[vi]] then
-                    return false
-                end
+                if not allowed[data[vi]] then return false end
             end
         end
     end
-
     return true
 end
-
 local function spawn_house(area, data, base_pos)
     local width = 5
     local depth = 8
     local pillar_height = 3
     local roof_y = base_pos.y + pillar_height
-
-    local corners = {
-        { 0,         0 },
-        { width - 1, 0 },
-        { 0,         depth - 1 },
-        { width - 1, depth - 1 },
-    }
-
+    local corners = { { 0, 0 }, { width - 1, 0 }, { 0, depth - 1 }, { width - 1, depth - 1 }, }
     -- piso
     for dx = -2, width + 1 do
         for dz = -2, depth - 1 do
-            data[area:index(
-                base_pos.x + dx,
-                base_pos.y,
-                base_pos.z + dz
-            )] = C.oakwood
+            data[area:index(base_pos.x + dx, base_pos.y, base_pos.z + dz)] = C.oakwood
         end
     end
-
     -- teto
     for dx = 0, width + 1 do
         for dz = 0, depth - 1 do
-            data[area:index(
-                base_pos.x + dx - 1,
-                roof_y + 1,
-                base_pos.z + dz - 1
-            )] = C.oakwood
+            data[area:index(base_pos.x + dx - 1, roof_y + 1, base_pos.z + dz - 1)] = C.oakwood
         end
     end
     -- parede traseira (dz = 0)
@@ -1555,21 +1218,14 @@ local function spawn_house(area, data, base_pos)
             data[area:index(base_pos.x + dx, base_pos.y + y, base_pos.z)] = C.cobblestone
         end
     end
-
     -- parede frontal, da porta
     for dx = 0, width - 3 do
         for y = 0, pillar_height do
             data[area:index(base_pos.x + dx, base_pos.y + y, base_pos.z + depth - 3)] = C.cobblestone
         end
     end
-
     -- porta traseira (gap em dx = width-2, dz = depth-3)
-    local door_pos = {
-        x = base_pos.x + width - 2,
-        y = base_pos.y + 1,
-        z = base_pos.z + depth - 3
-    }
-
+    local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
     core.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
         core.set_node(door_pos, {
@@ -1577,114 +1233,82 @@ local function spawn_house(area, data, base_pos)
             param2 = 2                          -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
         })
     end)
-
     -- parede lateral esquerda fechada (dx = 0)
     for dz = 0, depth - 3 do
         for y = 0, pillar_height do
             data[area:index(base_pos.x, base_pos.y + y, base_pos.z + dz)] = C.cobblestone
         end
     end
-
     -- parede lateral direita fechada (dx = width-1)
     for dz = 0, depth - 3 do
         for y = 0, pillar_height do
             data[area:index(base_pos.x + width - 1, base_pos.y + y, base_pos.z + dz)] = C.cobblestone
         end
     end
-
     -- parede do fundo (dz = depth-1) fica ABERTA — entrada da cabine
 end
-
 local function place_ship_chest(area, data, base_pos)
     local candidates = {}
     for dx = 1, 2 do
-        for dz = 1, 3 do
-            table.insert(candidates, { dx = dx, dz = dz })
-        end
+        for dz = 1, 3 do table.insert(candidates, { dx = dx, dz = dz }) end
     end
     if #candidates == 0 then return end
-
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
     local idx = rng_chest:next(1, #candidates)
     local c = candidates[idx]
-
-    local chest_pos = {
-        x = base_pos.x + c.dx,
-        y = base_pos.y,
-        z = base_pos.z + c.dz
-    }
-
+    local chest_pos = { x = base_pos.x + c.dx, y = base_pos.y, z = base_pos.z + c.dz }
     core.after(0, function(pos)
         core.set_node(pos, { name = "nh_nodes:oak_chest", param2 = 2 })
         local def = core.registered_nodes["nh_nodes:oak_chest"]
-        if def and def.on_construct then
-            def.on_construct(pos)
-        end
+        if def and def.on_construct then def.on_construct(pos) end
     end, chest_pos)
 end
-
 local function safe_index(area, x, y, z, minp, maxp)
-    if x < minp.x or x > maxp.x or
-        y < minp.y or y > maxp.y or
-        z < minp.z or z > maxp.z then
-        return nil
-    end
+    if x < minp.x or x > maxp.x or y < minp.y or y > maxp.y or z < minp.z or z > maxp.z then return nil end
     return area:index(x, y, z)
 end
-
------------------------------
 -- FUNÇÃO DE INICIALIZAÇÃO DOS PERLIN MAPS
------------------------------
 local function init_perlin_maps()
-    if biome then
-        return -- Já inicializados
-    end
-
+    -- Já inicializados
+    if biome then return end
     -- Mantém os perlins antigos para compatibilidade com funções que ainda os usam
-    P.continent   = core.get_perlin(NOISE.continent)
-    P.mountain    = core.get_perlin(NOISE.mountain)
-    P.hills       = core.get_perlin(NOISE.hills)
-    P.plains      = core.get_perlin(NOISE.plains)
-    P.caves       = core.get_perlin(NOISE.caves)
-    P.caves_lava  = core.get_perlin(NOISE.caves_lava)
-    P.caves_water = core.get_perlin(NOISE.caves_water)
-    P.cave_size   = core.get_perlin(NOISE.cave_size)
-    P.roughness   = core.get_perlin(NOISE.roughness)
-    P.biome       = core.get_perlin(NOISE.biome)
-    P.grassleaves = core.get_perlin(NOISE.grassleaves)
-    P.trees       = core.get_perlin(NOISE.trees)
-    P.bushes      = core.get_perlin(NOISE.bushes)
-    P.saprolite   = core.get_perlin(NOISE.saprolite)
-    P.ore_master  = core.get_perlin(NOISE.ore_master)
-
-
-
+    P.continent     = core.get_perlin(NOISE.continent)
+    P.mountain      = core.get_perlin(NOISE.mountain)
+    P.hills         = core.get_perlin(NOISE.hills)
+    P.plains        = core.get_perlin(NOISE.plains)
+    P.caves         = core.get_perlin(NOISE.caves)
+    P.caves_lava    = core.get_perlin(NOISE.caves_lava)
+    P.caves_water   = core.get_perlin(NOISE.caves_water)
+    P.cave_size     = core.get_perlin(NOISE.cave_size)
+    P.roughness     = core.get_perlin(NOISE.roughness)
+    P.biome         = core.get_perlin(NOISE.biome)
+    P.grassleaves   = core.get_perlin(NOISE.grassleaves)
+    P.trees         = core.get_perlin(NOISE.trees)
+    P.bushes        = core.get_perlin(NOISE.bushes)
+    P.saprolite     = core.get_perlin(NOISE.saprolite)
+    P.ore_master    = core.get_perlin(NOISE.ore_master)
     -- NOVOS PERLIN MAPS OTIMIZADOS
     local chunksize = { x = 80, y = 80, z = 80 }
-    PM.continent = core.get_perlin_map(NOISE.continent, chunksize)
-    PM.biome = core.get_perlin_map(NOISE.biome, chunksize)
-    PM.mountain = core.get_perlin_map(NOISE.mountain, chunksize)
-    PM.hills = core.get_perlin_map(NOISE.hills, chunksize)
-    PM.plains = core.get_perlin_map(NOISE.plains, chunksize)
-    PM.roughness = core.get_perlin_map(NOISE.roughness, chunksize)
-    PM.caves = core.get_perlin_map(NOISE.caves, chunksize)
-    PM.caves_lava = core.get_perlin_map(NOISE.caves_lava, chunksize)
-    PM.caves_water = core.get_perlin_map(NOISE.caves_water, chunksize)
-    PM.cave_size = core.get_perlin_map(NOISE.cave_size, chunksize)
-    PM.grassleaves = core.get_perlin_map(NOISE.grassleaves, chunksize)
-    PM.trees = core.get_perlin_map(NOISE.trees, chunksize)
-    PM.bushes = core.get_perlin_map(NOISE.bushes, chunksize)
-    PM.saprolite = core.get_perlin_map(NOISE.saprolite, chunksize)
-    PM.ore_master = core.get_perlin_map(NOISE.ore_master, chunksize)
+    PM.continent    = core.get_perlin_map(NOISE.continent, chunksize)
+    PM.biome        = core.get_perlin_map(NOISE.biome, chunksize)
+    PM.mountain     = core.get_perlin_map(NOISE.mountain, chunksize)
+    PM.hills        = core.get_perlin_map(NOISE.hills, chunksize)
+    PM.plains       = core.get_perlin_map(NOISE.plains, chunksize)
+    PM.roughness    = core.get_perlin_map(NOISE.roughness, chunksize)
+    PM.caves        = core.get_perlin_map(NOISE.caves, chunksize)
+    PM.caves_lava   = core.get_perlin_map(NOISE.caves_lava, chunksize)
+    PM.caves_water  = core.get_perlin_map(NOISE.caves_water, chunksize)
+    PM.cave_size    = core.get_perlin_map(NOISE.cave_size, chunksize)
+    PM.grassleaves  = core.get_perlin_map(NOISE.grassleaves, chunksize)
+    PM.trees        = core.get_perlin_map(NOISE.trees, chunksize)
+    PM.bushes       = core.get_perlin_map(NOISE.bushes, chunksize)
+    PM.saprolite    = core.get_perlin_map(NOISE.saprolite, chunksize)
+    PM.ore_master   = core.get_perlin_map(NOISE.ore_master, chunksize)
 end
 core.log("action", "[terrain] Perlin and Perlin Maps initialized")
-
------------------------------
 -- FUNÇÃO DE GERAÇÃO DOS NOISE MAPS EM BATCH
------------------------------
 local function generate_noise_maps(minp, maxp)
     local minposxz = { x = minp.x, y = minp.z }
-
     -- Noise maps 2D (para altura do terreno)
     local continent_2d = PM.continent:get_2d_map_flat(minposxz)
     local biome_2d = PM.biome:get_2d_map_flat(minposxz)
@@ -1695,7 +1319,6 @@ local function generate_noise_maps(minp, maxp)
     local grassleaves_2d = PM.grassleaves:get_2d_map_flat(minposxz)
     local trees_2d = PM.trees:get_2d_map_flat(minposxz)
     local bushes_2d = PM.bushes:get_2d_map_flat(minposxz)
-
     -- Noise maps 3D (para cavernas e minérios)
     local caves_3d = PM.caves:get_3d_map_flat(minp)
     local caves_lava_3d = PM.caves_lava:get_3d_map_flat(minp)
@@ -1704,8 +1327,7 @@ local function generate_noise_maps(minp, maxp)
     local saprolite_3d = PM.saprolite:get_3d_map_flat(minp)
     local ore_master_3d = PM.ore_master:get_3d_map_flat(minp)
 
-    return {
-        -- 2D maps
+    return { -- 2D maps
         continent_2d = continent_2d,
         biome_2d = biome_2d,
         mountain_2d = mountain_2d,
@@ -1715,7 +1337,6 @@ local function generate_noise_maps(minp, maxp)
         grassleaves_2d = grassleaves_2d,
         trees_2d = trees_2d,
         bushes_2d = bushes_2d,
-
         -- 3D maps
         caves_3d = caves_3d,
         caves_lava_3d = caves_lava_3d,
@@ -1725,55 +1346,39 @@ local function generate_noise_maps(minp, maxp)
         ore_master_3d = ore_master_3d,
     }
 end
-
------------------------------
 -- FUNÇÃO AUXILIAR: EPICENTROS DE NEVE
------------------------------
 local SNOW_RADIUS = 350
 local EPICENTER_NE = { x = MAX_XZ * 0.5, z = MAX_XZ * 0.5 }
 local EPICENTER_SW = { x = MIN_XZ * 0.5, z = MIN_XZ * 0.5 }
-
 local function inside_snow_area(x, z)
     local dx1 = x - EPICENTER_NE.x
     local dz1 = z - EPICENTER_NE.z
     local d1 = dx1 * dx1 + dz1 * dz1
-
     local dx2 = x - EPICENTER_SW.x
     local dz2 = z - EPICENTER_SW.z
     local d2 = dx2 * dx2 + dz2 * dz2
-
     return (d1 <= SNOW_RADIUS * SNOW_RADIUS) or (d2 <= SNOW_RADIUS * SNOW_RADIUS)
 end
-
-
------------------------------
 -- FUNÇÃO DE GERAÇÃO DO TERRENO BASE
------------------------------
 local function generate_terrain_base(minp, maxp, area, data, heights, biome_factors, noise_maps)
     local SEA_LEVEL = 0
-
     local index_2d = 1
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
             local wx = ((x - MIN_XZ) % SIZE) + MIN_XZ
             local wz = ((z - MIN_XZ) % SIZE) + MIN_XZ
-
             -- ✅ RNG determinístico por coluna
             local rng_terrain = PseudoRandom(wx * 99991 + wz * 77773)
-
             local height = heights[index_2d]
             local biome_factor = biome_factors[index_2d]
-
             for y = math.max(minp.y, -50), math.min(maxp.y, MAX_TERRAIN_Y) do
                 local vi = area:index(x, y, z)
                 local is_snow_area = inside_snow_area(x, z)
-
                 -- Pular blocos obviamente vazios acima do terreno
                 if y > height + 10 then
                     data[vi] = C.air
                     goto skip_block
                 end
-
                 -- OTIMIZAÇÃO - CACHE DE CAVERNAS
                 local is_cave = false
                 local is_cave_lava = false
@@ -1787,7 +1392,6 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     is_cave_water = is_cave_water_batch(x, y, z, noise_maps.caves_water_3d, noise_maps.cave_size_3d, area,
                         minp)
                 end
-
                 if y <= -50 then
                     data[vi] = C.redrock
                 elseif y <= -48 then
@@ -1804,9 +1408,8 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     -- Verifica caverna primeiro
                     if is_cave then
                         data[vi] = C.ignore
-                        if y <= -34 and rng_terrain:next(1, 1000) <= 50 then -- 5%
-                            data[vi] = C.obsidian
-                        end
+                        -- 5%
+                        if y <= -34 and rng_terrain:next(1, 1000) <= 50 then data[vi] = C.obsidian end
                     elseif is_cave_lava then
                         data[vi] = C.ignore
                         if y < -30 then --and rng_terrain:next(1, 1000) <= 900 then  -- 90%
@@ -1821,7 +1424,6 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                         -- Gneiss e minérios
                         local node_type = C.gneiss
                         local ore_noise = noise_maps.ore_master_3d[vi]
-
                         if y > -10 and y < 5 and ore_noise > 0.85 then        -- 15% de chance
                             node_type = C.coal
                         elseif y > -20 and y < -10 and ore_noise > 0.88 then  --  (12% chance)
@@ -1837,28 +1439,17 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                         elseif y > -35 and y <= -33 and ore_noise > 0.98 then -- 2% chance
                             node_type = C.chromium
                         end
-
                         data[vi] = node_type
                     end
                 elseif y <= height - 4 then
                     -- Saprolite
                     local saprolite_2d_value = P.saprolite:get_2d({ x = wx, y = wz })
                     local saprolite_thickness = math.floor((saprolite_2d_value + 1) * 1.5 + 0.5)
-
-                    if y > height - 4 - saprolite_thickness then
-                        data[vi] = C.saprolite
-                    else
-                        data[vi] = C.gneiss
-                    end
+                    if y > height - 4 - saprolite_thickness then data[vi] = C.saprolite else data[vi] = C.gneiss end
                 elseif y <= height - 1 then
-                    if height <= SEA_LEVEL + 5 then
-                        data[vi] = C.sand
-                    else
-                        data[vi] = C.dirt
-                    end
+                    if height <= SEA_LEVEL + 5 then data[vi] = C.sand else data[vi] = C.dirt end
                 elseif y == height then
                     local is_mountain = (height > SEA_LEVEL + 8)
-
                     if is_mountain and is_snow_area then
                         data[vi] = C.snow
                     elseif height <= SEA_LEVEL then
@@ -1882,18 +1473,14 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                         data[vi] = C.topgrass
                     else
                         -- Porções aleatórias de dirt no lugar de topgrass
-                        if rng_terrain:next(1, 1000) <= 2 then -- 0.5% de chance
-                            data[vi] = C.dirt
-                        else
-                            data[vi] = C.topgrass
-                        end
+                        -- 0.5% de chance
+                        if rng_terrain:next(1, 1000) <= 2 then data[vi] = C.dirt else data[vi] = C.topgrass end
                     end
                     --elseif y <= SEA_LEVEL and data[vi] == C.air then
                     --data[vi] = C.water
                 else
                     data[vi] = C.air
                 end
-
                 ::skip_block::
             end
 
@@ -1911,39 +1498,30 @@ local function generate_terrain_base(minp, maxp, area, data, heights, biome_fact
                     end
                 end
                 -- Fireice sobre wet_sand entre y -19 e -16 (mesma área das ilhas)
-                if y >= -19 and y <= -16
-                    and x <= -500 and x >= -850
-                    and z >= 500 and z <= 850
-                then
+                if y >= -19 and y <= -16 and x <= -500 and x >= -850 and z >= 500 and z <= 850 then
                     if data[vi] == C.water then
                         local bvi = area:index(x, y - 1, z)
                         if area:contains(x, y - 1, z) and data[bvi] == C.wetsand then
                             -- RNG determinístico por posição para esparsidade
                             local rng_fi = PseudoRandom(x * 73856093 + y * 19349663 + z * 83492791)
-                            if rng_fi:next(1, 100) <= 1 then -- ~8% de chance
-                                data[vi] = C.fireice
-                            end
+                            -- ~8% de chance
+                            if rng_fi:next(1, 100) <= 1 then data[vi] = C.fireice end
                         end
                     end
                 end
             end
             for y = math.max(minp.y, -50), math.min(maxp.y, height) do
                 local vi = area:index(x, y, z)
-                if data[vi] == C.ignore then
-                    data[vi] = C.air -- restaura o ar das cavernas
-                end
+                -- restaura o ar das cavernas
+                if data[vi] == C.ignore then data[vi] = C.air end
             end
-
             index_2d = index_2d + 1
         end
     end
     return grass_positions
 end
 
-
------------------------------
 -- CONFIGURAÇÃO DA ILHA VULCÂNICA
------------------------------
 local VOLCANO_RADIUS = 100 -- Raio da ilha
 local VOLCANO_HEIGHT = 40  -- Altura do vulcão
 local CRATER_RADIUS = 10   -- Raio da cratera
@@ -1953,42 +1531,25 @@ local BEACH_WIDTH = 50     -- Largura da praia
 -- Posição aleatória no oceano (será calculada uma vez)
 local VOLCANO_POS = nil
 
------------------------------
 -- FUNÇÃO PARA ENCONTRAR POSIÇÃO VÁLIDA PARA O VULCÃO
------------------------------
 local function find_volcano_position()
-    if VOLCANO_POS then
-        return VOLCANO_POS
-    end
-
+    if VOLCANO_POS then return VOLCANO_POS end
     local CENTER_X = (MIN_XZ + MAX_XZ) / 2
     local CENTER_Z = (MIN_XZ + MAX_XZ) / 2
     local MAX_RADIUS = (SIZE / 2) * 0.85
-
     -- Define área onde o vulcão pode aparecer (no oceano, longe do centro e das bordas)
     local min_dist = MAX_RADIUS * 0.7  -- Mínimo 50% do raio (oceano profundo)
     local max_dist = MAX_RADIUS * 0.85 -- Máximo 75% do raio (antes das bordas)
-
     -- Gera posição aleatória
     local angle = math.random() * math.pi * 2
     local distance = min_dist + math.random() * (max_dist - min_dist)
-
-    VOLCANO_POS = {
-        x = CENTER_X + math.cos(angle) * distance,
-        z = CENTER_Z + math.sin(angle) * distance
-    }
-
+    VOLCANO_POS = { x = CENTER_X + math.cos(angle) * distance, z = CENTER_Z + math.sin(angle) * distance }
     core.log("action", "[terrain] Volcano generated in: x=" .. VOLCANO_POS.x .. ", z=" .. VOLCANO_POS.z)
-
     return VOLCANO_POS
 end
-
------------------------------
 -- FUNÇÃO DE GERAÇÃO DA ILHA VULCÂNICA
------------------------------
 local function generate_volcano(area, data, minp, maxp, volcano_pos)
     local SEA_LEVEL = 0
-
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
             -- Calcula distância do centro do vulcão
@@ -1998,23 +1559,18 @@ local function generate_volcano(area, data, minp, maxp, volcano_pos)
             local dist = math.sqrt(dist_sq) -- calcular UMA vez
             local VOLCANO_RADIUS_SQ = VOLCANO_RADIUS * VOLCANO_RADIUS
             local rng_volcano = PseudoRandom(x * 13579 + z * 24680)
-
             -- Se está dentro do raio da ilha (vulcão)
             if dist_sq <= VOLCANO_RADIUS_SQ then
                 local height_factor = 1.0 - (dist_sq / VOLCANO_RADIUS_SQ)
-
                 -- Usar potência maior para cone mais íngreme (convexo)
                 local base_height = math.floor(height_factor ^ 3 * VOLCANO_HEIGHT)
-
                 -- Adiciona rugosidade à superfície
                 local noise_x = x * 0.1
                 local noise_z = z * 0.1
                 local roughness = (P.roughness:get_2d({ x = noise_x, y = noise_z }) + 1) * 2
                 local volcano_height = SEA_LEVEL + base_height + math.floor(roughness)
-
                 -- Determina se está na zona de praia (parte baixa do vulcão)
                 local is_beach_zone = dist >= VOLCANO_RADIUS - BEACH_WIDTH
-
                 -- Encontra o terreno oceânico existente neste ponto
                 local ocean_floor_here = SEA_LEVEL
                 for y = SEA_LEVEL, minp.y, -1 do
@@ -2026,113 +1582,73 @@ local function generate_volcano(area, data, minp, maxp, volcano_pos)
                         end
                     end
                 end
-
                 -- Calcula a base do cone a partir do chão oceânico real
                 local total_cone_height = volcano_height - ocean_floor_here
-
-                -- ==== CRATERA (cálculo correto) ====
+                --  CRATERA (cálculo correto)
                 local in_crater = dist <= CRATER_RADIUS
                 local crater_factor = 1 - (dist / CRATER_RADIUS)
                 if crater_factor < 0 then crater_factor = 0 end
-
                 local crater_depth_here = (crater_factor ^ 3) * CRATER_DEPTH
-
                 -- Fundo real da cratera neste ponto
                 local crater_floor = volcano_height - crater_depth_here
-
                 -- **COMEÇA DO CHÃO OCEÂNICO ATÉ O TOPO**
                 for y = math.max(minp.y, ocean_floor_here), math.min(maxp.y, volcano_height + 10) do
-                    if not area:contains(x, y, z) then
-                        goto continue_y
-                    end
-
+                    if not area:contains(x, y, z) then goto continue_y end
                     local vi = area:index(x, y, z)
-
                     -- Calcula qual deveria ser o raio do cone nesta altura Y
                     local height_from_base = y - ocean_floor_here
                     local progress = height_from_base / total_cone_height -- 0 na base, 1 no topo
-
                     -- Cone mais íngreme: reduz raio mais rapidamente com a altura
                     local cone_radius_at_y = VOLCANO_RADIUS * (height_factor ^ 2) * (1.0 - progress ^ 1.5)
-
                     -- Verifica se estamos dentro do cone nesta altura
                     local inside_cone = dist <= cone_radius_at_y
-
                     -- CRATERA (tem prioridade máxima)
                     if in_crater and y >= crater_floor and y <= volcano_height then
                         -- Nível FIXO do lago de lava (horizontal)
                         local crater_center_floor = volcano_height - CRATER_DEPTH
                         local lava_level = crater_center_floor + 55
-
-                        if y <= lava_level then
-                            data[vi] = C.lava
-                        else
-                            data[vi] = C.air
-                        end
-
+                        if y <= lava_level then data[vi] = C.lava else data[vi] = C.air end
                         -- INTERIOR DO CONE (sólido, mas só onde o cone existe)
                     elseif inside_cone and y < volcano_height - 3 then
                         -- Se está na zona de praia E submerso, usa areia
-                        if is_beach_zone and y <= SEA_LEVEL then
-                            data[vi] = C.sand
-                        else
-                            data[vi] = C.basalt
-                        end
-
+                        if is_beach_zone and y <= SEA_LEVEL then data[vi] = C.sand else data[vi] = C.basalt end
                         -- SUPERFÍCIE DO CONE
                     elseif inside_cone and y <= volcano_height then
                         -- Se está na zona de praia E perto do nível do mar, usa areia
                         if is_beach_zone and y <= SEA_LEVEL + 3 then
                             data[vi] = C.sand
                         else
-                            if rng_volcano:next(1, 1000) <= 700 then -- 70%
-                                data[vi] = C.basalt
-                            else
-                                data[vi] = C.magma
-                            end
+                            -- 70%
+                            if rng_volcano:next(1, 1000) <= 700 then data[vi] = C.basalt else data[vi] = C.magma end
                         end
                     end
-
                     ::continue_y::
                 end
             end
         end
     end
 end
-
------------------------------
 -- SPAWN ÚNICO DA ESTÁTUA DO CARANGUEJO (próxima ao vulcão)
------------------------------
-
 local function try_spawn_crab_statue(minp, maxp, volcano_pos)
     if statue_spawned then return end
     if not volcano_pos then return end
-
     -- Só tenta se este chunk cobre a área do vulcão (margem aumentada para 80)
     local chunk_center_x = (minp.x + maxp.x) / 2
     local chunk_center_z = (minp.z + maxp.z) / 2
-    local dist_chunk = math.sqrt(
-        (chunk_center_x - volcano_pos.x) ^ 2 +
-        (chunk_center_z - volcano_pos.z) ^ 2
-    )
+    local dist_chunk = math.sqrt((chunk_center_x - volcano_pos.x) ^ 2 + (chunk_center_z - volcano_pos.z) ^ 2)
     if dist_chunk > (VOLCANO_RADIUS + BEACH_WIDTH + 80) then return end
-
     local search_min_r = VOLCANO_RADIUS - 10          -- borda da ilha
     local search_max_r = VOLCANO_RADIUS + BEACH_WIDTH -- praia submersa
-
     -- Duas passagens: 1ª prefere posições com kelp, 2ª aceita qualquer wet_sand
     for pass = 1, 2 do
         for attempts = 1, 200 do
             local angle = (attempts / 200) * math.pi * 2
             local radius = search_min_r + (attempts % 7) * (search_max_r - search_min_r) / 7
-
             local cx = math.floor(volcano_pos.x + math.cos(angle) * radius)
             local cz = math.floor(volcano_pos.z + math.sin(angle) * radius)
-
             -- Varre Y na mesma faixa de profundidade do kelp (-18 a -13)
             for cy = -18, -13 do
                 local node = core.get_node({ x = cx, y = cy, z = cz })
-
                 if node.name == "nh_nodes:wet_sand" then
                     -- Bloco acima deve ser água (estamos submersos)
                     local above = core.get_node({ x = cx, y = cy + 1, z = cz })
@@ -2157,7 +1673,6 @@ local function try_spawn_crab_statue(minp, maxp, volcano_pos)
                             ok = true
                             core.log("action", "[terrain] Crab Statue: Fallback without kelp (pass 2)")
                         end
-
                         if ok then
                             core.set_node({ x = cx, y = cy, z = cz }, { name = "nh_nodes:giantcrabstatue" })
                             statue_spawned = true
@@ -2173,189 +1688,120 @@ local function try_spawn_crab_statue(minp, maxp, volcano_pos)
         end
     end
 end
-
-
------------------------------
 -- ILHAS FLUTUANTES (-X, +Z, y 500-1000)
------------------------------
-
 local FLOATING_ISLAND_RADIUS = SNOW_RADIUS
 local FLOATING_ISLANDS = nil
-
------------------------------
 -- INICIALIZA ILHAS (AGORA COM 2–3 CONES)
------------------------------
 local function init_floating_islands()
     if FLOATING_ISLANDS then return end
     FLOATING_ISLANDS = {}
-
     local rng = PseudoRandom(314159)
     local count = 12
-
     for i = 1, count do
         local angle = rng:next(0, 3141) / 1000.0
         local t = rng:next(0, 1000) / 1000.0
         local dist = math.sqrt(t) * FLOATING_ISLAND_RADIUS * 0.9
-
         local center_x = -MAX_XZ / 2
         local center_z = MAX_XZ / 2
-
         local ix = center_x - math.abs(math.cos(angle) * dist)
         local iz = center_z + math.abs(math.sin(angle) * dist)
-
         if ix >= 0 then ix = -(30 + rng:next(0, 50)) end
         if iz <= 0 then iz = 30 + rng:next(0, 50) end
-
         local base_y = rng:next(520, 940)
         local top_radius = rng:next(18, 45)
         local cone_height = rng:next(40, 100)
-
         -- 🔻 2 a 3 cones por ilha
         local cone_count = rng:next(3, 4)
         local cones = {}
         local spread = 0.4 -- afastamento dos cones
-
         for c = 1, cone_count do
             local offset_x = rng:next(-top_radius * spread, top_radius * spread)
             local offset_z = rng:next(-top_radius * spread, top_radius * spread)
-
             table.insert(cones, {
                 x = math.floor(ix + offset_x),
                 z = math.floor(iz + offset_z),
-                top_radius = top_radius * (0.7 + rng:next(0, 30) / 100),
+                top_radius = top_radius *
+                    (0.7 + rng:next(0, 30) / 100),
                 cone_height = cone_height * (0.8 + rng:next(0, 40) / 100)
             })
         end
-
-        table.insert(FLOATING_ISLANDS, {
-            base_y = base_y,
-            cones = cones
-        })
+        table.insert(FLOATING_ISLANDS, { base_y = base_y, cones = cones })
     end
 end
 
------------------------------
 -- RELEVO NO TOPO (RUÍDO SIMPLES)
------------------------------
 local function get_top_variation(x, z)
     local n1 = math.sin(x * 0.04 + z * 0.02)
     local n2 = math.sin(x * 0.09 - z * 0.05) * 0.5
     local n3 = math.cos(z * 0.06 + x * 0.03) * 0.3
-
     local n = n1 + n2 + n3
-
     -- curva suave (flatten peaks)
     n = n * 2
-
     return n * 2
 end
 
------------------------------
 -- VERIFICA SE PONTO ESTÁ NA ILHA (MÚLTIPLOS CONES)
------------------------------
 local function point_in_island(x, y, z, island)
     local y_top = island.base_y
-
     if y > y_top then return false end
     if y < 500 or y > 1000 then return false end
-
     for _, cone in ipairs(island.cones) do
         local y_tip = y_top - cone.cone_height
         if y < y_tip then goto next_cone end
-
         local t = (y - y_tip) / cone.cone_height
-
         -- 🔻 laterais menos arredondadas
         t = t ^ 0.85
-
         local dx = x - cone.x
         local dz = z - cone.z
-
         local angle = math.atan2(dz, dx)
-
         local base_radius = cone.top_radius * t
-
         -- ruído angular (irregularidade da borda)
-        local noise =
-            math.sin(angle * 3 + cone.x * 0.1) * 0.15 +
-            math.sin(angle * 5 + cone.z * 0.1) * 0.10
-
+        local noise = math.sin(angle * 3 + cone.x * 0.1) * 0.15 + math.sin(angle * 5 + cone.z * 0.1) * 0.10
         local radius = base_radius * (1 + noise)
-
         -- limite mínimo (evita buracos feios)
-        if radius < base_radius * 0.6 then
-            radius = base_radius * 0.6
-        end
-
-        if (dx * dx + dz * dz) <= (radius * radius) then
-            return true
-        end
-
+        if radius < base_radius * 0.6 then radius = base_radius * 0.6 end
+        if (dx * dx + dz * dz) <= (radius * radius) then return true end
         ::next_cone::
     end
-
     return false
 end
-
------------------------------
 -- GERAÇÃO DAS ILHAS
------------------------------
 local function generate_floating_islands(area, data, minp, maxp)
     init_floating_islands()
-
     if maxp.y < 500 or minp.y > 1000 then return end
     if maxp.x < MIN_XZ or minp.x > 0 then return end
     if maxp.z < 0 or minp.z > MAX_XZ then return end
-
     for _, island in ipairs(FLOATING_ISLANDS) do
         -- 🔻 margem baseada no maior cone
         local margin = 0
-        for _, cone in ipairs(island.cones) do
-            margin = math.max(margin, cone.top_radius)
-        end
+        for _, cone in ipairs(island.cones) do margin = math.max(margin, cone.top_radius) end
         margin = margin + 4
-
         -- checagem de chunk
         local skip = true
         for _, cone in ipairs(island.cones) do
-            if not (
-                    cone.x + margin < minp.x or
-                    cone.x - margin > maxp.x or
-                    cone.z + margin < minp.z or
-                    cone.z - margin > maxp.z
-                ) then
+            if not (cone.x + margin < minp.x or cone.x - margin > maxp.x or cone.z + margin < minp.z or cone.z - margin > maxp.z) then
                 skip = false
                 break
             end
         end
         if skip then goto next_island end
-
         for y = minp.y, maxp.y do
             if y < 500 or y > 1000 then goto next_y end
-
             for z = minp.z, maxp.z do
                 if z <= 0 then goto next_z end
-
                 for x = minp.x, maxp.x do
                     if x >= 0 then goto next_x end
                     if not area:contains(x, y, z) then goto next_x end
-
                     local vi = area:index(x, y, z)
-
                     if point_in_island(x, y, z, island) then
                         -- 🔻 topo com relevo
                         local top_variation = math.floor(get_top_variation(x, z))
                         local effective_top = island.base_y + top_variation
-
                         if y > effective_top then
                             data[vi] = C.air
                         elseif y == effective_top then
                             local has_solid_neighbor = false
-                            local neighbors = {
-                                { x + 1, y, z }, { x - 1, y, z },
-                                { x,     y, z + 1 }, { x, y, z - 1 }
-                            }
-
+                            local neighbors = { { x + 1, y, z }, { x - 1, y, z }, { x, y, z + 1 }, { x, y, z - 1 } }
                             for _, nb in ipairs(neighbors) do
                                 if area:contains(nb[1], nb[2], nb[3]) then
                                     local nvi = area:index(nb[1], nb[2], nb[3])
@@ -2365,7 +1811,6 @@ local function generate_floating_islands(area, data, minp, maxp)
                                     end
                                 end
                             end
-
                             data[vi] = has_solid_neighbor and C.topgrass or C.topgrass --or C.grass
                         elseif y >= effective_top - 6 then
                             data[vi] = C.dirt
@@ -2375,41 +1820,29 @@ local function generate_floating_islands(area, data, minp, maxp)
                             data[vi] = C.gneiss
                         end
                     end
-
                     ::next_x::
                 end
                 ::next_z::
             end
             ::next_y::
         end
-
         ::next_island::
     end
-
     -- 🗿 Coloca sentinelstatue no topo da ilha mais alta
     local tallest = nil
     for _, island in ipairs(FLOATING_ISLANDS) do
-        if not tallest or island.base_y > tallest.base_y then
-            tallest = island
-        end
+        if not tallest or island.base_y > tallest.base_y then tallest = island end
     end
-
     if tallest then
         -- Usa o primeiro cone como centro principal
         local main_cone = tallest.cones[1]
         local sx = main_cone.x
         local sz = main_cone.z
-
         -- Calcula o topo efetivo com a mesma variação usada na geração
         local top_variation = math.floor(get_top_variation(sx, sz))
         local statue_y = tallest.base_y + top_variation + 1 -- +1 = sobre o dirt
-
         -- Só coloca se o chunk atual contém essa posição
-        if sx >= minp.x and sx <= maxp.x
-            and sz >= minp.z and sz <= maxp.z
-            and statue_y >= minp.y and statue_y <= maxp.y
-            and area:contains(sx, statue_y, sz)
-        then
+        if sx >= minp.x and sx <= maxp.x and sz >= minp.z and sz <= maxp.z and statue_y >= minp.y and statue_y <= maxp.y and area:contains(sx, statue_y, sz) then
             local vi = area:index(sx, statue_y, sz)
             data[vi] = C.sentinelstatue
             -- Salva a posição da estátua do sentinela
@@ -2419,31 +1852,20 @@ local function generate_floating_islands(area, data, minp, maxp)
     -- Salva o topo da ilha mais BAIXA para o comando /lowisland
     local lowest = nil
     for _, island in ipairs(FLOATING_ISLANDS) do
-        if not lowest or island.base_y < lowest.base_y then
-            lowest = island
-        end
+        if not lowest or island.base_y < lowest.base_y then lowest = island end
     end
-
     if lowest then
         local main_cone = lowest.cones[1]
         local lx = main_cone.x
         local lz = main_cone.z
         local top_variation = math.floor(get_top_variation(lx, lz))
         local low_y = lowest.base_y + top_variation + 1
-
-        if lx >= minp.x and lx <= maxp.x
-            and lz >= minp.z and lz <= maxp.z
-            and low_y >= minp.y and low_y <= maxp.y
-            and area:contains(lx, low_y, lz)
-        then
+        if lx >= minp.x and lx <= maxp.x and lz >= minp.z and lz <= maxp.z and low_y >= minp.y and low_y <= maxp.y and area:contains(lx, low_y, lz) then
             lowest_island_pos = { x = lx, y = low_y, z = lz }
         end
     end
 end
-
------------------------------
 -- FUNÇÃO DE GERAÇÃO DE DECORAÇÕES (ÁRVORES, PEBBLES, ETC)
------------------------------
 local function generate_decorations(minp, maxp, heights, biome_factors, noise_maps)
     local SEA_LEVEL = 0
     local grassleaves_positions = {}
@@ -2451,7 +1873,6 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
     local pebble_positions = {}
     local pebble_positions2 = {}
     local palm_positions = {}
-
     local index_2d = 1
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
@@ -2459,7 +1880,6 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
             local wz = ((z - MIN_XZ) % SIZE) + MIN_XZ
             local height = heights[index_2d]
             local biome_factor = biome_factors[index_2d]
-
             -- Folhas de grama (não gera em área de neve)
             if not inside_snow_area(x, z) and height > SEA_LEVEL + 6 and height >= minp.y and height <= maxp.y then
                 local grassleaves_density = biome_factor < 0.4 and 0.9 or (biome_factor > 0.7 and 0.8 or 0.9)
@@ -2467,29 +1887,21 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
                     table.insert(grassleaves_positions, { x = x, y = height + 1, z = z })
                 end
             end
-
             -- Carvalhos e Macieiras
             if not inside_snow_area(x, z) and height > SEA_LEVEL + 4 and height >= minp.y and height <= maxp.y then
                 if noise_maps.trees_2d[index_2d] > 0.70 then
                     local tree_type = "tree" -- default: carvalho
-
                     -- Macieiras aparecem em alturas mais baixas (zona de transição)
-                    if height <= SEA_LEVEL + 6 then
-                        tree_type = "apple"
-                    end
-
+                    if height <= SEA_LEVEL + 6 then tree_type = "apple" end
                     table.insert(tree_positions, { x = x, y = height + 1, z = z, wx = wx, wz = wz, type = tree_type })
                 end
             end
-
-
             -- Pinheiros
             if inside_snow_area(x, z) and height > SEA_LEVEL + 6 and height >= minp.y and height <= maxp.y then
                 if noise_maps.trees_2d[index_2d] > 0.65 then
                     table.insert(tree_positions, { x = x, y = height + 1, z = z, wx = wx, wz = wz, type = "pine" })
                 end
             end
-
             -- Arbustos
             if not inside_snow_area(x, z) and height > SEA_LEVEL + 6 and height >= minp.y and height <= maxp.y then
                 local bush_density = biome_factor < 0.5 and 0.72 or (biome_factor > 0.7 and 0.80 or 0.75)
@@ -2497,14 +1909,12 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
                     table.insert(tree_positions, { x = x, y = height + 1, z = z, wx = wx, wz = wz, type = "bush" })
                 end
             end
-
             -- Coqueiros
             if not inside_snow_area(x, z) and height >= SEA_LEVEL - 2 and height <= SEA_LEVEL + 3 and height >= minp.y and height <= maxp.y then
                 if noise_maps.trees_2d[index_2d] > 0.7 then
                     table.insert(palm_positions, { x = x, y = height + 1, z = z, wx = wx, wz = wz })
                 end
             end
-
             -- Kelp (em wet_sand entre altitude -18 e -13)
             if height >= -18 and height <= -13 and height >= minp.y and height <= maxp.y then
                 local grassleaves_density = 0.85
@@ -2512,7 +1922,6 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
                     table.insert(grassleaves_positions, { x = x, y = height + 1, z = z, is_kelp = true })
                 end
             end
-
             -- sobre a wet_sand na altitude -19)
             if height == -19 and height >= minp.y and height <= maxp.y then
                 local grassleaves_density = 0.7 -- mesmo threshold das kelps
@@ -2520,22 +1929,17 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
                     table.insert(grassleaves_positions, { x = x, y = height + 1, z = z, is_wetsand = true })
                 end
             end
-
             -- Pebbles
             if height > SEA_LEVEL + 5 and height <= SEA_LEVEL + 6 then
                 local rng_pebble = PseudoRandom(x * 33333 + z * 44444)
-                if rng_pebble:next(1, 2000) == 1 then -- 0.05% = 1/2000
-                    table.insert(pebble_positions2, { x = x, y = height + 1, z = z })
-                end
-                if rng_pebble:next(1, 1000) == 1 then -- 0.1% = 1/1000
-                    table.insert(pebble_positions, { x = x, y = height + 1, z = z })
-                end
+                -- 0.05% = 1/2000
+                if rng_pebble:next(1, 2000) == 1 then table.insert(pebble_positions2, { x = x, y = height + 1, z = z }) end
+                -- 0.1% = 1/1000
+                if rng_pebble:next(1, 1000) == 1 then table.insert(pebble_positions, { x = x, y = height + 1, z = z }) end
             end
-
             index_2d = index_2d + 1
         end
     end
-
     return {
         grassleaves = grassleaves_positions,
         trees = tree_positions,
@@ -2544,10 +1948,7 @@ local function generate_decorations(minp, maxp, heights, biome_factors, noise_ma
         palms = palm_positions,
     }
 end
-
------------------------------
 -- FUNÇÃO DE APLICAÇÃO DAS DECORAÇÕES
------------------------------
 local function apply_decorations(area, data, param2_data, decorations)
     local palm_leaf_rotations = {}
 
@@ -2555,51 +1956,28 @@ local function apply_decorations(area, data, param2_data, decorations)
     for _, spawn_data in ipairs(decorations.trees) do
         if spawn_data.type == "tree" then
             spawn_tree(area, data, param2_data, spawn_data, spawn_data.wx, spawn_data.wz)
-
             local rng_page = PseudoRandom(spawn_data.wx * 31337 + spawn_data.wz * 13337)
             if rng_page:next(1, 15) == 1 then
-                local dirs = {
-                    { x = 1,  y = 0, z = 0 },
-                    { x = -1, y = 0, z = 0 },
-                    { x = 0,  y = 0, z = 1 },
-                    { x = 0,  y = 0, z = -1 },
-                }
+                local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
                 local dir = dirs[rng_page:next(1, 4)]
-
                 core.after(0.1, function()
                     local found_y = nil
                     for try_y = spawn_data.y + 2, spawn_data.y + 1, -1 do
                         local trunk_pos  = { x = spawn_data.x, y = try_y, z = spawn_data.z }
                         local side_pos   = { x = spawn_data.x + dir.x, y = try_y, z = spawn_data.z + dir.z }
-
                         local trunk_node = core.get_node(trunk_pos).name
                         local side_node  = core.get_node(side_pos).name
-
                         if trunk_node == "nh_nodes:oaktimber" and side_node == "air" then
                             found_y = try_y
                             break
                         end
                     end
-
                     if found_y then
-                        local page_pos = {
-                            x = spawn_data.x + dir.x,
-                            y = found_y,
-                            z = spawn_data.z + dir.z,
-                        }
-
-                        local dir_to_param2 = {
-                            [1]  = { [0] = 2 },
-                            [-1] = { [0] = 3 },
-                            [0]  = { [1] = 4, [-1] = 5 },
-                        }
+                        local page_pos = { x = spawn_data.x + dir.x, y = found_y, z = spawn_data.z + dir.z, }
+                        local dir_to_param2 = { [1] = { [0] = 2 }, [-1] = { [0] = 3 }, [0] = { [1] = 4, [-1] = 5 }, }
                         local param2 = dir_to_param2[dir.x] and dir_to_param2[dir.x][dir.z]
-
                         if param2 then
-                            core.set_node(page_pos, {
-                                name = "nh_nodes:writedpage_node",
-                                param2 = param2
-                            })
+                            core.set_node(page_pos, { name = "nh_nodes:writedpage_node", param2 = param2 })
                             local meta = core.get_meta(page_pos)
                             local list = page_texts.message
                             local text = list[rng_page:next(1, #list)]
@@ -2616,8 +1994,6 @@ local function apply_decorations(area, data, param2_data, decorations)
             spawn_bush(area, data, spawn_data, spawn_data.wx, spawn_data.wz)
         end
     end
-
-
     -- Gera coqueiros
     for _, palm_data in ipairs(decorations.palms) do
         local leaf_nodes = spawn_palm_tree(area, data, palm_data, palm_data.wx, palm_data.wz)
@@ -2627,7 +2003,6 @@ local function apply_decorations(area, data, param2_data, decorations)
             end
         end
     end
-
     -- Gera folhas de grama (com algumas pedras aleatórias)
     for _, grass_pos in ipairs(decorations.grassleaves) do
         if area:contains(grass_pos.x, grass_pos.y, grass_pos.z) then
@@ -2665,17 +2040,13 @@ local function apply_decorations(area, data, param2_data, decorations)
             end
         end
     end
-
     -- Gera pebbles
     for _, pebble_pos in ipairs(decorations.pebbles2) do
         if area:contains(pebble_pos.x, pebble_pos.y, pebble_pos.z) then
             local vi = area:index(pebble_pos.x, pebble_pos.y, pebble_pos.z)
-            if data[vi] == C.air then
-                data[vi] = C.whitepebble
-            end
+            if data[vi] == C.air then data[vi] = C.whitepebble end
         end
     end
-
     for _, pebble_pos in ipairs(decorations.pebbles) do
         if area:contains(pebble_pos.x, pebble_pos.y, pebble_pos.z) then
             local vi = area:index(pebble_pos.x, pebble_pos.y, pebble_pos.z)
@@ -2689,36 +2060,22 @@ local function apply_decorations(area, data, param2_data, decorations)
             end
         end
     end
-
     return palm_leaf_rotations, decorations.pebbles
 end
-
------------------------------
 -- FUNÇÃO DE GERAÇÃO DE TORRES DE OBSIDIANA
------------------------------
 local function generate_obsidian_towers(area, data, minp, maxp)
     local TOWER_MIN_Y = -50
     local TOWER_MAX_Y = 80
-
-    local tower_bases = {
-        { x = MIN_XZ,     z = MIN_XZ },
-        { x = MAX_XZ - 1, z = MIN_XZ },
-        { x = MIN_XZ,     z = MAX_XZ - 1 },
-        { x = MAX_XZ - 1, z = MAX_XZ - 1 },
-    }
-
+    local tower_bases = { { x = MIN_XZ, z = MIN_XZ }, { x = MAX_XZ - 1, z = MIN_XZ }, { x = MIN_XZ, z = MAX_XZ - 1 }, { x = MAX_XZ - 1, z = MAX_XZ - 1 }, }
     for _, base in ipairs(tower_bases) do
         for y = TOWER_MIN_Y, TOWER_MAX_Y do
             for dx = 0, 4 do
                 for dz = 0, 4 do
                     local vi = safe_index(area, base.x + dx, y, base.z + dz, minp, maxp)
-                    if vi then
-                        data[vi] = C.obsidian
-                    end
+                    if vi then data[vi] = C.obsidian end
                 end
             end
         end
-
         -- Place C.sphere centered at the top of the tower
         local sx, sy, sz = base.x + 2, TOWER_MAX_Y + 2, base.z + 2
         local vi = safe_index(area, sx, sy, sz, minp, maxp)
@@ -2737,27 +2094,16 @@ local function generate_obsidian_towers(area, data, minp, maxp)
         end
     end
 end
-
------------------------------
 -- FUNÇÃO DE TENTATIVA DE SPAWN DA TENDA
------------------------------
 local function try_spawn_tent(area, data, minp, maxp)
-    if tent_generated then
-        return false
-    end
-
-    if math.abs(minp.x) > TENT_SEARCH_RADIUS or math.abs(minp.z) > TENT_SEARCH_RADIUS then
-        return false
-    end
-
+    if tent_generated then return false end
+    if math.abs(minp.x) > TENT_SEARCH_RADIUS or math.abs(minp.z) > TENT_SEARCH_RADIUS then return false end
     local SEA_LEVEL = 0
-
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
             if (x * x + z * z) <= (TENT_SEARCH_RADIUS * TENT_SEARCH_RADIUS) then
                 for y = SEA_LEVEL + 1, SEA_LEVEL + 6 do
                     local base_pos = { x = x, y = y, z = z }
-
                     if area:contains(x, y, z) and can_spawn_tent(area, data, base_pos) then
                         spawn_tent(area, data, base_pos)
                         place_tent_chest(area, data, base_pos)
@@ -2770,30 +2116,18 @@ local function try_spawn_tent(area, data, minp, maxp)
         end
         if tent_generated then return true end
     end
-
     return false
 end
-
------------------------------
 -- FUNÇÃO DE TENTATIVA DE SPAWN DO BARCO AFUNDADO
------------------------------
 local function try_spawn_ship(area, data, minp, maxp)
-    if ship_generated then
-        return false
-    end
-
-    if math.abs(minp.x) > SHIP_SEARCH_RADIUS or math.abs(minp.z) > SHIP_SEARCH_RADIUS then
-        return false
-    end
-
+    if ship_generated then return false end
+    if math.abs(minp.x) > SHIP_SEARCH_RADIUS or math.abs(minp.z) > SHIP_SEARCH_RADIUS then return false end
     local SEA_LEVEL = 0
-
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
             if (x * x + z * z) <= (SHIP_SEARCH_RADIUS * SHIP_SEARCH_RADIUS) then
                 for y = SEA_LEVEL - 7, SEA_LEVEL - 2 do
                     local base_pos = { x = x, y = y, z = z }
-
                     if area:contains(x, y, z) and can_spawn_ship(area, data, base_pos) then
                         spawn_ship(area, data, base_pos)
                         place_ship_chest(area, data, { x = base_pos.x, y = base_pos.y + 1, z = base_pos.z })
@@ -2806,22 +2140,12 @@ local function try_spawn_ship(area, data, minp, maxp)
         end
         if ship_generated then return true end
     end
-
     return false
 end
-
------------------------------
 -- FUNÇÃO DE TENTATIVA DE SPAWN DA CASA
------------------------------
 local function try_spawn_house(area, data, minp, maxp)
-    if house_generated then
-        return false
-    end
-
-    if math.abs(minp.x) > HOUSE_SEARCH_RADIUS or math.abs(minp.z) > HOUSE_SEARCH_RADIUS then
-        return false
-    end
-
+    if house_generated then return false end
+    if math.abs(minp.x) > HOUSE_SEARCH_RADIUS or math.abs(minp.z) > HOUSE_SEARCH_RADIUS then return false end
     for z = minp.z, maxp.z do
         for x = minp.x, maxp.x do
             if (x * x + z * z) <= (HOUSE_SEARCH_RADIUS * HOUSE_SEARCH_RADIUS) then
@@ -2838,10 +2162,8 @@ local function try_spawn_house(area, data, minp, maxp)
         end
         if house_generated then return true end
     end
-
     return false
 end
-
 
 local function apply_slope_conversion(area, data, param2_data)
     slope_area = area
@@ -2859,7 +2181,7 @@ local function apply_slope_conversion(area, data, param2_data)
                 local above_vi = area:index(x, y + 1, z)
                 if data[above_vi] ~= C.air then goto continue end
 
-                -- =============== TOP_GRASS ===============
+                --  TOP_GRASS
                 if node == C.topgrass then
                     local dn = slope_get(x, z - 1) == C.air
                     local ds = slope_get(x, z + 1) == C.air
@@ -2881,18 +2203,25 @@ local function apply_slope_conversion(area, data, param2_data)
                         end
 
                         if ss and sw and pass_g(x - 1, z + 1) then
-                            data[vi] = C.grassinsidecorner; param2_data[vi] = 2; goto continue
+                            data[vi] = C.grassinsidecorner
+                            param2_data[vi] = 2
+                            goto continue
                         end
                         if sw and sn and pass_g(x - 1, z - 1) then
-                            data[vi] = C.grassinsidecorner; param2_data[vi] = 1; goto continue
+                            data[vi] = C.grassinsidecorner
+                            param2_data[vi] = 1
+                            goto continue
                         end
                         if sn and se and pass_g(x + 1, z - 1) then
-                            data[vi] = C.grassinsidecorner; param2_data[vi] = 0; goto continue
+                            data[vi] = C.grassinsidecorner
+                            param2_data[vi] = 0
+                            goto continue
                         end
                         if se and ss and pass_g(x + 1, z + 1) then
-                            data[vi] = C.grassinsidecorner; param2_data[vi] = 3; goto continue
+                            data[vi] = C.grassinsidecorner
+                            param2_data[vi] = 3
+                            goto continue
                         end
-
                         -- Vertix: 2 quedas
                     elseif nd == 2 then
                         if ds and dw then
@@ -2905,7 +2234,6 @@ local function apply_slope_conversion(area, data, param2_data)
                             data[vi] = C.top_grass_vertix; param2_data[vi] = 1
                         end
                         goto continue
-
                         -- Rampa: 1 queda
                     elseif nd == 1 then
                         if dn then
@@ -2919,64 +2247,50 @@ local function apply_slope_conversion(area, data, param2_data)
                         end
                         goto continue
                     end
-
-                    -- =============== DIRT ===============
+                    --  DIRT
                 elseif node == C.dirt then
                     local dn = DIRT_EDGE[slope_get(x, z - 1)]
                     local ds = DIRT_EDGE[slope_get(x, z + 1)]
                     local de = DIRT_EDGE[slope_get(x + 1, z)]
                     local dw = DIRT_EDGE[slope_get(x - 1, z)]
                     local nd = (dn and 1 or 0) + (ds and 1 or 0) + (de and 1 or 0) + (dw and 1 or 0)
-
                     -- (repita o mesmo padrão com C.dirt_insidecorner, C.dirt_corner, C.dirt_ramp)
-
-                    -- =============== SAND ===============
+                    --  SAND
                 elseif node == C.sand then
                     local dn = SAND_EDGE[slope_get(x, z - 1)]
                     local ds = SAND_EDGE[slope_get(x, z + 1)]
                     local de = SAND_EDGE[slope_get(x + 1, z)]
                     local dw = SAND_EDGE[slope_get(x - 1, z)]
                     local nd = (dn and 1 or 0) + (ds and 1 or 0) + (de and 1 or 0) + (dw and 1 or 0)
-
                     -- (repita o mesmo padrão com C.sand_insidecorner, C.sand_corner, C.sand_ramp)
                 end
-
                 ::continue::
             end
         end
     end
 end
 
-
------------------------------
 -- GERAÇÃO DO MUNDO (OTIMIZADA E REFATORADA)
------------------------------
 core.register_on_generated(function(minp, maxp)
     -- Inicializa Perlin maps (apenas uma vez)
     init_perlin_maps()
-
     -- Otimização: ignora chunks muito altos ou muito baixos
     if maxp.y < -100 or minp.y > 1000 then return end
-
     -- Setup do voxelmanip
     local vm = core.get_voxel_manip()
     local emin, emax = vm:read_from_map(minp, maxp)
     local area = VoxelArea:new { MinEdge = emin, MaxEdge = emax }
     local data = vm:get_data()
     local param2_data = vm:get_param2_data()
-
     -- Configurações
     local SEA_LEVEL = 0
     local CENTER_X = (MIN_XZ + MAX_XZ) / 2
     local CENTER_Z = (MIN_XZ + MAX_XZ) / 2
     local MAX_RADIUS = (SIZE / 2) * 0.85
-
     -- Gera todos os noise maps em batch
     local noise_maps = generate_noise_maps(minp, maxp)
-
     -- Encontra/define posição do vulcão
     local volcano_pos = find_volcano_position()
-
     -- Verifica se este chunk está próximo do vulcão
     local chunk_near_volcano = false
     if volcano_pos then
@@ -2985,128 +2299,83 @@ core.register_on_generated(function(minp, maxp)
         local dist = math.sqrt((chunk_center_x - volcano_pos.x) ^ 2 + (chunk_center_z - volcano_pos.z) ^ 2)
         chunk_near_volcano = dist < (VOLCANO_RADIUS + 80) -- Margem de segurança
     end
-
     -- Calcula alturas em batch
-    local heights, biome_factors = calculate_height_batch(
-        minp, maxp, SEA_LEVEL, CENTER_X, CENTER_Z, MAX_RADIUS,
-        noise_maps.continent_2d, noise_maps.biome_2d, noise_maps.mountain_2d,
-        noise_maps.hills_2d, noise_maps.plains_2d, noise_maps.rough_2d
-    )
-
-
+    local heights, biome_factors = calculate_height_batch(minp, maxp, SEA_LEVEL, CENTER_X, CENTER_Z, MAX_RADIUS,
+        noise_maps.continent_2d, noise_maps.biome_2d, noise_maps.mountain_2d, noise_maps.hills_2d, noise_maps.plains_2d,
+        noise_maps.rough_2d)
     -- Gera terreno base
     --generate_terrain_base(minp, maxp, area, data, heights, biome_factors, noise_maps)
     local grass_positions = generate_terrain_base(minp, maxp, area, data, heights, biome_factors, noise_maps)
-
-
     -- Ilhas flutuantes
     generate_floating_islands(area, data, minp, maxp)
-
     -- Gera ilha vulcânica se o chunk estiver próximo
     if chunk_near_volcano then
         generate_volcano(area, data, minp, maxp, volcano_pos)
         --add_eruption_effects(area, data, minp, maxp, volcano_pos)
     end
-
     -- Gera decorações (árvores, arbustos, etc)
     local decorations = generate_decorations(minp, maxp, heights, biome_factors, noise_maps)
-
-
     -- Aplica decorações no terreno
     local palm_leaf_rotations, pebble_positions = apply_decorations(area, data, param2_data, decorations)
-
-
     -- Gera torres de obsidiana
     generate_obsidian_towers(area, data, minp, maxp)
-
     -- Aplica as rampas (inclinaçoes)
     --apply_slope_conversion(area, data, param2_data)
-
-
     -- Grava dados no voxelmanip
     vm:set_data(data)
     vm:set_param2_data(param2_data)
     vm:write_to_map()
     vm:update_map()
-
     -- Tentativa de spawnar tenda (APÓS gravar o terreno)
     local tent_spawned = try_spawn_tent(area, data, minp, maxp)
-
     if tent_spawned then
         -- Regrava apenas se modificou
         vm:set_data(data)
         vm:write_to_map()
         vm:update_map()
     end
-
     -- Tentativa de spawnar tenda (APÓS gravar o terreno)
     local ship_spawned = try_spawn_ship(area, data, minp, maxp)
-
     if ship_spawned then
         -- Regrava apenas se modificou
         vm:set_data(data)
         vm:write_to_map()
         vm:update_map()
     end
-
-
     local house_spawned = try_spawn_house(area, data, minp, maxp)
-
     if house_spawned then
         -- Regrava apenas se modificou
         vm:set_data(data)
         vm:write_to_map()
         vm:update_map()
     end
-
-
-
     -- Rotaciona folhas de coqueiro e inicializa baús
     core.after(0, function()
         -- Spawna estátua do caranguejo perto do vulcão (uma única vez)
         if chunk_near_volcano and not statue_spawned then
-            core.after(0.5, function()
-                try_spawn_crab_statue(minp, maxp, volcano_pos)
-            end)
+            core.after(0.5, function() try_spawn_crab_statue(minp, maxp, volcano_pos) end)
         end
         -- Rotação das folhas de palmeira
         for _, leaf_info in ipairs(palm_leaf_rotations) do
             local node = core.get_node(leaf_info.pos)
             if node.name == "nh_nodes:palmleaf" then
-                core.set_node(leaf_info.pos, {
-                    name = "nh_nodes:palmleaf",
-                    param2 = leaf_info.rotation
-                })
+                core.set_node(leaf_info.pos, { name = "nh_nodes:palmleaf", param2 = leaf_info.rotation })
             elseif node.name == "nh_nodes:coconutlinked" then
-                core.set_node(leaf_info.pos, {
-                    name = "nh_nodes:coconutlinked",
-                    param2 = leaf_info.rotation
-                })
+                core.set_node(leaf_info.pos, { name = "nh_nodes:coconutlinked", param2 = leaf_info.rotation })
             end
         end
-
         -- Inicializa baús do pebble
         for _, pebble_pos in ipairs(pebble_positions) do
             local chest_pos = { x = pebble_pos.x, y = pebble_pos.y - 2, z = pebble_pos.z }
             local node = core.get_node(chest_pos)
             if node.name == "nh_nodes:oak_chest" then
                 local node_def = core.registered_nodes["nh_nodes:oak_chest"]
-                if node_def and node_def.on_construct then
-                    node_def.on_construct(chest_pos)
-                end
+                if node_def and node_def.on_construct then node_def.on_construct(chest_pos) end
             end
         end
     end)
 end) -- FIM do register_on_generated
-
-
-if not core.registered_nodes["nh_nodes:grass"] then
-    core.log("warning", "[terrain] nh_nodes:top_grass is not registered.")
-end
-
-
-
-
+if not core.registered_nodes["nh_nodes:grass"] then core.log("warning", "[terrain] nh_nodes:top_grass is not registered.") end
 local decorations = {
     ["nh_nodes:smallgrass"]        = true,
     ["nh_nodes:highgrass"]         = true,
@@ -3120,7 +2389,6 @@ local decorations = {
     ["nh_nodes:white_pebble"]      = true,
     ["nh_nodes:fallenstick"]       = true,
 }
-
 local function clear_above(pos)
     local above = { x = pos.x, y = pos.y + 1, z = pos.z }
     local name = core.get_node(above).name
@@ -3217,10 +2485,10 @@ core.register_lbm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+        --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        -- =========================
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3251,9 +2519,9 @@ core.register_lbm({
         -- Lógica de ramp/vertix só roda para top_grass
         if current ~= "nh_nodes:top_grass" then return end
 
-        -- =========================
+        --
         -- PRIORIDADE 2: VERTIX
-        -- =========================
+        --
 
         if #drops == 2 then
             local a, b = drops[1], drops[2]
@@ -3280,9 +2548,9 @@ core.register_lbm({
             return
         end
 
-        -- =========================
+        --
         -- PRIORIDADE 3: RAMPAS
-        -- =========================
+        --
 
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 0 })
@@ -3377,10 +2645,10 @@ core.register_lbm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+        --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        -- =========================
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3411,9 +2679,9 @@ core.register_lbm({
         -- Lógica de ramp/vertix só roda para top_grass
         --if current ~= "nh_nodes:top_grass" then return end
 
-        -- =========================
+        --
         -- PRIORIDADE 2: VERTIX
-        -- =========================
+        --
 
         if #drops == 2 then
             local a, b = drops[1], drops[2]
@@ -3440,9 +2708,9 @@ core.register_lbm({
             return
         end
 
-        -- =========================
+        --
         -- PRIORIDADE 3: RAMPAS
-        -- =========================
+        --
 
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:dirt_ramp", param2 = 0 })
@@ -3541,9 +2809,9 @@ core.register_lbm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+        --
         -- PRIORIDADE 1: INSIDE CORNER
-        -- =========================
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3567,9 +2835,9 @@ core.register_lbm({
             end
         end
 
-        -- =========================
+        --
         -- PRIORIDADE 2: VERTIX (corner externo)
-        -- =========================
+        --
 
         if #drops == 2 then
             local a, b = drops[1], drops[2]
@@ -3592,9 +2860,9 @@ core.register_lbm({
             return
         end
 
-        -- =========================
+        --
         -- PRIORIDADE 3: RAMPAS
-        -- =========================
+        --
 
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:snow_ramp", param2 = 0 })
@@ -3685,9 +2953,9 @@ core.register_lbm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+        --
         -- PRIORIDADE 1: INSIDE CORNER
-        -- =========================
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3711,9 +2979,9 @@ core.register_lbm({
             end
         end
 
-        -- =========================
+
         -- PRIORIDADE 2: VERTIX (corner externo)
-        -- =========================
+
 
         if #drops == 2 then
             local a, b = drops[1], drops[2]
@@ -3736,9 +3004,9 @@ core.register_lbm({
             return
         end
 
-        -- =========================
+
         -- PRIORIDADE 3: RAMPAS
-        -- =========================
+
 
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:basalt_ramp", param2 = 0 })
@@ -3821,10 +3089,10 @@ core.register_abm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+        --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        -- =========================
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3921,10 +3189,10 @@ core.register_lbm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+        --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        -- =========================
+        --
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
@@ -3955,9 +3223,9 @@ core.register_lbm({
         -- Lógica de ramp/vertix só roda para top_grass
         --if current ~= "nh_nodes:top_grass" then return end
 
-        -- =========================
+        --
         -- PRIORIDADE 2: VERTIX
-        -- =========================
+        --
 
         if #drops == 2 then
             local a, b = drops[1], drops[2]
@@ -3984,9 +3252,9 @@ core.register_lbm({
             return
         end
 
-        -- =========================
+        --
         -- PRIORIDADE 3: RAMPAS
-        -- =========================
+        --
 
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:sand_ramp", param2 = 0 })
@@ -4073,10 +3341,10 @@ core.register_abm({
 
         local any_below = below.north or below.south or below.east or below.west
 
-        -- =========================
+
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        -- =========================
+
 
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
