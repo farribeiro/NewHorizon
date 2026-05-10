@@ -1,4 +1,4 @@
-minetest.log("action", "[body] Mod carregado")
+minetest.log("action", "[body] init.lua loaded")
 local S = core.get_translator("nh_body")
 local function sit_log(player_name, msg)   minetest.log("action", "[SIT DEBUG] [" .. player_name .. "] " .. msg) end --aqui
 -- TABELAS GLOBAIS
@@ -798,8 +798,8 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
     --    { x = 0, y = -1, z = 3 }, -- Primeira pessoa: move 3 unidades para frente (Z negativo)
     --    { x = 0, y = 7, z = -7 }  -- Terceira pessoa
     --)
-    core.log("action", "[BODY MOD] Invisible player body applyed to " .. player_name)
 end
+    core.log("action", "[BODY MOD] Invisible player body applyed to player")
 
 -- FUNÇÃO PARA A ANIMAÇÃO DE BATER PLAYER
 local function trigger_punch(player)
