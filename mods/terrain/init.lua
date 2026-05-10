@@ -137,54 +137,50 @@ local function populate_Pall(names)
     for _, name in ipairs(names) do father[name] = nil end
     return father
 end
-local P_nomes = {
-    continent,
-    biome,
-    mountain,
-    hills,
-    plains,
-    roughness,
-    caves,
-    caves_lava,
-    caves_water,
-    cave_size,
-    grassleaves,
-    trees,
-    bushes,
-    -- perlin_palms,
-    saprolite,
+local P = populate_Pall({
+    "continent",
+    "biome",
+    "mountain",
+    "hills",
+    "plains",
+    "roughness",
+    "caves",
+    "caves_lava",
+    "caves_water",
+    "cave_size",
+    "grassleaves",
+    "trees",
+    "bushes",
+    -- "perlin_palms",
+    "saprolite",
     -- NOISES PARA MINÉRIOS (adicionar após os noises existentes)
-    ore_master,
-    coal,
-    copper,
-    tin,
-    iron,
-    nickel,
-    manganes,
-    chromium
-}
-local P = populate_Pall(P_nomes)
-P_nomes = nil
+    "ore_master",
+    "coal",
+    "copper",
+    "tin",
+    "iron",
+    "nickel",
+    "manganes",
+    "chromium",
+})
 -- PERLIN MAPS (OTIMIZAÇÃO)
-local PM_nomes = {
-    continent,
-    biome,
-    mountain,
-    hills,
-    plains,
-    roughness,
-    caves,
-    caves_lava,
-    caves_water,
-    cave_size,
-    grassleaves,
-    trees,
-    bushes,
-    saprolite,
-    ore_master,
-}
-PM = populate_Pall(PM_nomes)
-PM_nomes = nil
+local PM = populate_Pall({
+    "continent",
+    "biome",
+    "mountain",
+    "hills",
+    "plains",
+    "roughness",
+    "caves",
+    "caves_lava",
+    "caves_water",
+    "cave_size",
+    "grassleaves",
+    "trees",
+    "bushes",
+    "saprolite",
+    "ore_master",
+})
 -- CONFIGURAÇÃO DOS NOISES
 local NOISE = {
     continent = {
