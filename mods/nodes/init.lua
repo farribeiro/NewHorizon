@@ -1962,7 +1962,7 @@ collision_box = {type = "fixed",
 },
 })
 
-core.register_node("nh_nodes:top_grass_vertix", {
+core.register_node("nh_nodes:top_grass_corner", {
     description = "Grass Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
