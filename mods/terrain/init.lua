@@ -130,6 +130,7 @@ local statue_spawned = false
 local statue_pos = nil
 local sentinel_pos = nil
 local lowest_island_pos = nil
+local ship_pos = nil
 -- NOISES (mantidos para compatibilidade com funções antigas)
 local function populate_Pall(names)
     local father = {}
@@ -2135,6 +2136,7 @@ local function try_spawn_ship(area, data, minp, maxp)
                         spawn_ship(area, data, base_pos)
                         place_ship_chest(area, data, { x = base_pos.x, y = base_pos.y + 1, z = base_pos.z })
                         ship_generated = true
+                        ship_pos = {x = base_pos.x + 2, y = base_pos.y + 4, z = base_pos.z + 4}
                         return true
                     end
                 end
@@ -2653,27 +2655,22 @@ core.register_lbm({
         --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        --
-
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:dirt_insidecorner", param2 = 2 })
                 clear_above(pos)
                 return
             end
-
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:dirt_insidecorner", param2 = 1 })
                 clear_above(pos)
                 return
             end
-
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:dirt_insidecorner", param2 = 0 })
                 clear_above(pos)
                 return
             end
-
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:dirt_insidecorner", param2 = 3 })
                 clear_above(pos)
@@ -2686,13 +2683,9 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 2: VERTIX
-        --
-
         if #drops == 2 then
             local a, b = drops[1], drops[2]
-
             local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
-
             if match("south", "west") then
                 core.set_node(pos, { name = "nh_nodes:dirt_corner", param2 = 0 })
                 clear_above(pos)
@@ -2715,26 +2708,21 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 3: RAMPAS
-        --
-
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:dirt_ramp", param2 = 0 })
             clear_above(pos)
             return
         end
-
         if below.south and not below.north then
             core.set_node(pos, { name = "nh_nodes:dirt_ramp", param2 = 2 })
             clear_above(pos)
             return
         end
-
         if below.east and not below.west then
             core.set_node(pos, { name = "nh_nodes:dirt_ramp", param2 = 3 })
             clear_above(pos)
             return
         end
-
         if below.west and not below.east then
             core.set_node(pos, { name = "nh_nodes:dirt_ramp", param2 = 1 })
             clear_above(pos)
@@ -2816,24 +2804,19 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 1: INSIDE CORNER
-        --
-
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:snow_insidecorner", param2 = 2 })
                 return
             end
-
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:snow_insidecorner", param2 = 1 })
                 return
             end
-
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:snow_insidecorner", param2 = 0 })
                 return
             end
-
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:snow_insidecorner", param2 = 3 })
                 return
@@ -2842,11 +2825,8 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 2: VERTIX (corner externo)
-        --
-
         if #drops == 2 then
             local a, b = drops[1], drops[2]
-
             local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
 
             if match("south", "west") then
@@ -2867,23 +2847,18 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 3: RAMPAS
-        --
-
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:snow_ramp", param2 = 0 })
             return
         end
-
         if below.south and not below.north then
             core.set_node(pos, { name = "nh_nodes:snow_ramp", param2 = 2 })
             return
         end
-
         if below.east and not below.west then
             core.set_node(pos, { name = "nh_nodes:snow_ramp", param2 = 3 })
             return
         end
-
         if below.west and not below.east then
             core.set_node(pos, { name = "nh_nodes:snow_ramp", param2 = 1 })
             return
@@ -2960,24 +2935,19 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 1: INSIDE CORNER
-        --
-
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:basalt_insidecorner", param2 = 2 })
                 return
             end
-
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:basalt_insidecorner", param2 = 1 })
                 return
             end
-
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:basalt_insidecorner", param2 = 0 })
                 return
             end
-
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:basalt_insidecorner", param2 = 3 })
                 return
@@ -2986,8 +2956,6 @@ core.register_lbm({
 
 
         -- PRIORIDADE 2: VERTIX (corner externo)
-
-
         if #drops == 2 then
             local a, b = drops[1], drops[2]
 
@@ -3011,23 +2979,18 @@ core.register_lbm({
 
 
         -- PRIORIDADE 3: RAMPAS
-
-
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:basalt_ramp", param2 = 0 })
             return
         end
-
         if below.south and not below.north then
             core.set_node(pos, { name = "nh_nodes:basalt_ramp", param2 = 2 })
             return
         end
-
         if below.east and not below.west then
             core.set_node(pos, { name = "nh_nodes:basalt_ramp", param2 = 3 })
             return
         end
-
         if below.west and not below.east then
             core.set_node(pos, { name = "nh_nodes:basalt_ramp", param2 = 1 })
             return
@@ -3105,27 +3068,22 @@ core.register_lbm({
         --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        --
-
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:sand_insidecorner", param2 = 2 })
                 clear_above(pos)
                 return
             end
-
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:sand_insidecorner", param2 = 1 })
                 clear_above(pos)
                 return
             end
-
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:sand_insidecorner", param2 = 0 })
                 clear_above(pos)
                 return
             end
-
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:sand_insidecorner", param2 = 3 })
                 clear_above(pos)
@@ -3138,8 +3096,6 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 2: VERTIX
-        --
-
         if #drops == 2 then
             local a, b = drops[1], drops[2]
 
@@ -3167,26 +3123,21 @@ core.register_lbm({
 
         --
         -- PRIORIDADE 3: RAMPAS
-        --
-
         if below.north and not below.south then
             core.set_node(pos, { name = "nh_nodes:sand_ramp", param2 = 0 })
             clear_above(pos)
             return
         end
-
         if below.south and not below.north then
             core.set_node(pos, { name = "nh_nodes:sand_ramp", param2 = 2 })
             clear_above(pos)
             return
         end
-
         if below.east and not below.west then
             core.set_node(pos, { name = "nh_nodes:sand_ramp", param2 = 3 })
             clear_above(pos)
             return
         end
-
         if below.west and not below.east then
             core.set_node(pos, { name = "nh_nodes:sand_ramp", param2 = 1 })
             clear_above(pos)
@@ -3213,8 +3164,8 @@ core.register_abm({
 core.register_abm({
     name = "nh_terrain:grass_conversion2",
     nodenames = { "nh_nodes:top_grass2" },
-    interval = 3,
-    chance = 1,
+    interval = 1,
+    chance = 20,
     catch_up = true,
     action = function(pos, node)
         local x, y, z = pos.x, pos.y, pos.z
@@ -3230,7 +3181,6 @@ core.register_abm({
         local function is_solid_below(p)
             return solid_types[core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name] == true
         end
-
         local function is_solid_same(p)
             return solid_types[core.get_node(p).name] == true
         end
@@ -3272,27 +3222,22 @@ core.register_abm({
         --
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
-        --
-
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
                 clear_above(pos)
                 return
             end
-
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
                 clear_above(pos)
                 return
             end
-
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
                 core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
                 clear_above(pos)
                 return
             end
-
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
                 core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
                 clear_above(pos)
@@ -3356,9 +3301,7 @@ core.after(1, function()
         end)
 end)
 
------------------------------
 -- COMANDO PARA VOLTAR A ORIGEM
------------------------------
 core.register_chatcommand("origin", {
     description = S("Teleport to the origin"),
     privs = { teleport = true },
@@ -3376,9 +3319,41 @@ core.register_chatcommand("origin", {
     end,
 })
 
------------------------------
+-- COMANDO PARA IR AO BARCO AFUNDADO
+core.register_chatcommand("ship", {
+    description = S("Teleport to the sunken ship"),
+    privs = { teleport = true },
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, S("Player not found")
+        end
+
+        if not ship_pos then
+            return false, S("The sunken ship has not yet been generated. Explore the ocean near spawn first")
+        end
+
+        player:set_pos(ship_pos)
+
+        return true,
+            S("Teleported to the sunken ship at X:") ..
+            ship_pos.x .. " Y:" .. ship_pos.y .. " Z:" .. ship_pos.z
+    end,
+})
+-- Comando só para ver as coordenadas do barco
+core.register_chatcommand("local_ship", {
+    description = S("Shows the coordinates of the sunken ship"),
+    func = function(name)
+        if not ship_pos then
+            return false, S("The sunken ship has not yet been generated. Explore the ocean near spawn first")
+        end
+
+        return true,
+            S("Sunken ship at X:") .. ship_pos.x .. " Y:" .. ship_pos.y .. " Z:" .. ship_pos.z
+    end,
+})
+
 -- COMANDO PARA ENCONTRAR O VULCÃO
------------------------------
 core.register_chatcommand("vulcan", {
     description = S("Teleport to the volcanic island"),
     privs = { teleport = true }, -- Requer privilégio de teleporte
@@ -3407,7 +3382,6 @@ core.register_chatcommand("vulcan", {
             S("Teleported to the volcano in X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
     end,
 })
-
 -- Comando alternativo sem necessidade de privilégios (para testes)
 core.register_chatcommand("local_vulcan", {
     description = S("Shows the coordinates of the volcanic island"),
@@ -3422,9 +3396,7 @@ core.register_chatcommand("local_vulcan", {
     end,
 })
 
------------------------------
 -- COMANDO PARA IR ATÉ O CARANGUEJO
------------------------------
 core.register_chatcommand("crab", {
     description = S("Teleport to the giant crab statue"),
     privs = { teleport = true },
@@ -3447,7 +3419,6 @@ core.register_chatcommand("crab", {
             statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
     end,
 })
-
 -- Comando para só ver as coordenadas sem teleportar
 core.register_chatcommand("local_crab", {
     description = S("Show the coordinates of the giant crab statue"),
@@ -3460,6 +3431,7 @@ core.register_chatcommand("local_crab", {
     end,
 })
 
+-- COMANDO PARA IR ATÉ O MAR DE AR
 core.register_chatcommand("airsea", {
     description = S("Teleport to the air sea"),
     privs = { teleport = true },
@@ -3499,7 +3471,6 @@ core.register_chatcommand("flyisland", {
             lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z
     end,
 })
-
 -- Comando para só ver as coordenadas sem teleportar
 core.register_chatcommand("local_flyisland", {
     description = S("Shows the coordinates of the fly island"),
@@ -3513,9 +3484,7 @@ core.register_chatcommand("local_flyisland", {
     end,
 })
 
------------------------------
 -- COMANDO PARA IR ATÉ O SENTINELA
------------------------------
 core.register_chatcommand("sentinel", {
     description = S("Teleport to the sentinel statue"),
     privs = { teleport = true },
@@ -3538,7 +3507,6 @@ core.register_chatcommand("sentinel", {
             sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
     end,
 })
-
 -- Comando para só ver as coordenadas sem teleportar
 core.register_chatcommand("local_sentinel", {
     description = S("Shows the coordinates of the sentinel statue"),
