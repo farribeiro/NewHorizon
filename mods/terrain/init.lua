@@ -164,7 +164,7 @@ local P = populate_Pall({
     chromium
 })
 -- PERLIN MAPS (OTIMIZAÇÃO)
-PM = populate_Pall({
+local PM = populate_Pall({
     continent,
     biome,
     mountain,
