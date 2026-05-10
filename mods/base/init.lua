@@ -1,4 +1,4 @@
-minetest.log("action", "[base] Mod iniciado!")
+minetest.log("action", "[base] init.lua loaded")
 
 minetest.register_node("nh_base:bloco_teste",
     { description = "Bloco de Teste", tiles = { "base_bloco_teste.png" }, groups = { cracky = 3 }, })
