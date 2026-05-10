@@ -119,7 +119,7 @@ local function slope_get_below(x, z)
     if slope_area:contains(x, slope_y - 1, z) then return slope_data[slope_area:index(x, slope_y - 1, z)] end
     return C.ignore
 end
-print("[terrain] content_ids obtidos")
+
 local entity_positions = {}
 local tent_generated = false
 local TENT_SEARCH_RADIUS = 256
@@ -1439,7 +1439,7 @@ local function spawn_ship(area, data, base_pos)
     -- parede do fundo (dz = depth-1) fica ABERTA — entrada da cabine 
 end
 
-local function place_random_chest(area, data, base_pos)
+local function place_tent_chest(area, data, base_pos)
     local candidates = {}
     for dx = 1, 2 do
         for dz = 1, 3 do
@@ -1458,18 +1458,15 @@ local function place_random_chest(area, data, base_pos)
         z = base_pos.z + c.dz
     }
 
-    -- Remove a linha data[vi] = C.oakchest e substitui por set_node
-    core.after(0, function()
-        core.set_node(chest_pos, {
-            name   = "nh_nodes:oak_chest",
-            param2 = 2  -- mesmo param2 da porta, virado para sul (+Z)
-        })
-        -- inicializa o baú corretamente
+    -- Passa chest_pos como argumento ao core.after para evitar
+    -- condição de corrida entre threads de emerge paralelos
+    core.after(0, function(pos)
+        core.set_node(pos, {name = "nh_nodes:oak_chest", param2 = 2})
         local def = core.registered_nodes["nh_nodes:oak_chest"]
         if def and def.on_construct then
-            def.on_construct(chest_pos)
+            def.on_construct(pos)
         end
-    end)
+    end, chest_pos)
 end
 
 local function safe_index(area, x, y, z, minp, maxp)
@@ -1604,7 +1601,7 @@ local function spawn_house(area, data, base_pos)
     -- parede do fundo (dz = depth-1) fica ABERTA — entrada da cabine 
 end
 
-local function place_random_chest(area, data, base_pos)
+local function place_ship_chest(area, data, base_pos)
     local candidates = {}
     for dx = 1, 2 do
         for dz = 1, 3 do
@@ -1623,18 +1620,13 @@ local function place_random_chest(area, data, base_pos)
         z = base_pos.z + c.dz
     }
 
-    -- Remove a linha data[vi] = C.oakchest e substitui por set_node
-    core.after(0, function()
-        core.set_node(chest_pos, {
-            name   = "nh_nodes:oakchest",
-            param2 = 2  -- mesmo param2 da porta, virado para sul (+Z)
-        })
-        -- inicializa o baú corretamente
-        local def = core.registered_nodes["nh_nodes:oakchest"]
+    core.after(0, function(pos)
+        core.set_node(pos, {name = "nh_nodes:oak_chest", param2 = 2})
+        local def = core.registered_nodes["nh_nodes:oak_chest"]
         if def and def.on_construct then
-            def.on_construct(chest_pos)
+            def.on_construct(pos)
         end
-    end)
+    end, chest_pos)
 end
 
 local function safe_index(area, x, y, z, minp, maxp)
@@ -1690,9 +1682,8 @@ local function init_perlin_maps()
     PM.bushes = core.get_perlin_map(NOISE.bushes, chunksize)
     PM.saprolite = core.get_perlin_map(NOISE.saprolite, chunksize)
     PM.ore_master = core.get_perlin_map(NOISE.ore_master, chunksize)
-
-    core.log("action", "[terrain] Perlins e Perlin Maps inicializados")
 end
+    core.log("action", "[terrain] Perlins e Perlin Maps inicializados")
 
 -----------------------------
 -- FUNÇÃO DE GERAÇÃO DOS NOISE MAPS EM BATCH
@@ -2777,7 +2768,7 @@ local function try_spawn_tent(area, data, minp, maxp)
                     
                     if area:contains(x, y, z) and can_spawn_tent(area, data, base_pos) then
                         spawn_tent(area, data, base_pos)
-                        place_random_chest(area, data, base_pos)
+                        place_tent_chest(area, data, base_pos)
                         tent_generated = true
                         return true
                     end
@@ -2813,7 +2804,7 @@ local function try_spawn_ship(area, data, minp, maxp)
                     
                     if area:contains(x, y, z) and can_spawn_ship(area, data, base_pos) then
                         spawn_ship(area, data, base_pos)
-                        place_random_chest(area, data, {x = base_pos.x, y = base_pos.y + 1, z = base_pos.z})
+                        place_ship_chest(area, data, {x = base_pos.x, y = base_pos.y + 1, z = base_pos.z})
                         ship_generated = true
                         return true
                     end
@@ -2845,7 +2836,7 @@ local function try_spawn_house(area, data, minp, maxp)
                 for y = 22, 50 do  -- ← altitude da casa em terra firme
                     if area:contains(x, y, z) and can_spawn_house(area, data, {x=x, y=y, z=z}) then
                         spawn_house(area, data, {x=x, y=y, z=z})
-                        place_random_chest(area, data, {x=x, y=y+1, z=z})
+                        place_tent_chest(area, data, {x=x, y=y+1, z=z})
                         house_generated = true  -- ← corrigido (estava "house_generated")
                         return true
                     end
@@ -3085,19 +3076,18 @@ core.register_on_generated(function(minp, maxp)
             end
         end
         
-        -- Inicializa inventários dos baús
+        -- Inicializa baús do pebble
         for _, pebble_pos in ipairs(pebble_positions) do
             local chest_pos = {x = pebble_pos.x, y = pebble_pos.y - 2, z = pebble_pos.z}
             local node = core.get_node(chest_pos)
-            
             if node.name == "nh_nodes:oak_chest" then
-                -- Força re-construção do baú para criar o inventário
                 local node_def = core.registered_nodes["nh_nodes:oak_chest"]
                 if node_def and node_def.on_construct then
                     node_def.on_construct(chest_pos)
                 end
             end
         end
+
     end)
 end) -- FIM do register_on_generated
 
