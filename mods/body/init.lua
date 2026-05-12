@@ -3,7 +3,10 @@ local S = core.get_translator("nh_body")
 local function sit_log(player_name, msg)   minetest.log("action", "[SIT DEBUG] [" .. player_name .. "] " .. msg) end --aqui
 -- TABELAS GLOBAIS
 --local shadow_objects = {}
-local zeroaxys = { x = 0, y = 0, z = 0 }
+local function table_xyz(fx, fy, fz)
+    return {x = fx, y = fy, z = fz}
+end
+local zeroaxys = table_xyz(0,0,0)
 local last_wielded = {}
 local last_wield_index = {}
 local player_states = {}
