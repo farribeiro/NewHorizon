@@ -2776,6 +2776,7 @@ core.register_abm({
 -- Rampas, quinas e quinas internas têm colisão de meia altura,
 -- então qualquer decoração gerada em cima deles fica flutuando.
 -----------------------------
+--[[
 core.register_abm({
     name = "nh_terrain:clear_decorations_on_slopes",
     nodenames = {
@@ -2794,6 +2795,7 @@ core.register_abm({
         end
     end
 })
+]]--
 
 -- Pré-geração da área
 core.after(1, function()
