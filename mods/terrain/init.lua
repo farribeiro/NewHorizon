@@ -11,93 +11,93 @@ core.set_mapgen_setting("mg_name", "singlenode", true)
 local gcid        = core.get_content_id
 -- REGISTRO DOS IDS
 local C           = {
-    ignore            = core.CONTENT_IGNORE,
-    air               = core.CONTENT_AIR,
-    grass             = gcid "nh_nodes:grass",
-    topgrass          = gcid "nh_nodes:top_grass",
-    topgrass2         = gcid "nh_nodes:top_grass2",
-    top_grass_ramp    = gcid "nh_nodes:top_grass_ramp",
-    top_grass_corner  = gcid "nh_nodes:top_grass_corner",
-    grassinsidecorner = gcid "nh_nodes:top_grass_insidecorner",
-    dirt_ramp         = gcid "nh_nodes:dirt_ramp",
-    dirt_corner       = gcid "nh_nodes:dirt_corner",
-    dirt_insidecorner = gcid "nh_nodes:dirt_insidecorner",
-    sand_ramp         = gcid "nh_nodes:sand_ramp",
-    sand_corner       = gcid "nh_nodes:sand_corner",
-    sand_insidecorner = gcid "nh_nodes:sand_insidecorner",
-    top_grass2        = gcid "nh_nodes:top_grass2",
-    grassleaves       = gcid "nh_nodes:grassleaves",
-    grassleavesmedium = gcid "nh_nodes:grassleavesmedium",
-    smallgrass        = gcid "nh_nodes:smallgrass",
-    highgrass         = gcid "nh_nodes:highgrass",
-    rush              = gcid "nh_nodes:rush",
-    dandelion         = gcid "nh_nodes:dandelion",
-    micaceusfungus    = gcid "nh_nodes:micaceusfungus",
-    flyamanitafungus  = gcid "nh_nodes:flyamanitafungus",
-    dirt              = gcid "nh_nodes:dirt",
-    pebble            = gcid "nh_nodes:pebble",
-    whitepebble       = gcid "nh_nodes:white_pebble",
-    sand              = gcid "nh_nodes:sand",
-    wetsand           = gcid "nh_nodes:wet_sand",
-    saprolite         = gcid "nh_nodes:saprolite",
-    gneiss            = gcid "nh_nodes:gneiss",
-    cobblestone       = gcid "nh_nodes:cobblestone",
-    basalt            = gcid "nh_nodes:basalt",
-    basaltramp        = gcid "nh_nodes:basalt_ramp",
-    basaltcorner      = gcid "nh_nodes:basalt_corner",
-    basaltinsidecorner= gcid "nh_nodes:basalt_insidecorner",
-    magma             = gcid "nh_nodes:magma",
-    peridotite        = gcid "nh_nodes:peridotite",
-    bedrock           = gcid "nh_nodes:bedrock",
-    redrock           = gcid "nh_nodes:redrock",
-    oaktimber         = gcid "nh_nodes:oaktimber",
-    fallenstick       = gcid "nh_nodes:fallenstick",
-    appletimber       = gcid "nh_nodes:appletimber",
-    pinetimber        = gcid "nh_nodes:pinetimber",
-    pineleaves        = gcid "nh_nodes:pineleaves",
-    oakwood           = gcid "nh_nodes:oakwood",
-    oakplank          = gcid "nh_nodes:oakplank",
-    oakdowel          = gcid "nh_nodes:oakdowel",
-    oakchest          = gcid "nh_nodes:oak_chest",
-    oakdoor           = gcid "nh_nodes:oakdoor_closed",
-    oakbranch         = gcid "nh_nodes:oakbranch",
-    leaves            = gcid "nh_nodes:leaves",
-    leavesrelief      = gcid "nh_nodes:leavesrelief",
-    kelp              = gcid "nh_nodes:kelp",
-    sentinelstatue    = gcid "nh_nodes:sentinelstatue",
-    leaves_nut        = gcid "nh_nodes:leaves_nut",
-    leaves_nut2       = gcid "nh_nodes:leaves_nut2",
-    leaves_nut3       = gcid "nh_nodes:leaves_nut3",
-    appleleaves       = gcid "nh_nodes:appleleaves",
-    blueberryleaves   = gcid "nh_nodes:blueberryleaves",
-    leavesblueberry4  = gcid "nh_nodes:leaves_blueberry4",
-    leavesapple       = gcid "nh_nodes:leaves_apple",
-    leavesapple2      = gcid "nh_nodes:leaves_apple2",
-    leavesapple3      = gcid "nh_nodes:leaves_apple3",
-    palmtimber        = gcid "nh_nodes:palmtimber",
-    palmstraws        = gcid "nh_nodes:palmstraws",
-    palmleafstalks    = gcid "nh_nodes:palmleafstalks",
-    palmleaf          = gcid "nh_nodes:palmleaf",
-    palmstraw         = gcid "nh_nodes:palmstraw",
-    coconut           = gcid "nh_nodes:coconutlinked",
-    water             = gcid "nh_nodes:water",
-    water2            = gcid "nh_nodes:water2",
-    lava              = gcid "nh_nodes:lava",
-    obsidian          = gcid "nh_nodes:obsidian",
-    fireice           = gcid "nh_nodes:fireice",
-    snow              = gcid "nh_nodes:snow",
-    snow_ramp         = gcid "nh_nodes:snow_ramp",
-    snow_corner       = gcid "nh_nodes:snow_corner",
-    snow_insidecorner = gcid "nh_nodes:snow_insidecorner",
-    ice               = gcid "nh_nodes:ice",
-    sphere            = gcid "nh_nodes:sphere",
-    coal              = gcid "nh_nodes:coal",
-    copper            = gcid "nh_nodes:copper",
-    tin               = gcid "nh_nodes:tin",
-    iron              = gcid "nh_nodes:iron",
-    nickel            = gcid "nh_nodes:nickel",
-    manganese         = gcid "nh_nodes:manganese",
-    chromium          = gcid "nh_nodes:chromium",
+    ignore             = core.CONTENT_IGNORE,
+    air                = core.CONTENT_AIR,
+    grass              = gcid "nh_nodes:grass",
+    topgrass           = gcid "nh_nodes:top_grass",
+    topgrass2          = gcid "nh_nodes:top_grass2",
+    top_grass_ramp     = gcid "nh_nodes:top_grass_ramp",
+    top_grass_corner   = gcid "nh_nodes:top_grass_corner",
+    grassinsidecorner  = gcid "nh_nodes:top_grass_insidecorner",
+    dirt_ramp          = gcid "nh_nodes:dirt_ramp",
+    dirt_corner        = gcid "nh_nodes:dirt_corner",
+    dirt_insidecorner  = gcid "nh_nodes:dirt_insidecorner",
+    sand_ramp          = gcid "nh_nodes:sand_ramp",
+    sand_corner        = gcid "nh_nodes:sand_corner",
+    sand_insidecorner  = gcid "nh_nodes:sand_insidecorner",
+    top_grass2         = gcid "nh_nodes:top_grass2",
+    grassleaves        = gcid "nh_nodes:grassleaves",
+    grassleavesmedium  = gcid "nh_nodes:grassleavesmedium",
+    smallgrass         = gcid "nh_nodes:smallgrass",
+    highgrass          = gcid "nh_nodes:highgrass",
+    rush               = gcid "nh_nodes:rush",
+    dandelion          = gcid "nh_nodes:dandelion",
+    micaceusfungus     = gcid "nh_nodes:micaceusfungus",
+    flyamanitafungus   = gcid "nh_nodes:flyamanitafungus",
+    dirt               = gcid "nh_nodes:dirt",
+    pebble             = gcid "nh_nodes:pebble",
+    whitepebble        = gcid "nh_nodes:white_pebble",
+    sand               = gcid "nh_nodes:sand",
+    wetsand            = gcid "nh_nodes:wet_sand",
+    saprolite          = gcid "nh_nodes:saprolite",
+    gneiss             = gcid "nh_nodes:gneiss",
+    cobblestone        = gcid "nh_nodes:cobblestone",
+    basalt             = gcid "nh_nodes:basalt",
+    basaltramp         = gcid "nh_nodes:basalt_ramp",
+    basaltcorner       = gcid "nh_nodes:basalt_corner",
+    basaltinsidecorner = gcid "nh_nodes:basalt_insidecorner",
+    magma              = gcid "nh_nodes:magma",
+    peridotite         = gcid "nh_nodes:peridotite",
+    bedrock            = gcid "nh_nodes:bedrock",
+    redrock            = gcid "nh_nodes:redrock",
+    oaktimber          = gcid "nh_nodes:oaktimber",
+    fallenstick        = gcid "nh_nodes:fallenstick",
+    appletimber        = gcid "nh_nodes:appletimber",
+    pinetimber         = gcid "nh_nodes:pinetimber",
+    pineleaves         = gcid "nh_nodes:pineleaves",
+    oakwood            = gcid "nh_nodes:oakwood",
+    oakplank           = gcid "nh_nodes:oakplank",
+    oakdowel           = gcid "nh_nodes:oakdowel",
+    oakchest           = gcid "nh_nodes:oak_chest",
+    oakdoor            = gcid "nh_nodes:oakdoor_closed",
+    oakbranch          = gcid "nh_nodes:oakbranch",
+    leaves             = gcid "nh_nodes:leaves",
+    leavesrelief       = gcid "nh_nodes:leavesrelief",
+    kelp               = gcid "nh_nodes:kelp",
+    sentinelstatue     = gcid "nh_nodes:sentinelstatue",
+    leaves_nut         = gcid "nh_nodes:leaves_nut",
+    leaves_nut2        = gcid "nh_nodes:leaves_nut2",
+    leaves_nut3        = gcid "nh_nodes:leaves_nut3",
+    appleleaves        = gcid "nh_nodes:appleleaves",
+    blueberryleaves    = gcid "nh_nodes:blueberryleaves",
+    leavesblueberry4   = gcid "nh_nodes:leaves_blueberry4",
+    leavesapple        = gcid "nh_nodes:leaves_apple",
+    leavesapple2       = gcid "nh_nodes:leaves_apple2",
+    leavesapple3       = gcid "nh_nodes:leaves_apple3",
+    palmtimber         = gcid "nh_nodes:palmtimber",
+    palmstraws         = gcid "nh_nodes:palmstraws",
+    palmleafstalks     = gcid "nh_nodes:palmleafstalks",
+    palmleaf           = gcid "nh_nodes:palmleaf",
+    palmstraw          = gcid "nh_nodes:palmstraw",
+    coconut            = gcid "nh_nodes:coconutlinked",
+    water              = gcid "nh_nodes:water",
+    water2             = gcid "nh_nodes:water2",
+    lava               = gcid "nh_nodes:lava",
+    obsidian           = gcid "nh_nodes:obsidian",
+    fireice            = gcid "nh_nodes:fireice",
+    snow               = gcid "nh_nodes:snow",
+    snow_ramp          = gcid "nh_nodes:snow_ramp",
+    snow_corner        = gcid "nh_nodes:snow_corner",
+    snow_insidecorner  = gcid "nh_nodes:snow_insidecorner",
+    ice                = gcid "nh_nodes:ice",
+    sphere             = gcid "nh_nodes:sphere",
+    coal               = gcid "nh_nodes:coal",
+    copper             = gcid "nh_nodes:copper",
+    tin                = gcid "nh_nodes:tin",
+    iron               = gcid "nh_nodes:iron",
+    nickel             = gcid "nh_nodes:nickel",
+    manganese          = gcid "nh_nodes:manganese",
+    chromium           = gcid "nh_nodes:chromium",
 }
 -- Tabelas de tipo, definidas UMA VEZ no escopo do módulo (fora de qualquer função)
 local GRASS_SOLID = {} -- preenchido após os content_ids serem obtidos
@@ -202,7 +202,7 @@ local DECORATIONS = {
 }
 -- DECORATION_CIDS é agora um alias direto (ids já são content ids)
 local DECORATION_CIDS = DECORATIONS
- 
+
 -- Nodes que são "passáveis" para o cálculo de quinas internas de grama
 local PASSABLE = {[C.air] = true}
 for cid in pairs(DECORATIONS) do PASSABLE[cid] = true end
@@ -1194,7 +1194,11 @@ local function spawn_ship(area, data, base_pos)
     -- conves
     for dx = -2, width + 1 do
         for dz = -3, depth + 3 do
-            data[area:index(base_pos.x + dx, base_pos.y, base_pos.z + dz)] = C.oakwood
+            data[area:index(
+                base_pos.x + dx,
+                base_pos.y,
+                base_pos.z + dz
+            )] = C.oakwood
         end
     end
     -- teto
@@ -2377,7 +2381,7 @@ if not core.registered_nodes["nh_nodes:grass"] then core.log("warning", "[terrai
 --  FUNÇÕES AUXILIARES COMPARTILHADAS PELOS LBMs DE RAMPA
 local function clear_above(pos)
     local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-    if DECORATIONS[core.get_node(above).name] then
+    if DECORATIONS[gcid(core.get_node(above).name)] then
         core.set_node(above, {name = "air"})
     end
 end
@@ -2400,15 +2404,15 @@ core.register_lbm({
         local current = core.get_node(pos).name
 
         local function is_solid_below(p)
-            return SOLID_GRASS[core.get_node({x = p.x, y = p.y - 1, z = p.z}).name] == true
+            return SOLID_GRASS[gcid(core.get_node({x = p.x, y = p.y - 1, z = p.z}).name)] == true
         end
         local function is_solid_same(p)
-            return SOLID_GRASS[core.get_node(p).name] == true
+            return SOLID_GRASS[gcid(core.get_node(p).name)] == true
         end
         local function is_passthrough(p)
-            local name = core.get_node(p).name
-            if not PASSABLE[name] then return false end
-            return SOLID_GRASS[core.get_node({x = p.x, y = p.y - 1, z = p.z}).name] == true
+            local cid = gcid(core.get_node(p).name)
+            if not PASSABLE[cid] then return false end
+            return SOLID_GRASS[gcid(core.get_node({x = p.x, y = p.y - 1, z = p.z}).name)] == true
         end
 
         local below = {
@@ -2698,17 +2702,17 @@ core.register_abm({
         local current = core.get_node(pos).name
 
         local function is_solid_below(p)
-            return SOLID_GRASS[core.get_node({x = p.x, y = p.y - 1, z = p.z}).name] == true
+            return SOLID_GRASS[gcid(core.get_node({x = p.x, y = p.y - 1, z = p.z}).name)] == true
         end
         local function is_solid_same(p)
-            return SOLID_GRASS[core.get_node(p).name] == true
+            return SOLID_GRASS[gcid(core.get_node(p).name)] == true
         end
 
         local function is_passthrough(p)
-            local name = core.get_node(p).name
-            if not PASSABLE[name] then return false end
+            local cid = gcid(core.get_node(p).name)
+            if not PASSABLE[cid] then return false end
 
-            local below_diag = core.get_node({x = p.x, y = p.y - 1, z = p.z}).name
+            local below_diag = gcid(core.get_node({x = p.x, y = p.y - 1, z = p.z}).name)
             return SOLID_GRASS[below_diag] == true
         end
 
@@ -2780,9 +2784,7 @@ core.register_abm({
 
     action = function(pos, node)
         local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-        local above_name = core.get_node(above).name
-
-        if DECORATIONS[above_name] then
+        if DECORATIONS[gcid(core.get_node(above).name)] then
             core.set_node(above, {name = "air"})
         end
     end
