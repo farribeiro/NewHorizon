@@ -1183,11 +1183,7 @@ local function spawn_ship(area, data, base_pos)
     -- conves
     for dx = -2, width + 1 do
         for dz = -3, depth + 3 do
-            data[area:index(
-                base_pos.x + dx,
-                base_pos.y,
-                base_pos.z + dz
-            )] = C.oakwood
+            data[area:index(base_pos.x + dx, base_pos.y, base_pos.z + dz)] = C.oakwood
         end
     end
     -- teto
