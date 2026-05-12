@@ -19,6 +19,13 @@ local C           = {
     top_grass_ramp    = gcid "nh_nodes:top_grass_ramp",
     top_grass_corner  = gcid "nh_nodes:top_grass_corner",
     grassinsidecorner = gcid "nh_nodes:top_grass_insidecorner",
+    dirt_ramp         = gcid "nh_nodes:dirt_ramp",
+    dirt_corner       = gcid "nh_nodes:dirt_corner",
+    dirt_insidecorner = gcid "nh_nodes:dirt_insidecorner",
+    sand_ramp         = gcid "nh_nodes:sand_ramp",
+    sand_corner       = gcid "nh_nodes:sand_corner",
+    sand_insidecorner = gcid "nh_nodes:sand_insidecorner",
+    top_grass2        = gcid "nh_nodes:top_grass2",
     grassleaves       = gcid "nh_nodes:grassleaves",
     grassleavesmedium = gcid "nh_nodes:grassleavesmedium",
     smallgrass        = gcid "nh_nodes:smallgrass",
@@ -101,19 +108,25 @@ local function init_slope_tables()
     GRASS_PASS[C.air]                = true
     GRASS_PASS[C.grassleaves]        = true
     GRASS_PASS[C.grassleavesmedium]  = true
-    DIRT_SOLID[C.dirt]               = true
-    DIRT_EDGE[C.sand]                = true
-    DIRT_EDGE[C.air]                 = true
-    SAND_SOLID[C.sand]               = true
-    SAND_EDGE[C.wetsand]             = true
-    SAND_EDGE[C.air]                 = true
+
+    DIRT_SOLID[C.dirt]              = true
+    DIRT_SOLID[C.dirt_ramp]         = true
+    DIRT_SOLID[C.dirt_corner]       = true
+    DIRT_SOLID[C.dirt_insidecorner] = true
+    DIRT_EDGE[C.sand]               = true
+    DIRT_EDGE[C.air]                = true
+
+    SAND_SOLID[C.sand]              = true
+    SAND_SOLID[C.sand_ramp]         = true
+    SAND_SOLID[C.sand_corner]       = true
+    SAND_SOLID[C.sand_insidecorner] = true
+    SAND_EDGE[C.wetsand]            = true
+    SAND_EDGE[C.air]                = true
 end
 init_slope_tables()
 
 
 -- LOOKUP TABLES GLOBAIS --
--- Nodes que são "passáveis" para o cálculo de quinas internas de grama
-local PASSABLE = {["air"] = true, ["nh_nodes:grassleaves"] = true, ["nh_nodes:grassleavesmedium"] = true,}
 -- Nodes sólidos de grama (LBMs grass_conversion e grass_conversion2)
 local SOLID_GRASS = {
     ["nh_nodes:top_grass"]              = true,
@@ -173,6 +186,15 @@ local DECORATIONS = {
     ["nh_nodes:white_pebble"]      = true,
     ["nh_nodes:fallenstick"]       = true,
 }
+-- Converte nomes em content IDs
+local DECORATION_CIDS = {}
+for name in pairs(DECORATIONS) do
+    DECORATION_CIDS[minetest.get_content_id(name)] = true
+end
+
+-- Nodes que são "passáveis" para o cálculo de quinas internas de grama
+local PASSABLE = {["air"] = true}
+for name in pairs(DECORATIONS) do PASSABLE[name] = true end
 
 -- Função auxiliar global (sem local function dentro de loop)
 local slope_area, slope_data, slope_p2, slope_y
@@ -2235,118 +2257,6 @@ local function try_spawn_house(area, data, minp, maxp)
     return false
 end
 
-local function apply_slope_conversion(area, data, param2_data)
-    slope_area = area
-    slope_data = data
-    slope_p2   = param2_data
-
-    for z = area.MinEdge.z + 1, area.MaxEdge.z - 1 do
-        for x = area.MinEdge.x + 1, area.MaxEdge.x - 1 do
-            for y = area.MinEdge.y + 1, area.MaxEdge.y - 1 do
-                slope_y        = y
-                local vi       = area:index(x, y, z)
-                local node     = data[vi]
-
-                -- Só nodes com ar acima
-                local above_vi = area:index(x, y + 1, z)
-                if data[above_vi] ~= C.air then goto continue end
-
-                --  TOP_GRASS
-                if node == C.topgrass then
-                    local dn = slope_get(x, z - 1) == C.air
-                    local ds = slope_get(x, z + 1) == C.air
-                    local de = slope_get(x + 1, z) == C.air
-                    local dw = slope_get(x - 1, z) == C.air
-
-                    local nd = (dn and 1 or 0) + (ds and 1 or 0) + (de and 1 or 0) + (dw and 1 or 0)
-
-                    -- Inside corner: nenhuma queda, mas diagonal vazia com grass abaixo dela
-                    if nd == 0 then
-                        local sn = GRASS_SOLID[slope_get(x, z - 1)]
-                        local ss = GRASS_SOLID[slope_get(x, z + 1)]
-                        local se = GRASS_SOLID[slope_get(x + 1, z)]
-                        local sw = GRASS_SOLID[slope_get(x - 1, z)]
-
-                        local function pass_g(cx, cz)
-                            local n = slope_get(cx, cz)
-                            return GRASS_PASS[n] and GRASS_SOLID[slope_get_below(cx, cz)]
-                        end
-
-                        if ss and sw and pass_g(x - 1, z + 1) then
-                            data[vi] = C.grassinsidecorner
-                            param2_data[vi] = 2
-                            goto continue
-                        end
-                        if sw and sn and pass_g(x - 1, z - 1) then
-                            data[vi] = C.grassinsidecorner
-                            param2_data[vi] = 1
-                            goto continue
-                        end
-                        if sn and se and pass_g(x + 1, z - 1) then
-                            data[vi] = C.grassinsidecorner
-                            param2_data[vi] = 0
-                            goto continue
-                        end
-                        if se and ss and pass_g(x + 1, z + 1) then
-                            data[vi] = C.grassinsidecorner
-                            param2_data[vi] = 3
-                            goto continue
-                        end
-                        -- corner: 2 quedas
-                    elseif nd == 2 then
-                        if ds and dw then
-                            data[vi] = C.top_grass_corner
-                            param2_data[vi] = 0
-                        elseif dw and dn then
-                            data[vi] = C.top_grass_corner
-                            param2_data[vi] = 3
-                        elseif dn and de then
-                            data[vi] = C.top_grass_corner
-                            param2_data[vi] = 2
-                        elseif de and ds then
-                            data[vi] = C.top_grass_corner
-                            param2_data[vi] = 1
-                        end
-                        goto continue
-                        -- Rampa: 1 queda
-                    elseif nd == 1 then
-                        if dn then
-                            data[vi] = C.top_grass_ramp
-                            param2_data[vi] = 0
-                        elseif ds then
-                            data[vi] = C.top_grass_ramp
-                            param2_data[vi] = 2
-                        elseif de then
-                            data[vi] = C.top_grass_ramp
-                            param2_data[vi] = 3
-                        elseif dw then
-                            data[vi] = C.top_grass_ramp
-                            param2_data[vi] = 1
-                        end
-                        goto continue
-                    end
-                    --  DIRT
-                elseif node == C.dirt then
-                    local dn = DIRT_EDGE[slope_get(x, z - 1)]
-                    local ds = DIRT_EDGE[slope_get(x, z + 1)]
-                    local de = DIRT_EDGE[slope_get(x + 1, z)]
-                    local dw = DIRT_EDGE[slope_get(x - 1, z)]
-                    local nd = (dn and 1 or 0) + (ds and 1 or 0) + (de and 1 or 0) + (dw and 1 or 0)
-                    -- (repita o mesmo padrão com C.dirt_insidecorner, C.dirt_corner, C.dirt_ramp)
-                    --  SAND
-                elseif node == C.sand then
-                    local dn = SAND_EDGE[slope_get(x, z - 1)]
-                    local ds = SAND_EDGE[slope_get(x, z + 1)]
-                    local de = SAND_EDGE[slope_get(x + 1, z)]
-                    local dw = SAND_EDGE[slope_get(x - 1, z)]
-                    local nd = (dn and 1 or 0) + (ds and 1 or 0) + (de and 1 or 0) + (dw and 1 or 0)
-                    -- (repita o mesmo padrão com C.sand_insidecorner, C.sand_corner, C.sand_ramp)
-                end
-                ::continue::
-            end
-        end
-    end
-end
 
 -- GERAÇÃO DO MUNDO (OTIMIZADA E REFATORADA)
 core.register_on_generated(function(minp, maxp)
@@ -2397,8 +2307,6 @@ core.register_on_generated(function(minp, maxp)
     local palm_leaf_rotations, pebble_positions = apply_decorations(area, data, param2_data, decorations)
     -- Gera torres de obsidiana
     generate_obsidian_towers(area, data, minp, maxp)
-    -- Aplica as rampas (inclinaçoes)
-    --apply_slope_conversion(area, data, param2_data)
     -- Grava dados no voxelmanip
     vm:set_data(data)
     vm:set_param2_data(param2_data)
@@ -2454,49 +2362,145 @@ core.register_on_generated(function(minp, maxp)
     end)
 end) -- FIM do register_on_generated
 if not core.registered_nodes["nh_nodes:grass"] then core.log("warning", "[terrain] nh_nodes:grass is not registered.") end
+
+-- ============================================================
+--  FUNÇÕES AUXILIARES COMPARTILHADAS PELOS LBMs DE RAMPA
+-- ============================================================
 local function clear_above(pos)
     local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-    local name = core.get_node(above).name
-
-    if DECORATIONS[name] then
+    if DECORATIONS[core.get_node(above).name] then
         core.set_node(above, {name = "air"})
     end
 end
 
-local function convert_dirt_below(pos)
+-- Converte o nó abaixo se for "nh_nodes:dirt" para `target`
+local function convert_below(pos, src, target)
     local below = {x = pos.x, y = pos.y - 1, z = pos.z}
-    if core.get_node(below).name == "nh_nodes:dirt" then
-        core.set_node(below, {name = "nh_nodes:top_grass2"})
+    if core.get_node(below).name == src then
+        core.set_node(below, {name = target})
     end
 end
 
-local function convert_sand_below(pos)
-    local below = {x = pos.x, y = pos.y - 1, z = pos.z}
-    if core.get_node(below).name == "nh_nodes:dirt" then
-        core.set_node(below, {name = "nh_nodes:sand"})
+-- FONTE GENÉRICA PARA LBMs DE RAMPA E QUINAS
+local function make_slope_lbm(cfg)
+    local solid        = cfg.solid
+    local edge         = cfg.edge
+    local passable     = cfg.passable or edge
+    local nodes        = cfg.nodes
+    local req_air      = cfg.require_air_above ~= false
+    local do_clear     = cfg.clear ~= false
+    local on_corner    = cfg.on_corner
+    local on_ic        = cfg.on_insidecorner
+
+    local function get_node_name(p) return core.get_node(p).name end
+
+    local function is_edge(p)
+        return edge[get_node_name(p)] == true
     end
+    local function is_solid(p)
+        return solid[get_node_name(p)] == true
+    end
+    local function is_passthrough(p)
+        local name = get_node_name(p)
+        if not passable[name] then return false end
+        return solid[get_node_name({x = p.x, y = p.y - 1, z = p.z})] == true
+    end
+
+    local function action(pos)
+        if req_air and get_node_name({x = pos.x, y = pos.y + 1, z = pos.z}) ~= "air" then return end
+
+        local x, y, z = pos.x, pos.y, pos.z
+
+        local b = {
+            north = is_edge({x = x,     y = y, z = z - 1}),
+            south = is_edge({x = x,     y = y, z = z + 1}),
+            east  = is_edge({x = x + 1, y = y, z = z    }),
+            west  = is_edge({x = x - 1, y = y, z = z    }),
+        }
+        local s = {
+            north = is_solid({x = x,     y = y, z = z - 1}),
+            south = is_solid({x = x,     y = y, z = z + 1}),
+            east  = is_solid({x = x + 1, y = y, z = z    }),
+            west  = is_solid({x = x - 1, y = y, z = z    }),
+        }
+
+        local drops = {}
+        if b.north then drops[#drops+1] = "south" end
+        if b.south then drops[#drops+1] = "north" end
+        if b.east  then drops[#drops+1] = "west"  end
+        if b.west  then drops[#drops+1] = "east"  end
+
+        local any_below = b.north or b.south or b.east or b.west
+
+        -- PRIORIDADE 1: INSIDE CORNER
+        if not any_below then
+            local ic_cases = {
+                {s.south and s.west, {x=x-1,y=y,z=z+1}, 2},
+                {s.west  and s.north,{x=x-1,y=y,z=z-1}, 1},
+                {s.north and s.east, {x=x+1,y=y,z=z-1}, 0},
+                {s.east  and s.south,{x=x+1,y=y,z=z+1}, 3},
+            }
+            for _, ic in ipairs(ic_cases) do
+                if ic[1] and is_passthrough(ic[2]) then
+                    core.set_node(pos, {name = nodes.insidecorner, param2 = ic[3]})
+                    if do_clear then clear_above(pos) end
+                    if on_ic then on_ic(pos) end
+                    return
+                end
+            end
+        end
+
+        -- PRIORIDADE 2: CORNER EXTERNO  (só se nó atual for o trigger primário)
+        if #drops == 2 then
+            local a, b2 = drops[1], drops[2]
+            local function match(x1, x2) return (a==x1 and b2==x2) or (a==x2 and b2==x1) end
+            local corner_map = {
+                {match("south","west"),  0},
+                {match("west", "north"), 3},
+                {match("north","east"),  2},
+                {match("east", "south"), 1},
+            }
+            for _, cm in ipairs(corner_map) do
+                if cm[1] then
+                    core.set_node(pos, {name = nodes.corner, param2 = cm[2]})
+                    if do_clear then clear_above(pos) end
+                    if on_corner then on_corner(pos) end
+                    return
+                end
+            end
+            return
+        end
+
+        -- PRIORIDADE 3: RAMPA
+        local ramp_map = {
+            {b.north and not b.south, 0},
+            {b.south and not b.north, 2},
+            {b.east  and not b.west,  3},
+            {b.west  and not b.east,  1},
+        }
+        for _, rm in ipairs(ramp_map) do
+            if rm[1] then
+                core.set_node(pos, {name = nodes.ramp, param2 = rm[2]})
+                if do_clear then clear_above(pos) end
+                return
+            end
+        end
+    end
+
+    core.register_lbm({
+        name             = cfg.lbm_name,
+        nodenames        = cfg.nodenames,
+        run_at_every_load = true,
+        action           = action,
+    })
 end
 
-local function convert_snow_below(pos)
-    local below = {x = pos.x, y = pos.y - 1, z = pos.z}
-    if core.get_node(below).name == "nh_nodes:dirt" then
-        core.set_node(below, {name = "nh_nodes:snow"})
-    end
-end
 
---local function convert_wetsand_below(pos)
---    local below = {x = pos.x, y = pos.y - 1, z = pos.z}
---    if core.get_node(below).name == "nh_nodes:sand" then
---        core.set_node(below, {name = "nh_nodes:wet_sand"})
---    end
---end
-
-
+--  REGISTRO DOS LBMs SIMPLIFICADOS
 core.register_lbm({
-    name = "nh_terrain:grass_conversion",
-    nodenames = {"nh_nodes:top_grass"},
-    run_at_every_load = true, --run_at_every_load = true,
-
+    name             = "nh_terrain:grass_conversion",
+    nodenames        = {"nh_nodes:top_grass"},
+    run_at_every_load = true,
     action = function(pos)
         local x, y, z = pos.x, pos.y, pos.z
         local current = core.get_node(pos).name
@@ -2504,44 +2508,37 @@ core.register_lbm({
         local function is_solid_below(p)
             return SOLID_GRASS[core.get_node({x = p.x, y = p.y - 1, z = p.z}).name] == true
         end
-
         local function is_solid_same(p)
             return SOLID_GRASS[core.get_node(p).name] == true
         end
-
         local function is_passthrough(p)
             local name = core.get_node(p).name
             if not PASSABLE[name] then return false end
-
-            local below_diag = core.get_node({x = p.x, y = p.y - 1, z = p.z}).name
-            return SOLID_GRASS[below_diag] == true
+            return SOLID_GRASS[core.get_node({x = p.x, y = p.y - 1, z = p.z}).name] == true
         end
 
         local below = {
-            north = is_solid_below({x = x, y = y, z = z - 1}),
-            south = is_solid_below({x = x, y = y, z = z + 1}),
-            east  = is_solid_below({x = x + 1, y = y, z = z}),
-            west  = is_solid_below({x = x - 1, y = y, z = z}),
-       }
-
+            north = is_solid_below({x = x,     y = y, z = z - 1}),
+            south = is_solid_below({x = x,     y = y, z = z + 1}),
+            east  = is_solid_below({x = x + 1, y = y, z = z    }),
+            west  = is_solid_below({x = x - 1, y = y, z = z    }),
+        }
         local same = {
-            north = is_solid_same({x = x, y = y, z = z - 1}),
-            south = is_solid_same({x = x, y = y, z = z + 1}),
-            east  = is_solid_same({x = x + 1, y = y, z = z}),
-            west  = is_solid_same({x = x - 1, y = y, z = z}),
-       }
+            north = is_solid_same({x = x,     y = y, z = z - 1}),
+            south = is_solid_same({x = x,     y = y, z = z + 1}),
+            east  = is_solid_same({x = x + 1, y = y, z = z    }),
+            west  = is_solid_same({x = x - 1, y = y, z = z    }),
+        }
 
         local drops = {}
-        if below.north then table.insert(drops, "south") end
-        if below.south then table.insert(drops, "north") end
-        if below.east then table.insert(drops, "west") end
-        if below.west then table.insert(drops, "east") end
+        if below.north then drops[#drops+1] = "south" end
+        if below.south then drops[#drops+1] = "north" end
+        if below.east  then drops[#drops+1] = "west"  end
+        if below.west  then drops[#drops+1] = "east"  end
 
         local any_below = below.north or below.south or below.east or below.west
 
-        --
-        -- PRIORIDADE 1: INSIDE CORNER
-        -- Roda para top_grass e grass
+        -- PRIORIDADE 1: INSIDE CORNER (roda para top_grass e variantes)
         if not any_below then
             if same.south and same.west and is_passthrough({x = x - 1, y = y, z = z + 1}) then
                 core.set_node(pos, {name = "nh_nodes:top_grass_insidecorner", param2 = 2})
@@ -2565,541 +2562,104 @@ core.register_lbm({
             end
         end
 
-        -- Lógica de ramp/corner só roda para top_grass
+        -- Ramp/corner só para top_grass puro
         if current ~= "nh_nodes:top_grass" then return end
 
-        -- PRIORIDADE 2: corner
+        -- PRIORIDADE 2: CORNER EXTERNO
         if #drops == 2 then
             local a, b = drops[1], drops[2]
-
             local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
-
             if match("south", "west") then
                 core.set_node(pos, {name = "nh_nodes:top_grass_corner", param2 = 0})
                 clear_above(pos)
-                convert_dirt_below(pos)
+                convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             elseif match("west", "north") then
                 core.set_node(pos, {name = "nh_nodes:top_grass_corner", param2 = 3})
                 clear_above(pos)
-                convert_dirt_below(pos)
+                convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             elseif match("north", "east") then
                 core.set_node(pos, {name = "nh_nodes:top_grass_corner", param2 = 2})
                 clear_above(pos)
-                convert_dirt_below(pos)
+                convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             elseif match("east", "south") then
                 core.set_node(pos, {name = "nh_nodes:top_grass_corner", param2 = 1})
                 clear_above(pos)
-                convert_dirt_below(pos)
+                convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             end
             return
         end
 
-        -- PRIORIDADE 3: RAMPAS
+        -- PRIORIDADE 3: RAMPA
         if below.north and not below.south then
             core.set_node(pos, {name = "nh_nodes:top_grass_ramp", param2 = 0})
             clear_above(pos)
-            return
-        end
-        if below.south and not below.north then
+        elseif below.south and not below.north then
             core.set_node(pos, {name = "nh_nodes:top_grass_ramp", param2 = 2})
             clear_above(pos)
-            return
-        end
-        if below.east and not below.west then
+        elseif below.east and not below.west then
             core.set_node(pos, {name = "nh_nodes:top_grass_ramp", param2 = 3})
             clear_above(pos)
-            return
-        end
-        if below.west and not below.east then
+        elseif below.west and not below.east then
             core.set_node(pos, {name = "nh_nodes:top_grass_ramp", param2 = 1})
             clear_above(pos)
-            return
         end
-    end
+    end,
 })
 
-
-
-core.register_lbm({
-    name = "nh_terrain:dirt_conversion",
+-- DIRT
+make_slope_lbm({
+    lbm_name  = "nh_terrain:dirt_conversion",
     nodenames = {"nh_nodes:dirt"},
-    run_at_every_load = true, --run_at_every_load = true,
-
-    action = function(pos)
-        -- Só converte se houver ar acima
-        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-        if core.get_node(above).name ~= "air" then return end
-
-        local x, y, z = pos.x, pos.y, pos.z
-
-        local function is_solid_below(p)
-            -- "drop" = o vizinho lateral é sand/air (não é dirt sólido no mesmo nível)
-            local neighbor = core.get_node(p).name
-            return EDGE_DIRT[neighbor] == true
-        end
-
-        local function is_solid_same(p)
-            return SOLID_DIRT[core.get_node(p).name] == true
-        end
-
-        local function is_passthrough(p)
-            -- diagonal é sand/air E tem dirt abaixo dela (quina interna válida)
-            local name = core.get_node(p).name
-            if not EDGE_DIRT[name] then return false end
-
-            local below_diag = core.get_node({x = p.x, y = p.y - 1, z = p.z}).name
-            return SOLID_DIRT[below_diag] == true
-        end
-
-        local below = {
-            north = is_solid_below({x = x, y = y, z = z - 1}),
-            south = is_solid_below({x = x, y = y, z = z + 1}),
-            east  = is_solid_below({x = x + 1, y = y, z = z}),
-            west  = is_solid_below({x = x - 1, y = y, z = z}),
-       }
-
-        local same = {
-            north = is_solid_same({x = x, y = y, z = z - 1}),
-            south = is_solid_same({x = x, y = y, z = z + 1}),
-            east = is_solid_same({x = x + 1, y = y, z = z}),
-            west = is_solid_same({x = x - 1, y = y, z = z}),
-       }
-        local drops = {}
-        if below.north then table.insert(drops, "south") end
-        if below.south then table.insert(drops, "north") end
-        if below.east then table.insert(drops, "west") end
-        if below.west then table.insert(drops, "east") end
-        local any_below = below.north or below.south or below.east or below.west
-        -- PRIORIDADE 1: INSIDE CORNER
-        -- Roda para top_grass e grass
-        if not any_below then
-            if same.south and same.west and is_passthrough({x = x - 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:dirt_insidecorner", param2 = 2})
-                clear_above(pos)
-                return
-            end
-            if same.west and same.north and is_passthrough({x = x - 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:dirt_insidecorner", param2 = 1})
-                clear_above(pos)
-                return
-            end
-            if same.north and same.east and is_passthrough({x = x + 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:dirt_insidecorner", param2 = 0})
-                clear_above(pos)
-                return
-            end
-            if same.east and same.south and is_passthrough({x = x + 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:dirt_insidecorner", param2 = 3})
-                clear_above(pos)
-                return
-            end
-        end
-        -- Lógica de ramp/corner só roda para top_grass
-        --if current ~= "nh_nodes:top_grass" then return end
-        -- PRIORIDADE 2: corner
-        if #drops == 2 then
-            local a, b = drops[1], drops[2]
-            local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
-            if match("south", "west") then
-                core.set_node(pos, {name = "nh_nodes:dirt_corner", param2 = 0})
-                clear_above(pos)
-                convert_sand_below(pos)
-            elseif match("west", "north") then
-                core.set_node(pos, {name = "nh_nodes:dirt_corner", param2 = 3})
-                clear_above(pos)
-                convert_sand_below(pos)
-            elseif match("north", "east") then
-                core.set_node(pos, {name = "nh_nodes:dirt_corner", param2 = 2})
-                clear_above(pos)
-                convert_sand_below(pos)
-            elseif match("east", "south") then
-                core.set_node(pos, {name = "nh_nodes:dirt_corner", param2 = 1})
-                clear_above(pos)
-                convert_sand_below(pos)
-            end
-            return
-        end
-        -- PRIORIDADE 3: RAMPAS
-        if below.north and not below.south then
-            core.set_node(pos, {name = "nh_nodes:dirt_ramp", param2 = 0})
-            clear_above(pos)
-            return
-        end
-        if below.south and not below.north then
-            core.set_node(pos, {name = "nh_nodes:dirt_ramp", param2 = 2})
-            clear_above(pos)
-            return
-        end
-        if below.east and not below.west then
-            core.set_node(pos, {name = "nh_nodes:dirt_ramp", param2 = 3})
-            clear_above(pos)
-            return
-        end
-        if below.west and not below.east then
-            core.set_node(pos, {name = "nh_nodes:dirt_ramp", param2 = 1})
-            clear_above(pos)
-            return
-        end
-    end
+    solid     = SOLID_DIRT,
+    edge      = EDGE_DIRT,
+    nodes = {
+        insidecorner = "nh_nodes:dirt_insidecorner",
+        corner       = "nh_nodes:dirt_corner",
+        ramp         = "nh_nodes:dirt_ramp",
+    },
+    on_corner = function(pos) convert_below(pos, "nh_nodes:dirt", "nh_nodes:sand") end,
 })
--- LBM: SLOPES DE NEVE (mesma lógica do sand)
-core.register_lbm({
-    name = "nh_terrain:snow_conversion",
+
+-- NEVE
+make_slope_lbm({
+    lbm_name  = "nh_terrain:snow_conversion",
     nodenames = {"nh_nodes:snow"},
-    run_at_every_load = true,
-    action = function(pos)
-        -- Só converte se houver ar acima
-        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-        if core.get_node(above).name ~= "air" then return end
-        local x, y, z = pos.x, pos.y, pos.z
-        -- Material que indica "borda de queda" — ice/air no mesmo nível = snow está na borda
-        local function is_solid_below(p)
-            local neighbor = core.get_node(p).name
-            return EDGE_SNOW[neighbor] == true
-        end
-        local function is_solid_same(p) return SOLID_SNOW[core.get_node(p).name] == true end
-        local function is_passthrough(p)
-            local name = core.get_node(p).name
-            if not EDGE_SNOW[name] then return false end
-            -- abaixo da diagonal pode ser snow OU ice (ambos são "chão válido")
-            local below_diag = core.get_node({x = p.x, y = p.y - 1, z = p.z}).name
-            return SOLID_SNOW[below_diag] == true
-        end
-
-        local below = {
-            north = is_solid_below({x = x, y = y, z = z - 1}),
-            south = is_solid_below({x = x, y = y, z = z + 1}),
-            east  = is_solid_below({x = x + 1, y = y, z = z}),
-            west  = is_solid_below({x = x - 1, y = y, z = z}),
-       }
-
-        local same = {
-            north = is_solid_same({x = x, y = y, z = z - 1}),
-            south = is_solid_same({x = x, y = y, z = z + 1}),
-            east  = is_solid_same({x = x + 1, y = y, z = z}),
-            west  = is_solid_same({x = x - 1, y = y, z = z}),
-       }
-
-        local drops = {}
-        if below.north then table.insert(drops, "south") end
-        if below.south then table.insert(drops, "north") end
-        if below.east then table.insert(drops, "west") end
-        if below.west then table.insert(drops, "east") end
-
-        local any_below = below.north or below.south or below.east or below.west
-
-        --
-        -- PRIORIDADE 1: INSIDE CORNER
-        if not any_below then
-            if same.south and same.west and is_passthrough({x = x - 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:snow_insidecorner", param2 = 2})
-                return
-            end
-            if same.west and same.north and is_passthrough({x = x - 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:snow_insidecorner", param2 = 1})
-                return
-            end
-            if same.north and same.east and is_passthrough({x = x + 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:snow_insidecorner", param2 = 0})
-                return
-            end
-            if same.east and same.south and is_passthrough({x = x + 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:snow_insidecorner", param2 = 3})
-                return
-            end
-        end
-
-        --
-        -- PRIORIDADE 2: corner (corner externo)
-        if #drops == 2 then
-            local a, b = drops[1], drops[2]
-            local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
-
-            if match("south", "west") then
-                core.set_node(pos, {name = "nh_nodes:snow_corner", param2 = 0})
-                convert_snow_below(pos)
-            elseif match("west", "north") then
-                core.set_node(pos, {name = "nh_nodes:snow_corner", param2 = 3})
-                convert_snow_below(pos)
-            elseif match("north", "east") then
-                core.set_node(pos, {name = "nh_nodes:snow_corner", param2 = 2})
-                convert_snow_below(pos)
-            elseif match("east", "south") then
-                core.set_node(pos, {name = "nh_nodes:snow_corner", param2 = 1})
-                convert_snow_below(pos)
-            end
-            return
-        end
-
-        --
-        -- PRIORIDADE 3: RAMPAS
-        if below.north and not below.south then
-            core.set_node(pos, {name = "nh_nodes:snow_ramp", param2 = 0})
-            return
-        end
-        if below.south and not below.north then
-            core.set_node(pos, {name = "nh_nodes:snow_ramp", param2 = 2})
-            return
-        end
-        if below.east and not below.west then
-            core.set_node(pos, {name = "nh_nodes:snow_ramp", param2 = 3})
-            return
-        end
-        if below.west and not below.east then
-            core.set_node(pos, {name = "nh_nodes:snow_ramp", param2 = 1})
-            return
-        end
-    end
+    solid     = SOLID_SNOW,
+    edge      = EDGE_SNOW,
+    nodes = {
+        insidecorner = "nh_nodes:snow_insidecorner",
+        corner       = "nh_nodes:snow_corner",
+        ramp         = "nh_nodes:snow_ramp",
+    },
+    on_corner = function(pos) convert_below(pos, "nh_nodes:dirt", "nh_nodes:snow") end,
 })
 
------------------------------
--- LBM: SLOPES DE NEVE (mesma lógica do sand)
------------------------------
-core.register_lbm({
-    name = "nh_terrain:basalt_conversion",
+-- BASALTO
+make_slope_lbm({
+    lbm_name  = "nh_terrain:basalt_conversion",
     nodenames = {"nh_nodes:basalt"},
-    run_at_every_load = true,
-
-    action = function(pos)
-        -- Só converte se houver ar acima
-        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-        if core.get_node(above).name ~= "air" then return end
-
-        local x, y, z = pos.x, pos.y, pos.z
-
-        -- Material que indica "borda de queda" — wet_sand/air no mesmo nível = snow está na borda
-        local function is_solid_below(p)
-            local neighbor = core.get_node(p).name
-            return EDGE_BASALT[neighbor] == true
-        end
-
-        local function is_solid_same(p)
-            return SOLID_BASALT[core.get_node(p).name] == true
-        end
-
-        local function is_passthrough(p)
-            local name = core.get_node(p).name
-            if not EDGE_BASALT[name] then return false end
-            -- abaixo da diagonal pode ser basalt (é "chão válido")
-            local below_diag = core.get_node({x = p.x, y = p.y - 1, z = p.z}).name
-            return SOLID_BASALT[below_diag] == true
-        end
-
-        local below = {
-            north = is_solid_below({x = x, y = y, z = z - 1}),
-            south = is_solid_below({x = x, y = y, z = z + 1}),
-            east  = is_solid_below({x = x + 1, y = y, z = z}),
-            west  = is_solid_below({x = x - 1, y = y, z = z}),
-       }
-
-        local same = {
-            north = is_solid_same({x = x, y = y, z = z - 1}),
-            south = is_solid_same({x = x, y = y, z = z + 1}),
-            east  = is_solid_same({x = x + 1, y = y, z = z}),
-            west  = is_solid_same({x = x - 1, y = y, z = z}),
-       }
-
-        local drops = {}
-        if below.north then table.insert(drops, "south") end
-        if below.south then table.insert(drops, "north") end
-        if below.east then table.insert(drops, "west") end
-        if below.west then table.insert(drops, "east") end
-
-        local any_below = below.north or below.south or below.east or below.west
-
-        --
-        -- PRIORIDADE 1: INSIDE CORNER
-        if not any_below then
-            if same.south and same.west and is_passthrough({x = x - 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:basalt_insidecorner", param2 = 2})
-                return
-            end
-            if same.west and same.north and is_passthrough({x = x - 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:basalt_insidecorner", param2 = 1})
-                return
-            end
-            if same.north and same.east and is_passthrough({x = x + 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:basalt_insidecorner", param2 = 0})
-                return
-            end
-            if same.east and same.south and is_passthrough({x = x + 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:basalt_insidecorner", param2 = 3})
-                return
-            end
-        end
-
-
-        -- PRIORIDADE 2: corner (corner externo)
-        if #drops == 2 then
-            local a, b = drops[1], drops[2]
-
-            local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
-
-            if match("south", "west") then
-                core.set_node(pos, {name = "nh_nodes:basalt_corner", param2 = 0})
-                --convert_snow_below(pos)
-            elseif match("west", "north") then
-                core.set_node(pos, {name = "nh_nodes:basalt_corner", param2 = 3})
-                --convert_snow_below(pos)
-            elseif match("north", "east") then
-                core.set_node(pos, {name = "nh_nodes:basalt_corner", param2 = 2})
-                --convert_snow_below(pos)
-            elseif match("east", "south") then
-                core.set_node(pos, {name = "nh_nodes:basalt_corner", param2 = 1})
-                --convert_snow_below(pos)
-            end
-            return
-        end
-
-
-        -- PRIORIDADE 3: RAMPAS
-        if below.north and not below.south then
-            core.set_node(pos, {name = "nh_nodes:basalt_ramp", param2 = 0})
-            return
-        end
-        if below.south and not below.north then
-            core.set_node(pos, {name = "nh_nodes:basalt_ramp", param2 = 2})
-            return
-        end
-        if below.east and not below.west then
-            core.set_node(pos, {name = "nh_nodes:basalt_ramp", param2 = 3})
-            return
-        end
-        if below.west and not below.east then
-            core.set_node(pos, {name = "nh_nodes:basalt_ramp", param2 = 1})
-            return
-        end
-    end
+    solid     = SOLID_BASALT,
+    edge      = EDGE_BASALT,
+    nodes = {
+        insidecorner = "nh_nodes:basalt_insidecorner",
+        corner       = "nh_nodes:basalt_corner",
+        ramp         = "nh_nodes:basalt_ramp",
+    },
+    -- sem on_corner (convert estava comentado no original)
 })
 
-core.register_lbm({
-    name = "nh_terrain:sand_conversion",
+-- AREIA
+make_slope_lbm({
+    lbm_name  = "nh_terrain:sand_conversion",
     nodenames = {"nh_nodes:sand"},
-    run_at_every_load = true, --run_at_every_load = true,
-
-    action = function(pos)
-        -- Só converte se houver ar acima
-        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-        if core.get_node(above).name ~= "air" then return end
-
-        local x, y, z = pos.x, pos.y, pos.z
-
-        -- Material que indica "borda de queda" — sand no mesmo nível = dirt está na borda
-        local function is_solid_below(p)
-            -- "drop" = o vizinho lateral é sand/air (não é dirt sólido no mesmo nível)
-            local neighbor = core.get_node(p).name
-            return EDGE_SAND[neighbor] == true
-        end
-
-        local function is_solid_same(p)
-            return SOLID_SAND[core.get_node(p).name] == true
-        end
-
-        local function is_passthrough(p)
-            local name = core.get_node(p).name
-            if not EDGE_SAND[name] then return false end
-
-            -- abaixo da diagonal pode ser sand OU wet_sand (ambos são "chão válido")
-            local below_diag = core.get_node({x = p.x, y = p.y - 1, z = p.z}).name
-            return SOLID_SAND[below_diag] == true
-        end
-
-        local below = {
-            north = is_solid_below({x = x, y = y, z = z - 1}),
-            south = is_solid_below({x = x, y = y, z = z + 1}),
-            east  = is_solid_below({x = x + 1, y = y, z = z}),
-            west  = is_solid_below({x = x - 1, y = y, z = z}),
-       }
-
-        local same = {
-            north = is_solid_same({x = x, y = y, z = z - 1}),
-            south = is_solid_same({x = x, y = y, z = z + 1}),
-            east  = is_solid_same({x = x + 1, y = y, z = z}),
-            west  = is_solid_same({x = x - 1, y = y, z = z}),
-       }
-
-        local drops = {}
-        if below.north then table.insert(drops, "south") end
-        if below.south then table.insert(drops, "north") end
-        if below.east then table.insert(drops, "west") end
-        if below.west then table.insert(drops, "east") end
-
-        local any_below = below.north or below.south or below.east or below.west
-
-        --
-        -- PRIORIDADE 1: INSIDE CORNER
-        -- Roda para top_grass e grass
-        if not any_below then
-            if same.south and same.west and is_passthrough({x = x - 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:sand_insidecorner", param2 = 2})
-                clear_above(pos)
-                return
-            end
-            if same.west and same.north and is_passthrough({x = x - 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:sand_insidecorner", param2 = 1})
-                clear_above(pos)
-                return
-            end
-            if same.north and same.east and is_passthrough({x = x + 1, y = y, z = z - 1}) then
-                core.set_node(pos, {name = "nh_nodes:sand_insidecorner", param2 = 0})
-                clear_above(pos)
-                return
-            end
-            if same.east and same.south and is_passthrough({x = x + 1, y = y, z = z + 1}) then
-                core.set_node(pos, {name = "nh_nodes:sand_insidecorner", param2 = 3})
-                clear_above(pos)
-                return
-            end
-        end
-
-        -- PRIORIDADE 2: corner
-        if #drops == 2 then
-            local a, b = drops[1], drops[2]
-
-            local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
-
-            if match("south", "west") then
-                core.set_node(pos, {name = "nh_nodes:sand_corner", param2 = 0})
-                clear_above(pos)
-                --convert_wetsand_below(pos)
-            elseif match("west", "north") then
-                core.set_node(pos, {name = "nh_nodes:sand_corner", param2 = 3})
-                clear_above(pos)
-                --convert_wetsand_below(pos)
-            elseif match("north", "east") then
-                core.set_node(pos, {name = "nh_nodes:sand_corner", param2 = 2})
-                clear_above(pos)
-                --convert_wetsand_below(pos)
-            elseif match("east", "south") then
-                core.set_node(pos, {name = "nh_nodes:sand_corner", param2 = 1})
-                clear_above(pos)
-                --convert_wetsand_below(pos)
-            end
-            return
-        end
-
-        -- PRIORIDADE 3: RAMPAS
-        if below.north and not below.south then
-            core.set_node(pos, {name = "nh_nodes:sand_ramp", param2 = 0})
-            clear_above(pos)
-            return
-        end
-        if below.south and not below.north then
-            core.set_node(pos, {name = "nh_nodes:sand_ramp", param2 = 2})
-            clear_above(pos)
-            return
-        end
-        if below.east and not below.west then
-            core.set_node(pos, {name = "nh_nodes:sand_ramp", param2 = 3})
-            clear_above(pos)
-            return
-        end
-        if below.west and not below.east then
-            core.set_node(pos, {name = "nh_nodes:sand_ramp", param2 = 1})
-            clear_above(pos)
-            return
-        end
-    end
+    solid     = SOLID_SAND,
+    edge      = EDGE_SAND,
+    nodes = {
+        insidecorner = "nh_nodes:sand_insidecorner",
+        corner       = "nh_nodes:sand_corner",
+        ramp         = "nh_nodes:sand_ramp",
+    },
+    -- sem on_corner (convert_wetsand estava comentado no original)
 })
 
 --core.register_abm({
