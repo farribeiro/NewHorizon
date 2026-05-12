@@ -524,7 +524,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
     local height = rng:next(6, 9)
     --  TRONCO
     for y = 0, height do
-        local check_pos = {x = pos.x, y = pos.y + y, z = pos.z}
+        local check_pos = table_xyz(pos.x,pos.y + y,pos.z)
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
             if data[vi] == C.air then
@@ -534,7 +534,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
         end
     end
     --  PALMLEAFSTALKS NO TOPO DO TRONCO
-    local stalk_pos = {x = pos.x, y = pos.y + height + 1, z = pos.z}
+    local stalk_pos = table_xyz(pos.x,pos.y + height + 1, pos.z)
     if area:contains(stalk_pos.x, stalk_pos.y, stalk_pos.z) then
         local vi = area:index(stalk_pos.x, stalk_pos.y, stalk_pos.z)
         if data[vi] == C.air then data[vi] = C.palmleafstalks end
