@@ -1,4 +1,9 @@
 -- Terrain
+
+local function table_xyz(fx, fy, fz)
+    return {x = fx, y = fy, z = fz}
+end
+
 core.log("action", "[TERRAIN] init.lua loaded")
 local S = core.get_translator "nh_terrain"
 -- CONFIGURAÇÕES DO MUNDO
