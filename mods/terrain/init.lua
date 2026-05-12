@@ -139,76 +139,73 @@ terrain_slopes.init(C, DECORATION_CIDS)
 -- LOOKUP TABLES GLOBAIS --
 -- Nodes sólidos de grama (LBMs grass_conversion e grass_conversion2)
 local SOLID_GRASS = {
-    ["nh_nodes:top_grass"]              = true,
-    ["nh_nodes:top_grass_ramp"]         = true,
-    ["nh_nodes:top_grass_corner"]       = true,
-    ["nh_nodes:top_grass_insidecorner"] = true,
-    ["nh_nodes:snow"]                   = true,
-    ["nh_nodes:snow_ramp"]              = true,
-    ["nh_nodes:snow_corner"]            = true,
-    ["nh_nodes:snow_insidecorner"]      = true,
+    [C.topgrass]          = true,
+    [C.top_grass_ramp]    = true,
+    [C.top_grass_corner]  = true,
+    [C.grassinsidecorner] = true,
+    [C.snow]              = true,
+    [C.snow_ramp]         = true,
+    [C.snow_corner]       = true,
+    [C.snow_insidecorner] = true,
 }
 -- Nodes sólidos de dirt + edges (LBM dirt_conversion)
 local SOLID_DIRT = {
-    ["nh_nodes:dirt"]              = true,
-    ["nh_nodes:sand"]              = true,
-    ["nh_nodes:dirt_ramp"]         = true,
-    ["nh_nodes:dirt_corner"]       = true,
-    ["nh_nodes:dirt_insidecorner"] = true,
+    [C.dirt]              = true,
+    [C.sand]              = true,
+    [C.dirt_ramp]         = true,
+    [C.dirt_corner]       = true,
+    [C.dirt_insidecorner] = true,
 }
-local EDGE_DIRT = {["nh_nodes:sand"] = true, ["air"] = true,}
+local EDGE_DIRT = {[C.sand] = true, [C.air] = true,}
 -- Nodes sólidos de neve + edges (LBM snow_conversion)
 local SOLID_SNOW = {
-    ["nh_nodes:snow"]                   = true,
-    ["nh_nodes:snow_ramp"]              = true,
-    ["nh_nodes:snow_corner"]            = true,
-    ["nh_nodes:snow_insidecorner"]      = true,
-    ["nh_nodes:top_grass"]              = true,
-    ["nh_nodes:top_grass_ramp"]         = true,
-    ["nh_nodes:top_grass_corner"]       = true,
-    ["nh_nodes:top_grass_insidecorner"] = true,
+    [C.snow]              = true,
+    [C.snow_ramp]         = true,
+    [C.snow_corner]       = true,
+    [C.snow_insidecorner] = true,
+    [C.topgrass]          = true,
+    [C.top_grass_ramp]    = true,
+    [C.top_grass_corner]  = true,
+    [C.grassinsidecorner] = true,
 }
-local EDGE_SNOW = {["air"] = true,}
+local EDGE_SNOW = {[C.air] = true,}
 -- Nodes sólidos de basalt + edges (LBM basalt_conversion)
 local SOLID_BASALT = {
-    ["nh_nodes:basalt"]              = true,
-    ["nh_nodes:basalt_ramp"]         = true,
-    ["nh_nodes:basalt_corner"]       = true,
-    ["nh_nodes:basalt_insidecorner"] = true,
+    [C.basalt]              = true,
+    [C.basaltramp]          = true,
+    [C.basaltcorner]        = true,
+    [C.basaltinsidecorner]  = true,
 }
-local EDGE_BASALT = {["nh_nodes:wet_sand"] = true, ["air"] = true,}
+local EDGE_BASALT = {[C.wetsand] = true, [C.air] = true,}
 -- Nodes sólidos de areia + edges (LBM sand_conversion)
 local SOLID_SAND = {
-    ["nh_nodes:wet_sand"]          = true,
-    ["nh_nodes:sand"]              = true,
-    ["nh_nodes:sand_ramp"]         = true,
-    ["nh_nodes:sand_corner"]       = true,
-    ["nh_nodes:sand_insidecorner"] = true,
+    [C.wetsand]           = true,
+    [C.sand]              = true,
+    [C.sand_ramp]         = true,
+    [C.sand_corner]       = true,
+    [C.sand_insidecorner] = true,
 }
-local EDGE_SAND = {["nh_nodes:wet_sand"] = true, ["air"] = true,}
+local EDGE_SAND = {[C.wetsand] = true, [C.air] = true,}
 -- Nodes decorativos que podem ser removidos de cima de rampas/quinas
 local DECORATIONS = {
-    ["nh_nodes:smallgrass"]        = true,
-    ["nh_nodes:highgrass"]         = true,
-    ["nh_nodes:rush"]              = true,
-    ["nh_nodes:dandelion"]         = true,
-    ["nh_nodes:grassleaves"]       = true,
-    ["nh_nodes:grassleavesmedium"] = true,
-    ["nh_nodes:micaceusfungus"]    = true,
-    ["nh_nodes:flyamanitafungus"]  = true,
-    ["nh_nodes:pebble"]            = true,
-    ["nh_nodes:white_pebble"]      = true,
-    ["nh_nodes:fallenstick"]       = true,
+    [C.smallgrass]        = true,
+    [C.highgrass]         = true,
+    [C.rush]              = true,
+    [C.dandelion]         = true,
+    [C.grassleaves]       = true,
+    [C.grassleavesmedium] = true,
+    [C.micaceusfungus]    = true,
+    [C.flyamanitafungus]  = true,
+    [C.pebble]            = true,
+    [C.whitepebble]       = true,
+    [C.fallenstick]       = true,
 }
--- Converte nomes em content IDs
-local DECORATION_CIDS = {}
-for name in pairs(DECORATIONS) do
-    DECORATION_CIDS[minetest.get_content_id(name)] = true
-end
-
+-- DECORATION_CIDS é agora um alias direto (ids já são content ids)
+local DECORATION_CIDS = DECORATIONS
+ 
 -- Nodes que são "passáveis" para o cálculo de quinas internas de grama
-local PASSABLE = {["air"] = true}
-for name in pairs(DECORATIONS) do PASSABLE[name] = true end
+local PASSABLE = {[C.air] = true}
+for cid in pairs(DECORATIONS) do PASSABLE[cid] = true end
 
 -- Função auxiliar global (sem local function dentro de loop)
 local slope_area, slope_data, slope_p2, slope_y
