@@ -380,7 +380,7 @@ local NOISE = {
     grassleaves = {
         offset = 0,
         scale = 10,
-        spread = {x = 20, y = 20, z = 20}, -- Spread maior = mais espaçadas (era 10)
+        spread = table_xyz(20,20,20), -- Spread maior = mais espaçadas (era 10)
         seed = 12312,
         octaves = 3,
         persist = 0.5,
@@ -388,7 +388,7 @@ local NOISE = {
     trees = {
         offset = 0,
         scale = 0.6,
-        spread = {x = 10, y = 10, z = 10}, -- Spread maior = mais espaçadas (era 10)
+        spread = table_xyz(10,10,10), -- Spread maior = mais espaçadas (era 10)
         seed = 54321,
         octaves = 3,
         persist = 0.5,
@@ -396,7 +396,7 @@ local NOISE = {
     bushes = {
         offset = 0,
         scale = 0.6,
-        spread = {x = 8, y = 8, z = 8},
+        spread = table_xyz(8,8,8),
         seed = 98765,
         octaves = 2,
         persist = 0.4,
@@ -404,7 +404,7 @@ local NOISE = {
     -- noise_palms = {
     --    offset = 0,
     --    scale = 0.6,
-    --    spread = {x = 15, y = 15, z = 15},
+    --    spread = table_xyz(15,15,15),
     --    seed = 33333,
     --    octaves = 2,
     --    persist = 0.4,
@@ -413,7 +413,7 @@ local NOISE = {
     ore_master = {
         offset = 0,
         scale = 1,
-        spread = {x = 30, y = 30, z = 30},
+        spread = table_xyz(30,30,30),
         seed = 9130,
         octaves = 3,
         persist = 0.6,
@@ -422,7 +422,7 @@ local NOISE = {
     coal = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 30, y = 30, z = 30},
+        spread = table_xyz(30,30,30),
         seed = 19283,
         octaves = 3,
         persist = 0.6,
@@ -430,7 +430,7 @@ local NOISE = {
     copper = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 35, y = 35, z = 35},
+        spread = table_xyz(35,35,35),
         seed = 28374,
         octaves = 3,
         persist = 0.6,
@@ -438,7 +438,7 @@ local NOISE = {
     tin = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 32, y = 32, z = 32},
+        spread = table_xyz(32,32,32),
         seed = 37465,
         octaves = 3,
         persist = 0.6,
