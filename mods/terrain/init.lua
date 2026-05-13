@@ -289,7 +289,7 @@ local NOISE = {
     continent = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 300, y = 300, z = 300}, -- MUITO grande
+        spread = table_xyz(300, 300, 300), -- MUITO grande
         seed = 24680,
         octaves = 2,
         persist = 0.5,
@@ -297,7 +297,7 @@ local NOISE = {
     mountain = {
         offset = 0,
         scale = 1,
-        spread = {x = 80, y = 80, z = 80},
+        spread = table_xyz(80,80,80),
         seed = 12345,
         octaves = 5,
         persist = 0.6,
@@ -305,7 +305,7 @@ local NOISE = {
     hills = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 150, y = 150, z = 150},
+        spread = table_xyz(150,150,150),
         seed = 67890,
         octaves = 3,
         persist = 0.5,
@@ -313,7 +313,7 @@ local NOISE = {
     plains = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 180, y = 180, z = 180},
+        spread = table_xyz(180,180,180),
         seed = 99999,
         octaves = 2,
         persist = 0.4,
@@ -321,7 +321,7 @@ local NOISE = {
     caves = {
         offset = 0,
         scale = 1,
-        spread = {x = 50, y = 20, z = 50},
+        spread = table_xyz(50,20,50),
         seed = 121212,
         octaves = 3,
         persist = 0.5,
@@ -330,7 +330,7 @@ local NOISE = {
     caves_lava = {
         offset = 0,
         scale = 1,
-        spread = {x = 40, y = 80, z = 40}, -- spread maior em Y = cavernas mais verticais
+        spread = table_xyz(40,80,40), -- spread maior em Y = cavernas mais verticais
         seed = 424242,                       -- seed diferente
         octaves = 3,
         persist = 0.5,
@@ -339,7 +339,7 @@ local NOISE = {
     caves_water = {
         offset = 0,
         scale = 1,
-        spread = {x = 60, y = 30, z = 60}, -- spread menor em Y = cavernas mais horizontais
+        spread = table_xyz(60,30,60), -- spread menor em Y = cavernas mais horizontais
         seed = 777888,                       -- outra seed DIFERENTE
         octaves = 3,
         persist = 0.5,
@@ -347,7 +347,7 @@ local NOISE = {
     cave_size = {
         offset = 0,
         scale = 1,
-        spread = {x = 50, y = 50, z = 50}, -- Varia o tamanho das cavernas por região
+        spread = table_xyz(50,50,50), -- Varia o tamanho das cavernas por região
         seed = 131313,
         octaves = 2,
         persist = 0.4,
@@ -355,7 +355,7 @@ local NOISE = {
     roughness = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 25, y = 25, z = 25},
+        spread = table_xyz(25,25,25),
         seed = 11111,
         octaves = 2,
         persist = 0.6,
@@ -363,7 +363,7 @@ local NOISE = {
     biome = {
         offset = 0,
         scale = 0.5,
-        spread = {x = 150, y = 150, z = 150},
+        spread = table_xyz(150,150,150),
         seed = 77777,
         octaves = 3,
         persist = 0.6,
@@ -371,7 +371,7 @@ local NOISE = {
     saprolite = {
         offset = 0,
         scale = 1,
-        spread = {x = 40, y = 40, z = 40},
+        spread = table_xyz(40,40,40),
         seed = 9876,
         octaves = 2,
         persist = 0.5,
