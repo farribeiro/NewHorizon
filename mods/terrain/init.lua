@@ -234,6 +234,7 @@ local statue_pos = nil
 local sentinel_pos = nil
 local lowest_island_pos = nil
 local ship_pos = nil
+local house_pos = nil
 -- NOISES (mantidos para compatibilidade com funções antigas)
 local function populate_Pall(names)
     local father = {}
@@ -2261,6 +2262,7 @@ local function try_spawn_house(area, data, minp, maxp)
                     if area:contains(x, y, z) and can_spawn_house(area, data, {x = x, y = y, z = z}) then
                         spawn_house(area, data, {x = x, y = y, z = z})
                         place_tent_chest(area, data, {x = x, y = y + 1, z = z})
+                        house_pos = {x = x + 6, y = y, z = z + 7}
                         house_generated = true -- ← corrigido (estava "house_generated")
                         return true
                     end
@@ -2509,7 +2511,7 @@ core.register_lbm({
     end,
 })
 
---[[
+
 -- FONTE GENÉRICA PARA LBMs DE RAMPA E QUINAS
 local function make_slope_lbm(cfg)
     local solid        = cfg.solid
@@ -2520,26 +2522,26 @@ local function make_slope_lbm(cfg)
     local do_clear     = cfg.clear ~= false
     local on_corner    = cfg.on_corner
     local on_ic        = cfg.on_insidecorner
-
-    local function get_node_name(p) return core.get_node(p).name end
-
+ 
+    local function get_cid(p) return gcid(core.get_node(p).name) end
+ 
     local function is_edge(p)
-        return edge[get_node_name(p)] == true
+        return edge[get_cid(p)] == true
     end
     local function is_solid(p)
-        return solid[get_node_name(p)] == true
+        return solid[get_cid(p)] == true
     end
     local function is_passthrough(p)
-        local name = get_node_name(p)
-        if not passable[name] then return false end
-        return solid[get_node_name({x = p.x, y = p.y - 1, z = p.z})] == true
+        local cid = get_cid(p)
+        if not passable[cid] then return false end
+        return solid[get_cid({x = p.x, y = p.y - 1, z = p.z})] == true
     end
-
+ 
     local function action(pos)
-        if req_air and get_node_name({x = pos.x, y = pos.y + 1, z = pos.z}) ~= "air" then return end
-
+        if req_air and core.get_node({x = pos.x, y = pos.y + 1, z = pos.z}).name ~= "air" then return end
+ 
         local x, y, z = pos.x, pos.y, pos.z
-
+ 
         local b = {
             north = is_edge({x = x,     y = y, z = z - 1}),
             south = is_edge({x = x,     y = y, z = z + 1}),
@@ -2552,15 +2554,15 @@ local function make_slope_lbm(cfg)
             east  = is_solid({x = x + 1, y = y, z = z    }),
             west  = is_solid({x = x - 1, y = y, z = z    }),
         }
-
+ 
         local drops = {}
         if b.north then drops[#drops+1] = "south" end
         if b.south then drops[#drops+1] = "north" end
         if b.east  then drops[#drops+1] = "west"  end
         if b.west  then drops[#drops+1] = "east"  end
-
+ 
         local any_below = b.north or b.south or b.east or b.west
-
+ 
         -- PRIORIDADE 1: INSIDE CORNER
         if not any_below then
             local ic_cases = {
@@ -2578,7 +2580,7 @@ local function make_slope_lbm(cfg)
                 end
             end
         end
-
+ 
         -- PRIORIDADE 2: CORNER EXTERNO  (só se nó atual for o trigger primário)
         if #drops == 2 then
             local a, b2 = drops[1], drops[2]
@@ -2599,7 +2601,7 @@ local function make_slope_lbm(cfg)
             end
             return
         end
-
+ 
         -- PRIORIDADE 3: RAMPA
         local ramp_map = {
             {b.north and not b.south, 0},
@@ -2615,7 +2617,7 @@ local function make_slope_lbm(cfg)
             end
         end
     end
-
+ 
     core.register_lbm({
         name             = cfg.lbm_name,
         nodenames        = cfg.nodenames,
@@ -2623,8 +2625,8 @@ local function make_slope_lbm(cfg)
         action           = action,
     })
 end
-
-
+ 
+ 
 -- DIRT
 make_slope_lbm({
     lbm_name  = "nh_terrain:dirt_conversion",
@@ -2638,7 +2640,7 @@ make_slope_lbm({
     },
     on_corner = function(pos) convert_below(pos, "nh_nodes:dirt", "nh_nodes:sand") end,
 })
-
+ 
 -- NEVE
 make_slope_lbm({
     lbm_name  = "nh_terrain:snow_conversion",
@@ -2652,7 +2654,7 @@ make_slope_lbm({
     },
     on_corner = function(pos) convert_below(pos, "nh_nodes:dirt", "nh_nodes:snow") end,
 })
-
+ 
 -- BASALTO
 make_slope_lbm({
     lbm_name  = "nh_terrain:basalt_conversion",
@@ -2666,7 +2668,7 @@ make_slope_lbm({
     },
     -- sem on_corner (convert estava comentado no original)
 })
-
+ 
 -- AREIA
 make_slope_lbm({
     lbm_name  = "nh_terrain:sand_conversion",
@@ -2680,7 +2682,7 @@ make_slope_lbm({
     },
     -- sem on_corner (convert_wetsand estava comentado no original)
 })
-]]--
+
 --core.register_abm({
 --    name = "nh_terrain:corner_dirt_conversion",
 --    nodenames = {"nh_nodes:top_grass_corner"},
@@ -3025,6 +3027,38 @@ core.register_chatcommand("local_sentinel", {
         end
 
         return true, S("Sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
+    end,
+})
+
+-- COMANDO PARA IR ATÉ A CASA
+core.register_chatcommand("house", {
+    description = S("Teleport to the house"),
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, S("Player not found")
+        end
+
+        if not house_pos then
+            return false, S("The house has not yet been generated. Explore the area near spawn first")
+        end
+
+        player:set_pos(house_pos)
+
+        return true,
+            S("Teleported to the house at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
+    end,
+})
+-- Comando para só ver as coordenadas sem teleportar
+core.register_chatcommand("local_house", {
+    description = S("Shows the coordinates of the house"),
+    func = function(name)
+        if not house_pos then
+            return false, S("The house has not yet been generated. Explore the area near spawn first")
+        end
+
+        return true, S("House at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
     end,
 })
 

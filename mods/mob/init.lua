@@ -277,10 +277,10 @@ mobs:register_mob("nh_mob:crab",
 -- Spawn da ratazana (grama, perto de árvores/arbustos e cavernas)
 register_mob_spawn({
     name = "nh_mob:crab",
-    nodes = {"air"},
-    neighbors = {"nh_nodes:sand", "nh_nodes:wet_sand"},
-    min_height = -1,
-    max_height = 10,
+    nodes = {"air", "nh_nodes:water"},
+    neighbors = {"nh_nodes:dirt", "nh_nodes:sand", "nh_nodes:wet_sand", "nh_nodes:basalt"},
+    min_height = -6,
+    max_height = 7,
     interval = 120,
     chance = 2000,
     active_object_count = 3

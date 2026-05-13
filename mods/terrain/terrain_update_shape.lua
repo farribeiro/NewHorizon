@@ -282,7 +282,7 @@ local function apply_one(cfg, area, data, param2_data, DECORATION_CIDS, x, y, z)
 
     -- Requer ar acima (nó superficial exposto)
     local above_id = get_id(area, data, x, y + 1, z)
-    if above_id ~= AIR_ID_CACHE then return false end
+    if above_id ~= AIR_ID_CACHE and not DECORATION_CIDS[above_id] then return false end
 
     -- ── Calcula vizinhos ─────────────────────────────────────────────────
     -- b[dir] = true → há "drop" / borda nessa direção → candidato a rampa
@@ -348,8 +348,16 @@ local function apply_one(cfg, area, data, param2_data, DECORATION_CIDS, x, y, z)
                 local ok = false
 
                 if cfg.use_passthrough_for_ic and cfg._pass then
-                    -- Grass/top_grass2: passthrough = passable + sólido-família abaixo
-                    if cfg._pass[diag_id] then
+                    -- Grass/top_grass2: passthrough = passable + sólido-família abaixo.
+                    -- Decorações na diagonal são tratadas igual ao ar: se o diag_id
+                    -- for uma decoration (não é sólido), considera o espaço aberto e
+                    -- verifica se o nó abaixo da diagonal é sólido da família.
+                    local effective_diag_id = diag_id
+                    if DECORATION_CIDS[diag_id] then
+                        -- decoration no mesmo nível → trata como ar
+                        effective_diag_id = AIR_ID_CACHE
+                    end
+                    if cfg._pass[effective_diag_id] then
                         local diag_below = get_id(area, data, dx, y - 1, dz)
                         ok = cfg._sol[diag_below] == true
                     end
