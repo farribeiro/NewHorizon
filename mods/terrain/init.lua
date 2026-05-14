@@ -2543,16 +2543,16 @@ local function make_slope_lbm(cfg)
         local x, y, z = pos.x, pos.y, pos.z
  
         local b = {
-            north = is_edge({x = x,     y = y, z = z - 1}),
-            south = is_edge({x = x,     y = y, z = z + 1}),
-            east  = is_edge({x = x + 1, y = y, z = z    }),
+            north = is_edge(table_xyz(x, y, z - 1)),
+            south = is_edge(table_xyz(x, y, z + 1)),
+            east  = is_edge(table_xyz(x + 1, y, z)),
             west  = is_edge({x = x - 1, y = y, z = z    }),
         }
         local s = {
-            north = is_solid({x = x,     y = y, z = z - 1}),
-            south = is_solid({x = x,     y = y, z = z + 1}),
-            east  = is_solid({x = x + 1, y = y, z = z    }),
-            west  = is_solid({x = x - 1, y = y, z = z    }),
+            north = is_solid(table_xyz(x, y, z - 1)),
+            south = is_solid(table_xyz(x, y, z + 1)),
+            east  = is_solid(table_xyz(x + 1, y, z)),
+            west  = is_solid(table_xyz(x - 1, y, z)),
         }
  
         local drops = {}
@@ -2566,10 +2566,10 @@ local function make_slope_lbm(cfg)
         -- PRIORIDADE 1: INSIDE CORNER
         if not any_below then
             local ic_cases = {
-                {s.south and s.west, {x=x-1,y=y,z=z+1}, 2},
-                {s.west  and s.north,{x=x-1,y=y,z=z-1}, 1},
-                {s.north and s.east, {x=x+1,y=y,z=z-1}, 0},
-                {s.east  and s.south,{x=x+1,y=y,z=z+1}, 3},
+                {s.south and s.west, table_xyz(x - 1, y, z + 1), 2},
+                {s.west  and s.north,table_xyz(x - 1, y, z - 1), 1},
+                {s.north and s.east, table_xyz(x + 1, y, z - 1), 0},
+                {s.east  and s.south,table_xyz(x + 1, y, z + 1), 3},
             }
             for _, ic in ipairs(ic_cases) do
                 if ic[1] and is_passthrough(ic[2]) then
