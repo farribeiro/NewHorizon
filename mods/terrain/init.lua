@@ -2830,6 +2830,38 @@ core.register_chatcommand("origin", {
     end,
 })
 
+-- COMANDO PARA IR ATÉ A CASA
+core.register_chatcommand("house", {
+    description = S("Teleport to the house"),
+    privs = {teleport = true},
+    func = function(name)
+        local player = core.get_player_by_name(name)
+        if not player then
+            return false, S("Player not found")
+        end
+
+        if not house_pos then
+            return false, S("The house has not yet been generated. Explore the area near spawn first")
+        end
+
+        player:set_pos(house_pos)
+
+        return true,
+            S("Teleported to the house at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
+    end,
+})
+-- Comando para só ver as coordenadas sem teleportar
+core.register_chatcommand("local_house", {
+    description = S("Shows the coordinates of the house"),
+    func = function(name)
+        if not house_pos then
+            return false, S("The house has not yet been generated. Explore the area near spawn first")
+        end
+
+        return true, S("House at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
+    end,
+})
+
 -- COMANDO PARA IR AO BARCO AFUNDADO
 core.register_chatcommand("ship", {
     description = S("Teleport to the sunken ship"),
@@ -2841,7 +2873,7 @@ core.register_chatcommand("ship", {
         end
 
         if not ship_pos then
-            return false, S("The sunken ship has not yet been generated. Explore the ocean near spawn first")
+            return false, S("The sunken ship has not yet been generated. Explore the lakes near spawn first")
         end
 
         player:set_pos(ship_pos)
@@ -3027,38 +3059,6 @@ core.register_chatcommand("local_sentinel", {
         end
 
         return true, S("Sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
-    end,
-})
-
--- COMANDO PARA IR ATÉ A CASA
-core.register_chatcommand("house", {
-    description = S("Teleport to the house"),
-    privs = {teleport = true},
-    func = function(name)
-        local player = core.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
-        if not house_pos then
-            return false, S("The house has not yet been generated. Explore the area near spawn first")
-        end
-
-        player:set_pos(house_pos)
-
-        return true,
-            S("Teleported to the house at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
-    end,
-})
--- Comando para só ver as coordenadas sem teleportar
-core.register_chatcommand("local_house", {
-    description = S("Shows the coordinates of the house"),
-    func = function(name)
-        if not house_pos then
-            return false, S("The house has not yet been generated. Explore the area near spawn first")
-        end
-
-        return true, S("House at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
     end,
 })
 

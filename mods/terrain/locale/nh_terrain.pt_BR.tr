@@ -4,6 +4,18 @@ Teleport to the origin=Teleporta para a origem
 Player not found=Jogador não encontrado
 Teleported to the origin at X: 0 Y: 50 Z: 0=Teleportado para a origem em X: 0 Y: 50 Z: 0
 
+Teleport to the house=Teleporta para a casa
+Shows the coordinates of the house=Mostra coordenadas para a casa
+The house has not yet been generated. Explore the area near spawn first=A casa ainda não foi gerada. Explore primeiro a área próxima ao ponto de partida
+Teleported to the house at X:=Teleportado para a casa em X:
+House at X:=Casa em X:
+
+Teleport to the sunken ship=Teleporta para o barco afundado
+Shows the coordinates of the sunken ship=Mostra coordenadas para o barco afundado
+The sunken ship has not yet been generated. Explore the lakes near spawn first=O barco afundado não foi gerado. Explore primeiro os lagos próximos ao ponto de partida
+Teleported to the sunken ship at X:=Teleportado para o barco afundado em X:
+Sunken ship at X:=Barco afundado em X:
+
 Shows the coordinates of the volcanic island=Mostra as coordenadas da ilha vulcânica
 Volcanic island at X:=Ilha vulcânica em X:
 
@@ -20,6 +32,12 @@ Giant crab statue at X:=Estátua do caranguejo gigante em X:
 
 Teleport to the air sea=Teleporta para o mar de ar
 Teleported to the air sea at X:=Teleportado para o mar de ar em X:
+
+Teleport to the fly island=Teleporta para a ilha voadora
+The flying island hasn't been generated yet. Explore the sky of the Air Sea first=A ilha voadora ainda não foi gerada. Explore primeiro o céu do Mar Aéreo
+Teleported to the fly island at X:=Teleportado para a ilha voadora em X:
+Shows the coordinates of the fly island=Mostra as coordenadas da ilha voadora
+Fly island at X:=Ilha voadora em X:
 
 Shows the coordinates of the sentinel statue=Mostra as coordenadas da estátua do sentinela
 The sentinel statue has not yet spawned. Explore the floating islands first=A estátua do sentinela ainda não foi gerada. Explore as ilhas flutuantes primeiro
