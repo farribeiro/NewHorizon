@@ -662,7 +662,7 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
     -- Cancela a geração se estiver muito perto de outra árvore
     if not can_place_tree(area, data, pos, 5) then return end
     -- VERIFICAÇÃO: Verifica se há grama abaixo do ponto de spawn ***
-    local below_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
+    local below_pos = xyz(pos.x, pos.y - 1, pos.z)
     if area:contains(below_pos.x, below_pos.y, below_pos.z) then
         local vi_below = area:index(below_pos.x, below_pos.y, below_pos.z)
         -- Cancela se não tiver grama embaixo
@@ -698,7 +698,7 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
     --  RAIZ SUBTERRÂNEA (1 camada abaixo do solo)
     for dx = 0, trunk_dx do
         for dz = 0, trunk_dz do
-            local root_pos = {x = pos.x + dx, y = pos.y - 1, z = pos.z + dz}
+            local root_pos = xyz(pos.x + dx, pos.y - 1, pos.z + dz)
             if area:contains(root_pos.x, root_pos.y, root_pos.z) then
                 local vi = area:index(root_pos.x, root_pos.y, root_pos.z)
                 -- Substitui qualquer node de terreno pelo tronco
@@ -710,7 +710,7 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
     for y = 0, height do
         for dx = 0, trunk_dx do
             for dz = 0, trunk_dz do
-                local check_pos = {x = pos.x + dx, y = pos.y + y, z = pos.z + dz}
+                local check_pos = xyz(pos.x + dx, pos.y + y, pos.z + dz)
                 if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                     local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
                     -- Só substitui ar ou folhas
@@ -778,11 +778,7 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             for dz = -crown_radius, crown_radius do
                 local dist = (dx * dx + dy * dy + dz * dz)
                 if dist <= (crown_radius + 0.5) * (crown_radius + 0.5) then
-                    local check_pos = {
-                        x = math.floor(copa_center_x + dx),
-                        y = top + dy,
-                        z = math.floor(copa_center_z + dz)
-                   }
+                    local check_pos = xyz(math.floor(copa_center_x + dx), top + dy, math.floor(copa_center_z + dz))
                     if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                         local vi       = area:index(check_pos.x, check_pos.y, check_pos.z)
                         local vi_above = area:index(check_pos.x, check_pos.y + 1, check_pos.z)
@@ -882,7 +878,7 @@ local function spawn_pine_tree(area, data, pos, wx, wz)
     local rng = PseudoRandom(seed)
     local height = rng:next(8, 12) -- Pinheiros mais altos
     --  RAIZ SUBTERRÂNEA (1 camada abaixo do solo)
-    local pine_root_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
+    local pine_root_pos = xyz(pos.x, pos.y - 1, pos.z)
     if area:contains(pine_root_pos.x, pine_root_pos.y, pine_root_pos.z) then
         local vi = area:index(pine_root_pos.x, pine_root_pos.y, pine_root_pos.z)
         -- Substitui qualquer node de terreno pelo tronco
@@ -916,7 +912,7 @@ local function spawn_pine_tree(area, data, pos, wx, wz)
                 -- Irregularidade leve
                 local noise = rng:next(0, 100) / 350
                 if dist <= (limit + noise) * (limit + noise) then
-                    local check_pos = {x = pos.x + dx, y = y, z = pos.z + dz}
+                    local check_pos = xyz( pos.x + dx, y, pos.z + dz)
                     if area:contains(check_pos.x, check_pos.y, check_pos.z) then
                         local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
                         if data[vi] == C.air then data[vi] = C.pineleaves end
@@ -931,7 +927,7 @@ local function spawn_apple_tree(area, data, pos, wx, wz)
     -- Verifica se há espaço (raio de 4 blocos)
     if not can_place_tree(area, data, pos, 4) then return end
     -- VERIFICAÇÃO: Verifica se há dirt abaixo do ponto de spawn ***
-    local below_pos = {x = pos.x, y = pos.y - 1, z = pos.z}
+    local below_pos = xyz(pos.x, pos.y - 1, pos.z)
     if area:contains(below_pos.x, below_pos.y, below_pos.z) then
         local vi_below = area:index(below_pos.x, below_pos.y, below_pos.z)
         -- Cancela se não tiver grama embaixo
