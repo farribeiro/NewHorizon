@@ -15,7 +15,7 @@ local SIZE = MAX_XZ - MIN_XZ + 1
 core.set_mapgen_setting("mg_name", "singlenode", true)
 local gcid        = core.get_content_id
 -- REGISTRO DOS IDS
-local C           = {
+local C = {
     ignore             = core.CONTENT_IGNORE,
     air                = core.CONTENT_AIR,
     grass              = gcid "nh_nodes:grass",
