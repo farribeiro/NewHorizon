@@ -1,6 +1,6 @@
 -- Terrain
 
-local function table_xyz(fx, fy, fz)
+local function xyz(fx, fy, fz) -- table_xyz
     return {x = fx, y = fy, z = fz}
 end
 
@@ -290,7 +290,7 @@ local NOISE = {
     continent = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(300, 300, 300), -- MUITO grande
+        spread = xyz(300, 300, 300), -- MUITO grande
         seed = 24680,
         octaves = 2,
         persist = 0.5,
@@ -298,7 +298,7 @@ local NOISE = {
     mountain = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(80,80,80),
+        spread = xyz(80,80,80),
         seed = 12345,
         octaves = 5,
         persist = 0.6,
@@ -306,7 +306,7 @@ local NOISE = {
     hills = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(150,150,150),
+        spread = xyz(150,150,150),
         seed = 67890,
         octaves = 3,
         persist = 0.5,
@@ -314,7 +314,7 @@ local NOISE = {
     plains = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(180,180,180),
+        spread = xyz(180,180,180),
         seed = 99999,
         octaves = 2,
         persist = 0.4,
@@ -322,7 +322,7 @@ local NOISE = {
     caves = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(50,20,50),
+        spread = xyz(50,20,50),
         seed = 121212,
         octaves = 3,
         persist = 0.5,
@@ -331,7 +331,7 @@ local NOISE = {
     caves_lava = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(40,80,40), -- spread maior em Y = cavernas mais verticais
+        spread = xyz(40,80,40), -- spread maior em Y = cavernas mais verticais
         seed = 424242,                       -- seed diferente
         octaves = 3,
         persist = 0.5,
@@ -340,7 +340,7 @@ local NOISE = {
     caves_water = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(60,30,60), -- spread menor em Y = cavernas mais horizontais
+        spread = xyz(60,30,60), -- spread menor em Y = cavernas mais horizontais
         seed = 777888,                       -- outra seed DIFERENTE
         octaves = 3,
         persist = 0.5,
@@ -348,7 +348,7 @@ local NOISE = {
     cave_size = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(50,50,50), -- Varia o tamanho das cavernas por região
+        spread = xyz(50,50,50), -- Varia o tamanho das cavernas por região
         seed = 131313,
         octaves = 2,
         persist = 0.4,
@@ -356,7 +356,7 @@ local NOISE = {
     roughness = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(25,25,25),
+        spread = xyz(25,25,25),
         seed = 11111,
         octaves = 2,
         persist = 0.6,
@@ -364,7 +364,7 @@ local NOISE = {
     biome = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(150,150,150),
+        spread = xyz(150,150,150),
         seed = 77777,
         octaves = 3,
         persist = 0.6,
@@ -372,7 +372,7 @@ local NOISE = {
     saprolite = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(40,40,40),
+        spread = xyz(40,40,40),
         seed = 9876,
         octaves = 2,
         persist = 0.5,
@@ -381,7 +381,7 @@ local NOISE = {
     grassleaves = {
         offset = 0,
         scale = 10,
-        spread = table_xyz(20,20,20), -- Spread maior = mais espaçadas (era 10)
+        spread = xyz(20,20,20), -- Spread maior = mais espaçadas (era 10)
         seed = 12312,
         octaves = 3,
         persist = 0.5,
@@ -389,7 +389,7 @@ local NOISE = {
     trees = {
         offset = 0,
         scale = 0.6,
-        spread = table_xyz(10,10,10), -- Spread maior = mais espaçadas (era 10)
+        spread = xyz(10,10,10), -- Spread maior = mais espaçadas (era 10)
         seed = 54321,
         octaves = 3,
         persist = 0.5,
@@ -397,7 +397,7 @@ local NOISE = {
     bushes = {
         offset = 0,
         scale = 0.6,
-        spread = table_xyz(8,8,8),
+        spread = xyz(8,8,8),
         seed = 98765,
         octaves = 2,
         persist = 0.4,
@@ -405,7 +405,7 @@ local NOISE = {
     -- noise_palms = {
     --    offset = 0,
     --    scale = 0.6,
-    --    spread = table_xyz(15,15,15),
+    --    spread = xyz(15,15,15),
     --    seed = 33333,
     --    octaves = 2,
     --    persist = 0.4,
@@ -414,7 +414,7 @@ local NOISE = {
     ore_master = {
         offset = 0,
         scale = 1,
-        spread = table_xyz(30,30,30),
+        spread = xyz(30,30,30),
         seed = 9130,
         octaves = 3,
         persist = 0.6,
@@ -423,7 +423,7 @@ local NOISE = {
     coal = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(30,30,30),
+        spread = xyz(30,30,30),
         seed = 19283,
         octaves = 3,
         persist = 0.6,
@@ -431,7 +431,7 @@ local NOISE = {
     copper = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(35,35,35),
+        spread = xyz(35,35,35),
         seed = 28374,
         octaves = 3,
         persist = 0.6,
@@ -439,7 +439,7 @@ local NOISE = {
     tin = {
         offset = 0,
         scale = 0.5,
-        spread = table_xyz(32,32,32),
+        spread = xyz(32,32,32),
         seed = 37465,
         octaves = 3,
         persist = 0.6,
@@ -525,7 +525,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
     local height = rng:next(6, 9)
     --  TRONCO
     for y = 0, height do
-        local check_pos = table_xyz(pos.x,pos.y + y,pos.z)
+        local check_pos = xyz(pos.x,pos.y + y,pos.z)
         if area:contains(check_pos.x, check_pos.y, check_pos.z) then
             local vi = area:index(check_pos.x, check_pos.y, check_pos.z)
             if data[vi] == C.air then
@@ -535,7 +535,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
         end
     end
     --  PALMLEAFSTALKS NO TOPO DO TRONCO
-    local stalk_pos = table_xyz(pos.x,pos.y + height + 1, pos.z)
+    local stalk_pos = xyz(pos.x,pos.y + height + 1, pos.z)
     if area:contains(stalk_pos.x, stalk_pos.y, stalk_pos.z) then
         local vi = area:index(stalk_pos.x, stalk_pos.y, stalk_pos.z)
         if data[vi] == C.air then data[vi] = C.palmleafstalks end
@@ -2543,16 +2543,16 @@ local function make_slope_lbm(cfg)
         local x, y, z = pos.x, pos.y, pos.z
  
         local b = {
-            north = is_edge(table_xyz(x, y, z - 1)),
-            south = is_edge(table_xyz(x, y, z + 1)),
-            east  = is_edge(table_xyz(x + 1, y, z)),
+            north = is_edge(xyz(x, y, z - 1)),
+            south = is_edge(xyz(x, y, z + 1)),
+            east  = is_edge(xyz(x + 1, y, z)),
             west  = is_edge({x = x - 1, y = y, z = z    }),
         }
         local s = {
-            north = is_solid(table_xyz(x, y, z - 1)),
-            south = is_solid(table_xyz(x, y, z + 1)),
-            east  = is_solid(table_xyz(x + 1, y, z)),
-            west  = is_solid(table_xyz(x - 1, y, z)),
+            north = is_solid(xyz(x, y, z - 1)),
+            south = is_solid(xyz(x, y, z + 1)),
+            east  = is_solid(xyz(x + 1, y, z)),
+            west  = is_solid(xyz(x - 1, y, z)),
         }
  
         local drops = {}
@@ -2566,10 +2566,10 @@ local function make_slope_lbm(cfg)
         -- PRIORIDADE 1: INSIDE CORNER
         if not any_below then
             local ic_cases = {
-                {s.south and s.west, table_xyz(x - 1, y, z + 1), 2},
-                {s.west  and s.north,table_xyz(x - 1, y, z - 1), 1},
-                {s.north and s.east, table_xyz(x + 1, y, z - 1), 0},
-                {s.east  and s.south,table_xyz(x + 1, y, z + 1), 3},
+                {s.south and s.west, xyz(x - 1, y, z + 1), 2},
+                {s.west  and s.north,xyz(x - 1, y, z - 1), 1},
+                {s.north and s.east, xyz(x + 1, y, z - 1), 0},
+                {s.east  and s.south,xyz(x + 1, y, z + 1), 3},
             }
             for _, ic in ipairs(ic_cases) do
                 if ic[1] and is_passthrough(ic[2]) then
