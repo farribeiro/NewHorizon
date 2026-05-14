@@ -959,6 +959,11 @@ core.register_globalstep(function(dtime)
         local has_item = item_name ~= "" and item_name ~= ":"
         local name = player:get_player_name()
         local ctrl = player:get_player_control()
+        local pos = player:get_pos()
+	-- Ajuste leve no Y para verificar o nó na altura do corpo/pés
+	local node_at_pos = core.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z})
+	local node_def = core.registered_nodes[node_at_pos.name]
+	local is_climbable = node_def and node_def.climbable
         if last_sneak[player_name] ~= ctrl.sneak then last_sneak[player_name] = ctrl.sneak end
         -- BOTÃO ESQUERDO (bater)
         if ctrl.LMB then
@@ -1125,8 +1130,7 @@ core.register_globalstep(function(dtime)
             local sneak_press = sneak_now and not sneak_was
 
             -- Qualquer tecla de movimento cancela o estado de sentar
-            local movement_key = ctrl.up or ctrl.down or ctrl.left or ctrl.right
-                               or ctrl.jump
+            local movement_key = ctrl.up or ctrl.down or ctrl.left or ctrl.right or ctrl.jump
                                
                     local eye_first, eye_third = player:get_eye_offset()
                     local first_str = core.serialize(eye_first)
@@ -1298,9 +1302,31 @@ core.register_globalstep(function(dtime)
             -- END OF SITTING SYSTEM — normal animation logic below
             -- ══════════════════════════════════════════════════════════════
             
-            if ctrl.jump and vel.y >= 0 then
-                set_player_animation(player, "jump")
-            else
+local vel = player:get_velocity()
+local is_moving_vertically = math.abs(vel.y) > 0.1
+-- Lê o estado de climb do mod moves (tabela global separada, não mexe em player_states deste mod)
+local is_wall_climbing = moves_player_states and moves_player_states[name] == "climb"
+
+if is_wall_climbing then
+    -- Animação de wall climb enquanto o jogador estiver subindo na parede
+    set_player_animation(player, "climb")
+    -- Reseta quando soltar o pulo
+    if not ctrl.jump then
+        moves_player_states[name] = nil
+    end
+elseif is_climbable and (ctrl.up or ctrl.down or ctrl.jump or ctrl.sneak) then
+    set_player_animation(player, "climb")
+    
+    -- Opcional: Forçar movimento vertical se o motor não estiver fazendo sozinho
+    -- Isso garante que a animação de climb rode enquanto ele sobe/desce
+    if ctrl.jump then
+        player:set_velocity({x=vel.x, y=3, z=vel.z}) -- Velocidade de subida
+    elseif ctrl.sneak and is_climbable then
+        player:set_velocity({x=vel.x, y=-3, z=vel.z}) -- Velocidade de descida
+    end
+elseif ctrl.jump and vel.y >= 0.1 and not is_climbable then
+    set_player_animation(player, "jump")
+else
                 local props = player:get_properties()
                 local is_crawling = props.eye_height <= 0.7
                 local horizontal = {x = vel.x, y = 0, z = vel.z}

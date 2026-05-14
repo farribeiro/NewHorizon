@@ -325,7 +325,7 @@ If you're reading this, it's because you've lost your memory or perhaps you've n
 Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore.=Ande (direcionais / WASD), pule (segure ↑ / espaço) e agache (segure ↓ / shift) para explorar.
 Anywhere you can also:=Em qualquer lugar você também consegue:
 Wall jump (Quick jump x2 in front of small walls, to climb them)=Salto na parede (Salto rápido x2 em frente a paredes baixas para as subir)
-Climbing surfaces (jump in front of walls or tree trunks) [If you can't reach a foothold but maintain contact with the surface, you will slowly slide down it]=Escalada em superfícies (pule em frente a paredes ou troncos de árvores) [Se você não conseguir alcançar um ponto de apoio, mas mantiver contato com a superfície, você cairá mais lentamente ao deslizar]
+Vertical climbing (hold jump in front of walls or tree trunks at least 4 blocks high) [If you can't reach a foothold but keep holding jump in contact with the vertical surface, you will fall more slowly sliding down it]=Escalada vertical (segure o pulo em frente a paredes ou troncos de árvores a partir de 4 blocos de altura) [Se você não conseguir alcançar um ponto de apoio, mas mantiver segurando jump em contato com a superfície vertical, você cairá mais lentamente deslizando por ela]
 Crawl (press sneak + hold sneak)=Rastejar (aperte agachar + segure agachar)
 Sit (hold sneak + 2x Aux1 / E)=Sentar (segure agachar + 2x Aux1 / E)
 Lie down (sitting press: 2x Aux1 / E) [Return to sitting: 2x Aux1 / E]=Deitar (sentado aperte: 2x Aux1 / E) [Volte a sentar: 2x Aux1 / E]

@@ -17,10 +17,12 @@ local was_jump = {}
 local air_jumps = {}
 
 -- WALL CLIMB
-local CLIMB_SPEED    = 9
-local HORIZ_FRICTION = 0.15
+local CLIMB_SPEED    = 20      -- velocidade de subida (aumentada)
+local HORIZ_FRICTION = 0.1
 local FRONT_DIST     = 0.6
 local HEIGHT_OFFS    = {0.5, 1.1, 1.8}
+local is_climbing    = {}      -- true enquanto o climb estiver ativo
+moves_player_states  = {}
 
 -- Janela de tempo após um wall jump em que o climb fica bloqueado
 local CLIMB_BLOCK_AFTER_WALLJUMP = 0.4
@@ -123,7 +125,7 @@ core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
         local name = player:get_player_name()
         local ctrl  = player:get_player_control()
-        
+
         local pos = player:get_pos()
         local below = {
             x = pos.x,
@@ -131,7 +133,10 @@ core.register_globalstep(function(dtime)
             z = pos.z
         }
         local touching_ground = is_walkable(below)
-        if touching_ground then air_jumps[name] = 0 end
+        if touching_ground then
+            air_jumps[name] = 0
+            is_climbing[name] = false   -- toca o chão → cancela climb
+        end
         if air_jumps[name] == nil then air_jumps[name] = 0 end
 
         if not walljump_cooldown[name] then walljump_cooldown[name] = 0 end
@@ -153,20 +158,25 @@ core.register_globalstep(function(dtime)
         end
 
         -- Parede de ≥2 blocos contínuos (para wall jump)
-        local walljump_wall  = base_wall_found and wall_at(check_x, pos.y, check_z, 2)
+        local walljump_wall = base_wall_found and wall_at(check_x, pos.y, check_z, 2)
 
-        -- Parede de ≥4 blocos contínuos (para wall climb)
-        local climbable_wall = base_wall_found and wall_at(check_x, pos.y, check_z, 4)
+        -- Checagem de início de climb: ≥4 blocos — só usada para INICIAR, não manter
+        local climb_start_wall = base_wall_found and wall_at(check_x, pos.y, check_z, 4)
 
         local jump_just_pressed = ctrl.jump and not was_jump[name]
         if jump_just_pressed and touching_ground then air_jumps[name] = 1 end
-        local walljump_ready    = (now - walljump_cooldown[name]) >= walljump_delay
-        local climb_blocked     = (now - last_walljump[name]) < CLIMB_BLOCK_AFTER_WALLJUMP
+        local walljump_ready = (now - walljump_cooldown[name]) >= walljump_delay
+        local climb_blocked  = (now - last_walljump[name]) < CLIMB_BLOCK_AFTER_WALLJUMP
+
+        -- Cancela climb se soltar o pulo ou sumir a parede completamente
+        if is_climbing[name] and (not ctrl.jump or not base_wall_found) then
+            is_climbing[name] = false
+        end
 
         -- PRIORIDADE 1 — WALL JUMP
-        -- Borda de aperto de espaço + parede ≥2 + cooldown ok
         if jump_just_pressed and walljump_wall and walljump_ready and air_jumps[name] >= 1 and air_jumps[name] < 2 then
 
+            is_climbing[name] = false
             player:set_physics_override({ gravity = 1.0, jump = 1.0 })
             player:add_velocity({
                 x = -dir.x * 6,
@@ -177,29 +187,33 @@ core.register_globalstep(function(dtime)
             walljump_cooldown[name] = now
             last_walljump[name]     = now
 
-
         -- PRIORIDADE 2 — WALL CLIMB
-        -- Espaço MANTIDO (não borda) + parede ≥4 + não acabou de wall-jumpar
-        -- "not jump_just_pressed" garante que não ativa no mesmo frame do wall jump
-        elseif ctrl.jump and not jump_just_pressed and climbable_wall and not climb_blocked then
+        -- Inicia climb: precisa de ≥4 blocos + não acabou de wall-jumpar
+        -- Mantém climb: já estava escalando, só precisa de parede presente e pulo segurado
+        elseif ctrl.jump and not jump_just_pressed and not climb_blocked and
+               (is_climbing[name] or climb_start_wall) then
 
+            is_climbing[name] = true
             local vel = player:get_velocity() or {x = 0, y = 0, z = 0}
             player:set_velocity({
                 x = vel.x * HORIZ_FRICTION,
                 y = CLIMB_SPEED,
                 z = vel.z * HORIZ_FRICTION,
             })
+            moves_player_states[name] = "climb"
             player:set_physics_override({
-                gravity = 0.25,
+                gravity = 0,
                 jump    = 0,
             })
 
         -- PADRÃO — física normal
         else
-            player:set_physics_override({
-                gravity = 1.0,
-                jump    = 1.0,
-            })
+            if not is_climbing[name] then
+                player:set_physics_override({
+                    gravity = 1.0,
+                    jump    = 1.0,
+                })
+            end
         end
 
         was_jump[name] = ctrl.jump

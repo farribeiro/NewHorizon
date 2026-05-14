@@ -13386,7 +13386,7 @@ core.register_on_newplayer(function(player)
         S("Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore.") .. "\n" ..
         S("Anywhere you can also:") .. "\n" ..   
         "- " .. S("Wall jump (Quick jump x2 in front of small walls, to climb them)") .. "\n\n" ..  
-        "- " .. S("Climbing surfaces (jump in front of walls or tree trunks) [If you can't reach a foothold but maintain contact with the surface, you will slowly slide down it]") .. "\n\n" ..  
+        "- " .. S("Vertical climbing (hold jump in front of walls or tree trunks at least 4 blocks high) [If you can't reach a foothold but keep holding jump in contact with the vertical surface, you will fall more slowly sliding down it]") .. "\n\n" ..  
         "- " .. S("Crawl (press sneak + hold sneak)") .. "\n" ..  
         "- " .. S("Sit (hold sneak + 2x Aux1 / E)") .. "\n" ..  
         "- " .. S("Lie down (sitting press: 2x Aux1 / E) [Return to sitting: 2x Aux1 / E]") .. "\n\n" ..  
