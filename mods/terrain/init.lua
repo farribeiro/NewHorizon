@@ -2518,9 +2518,9 @@ local function make_slope_lbm(cfg)
     local do_clear     = cfg.clear ~= false
     local on_corner    = cfg.on_corner
     local on_ic        = cfg.on_insidecorner
- 
+
     local function get_cid(p) return gcid(core.get_node(p).name) end
- 
+
     local function is_edge(p)
         return edge[get_cid(p)] == true
     end
@@ -2532,12 +2532,12 @@ local function make_slope_lbm(cfg)
         if not passable[cid] then return false end
         return solid[get_cid({x = p.x, y = p.y - 1, z = p.z})] == true
     end
- 
+
     local function action(pos)
         if req_air and core.get_node({x = pos.x, y = pos.y + 1, z = pos.z}).name ~= "air" then return end
- 
+
         local x, y, z = pos.x, pos.y, pos.z
- 
+
         local b = {
             north = is_edge(xyz(x, y, z - 1)),
             south = is_edge(xyz(x, y, z + 1)),
@@ -2550,15 +2550,15 @@ local function make_slope_lbm(cfg)
             east  = is_solid(xyz(x + 1, y, z)),
             west  = is_solid(xyz(x - 1, y, z)),
         }
- 
+
         local drops = {}
         if b.north then drops[#drops+1] = "south" end
         if b.south then drops[#drops+1] = "north" end
         if b.east  then drops[#drops+1] = "west"  end
         if b.west  then drops[#drops+1] = "east"  end
- 
+
         local any_below = b.north or b.south or b.east or b.west
- 
+
         -- PRIORIDADE 1: INSIDE CORNER
         if not any_below then
             local ic_cases = {
@@ -2576,7 +2576,7 @@ local function make_slope_lbm(cfg)
                 end
             end
         end
- 
+
         -- PRIORIDADE 2: CORNER EXTERNO  (só se nó atual for o trigger primário)
         if #drops == 2 then
             local a, b2 = drops[1], drops[2]
@@ -2597,7 +2597,7 @@ local function make_slope_lbm(cfg)
             end
             return
         end
- 
+
         -- PRIORIDADE 3: RAMPA
         local ramp_map = {
             {b.north and not b.south, 0},
@@ -2613,7 +2613,7 @@ local function make_slope_lbm(cfg)
             end
         end
     end
- 
+
     core.register_lbm({
         name             = cfg.lbm_name,
         nodenames        = cfg.nodenames,
@@ -2621,8 +2621,8 @@ local function make_slope_lbm(cfg)
         action           = action,
     })
 end
- 
- 
+
+
 -- DIRT
 make_slope_lbm({
     lbm_name  = "nh_terrain:dirt_conversion",
@@ -2636,7 +2636,7 @@ make_slope_lbm({
     },
     on_corner = function(pos) convert_below(pos, "nh_nodes:dirt", "nh_nodes:sand") end,
 })
- 
+
 -- NEVE
 make_slope_lbm({
     lbm_name  = "nh_terrain:snow_conversion",
@@ -2650,7 +2650,7 @@ make_slope_lbm({
     },
     on_corner = function(pos) convert_below(pos, "nh_nodes:dirt", "nh_nodes:snow") end,
 })
- 
+
 -- BASALTO
 make_slope_lbm({
     lbm_name  = "nh_terrain:basalt_conversion",
@@ -2664,7 +2664,7 @@ make_slope_lbm({
     },
     -- sem on_corner (convert estava comentado no original)
 })
- 
+
 -- AREIA
 make_slope_lbm({
     lbm_name  = "nh_terrain:sand_conversion",
