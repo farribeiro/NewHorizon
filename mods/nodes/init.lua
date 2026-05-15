@@ -7383,7 +7383,7 @@ core.register_node("nh_nodes:snow_flowing", {
     walkable = false,
     pointable = false,
     buildable_to = true,
-    liquidtype = "none",  -- ❗ Para NÃO deixar fluir automaticamente
+    liquidtype = "flowing",
     groups = {not_in_creative_inventory=1},
 })
 
@@ -7532,6 +7532,67 @@ core.register_node("nh_nodes:ice2", {
     --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
     --connects_to = {"nh_nodes:ice"},
 
+
+    pointabilities = {
+        nodes = {
+            ["nh_nodes:water"]         = true,
+            ["nh_nodes:water_flowing"] = true,
+            ["nh_nodes:water2"]        = true,
+            ["nh_nodes:water2_flowing"] = true,
+        }
+    },
+
+    -- Quando o nó é colocado, verifica se está na água
+  after_place_node = function(pos, placer, itemstack, pointed_thing)
+    if placer and placer:is_player() then
+        local ctrl = placer:get_player_control()
+        if ctrl.sneak then
+            return
+        end
+    end
+    -- Sem agachar: vira entidade normalmente
+    if is_water_near(pos) then
+        core.remove_node(pos)
+        core.add_entity(pos, "nh_mob:iceberg")
+    end
+end,  
+    
+-- Cobre o caso de água chegar até o nó depois que ele já está parado
+on_flood = function(pos, oldnode, newnode)
+    core.remove_node(pos)
+    core.add_entity(pos, "nh_mob:iceberg")
+    return false
+end,
+})
+
+core.register_node("nh_nodes:ice2ramp", {
+    description = S("Ice"),
+    drawtype = "mesh",
+    mesh = "grass_slope.obj",
+    tiles = {"ice2ramp.png"}, 
+    groups = {cracky = 3, slippery = 3},
+    walkable = true,
+    --is_ground_content = true,
+    use_texture_alpha = "blend", --blend
+    --alpha = 200,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,   -- deixa a luz passar, como gelo real         -- não flui
+    --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+    --connects_to = {"nh_nodes:ice2"},
+
+    selection_box = {type = "fixed",
+        fixed = {
+            {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
+            {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
+        },
+    },
+    collision_box = {type = "fixed",
+        fixed = {
+            {-0.5, -0.5, -0.5, 0.5,  0.0, 0.5},
+            {-0.5,  0.0,  0.0, 0.5,  0.5, 0.5},
+        },
+    },
 
     pointabilities = {
         nodes = {
@@ -7777,7 +7838,58 @@ core.register_node("nh_nodes:magma", {
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
-   
+
+-- ABM: Lava + água fluindo = basalto
+minetest.register_abm({
+    label = "Lava solidifica em basalto ou obsidiana",
+    nodenames = {"nh_nodes:lava", "nh_nodes:lava_flowing", "nh_nodes:bluelava", "nh_nodes:bluelava_flowing"},
+    neighbors = {"nh_nodes:water", "nh_nodes:water2", "nh_nodes:water_flowing", "nh_nodes:water2_flowing"},
+    interval = 1,
+    chance = 1,
+    action = function(pos, node)
+        local directions = {
+            {x=0, y=1, z=0},
+            {x=0, y=-1, z=0},
+            {x=1, y=0, z=0},
+            {x=-1, y=0, z=0},
+            {x=0, y=0, z=1},
+            {x=0, y=0, z=-1},
+        }
+
+        local is_source = (node.name == "nh_nodes:lava" or node.name == "nh_nodes:bluelava")
+        local is_flowing = (node.name == "nh_nodes:lava_flowing" or node.name == "nh_nodes:bluelava_flowing")
+
+        for _, dir in ipairs(directions) do
+            local neighbor_pos = vector.add(pos, dir)
+            local neighbor = minetest.get_node(neighbor_pos)
+            local is_water_source = (neighbor.name == "nh_nodes:water" or neighbor.name == "nh_nodes:water2")
+            local is_water_flowing = (neighbor.name == "nh_nodes:water_flowing" or neighbor.name == "nh_nodes:water2_flowing")
+
+            if is_source and is_water_source then
+                -- Lava/bluelava source + água source = obsidiana, água some
+                minetest.set_node(pos, {name = "nh_nodes:obsidian"})
+                minetest.set_node(neighbor_pos, {name = "air"})
+                return
+            elseif is_source and is_water_flowing then
+                -- Lava/bluelava source + água flowing = obsidiana, água some
+                minetest.set_node(pos, {name = "nh_nodes:obsidian"})
+                minetest.set_node(neighbor_pos, {name = "air"})
+                return
+            elseif is_flowing and is_water_source then
+                -- Lava/bluelava flowing + qualquer água = gneiss, água some
+                minetest.set_node(pos, {name = "nh_nodes:basalt"})
+                minetest.set_node(neighbor_pos, {name = "air"})
+                return
+            elseif is_flowing and is_water_flowing then
+                -- Lava/bluelava flowing + qualquer água = gneiss, água some
+                minetest.set_node(pos, {name = "nh_nodes:gneiss"})
+                minetest.set_node(neighbor_pos, {name = "air"})
+                return
+            end
+        end
+    end,
+})
+
 core.register_node("nh_nodes:lava", {
     description = S("Lava"),
     drawtype = "liquid",
@@ -11771,6 +11883,78 @@ core.register_node("nh_nodes:white_pebble", {
             ::continue::
         end
     end,
+})
+
+core.register_node("nh_nodes:granade", {
+    description = S("Granade"),
+    drawtype = "mesh",
+    mesh = "granade.obj",
+    tiles = {"fusegranade.png"},
+    
+    walkable = false,
+    paramtype = "light",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
+    
+    collision_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+})
+
+core.register_entity("nh_nodes:granade_entity", {
+    description = S("Granade") .. "\n" .. S("[Throwable]"),
+    drawtype = "mesh",
+    mesh = "granade.obj",
+    tiles = {"fusegranade.png"},
+    
+    walkable = false,
+    paramtype = "light",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
+    
+    collision_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+})
+
+core.register_node("nh_nodes:litgranade", {
+    description = S("Lit Granade"),
+    drawtype = "mesh",
+    mesh = "granade.obj",
+    tiles = {"litgranade.png"},
+    
+    walkable = false,
+    paramtype = "light",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
+    
+    collision_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+})
+
+core.register_entity("nh_nodes:litgranade_entity", {
+    description = S("Lit Granade") .. "\n" .. S("[Throwable]"),
+    drawtype = "mesh",
+    mesh = "granade.obj",
+    tiles = {"litgranade.png"},
+    
+    walkable = false,
+    paramtype = "light",
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
+    
+    collision_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
+    selection_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    },
 })
 
 ---------------------------
