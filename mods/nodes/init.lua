@@ -1353,31 +1353,24 @@ core.register_node("nh_nodes:dirt_corner", {
 })
 
 core.register_node("nh_nodes:dirt_insidecorner", {
-    description = S("Dirt Inside Corner"),
+    description         = S("Dirt Inside Corner"),
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
-    paramtype   = "light",
-    paramtype2  = "facedir",
-    drawtype    = "mesh",
-    mesh        = "grassinsidecorner.obj",
-    tiles       = { "dirt_slope.png" },
+    paramtype           = "light",
+    paramtype2          = "facedir",
+    drawtype            = "mesh",
+    mesh                = "grassinsidecorner.obj",
+    tiles               = { "dirt_slope.png" },
 
-    groups      = { cracky = 3, soil = 1, not_blocking_trains = 1 },
-    drop        = "nh_nodes:dirt",
+    groups              = { cracky = 3, soil = 1, not_blocking_trains = 1 },
+    drop                = "nh_nodes:dirt",
 
-    sounds      = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds              = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
 
     -- E adicione essa propriedade:
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
-    collision_box = {
+    collision_box       = {
         type = "fixed",
         fixed = {
             { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
@@ -1386,15 +1379,7 @@ core.register_node("nh_nodes:dirt_insidecorner", {
             { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo braço 2: faixa lateral (X-)
         },
     },
-    selection_box = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },
-        },
-    },
+    selection_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, { -0.5, 0.0, -0.5, 0.0, 0.5, 0.0 }, { 0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, }, },
 })
 
 
@@ -1402,14 +1387,7 @@ register_craft_station("nh_nodes:dirt", {
     description = S("Dirt"),
     tiles = { "terra.png" },
     groups = { crumbly = 2 },
-
-    sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
 
@@ -1422,55 +1400,44 @@ register_craft_station("nh_nodes:dirt", {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
-
-
     on_construct = function(pos)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
         local light = core.get_node_light(above)
-
         --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
         -- core.chat_send_all("   Bloco acima: " .. node_above)
-
         if light and light > 4 then
             core.get_node_timer(pos):start(math.random(30, 60))
-            -- core.chat_send_all("   ✅ Timer iniciado!")
+            --[[
+            core.chat_send_all("   ✅ Timer iniciado!")
         else
-            --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
+            -- core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
+            ]] --
         end
     end,
-
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
         local light = core.get_node_light(above)
-
         -- Bloco líquido ou lava acima impede virar grama
         local blocked_nodes = {
-            ["nh_nodes:water"]            = true,
-            ["nh_nodes:water_flowing"]    = true,
-            ["nh_nodes:water2"]           = true,
-            ["nh_nodes:water2_flowing"]   = true,
-            ["nh_nodes:lava"]             = true,
-            ["nh_nodes:lava_flowing"]     = true,
-            ["nh_nodes:bluelava"]         = true,
+            ["nh_nodes:water"] = true,
+            ["nh_nodes:water_flowing"] = true,
+            ["nh_nodes:water2"] = true,
+            ["nh_nodes:water2_flowing"] = true,
+            ["nh_nodes:lava"] = true,
+            ["nh_nodes:lava_flowing"] = true,
+            ["nh_nodes:bluelava"] = true,
             ["nh_nodes:bluelava_flowing"] = true,
         }
-
-        if blocked_nodes[node_above] then
-            return false -- Para o timer; terra fica como terra
-        end
-
-        if light and light <= 4 then
-            return false
-        end
-
+        -- Para o timer; terra fica como terra
+        if blocked_nodes[node_above] then return false end
+        if light and light <= 4 then return false end
         if light and light > 4 then
             local neighbors = {
                 -- (todo o seu código de vizinhos permanece igual)
                 { x = pos.x + 1, y = pos.y, z = pos.z },
             }
-
             local has_grass_neighbor = false
             for _, npos in ipairs(neighbors) do
                 local neighbor_name = core.get_node(npos).name
@@ -1479,75 +1446,45 @@ register_craft_station("nh_nodes:dirt", {
                     break
                 end
             end
-
             if has_grass_neighbor then
                 core.set_node(pos, { name = "nh_nodes:top_grass" })
                 return false
             end
         end
-
         return true
     end,
-
-
     title = S("2x2 Craft on the Dirt"), -- Campo obrigatório!
-
-
-
     grid_size = 4,
-
-    positions = {
-        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },
-    },
-
+    positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-
     output_position = { x = 0, y = 1.4, z = 0 },
-
-    layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
-    },
-
+    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
-
 core.register_node("nh_nodes:wetdirt", {
     description = S("Wet Dirt"),
     tiles = { "wetdirt.png" },
     groups = { crumbly = 2 },
-
-    sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
-
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     on_construct = function(pos)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
         local light = core.get_node_light(above)
-
         --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
         -- core.chat_send_all("   Bloco acima: " .. node_above)
-
         if light and light > 4 then
             core.get_node_timer(pos):start(math.random(30, 60))
             -- core.chat_send_all("   ✅ Timer iniciado!")
@@ -1555,24 +1492,18 @@ core.register_node("nh_nodes:wetdirt", {
             --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
         end
     end,
-
     on_timer = function(pos, elapsed)
         --core.chat_send_all("⏰ TIMER disparou em " .. core.pos_to_string(pos))
-
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
         local light = core.get_node_light(above)
-
         --core.chat_send_all("   Bloco acima: " .. node_above)
-
         if light and light <= 4 then
             --core.chat_send_all("   ❌ Tem bloco em cima escurecendo, parando timer")
             return false
         end
-
         --local light = core.get_node_light(pos)
         --core.chat_send_all("   Luz: " .. tostring(light))
-
         if light and light > 4 then
             local neighbors = {
                 -- Laterais
@@ -1606,10 +1537,8 @@ core.register_node("nh_nodes:wetdirt", {
                 { x = pos.x - 1, y = pos.y + 1, z = pos.z + 1 },
                 { x = pos.x - 1, y = pos.y + 1, z = pos.z - 1 },
             }
-
             local has_grass_neighbor = false
             local grass_found = ""
-
             for _, npos in ipairs(neighbors) do
                 local neighbor_name = core.get_node(npos).name
                 if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
@@ -1618,12 +1547,12 @@ core.register_node("nh_nodes:wetdirt", {
                     break
                 end
             end
-
-            --core.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
+            --[[
+            core.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
             if has_grass_neighbor then
-                --core.chat_send_all("   🌱 " .. grass_found)
+                core.chat_send_all("   🌱 " .. grass_found)
             end
-
+            ]] --
             if has_grass_neighbor then
                 core.set_node(pos, { name = "nh_nodes:top_grass" })
                 --core.chat_send_all("   🟩 CONVERTEU PARA GRAMA!")
@@ -1643,35 +1572,15 @@ core.register_node("nh_nodes:tilleddirt", {
     description = S("Tilled Dirt"),
     tiles = { "tilleddirt.png", "terra.png" },
     groups = { crumbly = 2 },
-
     drop = "nh_nodes:dirt",
-
-    sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
-    wielded_bone_position = {
-        pos = { x = 0.5, y = 0.5, z = 1.65 }
-    },
-
-    offhand_bone_position = {
-        pos = { x = 1.5, y = 0, z = 0 }
-    },
-
-    on_construct = function(pos)
-        core.get_node_timer(pos):start(math.random(30, 60))
-    end,
-
+    sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
+    wielded_bone_position = { pos = { x = 0.5, y = 0.5, z = 1.65 } },
+    offhand_bone_position = { pos = { x = 1.5, y = 0, z = 0 } },
+    on_construct = function(pos) core.get_node_timer(pos):start(math.random(30, 60)) end,
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
-        if node_above ~= "air" then
-            return true
-        end
-
+        if node_above ~= "air" then return true end
         local laterals = {
             { x = pos.x + 1, y = pos.y, z = pos.z },
             { x = pos.x - 1, y = pos.y, z = pos.z },
@@ -1683,7 +1592,6 @@ core.register_node("nh_nodes:tilleddirt", {
             { x = pos.x - 1, y = pos.y, z = pos.z + 1 },
             { x = pos.x - 1, y = pos.y, z = pos.z - 1 },
         }
-
         local has_water = false
         for _, npos in ipairs(laterals) do
             local name = core.get_node(npos).name
@@ -1707,15 +1615,8 @@ core.register_node("nh_nodes:wettilleddirt", {
     description = S("Wet Tilled Dirt"),
     tiles = { "wettilleddirt.png", "wetdirt.png" },
     groups = { crumbly = 2 },
-
     drop = "nh_nodes:wetdirt",
-
-    sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
+    sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
 
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
@@ -1726,34 +1627,24 @@ core.register_node("nh_nodes:wettilleddirt", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
-    on_construct = function(pos)
-        core.get_node_timer(pos):start(math.random(60, 120))
-    end,
-
+    on_construct = function(pos) core.get_node_timer(pos):start(math.random(60, 120)) end,
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
-
-        if node_above ~= "air" then
-            return true -- tem bloco em cima, aguarda e tenta de novo
-        end
-
+        -- tem bloco em cima, aguarda e tenta de novo
+        if node_above ~= "air" then return true end
         core.set_node(pos, { name = "nh_nodes:wetdirt" })
         return false
     end,
 })
-
 core.register_node("nh_nodes:top_grass_ramp", {
     description         = "Grass Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1762,30 +1653,10 @@ core.register_node("nh_nodes:top_grass_ramp", {
     -- Dentro do register_node:
     groups              = { cracky = 3, soil = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:dirt",
-
-    sounds              = {
-        footstep = { name = "GrassFootstep", gain = 0.5 },
-        dug      = { name = "GrassDig", gain = 0.5 },
-        dig      = { name = "GrassDig", gain = 0.5 },
-        place    = { name = "GrassDig", gain = 0.5 },
-    },
-
+    sounds              = { footstep = { name = "GrassFootstep", gain = 0.5 }, dug = { name = "GrassDig", gain = 0.5 }, dig = { name = "GrassDig", gain = 0.5 }, place = { name = "GrassDig", gain = 0.5 }, },
     sunlight_propagates = true,
-
-
-    selection_box = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },
-        },
-    },
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },
-        },
+    selection_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
+    collision_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, },
     },
 })
 
