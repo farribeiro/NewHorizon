@@ -37,10 +37,10 @@ local DECORATIONS        = {
     ["nh_nodes:fallenstick"] = true,
 }
 local FLAME_ENTITIES     = {
-    ["nh_nodes:campfire_flame_entity"]  = true,
-    ["nh_nodes:torch_flame_entity"]     = true,
+    ["nh_nodes:campfire_flame_entity"] = true,
+    ["nh_nodes:torch_flame_entity"] = true,
     ["nh_nodes:palmstraw_flame_entity"] = true,
-    ["nh_nodes:flame_entity"]           = true,
+    ["nh_nodes:flame_entity"] = true,
 }
 nodes                    = {}
 local function detach_glow(player)
@@ -73,9 +73,7 @@ core.register_globalstep(function(dtime)
 
         -- remove o glow se o player tirar a litgrenade da mão sem arremessar
         local item = player:get_wielded_item():get_name()
-        if item ~= "nh_nodes:litgrenade" then
-            detach_glow(player)
-        end
+        if item ~= "nh_nodes:litgrenade" then detach_glow(player) end
         -- PASSOS
         footstep_timer[name] = (footstep_timer[name] or 0) + dtime
         if footstep_timer[name] >= 0.4 then
@@ -94,27 +92,20 @@ core.register_globalstep(function(dtime)
                 local node_def    = core.registered_nodes[node.name]
                 if node_def and node_def.sounds and node_def.sounds.footstep then
                     local snd = node_def.sounds.footstep
-                    core.sound_play(snd.name, {
-                        pos               = pos,
-                        gain              = snd.gain or 0.5,
-                        max_hear_distance = 10,
-                    })
+                    core.sound_play(snd.name,
+                        { pos = pos, gain = snd.gain or 0.5, max_hear_distance = 10, })
                 end
             end
         end
-
-        -- ==== DANO DA LAVA ====
+        -- DANO DA LAVA
         lava_damage_timer[name] = (lava_damage_timer[name] or 0) + dtime
         if lava_damage_timer[name] >= 1.0 then
             lava_damage_timer[name] = 0
             local feet_node = core.get_node({ x = pos.x, y = pos.y, z = pos.z })
             local head_node = core.get_node({ x = pos.x, y = pos.y + 1, z = pos.z })
-            if LAVA_NODES[feet_node.name] or LAVA_NODES[head_node.name] then
-                player:set_hp(player:get_hp() - 22)
-            end
+            if LAVA_NODES[feet_node.name] or LAVA_NODES[head_node.name] then player:set_hp(player:get_hp() - 22) end
         end
-
-        -- ==== DANO DAS FOLHAS CAINDO ====
+        -- DANO DAS FOLHAS CAINDO
         local above_pos = { x = pos.x, y = pos.y + 2, z = pos.z }
         for _, obj in pairs(core.get_objects_inside_radius(above_pos, 1.5)) do
             local entity = obj:get_luaentity()
@@ -122,14 +113,11 @@ core.register_globalstep(function(dtime)
                 local node = entity.node
                 if node and LEAF_TYPES[node.name] then
                     local velocity = obj:get_velocity()
-                    if velocity and velocity.y < -2 then
-                        player:set_hp(player:get_hp() - 1)
-                    end
+                    if velocity and velocity.y < -2 then player:set_hp(player:get_hp() - 1) end
                 end
             end
         end
-
-        -- ==== TOCHA NA AGUA (troca torch2 por torch3) ====
+        -- TOCHA NA AGUA (troca torch2 por torch3)
         local head_pos  = { x = pos.x, y = pos.y + 1, z = pos.z }
         local head_node = core.get_node(head_pos)
         if core.get_item_group(head_node.name, "water") > 0 then
@@ -142,15 +130,11 @@ core.register_globalstep(function(dtime)
                 end
             end
         end
-
-        -- ==== LUZ DA TOCHA / CRISTAL ====
+        -- LUZ DA TOCHA / CRISTAL
         local wielded        = player:get_wielded_item()
         local light_pos_base = { x = pos.x, y = pos.y + 1, z = pos.z }
-
         if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" or wielded:get_name() == "nh_nodes:litgrenade" then
-            if not players_with_torch[name] then
-                players_with_torch[name] = {}
-            end
+            if not players_with_torch[name] then players_with_torch[name] = {} end
             -- Remove luz antiga
             if players_with_torch[name].pos then
                 local old_pos  = players_with_torch[name].pos
@@ -182,73 +166,50 @@ core.register_globalstep(function(dtime)
         end
     end
 end)
-
--- ==== DESTRUIÇÃO DE DROPS NA LAVA ====
+-- DESTRUIÇÃO DE DROPS NA LAVA
 -- Destrói qualquer item (drop) cuja face inferior toca um node de lava,
 -- emitindo partículas de fogo da base ao topo do node antes de removê-lo.
-
 local function spawn_lava_burn_particles(pos)
     -- 'pos' é a posição do node de lava (canto inferior-esquerdo = pos - 0.5)
     -- As partículas sobem da base (pos.y - 0.5) até o topo (pos.y + 0.5) do node.
     local base_y = pos.y - 0.5
-
     core.add_particlespawner({
         amount             = 24,  -- quantidade de partículas por emissão
         time               = 0.4, -- duração total do spawner (segundos)
-
         -- Origem: espalhada na face superior do node de lava
         minpos             = { x = pos.x - 0.4, y = base_y, z = pos.z - 0.4 },
         maxpos             = { x = pos.x + 0.4, y = base_y + 0.1, z = pos.z + 0.4 },
-
         -- Velocidade: sobem do fundo ao topo do node (1 node = 1 unidade)
         minvel             = { x = -0.15, y = 1.5, z = -0.15 },
         maxvel             = { x = 0.15, y = 3.0, z = 0.15 },
-
         -- Sem aceleração (fogo sobe naturalmente)
         minacc             = { x = 0, y = 0, z = 0 },
         maxacc             = { x = 0, y = 0, z = 0 },
-
         -- Vida das partículas: tempo suficiente para cruzar 1 node
         minexptime         = 0.2,
         maxexptime         = 0.5,
-
         -- Tamanho das fagulhas
         minsize            = 0.6,
         maxsize            = 1.4,
-
         texture            = "mobs_fire_particle.png",
-        animation          = {
-            type     = "vertical_frames",
-            aspect_w = 16,
-            aspect_h = 16,
-            length   = 0.4,
-        },
+        animation          = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.4, },
         glow               = 14,
         collisiondetection = false,
     })
 end
-
 local lava_drop_timer = 0
 core.register_globalstep(function(dtime)
     lava_drop_timer = lava_drop_timer + dtime
     if lava_drop_timer < 0.5 then return end
     lava_drop_timer = 0
-
-    for _, obj in ipairs(core.get_objects_in_area(
-        { x = -30000, y = -30000, z = -30000 },
-        { x = 30000, y = 30000, z = 30000 }
-    )) do
+    for _, obj in ipairs(core.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
         if not obj:is_player() then
             local entity = obj:get_luaentity()
             if entity and entity.name == "__builtin:item" then
                 local pos = obj:get_pos()
                 if pos then
                     -- Node abaixo do drop (parte inferior do item)
-                    local below = {
-                        x = math.floor(pos.x + 0.5),
-                        y = math.floor(pos.y),
-                        z = math.floor(pos.z + 0.5),
-                    }
+                    local below = { x = math.floor(pos.x + 0.5), y = math.floor(pos.y), z = math.floor(pos.z + 0.5), }
                     local node_below = core.get_node(below)
                     if LAVA_NODES[node_below.name] then
                         -- Emite partículas antes de remover
@@ -264,9 +225,7 @@ core.register_globalstep(function(dtime)
         end
     end
 end)
-
--- ==== FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS ====
-
+-- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
 local FLOATING_STUFF = {
     ["nh_nodes:oaktimber"]  = true,
     ["nh_nodes:oaklog"]     = true,
@@ -283,41 +242,26 @@ local FLOATING_STUFF = {
     ["nh_nodes:ice2"]       = true,
     ["nh_nodes:orb_empty"]  = true,
 }
-
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
-
 -- Calcula a direção da corrente da água.
 local function get_liquid_flow_dir(pos)
     local node_here = core.get_node(pos)
     local p2_here = node_here.param2
-
     -- Só opera em flowing (source não tem corrente direcional)
     if not WATER_MIDNODES[node_here.name] then return nil end
-
     -- Bit 3 (0x08) do param2 = "liquid_fall": a água despenca verticalmente.
     -- Nesse caso a direção é para baixo, sem componente horizontal.
     local falling = (p2_here >= 8)
     local p2_level = p2_here % 8
     local flow = { x = 0, y = 0, z = 0 }
-
-
     if falling then flow.y = -1 end
-
-    local dirs = {
-        { x = 1,  y = 0, z = 0 },
-        { x = -1, y = 0, z = 0 },
-        { x = 0,  y = 0, z = 1 },
-        { x = 0,  y = 0, z = -1 },
-    }
-
+    local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
     for _, d in ipairs(dirs) do
         local nb_pos = { x = pos.x + d.x, y = pos.y, z = pos.z + d.z }
         local nb     = core.get_node(nb_pos)
         local nb_def = core.registered_nodes[nb.name]
         if not nb_def then goto next_dir end
-
         local is_flowing = WATER_MIDNODES[nb.name]
-
         -- Vizinho é source → nível máximo (param2 = 0 equivalente)
         -- Vizinho é flowing com param2 MENOR (= mais cheio) que o nosso
         -- Em ambos os casos a água VEM desse vizinho → flui para o OPOSTO
@@ -327,55 +271,37 @@ local function get_liquid_flow_dir(pos)
             flow.x = flow.x + d.x
             flow.z = flow.z + d.z
         end
-
         ::next_dir::
     end
-
     local hlen = math.sqrt(flow.x ^ 2 + flow.z ^ 2)
     if hlen > 0 then
         flow.x = flow.x / hlen
         flow.z = flow.z / hlen
     end
-
     if flow.x == 0 and flow.y == 0 and flow.z == 0 then return nil end
     return flow
 end
-
 local SPEED_CURRENT     = 2   -- velocidade horizontal da correnteza (m/s)
 local SPEED_SINK        = 0.5 -- afundamento de drops normais (m/s)
 local SPEED_FLOAT       = 0.3 -- subida de itens flutuantes (m/s)
 local SPEED_FALL        = 2.0 -- queda em correnteza vertical (m/s)
-
 -- Rastreia se o drop estava na água no tick anterior (para restaurar aceleração
 -- de gravidade uma única vez ao sair, sem chamar set_acceleration toda tick)
 local drop_was_in_water = {}
 local drop_last_flow    = {} -- última direção de corrente detectada por drop
-
 core.register_globalstep(function(dtime)
-    for _, obj in ipairs(core.get_objects_in_area(
-        { x = -30000, y = -30000, z = -30000 },
-        { x = 30000, y = 30000, z = 30000 }
-    )) do
+    for _, obj in ipairs(core.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
         if obj:is_player() then goto drop_next end
-
         local entity = obj:get_luaentity()
         if not (entity and entity.name == "__builtin:item") then goto drop_next end
-
         local pos = obj:get_pos()
         if not pos then goto drop_next end
-
-        local ipos     = {
-            x = math.floor(pos.x + 0.5),
-            y = math.floor(pos.y + 0.5),
-            z = math.floor(pos.z + 0.5),
-        }
+        local ipos     = { x = math.floor(pos.x + 0.5), y = math.floor(pos.y + 0.5), z = math.floor(pos.z + 0.5), }
         local node     = core.get_node(ipos)
         local in_full  = WATER_FULLNODES[node.name]
         local in_mid   = WATER_MIDNODES[node.name]
         local in_water = in_full or in_mid
-
         local uid      = tostring(obj)
-
         if not in_water then
             -- Saiu da água: restaura gravidade (uma vez só)
             if drop_was_in_water[uid] then
@@ -385,16 +311,11 @@ core.register_globalstep(function(dtime)
             end
             goto drop_next
         end
-
         -- ── Dentro da água ───────────────────────────────────────────────────
         -- Zera aceleração para que set_velocity abaixo seja o movimento final
-        if not drop_was_in_water[uid] then
-            drop_was_in_water[uid] = true
-        end
+        if not drop_was_in_water[uid] then drop_was_in_water[uid] = true end
         obj:set_acceleration({ x = 0, y = 0, z = 0 })
-
-        local item_name = entity.itemstring or
-            (entity.item and ItemStack(entity.item):get_name()) or ""
+        local item_name = entity.itemstring or (entity.item and ItemStack(entity.item):get_name()) or ""
         local is_floating = FLOATING_STUFF[item_name]
 
         if in_full and not in_mid then
