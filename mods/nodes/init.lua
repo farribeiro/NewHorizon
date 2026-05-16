@@ -426,6 +426,39 @@ end)
 -- RECEITAS BASICAS (2x2)
 -- Usada por: Nodes do chão
 -- Inclui crafts básicos
+--[[
+local function craft_ingredients(ingredients, output)
+    local formatted_ingredients = {}
+
+    for k, v in pairs(ingredients) do
+        local name, count
+        if type(k) == "number" then
+            -- Se for lista simples: {"stick", "palmstraw"} -> quantidade é 1
+            name = v
+            count = 1
+        else
+            -- Se for par chave-valor: {pebble = 2}
+            name = k
+            count = v
+        end
+
+        -- Garante o prefixo nh_nodes: se já não o tiver
+        if not name:find(":") then
+            name = "nh_nodes:" .. name
+        end
+
+        formatted_ingredients[name] = count
+    end
+
+    -- Garante o prefixo na saída também
+    if not output:find(":") then
+        output = "nh_nodes:" .. output
+    end
+
+    return { ingredients = formatted_ingredients, output = output }
+end
+]] --
+
 recipes_floor = {
     { ingredients = { ["nh_nodes:pebble"] = 2 },                                                              output = "nh_nodes:chippedstone" },
     { ingredients = { ["nh_nodes:pebble_item"] = 2 },                                                         output = "nh_nodes:chippedstone" },
