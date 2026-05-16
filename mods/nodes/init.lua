@@ -6606,7 +6606,8 @@ local function get_node_below(pos)
         local node = core.get_node(candidate_pos)
         if node.name ~= "air"
         and node.name ~= "ignore"
-        and node.name ~= "nh_nodes:mirror" then
+        and node.name ~= "nh_nodes:mirror"
+        and node.name ~= "nh_nodes:ulexite" then
             return node
         end
     end
@@ -6842,6 +6843,181 @@ local function is_water_near(pos)
 
     return false
 end
+
+-- ============================================================
+--  ULEXITE – entidade de superfície (topo do bloco abaixo)
+--  Adicionar logo APÓS o registro de "nh_nodes:ulexite"
+-- ============================================================
+
+-- ── Helpers (reutilizados do espelho, mas isolados para ulexita) ──────────────
+
+-- Retorna a textura do topo do node (tiles[1])
+local function ulexite_get_top_texture(node_name)
+    local def = core.registered_nodes[node_name]
+    if not def or not def.tiles then return nil end
+    local tile = def.tiles[1]
+    if type(tile) == "string" then
+        return tile
+    elseif type(tile) == "table" then
+        return tile.name
+    end
+    return nil
+end
+
+-- Posição onde a entidade fica: topo da ulexita (y + 0.501, levemente acima)
+local function ulexite_surface_pos(ulexite_pos)
+    return vector.new(ulexite_pos.x, ulexite_pos.y + 0.501, ulexite_pos.z)
+end
+
+-- Verifica se já existe uma entidade de superfície sobre esta ulexita
+local function ulexite_has_surface(ulexite_pos)
+    local epos = ulexite_surface_pos(ulexite_pos)
+    for _, obj in ipairs(core.get_objects_inside_radius(epos, 0.15)) do
+        local ent = obj:get_luaentity()
+        if ent and ent.name == "nh_nodes:ulexite_surface" then
+            return true
+        end
+    end
+    return false
+end
+
+-- Spawna a entidade visual deitada no topo da ulexita
+local function ulexite_spawn_surface(ulexite_pos)
+    local below = get_node_below(ulexite_pos)
+    if not below then return end
+
+    local tex = ulexite_get_top_texture(below.name)
+    if not tex then return end
+
+    local epos = ulexite_surface_pos(ulexite_pos)
+    local ent  = core.add_entity(epos, "nh_nodes:ulexite_surface")
+    if not ent then return end
+
+    ent:set_properties({ textures = { tex } })
+
+    local luaent = ent:get_luaentity()
+    if luaent then
+        luaent._ulexite_pos = ulexite_pos
+    end
+end
+
+-- ── Entidade visual ───────────────────────────────────────────────────────────
+
+core.register_entity("nh_nodes:ulexite_surface", {
+    initial_properties = {
+        -- upright_sprite igual ao mirror; rotação 90° em X o deita horizontalmente
+        visual               = "upright_sprite",
+        visual_size          = { x = 1.0, y = 1.0 },
+        textures             = { "blank.png" },
+        physical             = false,
+        collide_with_objects = false,
+        pointable            = false,
+        static_save          = false,
+    },
+
+    on_activate = function(self, staticdata, dtime_s)
+        -- Inclina o sprite 90° para ficar "deitado" (horizontal)
+        self.object:set_rotation({ x = math.pi / 2, y = 0, z = 0 })
+
+        if staticdata and staticdata ~= "" then
+            local data = core.deserialize(staticdata)
+            if data and data.ulexite_pos then
+                self._ulexite_pos = data.ulexite_pos
+                local node = core.get_node(data.ulexite_pos)
+                if node.name ~= "nh_nodes:ulexite" then
+                    self.object:remove()
+                    return
+                end
+                -- Restaura textura
+                local below = get_node_below(data.ulexite_pos)
+                if below then
+                    local tex = ulexite_get_top_texture(below.name)
+                    if tex then
+                        self.object:set_properties({ textures = { tex } })
+                    end
+                end
+            end
+        end
+    end,
+
+    get_staticdata = function(self)
+        return core.serialize({ ulexite_pos = self._ulexite_pos })
+    end,
+
+    on_step = function(self, dtime)
+        self._timer = (self._timer or 0) + dtime
+        if self._timer < 1.0 then return end
+        self._timer = 0
+
+        if not self._ulexite_pos then
+            self.object:remove()
+            return
+        end
+
+        -- Remove se a ulexita sumiu
+        local node = core.get_node(self._ulexite_pos)
+        if node.name ~= "nh_nodes:ulexite" then
+            self.object:remove()
+            return
+        end
+
+        -- Atualiza textura caso o bloco abaixo tenha mudado
+        local below = get_node_below(self._ulexite_pos)
+        if below then
+            local tex = ulexite_get_top_texture(below.name)
+            if tex then
+                local cur = self.object:get_properties().textures
+                if not cur or cur[1] ~= tex then
+                    self.object:set_properties({ textures = { tex } })
+                end
+            end
+        end
+    end,
+})
+
+-- ── Hooks no node ulexite ─────────────────────────────────────────────────────
+-- ATENÇÃO: substitua o registro original de "nh_nodes:ulexite" por este,
+-- ou adicione after_place_node / on_destruct manualmente se preferir não
+-- duplicar. O mais simples é substituir o bloco original pelo abaixo.
+
+-- (apague o core.register_node("nh_nodes:ulexite", {...}) anterior e use este)
+core.register_node("nh_nodes:ulexite", {
+    description = S("Ulexite"),
+    drawtype = "normal",
+    tiles = {"ulexitetopdown.png", "ulexitetopdown.png", "ulexitesides.png"},
+    groups = {cracky = 3},
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    sunlight_propagates = true,
+
+    after_place_node = function(pos, placer, itemstack, pointed_thing)
+        ulexite_spawn_surface(pos)
+    end,
+
+    on_destruct = function(pos)
+        local epos = ulexite_surface_pos(pos)
+        for _, obj in ipairs(core.get_objects_inside_radius(epos, 0.15)) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "nh_nodes:ulexite_surface" then
+                obj:remove()
+            end
+        end
+    end,
+})
+
+-- ── ABM: recria entidades que sumiram ao recarregar chunks ────────────────────
+
+core.register_abm({
+    label     = "Ulexite surface restore",
+    nodenames = { "nh_nodes:ulexite" },
+    interval  = 2,
+    chance    = 1,
+    action    = function(pos, node)
+        if not ulexite_has_surface(pos) then
+            ulexite_spawn_surface(pos)
+        end
+    end,
+})
 
 core.register_node("nh_nodes:messagebottle", {
     description = S("Bottle with Message") .. "\n" .. S("[Floating Item]"),
