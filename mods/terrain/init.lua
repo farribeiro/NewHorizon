@@ -1413,7 +1413,7 @@ core.log("action", "[terrain] Perlin and Perlin Maps initialized")
 -- FUNÇÃO DE GERAÇÃO DOS NOISE MAPS EM BATCH
 local function generate_noise_maps(minp, maxp)
 	local minposxz = {x = minp.x, y = minp.z}
-	local noise_maps = {
+	return {
 		-- Noise maps 2D (para altura do terreno)
 		continent_2d = PM.continent:get_2d_map_flat(minposxz),
 		biome_2d = PM.biome:get_2d_map_flat(minposxz),
@@ -1432,7 +1432,6 @@ local function generate_noise_maps(minp, maxp)
 		saprolite_3d = PM.saprolite:get_3d_map_flat(minp),
 		ore_master_3d = PM.ore_master:get_3d_map_flat(minp),
 	}
-    return noise_maps
 end
 -- FUNÇÃO AUXILIAR: EPICENTROS DE NEVE
 local SNOW_RADIUS = 350
