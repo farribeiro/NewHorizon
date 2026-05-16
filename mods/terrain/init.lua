@@ -2402,16 +2402,16 @@ core.register_lbm({
         end
 
         local below = {
-            north = is_solid_below({x = x,     y = y, z = z - 1}),
-            south = is_solid_below({x = x,     y = y, z = z + 1}),
-            east  = is_solid_below({x = x + 1, y = y, z = z    }),
-            west  = is_solid_below({x = x - 1, y = y, z = z    }),
+            north = is_solid_below(xyz(x, y, z - 1)),
+            south = is_solid_below(xyz(x, y, z + 1)),
+            east  = is_solid_below(xyz(x + 1, y, z)),
+            west  = is_solid_below(xyz(x - 1, y, z)),
         }
         local same = {
-            north = is_solid_same({x = x,     y = y, z = z - 1}),
-            south = is_solid_same({x = x,     y = y, z = z + 1}),
-            east  = is_solid_same({x = x + 1, y = y, z = z    }),
-            west  = is_solid_same({x = x - 1, y = y, z = z    }),
+            north = is_solid_same(xyz(x, y, z - 1)),
+            south = is_solid_same(xyz(x, y, z + 1)),
+            east  = is_solid_same(xyz(x + 1, y, z)),
+            west  = is_solid_same(xyz(x - 1, y, z)),
         }
 
         local drops = {}
