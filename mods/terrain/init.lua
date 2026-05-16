@@ -1358,7 +1358,7 @@ local function place_ship_chest(area, data, base_pos)
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
     local idx = rng_chest:next(1, #candidates)
     local c = candidates[idx]
-    local chest_pos = {x = base_pos.x + c.dx, y = base_pos.y, z = base_pos.z + c.dz}
+    local chest_pos = xyz(base_pos.x + c.dx, base_pos.y, base_pos.z + c.dz)
     core.after(0, function(pos)
         core.set_node(pos, {name = "nh_nodes:oak_chest", param2 = 2})
         local def = core.registered_nodes["nh_nodes:oak_chest"]
@@ -1412,43 +1412,27 @@ end
 core.log("action", "[terrain] Perlin and Perlin Maps initialized")
 -- FUNÇÃO DE GERAÇÃO DOS NOISE MAPS EM BATCH
 local function generate_noise_maps(minp, maxp)
-    local minposxz = {x = minp.x, y = minp.z}
-    -- Noise maps 2D (para altura do terreno)
-    local continent_2d = PM.continent:get_2d_map_flat(minposxz)
-    local biome_2d = PM.biome:get_2d_map_flat(minposxz)
-    local mountain_2d = PM.mountain:get_2d_map_flat(minposxz)
-    local hills_2d = PM.hills:get_2d_map_flat(minposxz)
-    local plains_2d = PM.plains:get_2d_map_flat(minposxz)
-    local rough_2d = PM.roughness:get_2d_map_flat(minposxz)
-    local grassleaves_2d = PM.grassleaves:get_2d_map_flat(minposxz)
-    local trees_2d = PM.trees:get_2d_map_flat(minposxz)
-    local bushes_2d = PM.bushes:get_2d_map_flat(minposxz)
-    -- Noise maps 3D (para cavernas e minérios)
-    local caves_3d = PM.caves:get_3d_map_flat(minp)
-    local caves_lava_3d = PM.caves_lava:get_3d_map_flat(minp)
-    local caves_water_3d = PM.caves_water:get_3d_map_flat(minp)
-    local cave_size_3d = PM.cave_size:get_3d_map_flat(minp)
-    local saprolite_3d = PM.saprolite:get_3d_map_flat(minp)
-    local ore_master_3d = PM.ore_master:get_3d_map_flat(minp)
-
-    return {-- 2D maps
-        continent_2d = continent_2d,
-        biome_2d = biome_2d,
-        mountain_2d = mountain_2d,
-        hills_2d = hills_2d,
-        plains_2d = plains_2d,
-        rough_2d = rough_2d,
-        grassleaves_2d = grassleaves_2d,
-        trees_2d = trees_2d,
-        bushes_2d = bushes_2d,
-        -- 3D maps
-        caves_3d = caves_3d,
-        caves_lava_3d = caves_lava_3d,
-        caves_water_3d = caves_water_3d,
-        cave_size_3d = cave_size_3d,
-        saprolite_3d = saprolite_3d,
-        ore_master_3d = ore_master_3d,
-   }
+	local minposxz = {x = minp.x, y = minp.z}
+	local noise_maps = {
+		-- Noise maps 2D (para altura do terreno)
+		continent_2d = PM.continent:get_2d_map_flat(minposxz),
+		biome_2d = PM.biome:get_2d_map_flat(minposxz),
+		mountain_2d = PM.mountain:get_2d_map_flat(minposxz),
+		hills_2d = PM.hills:get_2d_map_flat(minposxz),
+		plains_2d = PM.plains:get_2d_map_flat(minposxz),
+		rough_2d = PM.roughness:get_2d_map_flat(minposxz),
+		grassleaves_2d = PM.grassleaves:get_2d_map_flat(minposxz),
+		trees_2d = PM.trees:get_2d_map_flat(minposxz),
+		bushes_2d = PM.bushes:get_2d_map_flat(minposxz),
+		-- Noise maps 3D (para cavernas e minérios)
+		caves_3d = PM.caves:get_3d_map_flat(minp),
+		caves_lava_3d = PM.caves_lava:get_3d_map_flat(minp),
+		caves_water_3d = PM.caves_water:get_3d_map_flat(minp),
+		cave_size_3d = PM.cave_size:get_3d_map_flat(minp),
+		saprolite_3d = PM.saprolite:get_3d_map_flat(minp),
+		ore_master_3d = PM.ore_master:get_3d_map_flat(minp),
+	}
+    return noise_maps
 end
 -- FUNÇÃO AUXILIAR: EPICENTROS DE NEVE
 local SNOW_RADIUS = 350
