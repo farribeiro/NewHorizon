@@ -64,7 +64,7 @@ local function detach_glow(player)
         end
     end
 end
--- ao trocar para litgranade (no on_use do granade):
+-- ao trocar para litgrenade (no on_use do grenade):
 local function attach_glow(player)
     -- remove glow anterior se existir
     detach_glow(player)
@@ -101,9 +101,9 @@ core.register_globalstep(function(dtime)
         local name = player:get_player_name()
         local pos  = player:get_pos()
         
-        -- remove o glow se o player tirar a litgranade da mão sem arremessar
+        -- remove o glow se o player tirar a litgrenade da mão sem arremessar
         local item = player:get_wielded_item():get_name()
-        if item ~= "nh_nodes:litgranade" then
+        if item ~= "nh_nodes:litgrenade" then
             detach_glow(player)
         end
         -- PASSOS
@@ -177,7 +177,7 @@ core.register_globalstep(function(dtime)
         local wielded        = player:get_wielded_item()
         local light_pos_base = {x = pos.x, y = pos.y + 1, z = pos.z}
 
-        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" or wielded:get_name() == "nh_nodes:litgranade" then
+        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" or wielded:get_name() == "nh_nodes:litgrenade" then
             if not players_with_torch[name] then
                 players_with_torch[name] = {}
             end
@@ -826,61 +826,90 @@ recipes_campfire = {
 -- --------------------------------------------------
 recipes_furnace = {
     {
-        ingredients = {["nh_nodes:oaklog"] = 1},
-        output = "nh_nodes:charcoal"
+        ingredients = {["nh_nodes:oaklog"] = 9},
+        output = "nh_nodes:charcoal 9",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
-        ingredients = {["nh_nodes:pinelog"] = 1},
-        output = "nh_nodes:charcoal"
+        ingredients = {["nh_nodes:pinelog"] = 9},
+        output = "nh_nodes:charcoal 9",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
-        ingredients = {["nh_nodes:palmlog"] = 1},
-        output = "nh_nodes:charcoal2"
+        ingredients = {["nh_nodes:palmlog"] = 9},
+        output = "nh_nodes:charcoal2 9",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:chickenegg"] = 1},
-        output = "nh_nodes:friedchickenegg"
+        output = "nh_nodes:friedchickenegg",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:rawchicken"] = 1},
-        output = "nh_nodes:roastchicken"
+        output = "nh_nodes:roastchicken",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:rawtuna"] = 1},
-        output = "nh_nodes:roasttuna"
+        output = "nh_nodes:roasttuna",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:rawbeef"] = 1},
-        output = "nh_nodes:roastbeef"
+        output = "nh_nodes:roastbeef",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:coppernugget"] = 3},
-        output = "nh_nodes:copperingot"
+        output = "nh_nodes:copperingot",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:copperingot"] = 3},
-        output = "nh_nodes:copperhelmet"
+        output = "nh_nodes:copperhelmet",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:copperingot"] = 8},
-        output = "nh_nodes:copperchestplate"
+        output = "nh_nodes:copperchestplate",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:tinnugget"] = 3},
-        output = "nh_nodes:tiningot"
+        output = "nh_nodes:tiningot",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
         ingredients = {["nh_nodes:ironnugget"] = 3},
-        output = "nh_nodes:ironingot"
+        output = "nh_nodes:ironingot",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
-        ingredients = {["nh_nodes:sand"] = 3},
-        output = "nh_nodes:bottle"
+        ingredients = {["nh_nodes:ironingot"] = 3, ["nh_nodes:coal"] = 1, ["nh_items:page"] = 1},
+        output = "nh_nodes:grenade",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
     {
-        ingredients = {["default:steel_ingot"] = 9},
-        output = "default:steel_block"
+        ingredients = {["nh_nodes:sand"] = 8},
+        output = "nh_nodes:glass 8",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
     },
+    {
+        ingredients = {["nh_nodes:glass"] = 3, ["nh_nodes:oakwood"] = 1},
+        output = "nh_nodes:bottle 6",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
+    },
+    {
+        ingredients = {["nh_nodes:glass"] = 4, ["nh_nodes:chromiumingot"] = 1},
+        output = "nh_nodes:mirror 4",
+        required_tool = "nh_nodes:coalnugget",   -- ← só funciona com isso no slot
+    },
+    --{
+    --    ingredients = {["nh_nodes:ironingot"] = 3},
+    --    output = "nh_nodes:stellingot 3"
+    --    required_tool = "nh_nodes:coal",   -- ← só funciona com isso no slot
+    --},
 }
 
 -- ========================================
@@ -3135,6 +3164,33 @@ core.register_node("nh_nodes:chromium", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
+core.register_node("nh_nodes:chromiumnugget", {
+    description = S("Chromium Nugget"),
+    drawtype = "mesh",
+    mesh = "metalnugget.obj",
+    tiles = {"ironnugget.png"},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    
+    collision_box = {type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
+
+    selection_box = {type = "fixed",
+        fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08},
+    },
+})
+
+core.register_node("nh_nodes:chromiumingot", {
+    description = S("Chromium Ingot"),
+    drawtype = "mesh",
+    mesh = "metalingot.obj",
+    tiles = {"ironingot.png"},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+})
 
 core.register_node("nh_nodes:peridotite", {
     description = S("Peridotite"),
@@ -6512,25 +6568,230 @@ core.register_node("nh_nodes:inksac", {
     },
 })
 
+-- VIDRO
+core.register_node("nh_nodes:glass", {
+    description = S("Glass"),
+    drawtype = "glasslike",
+    tiles = {"ice2.png"}, 
+    groups = {cracky = 3},
+    walkable = true,
+    --is_ground_content = true,
+    use_texture_alpha = "clip", --blend
+    --alpha = 200,
+    paramtype = "light",
+    sunlight_propagates = true,   -- deixa a luz passar, como gelo real         -- não flui
+    --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+    --connects_to = {"nh_nodes:ice"},
+})
+
+-- Converte facedir para vetor de direção frontal do espelho
+local facedir_to_dir = {
+    [0] = vector.new( 0, 0, -1),  -- sul   (frente padrão)
+    [1] = vector.new(-1, 0,  0),  -- oeste
+    [2] = vector.new( 0, 0,  1),  -- norte
+    [3] = vector.new( 1, 0,  0),  -- leste
+}
+
+-- Calcula posição da entidade na frente do espelho
+local function get_surface_pos(mirror_pos, param2)
+    local dir = facedir_to_dir[param2 % 4] or facedir_to_dir[0]
+    -- 0.44 para ficar colado na face frontal do mesh
+    return vector.add(mirror_pos, vector.multiply(dir, -0.435))
+end
+
+-- Busca o node sólido mais próximo abaixo
+local function get_node_below(pos)
+    for dy = 1, 16 do
+        local candidate_pos = vector.new(pos.x, pos.y - dy, pos.z)
+        local node = core.get_node(candidate_pos)
+        if node.name ~= "air"
+        and node.name ~= "ignore"
+        and node.name ~= "nh_nodes:mirror" then
+            return node
+        end
+    end
+    return nil
+end
+
+-- Retorna a textura do topo de um node
+local function get_top_texture(node_name)
+    local def = core.registered_nodes[node_name]
+    if not def or not def.tiles then return nil end
+    local tile = def.tiles[1]
+    if type(tile) == "string" then
+        return tile
+    elseif type(tile) == "table" then
+        return tile.name
+    end
+    return nil
+end
+
+local function mirror_has_surface(mirror_pos, param2)
+    local epos = get_surface_pos(mirror_pos, param2)
+    for _, obj in ipairs(core.get_objects_inside_radius(epos, 0.15)) do
+        local ent = obj:get_luaentity()
+        if ent and ent.name == "nh_nodes:mirror_surface" then
+            return true
+        end
+    end
+    return false
+end
+
+-- Spawna a entidade visual na frente do espelho
+-- Função auxiliar agora também guarda mirror_pos na entidade
+local function spawn_surface(mirror_pos, param2)
+    local below = get_node_below(mirror_pos)
+    if not below then return end
+
+    local tex = get_top_texture(below.name)
+    if not tex then return end
+
+    local epos = get_surface_pos(mirror_pos, param2)
+    local ent = core.add_entity(epos, "nh_nodes:mirror_surface")
+    if not ent then return end
+
+    local luaent = ent:get_luaentity()
+    if luaent then
+        luaent._mirror_pos = mirror_pos  -- salva referência ao dono
+    end
+
+    local dir = facedir_to_dir[param2 % 4] or facedir_to_dir[0]
+    ent:set_yaw(math.atan2(-dir.x, -dir.z))
+    ent:set_properties({textures = {tex}})
+end
+
+-- Entidade visual (sprite colado na frente do espelho)
+core.register_entity("nh_nodes:mirror_surface", {
+    initial_properties = {
+        visual               = "upright_sprite",
+        visual_size          = {x = 1.0, y = 1.0},
+        textures             = {"blank.png"},
+        physical             = false,
+        collide_with_objects = false,
+        pointable            = false,
+        static_save          = false,  -- precisa ser true para salvar
+    },
+
+    on_activate = function(self, staticdata, dtime_s)
+        -- Ao recarregar do staticdata, verifica se o espelho ainda existe
+        if staticdata and staticdata ~= "" then
+            local data = core.deserialize(staticdata)
+            if data and data.mirror_pos then
+                self._mirror_pos = data.mirror_pos
+                local node = core.get_node(data.mirror_pos)
+                if node.name ~= "nh_nodes:mirror" then
+                    -- Espelho foi quebrado enquanto chunk estava fora
+                    self.object:remove()
+                    return
+                end
+            end
+        end
+    end,
+
+    get_staticdata = function(self)
+        -- Salva a posição do espelho dono junto com a entidade
+        return core.serialize({mirror_pos = self._mirror_pos})
+    end,
+
+    on_step = function(self, dtime)
+        self._timer = (self._timer or 0) + dtime
+        if self._timer < 1.0 then return end
+        self._timer = 0
+
+        if not self._mirror_pos then
+            self.object:remove()
+            return
+        end
+        local node = core.get_node(self._mirror_pos)
+        if node.name ~= "nh_nodes:mirror" then
+            self.object:remove()
+        end
+    end,
+})
+
+-- Node do espelho
 core.register_node("nh_nodes:mirror", {
     description = S("Mirror"),
-    --inventory_image = "bottle.png",
-    drawtype = "mesh",
-    mesh = "mirror.obj",
-    tiles = {"mirror.png"},
-    paramtype = "light",
-    paramtype2 = "facedir",
+    drawtype    = "mesh",
+    mesh        = "mirror.obj",
+    tiles       = {"mirror.png"},
+    paramtype   = "light",
+    paramtype2  = "facedir",
     sunlight_propagates = true,
-    walkable = false,
-    
+    walkable    = false,
+
     collision_box = {type = "fixed",
         fixed = {-0.5, -0.5, 0.435, 0.5, 0.5, 0.5}
     },
     selection_box = {type = "fixed",
         fixed = {-0.5, -0.5, 0.435, 0.5, 0.5, 0.5}
     },
-
     groups = {cracky = 2, oddly_breakable_by_hand = 1},
+
+    after_place_node = function(pos, placer, itemstack, pointed_thing)
+        local node = core.get_node(pos)
+        -- Salva param2 nos metadados para poder recriar depois
+        local meta = core.get_meta(pos)
+        meta:set_int("param2", node.param2)
+        spawn_surface(pos, node.param2)
+    end,
+
+   on_destruct = function(pos)
+    for _, obj in ipairs(core.get_objects_inside_radius(pos, 0.6)) do
+        local ent = obj:get_luaentity()
+        if ent and ent.name == "nh_nodes:mirror_surface" then
+            -- Calcula qual espelho "dono" desta entidade seria
+            -- verificando se ela está próxima o suficiente do pos destruído
+            -- e NÃO está na frente de outro espelho vizinho
+            local epos = obj:get_pos()
+            if not epos then
+                obj:remove()
+            else
+                -- Checa se algum espelho vizinho reivindica esta entidade
+                local claimed_by_neighbor = false
+                local neighbors = {
+                    vector.new(pos.x + 1, pos.y, pos.z),
+                    vector.new(pos.x - 1, pos.y, pos.z),
+                    vector.new(pos.x,     pos.y, pos.z + 1),
+                    vector.new(pos.x,     pos.y, pos.z - 1),
+                }
+                for _, npos in ipairs(neighbors) do
+                    local nnode = core.get_node(npos)
+                    if nnode.name == "nh_nodes:mirror" then
+                        local expected = get_surface_pos(npos, nnode.param2)
+                        if vector.distance(epos, expected) < 0.1 then
+                            claimed_by_neighbor = true
+                            break
+                        end
+                    end
+                end
+
+                if not claimed_by_neighbor then
+                    obj:remove()
+                end
+            end
+        end
+    end
+end,
+
+    -- Suporte a reload de mundo: spawna entidade se sumir
+    on_construct = function(pos)
+        -- Usado apenas em construção manual/worldedit, não duplica com after_place_node
+    end,
+})
+
+-- ABM: recria entidades de espelhos que perderam a superfície
+-- (acontece ao recarregar chunks / reentrar no mundo)
+core.register_abm({
+    label     = "Mirror surface restore",
+    nodenames = {"nh_nodes:mirror"},
+    interval  = 1,
+    chance    = 1,
+    action    = function(pos, node)
+        if not mirror_has_surface(pos, node.param2) then
+            spawn_surface(pos, node.param2)
+        end
+    end,
 })
 
 core.register_node("nh_nodes:bottle", {
@@ -7458,7 +7719,7 @@ core.register_node("nh_nodes:avalanche", {
 })
 
 core.register_node("nh_nodes:avalanche_flowing", {
-    description = S("Avalanche Flow"),
+    description = S("Flowing Avalanche"),
     liquidtype = "flowing",
     drawtype = "flowingliquid",
     tiles = {"neve.png"},
@@ -7666,7 +7927,7 @@ end,
 })
 
 core.register_node("nh_nodes:ice2ramp", {
-    description = S("Ice"),
+    description = S("Ice Ramp"),
     drawtype = "mesh",
     mesh = "grass_slope.obj",
     tiles = {"ice2ramp.png"}, 
@@ -11971,7 +12232,7 @@ core.register_node("nh_nodes:white_pebble", {
 })
 
 -- FUNÇÃO DE ARREMESSO
-local function throw_granade(itemstack, placer, lit)
+local function throw_grenade(itemstack, placer, lit)
     if not placer or not placer:is_player() then
         return itemstack
     end
@@ -11982,7 +12243,7 @@ local function throw_granade(itemstack, placer, lit)
 
     local dir = placer:get_look_dir()
 
-    local entity_name = lit and "nh_nodes:litgranade_entity" or "nh_nodes:granade_entity"
+    local entity_name = lit and "nh_nodes:litgrenade_entity" or "nh_nodes:grenade_entity"
 
     local obj = core.add_entity(pos, entity_name)
 
@@ -11999,11 +12260,11 @@ local function throw_granade(itemstack, placer, lit)
     return itemstack
 end
 
-core.register_node("nh_nodes:granade", {
-    description = S("Granade"),
+core.register_node("nh_nodes:grenade", {
+    description = S("Grenade"),
     drawtype = "mesh",
-    mesh = "granade.obj",
-    tiles = {"fusegranade.png"},
+    mesh = "grenade.obj",
+    tiles = {"fusegrenade.png"},
     
     walkable = false,
     paramtype = "light",
@@ -12016,16 +12277,16 @@ core.register_node("nh_nodes:granade", {
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
     on_place = function(itemstack, placer, pointed_thing)
-        return throw_granade(itemstack, placer, false)
+        return throw_grenade(itemstack, placer, false)
     end,
     on_drop = function(itemstack, dropper, pos)
-        return throw_granade(itemstack, dropper, false)
+        return throw_grenade(itemstack, dropper, false)
     end,
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "object" then
             local ent = pointed_thing.ref:get_luaentity()
             if ent and FLAME_ENTITIES[ent.name] then
-                itemstack:set_name("nh_nodes:litgranade")
+                itemstack:set_name("nh_nodes:litgrenade")
             	attach_glow(user)
                 return itemstack
             end
@@ -12033,7 +12294,7 @@ core.register_node("nh_nodes:granade", {
     end,
 })
 
-core.register_entity("nh_nodes:granade_entity", {
+core.register_entity("nh_nodes:grenade_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -12041,8 +12302,8 @@ core.register_entity("nh_nodes:granade_entity", {
         static_save = false,
 
         visual = "mesh",
-        mesh = "granade.obj",
-        textures = {"fusegranade.png"},
+        mesh = "grenade.obj",
+        textures = {"fusegrenade.png"},
 
         visual_size = {x = 10, y = 10},
 
@@ -12080,7 +12341,7 @@ core.register_entity("nh_nodes:granade_entity", {
 
             if DECORATIONS[node.name] or node.name == "air" then
                 -- substitui a decoração pela granada
-                core.set_node(place_pos, {name = "nh_nodes:granade"})
+                core.set_node(place_pos, {name = "nh_nodes:grenade"})
             else
                 -- node sólido abaixo: coloca no air acima
                 local above_pos = vector.round({
@@ -12090,7 +12351,7 @@ core.register_entity("nh_nodes:granade_entity", {
                 })
                 local above_node = core.get_node(above_pos)
                 if above_node.name == "air" then
-                    core.set_node(above_pos, {name = "nh_nodes:granade"})
+                    core.set_node(above_pos, {name = "nh_nodes:grenade"})
                 end
             end
 
@@ -12100,11 +12361,11 @@ core.register_entity("nh_nodes:granade_entity", {
     end
 })
 
-core.register_node("nh_nodes:litgranade", {
-    description = S("Lit Granade"),
+core.register_node("nh_nodes:litgrenade", {
+    description = S("Lit Grenade"),
     drawtype = "mesh",
-    mesh = "granade.obj",
-    tiles = {"litgranade.png"},
+    mesh = "grenade.obj",
+    tiles = {"litgrenade.png"},
     
     walkable = false,
     paramtype = "light",
@@ -12117,14 +12378,14 @@ core.register_node("nh_nodes:litgranade", {
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
     on_place = function(itemstack, placer, pointed_thing)
-        return throw_granade(itemstack, placer, true)
+        return throw_grenade(itemstack, placer, true)
     end,
     on_drop = function(itemstack, dropper, pos)
-        return throw_granade(itemstack, dropper, true)
+        return throw_grenade(itemstack, dropper, true)
     end,
 })
 
-core.register_entity("nh_nodes:litgranade_entity", {
+core.register_entity("nh_nodes:litgrenade_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -12132,8 +12393,8 @@ core.register_entity("nh_nodes:litgranade_entity", {
         static_save = false,
 
         visual = "mesh",
-        mesh = "granade.obj",
-        textures = {"litgranade.png"},
+        mesh = "grenade.obj",
+        textures = {"litgrenade.png"},
 
         glow = 8,
 

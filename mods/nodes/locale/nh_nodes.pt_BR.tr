@@ -22,7 +22,9 @@ Water=Água
 Flowing Water=Água Corrente
 Fresh Water=Água Doce
 Flowing Fresh Water=Água Doce Corrente
+
 Ice=Gelo
+Ice Ramp = Gelo em Rampa
 
 Snow=Neve
 Snow Ramp=Neve em Rampa
@@ -30,6 +32,7 @@ Snow Corner=Neve em Quina
 Snow Inside Corner=Neve em Quina Interna
 
 Avalanche=Avalanche
+Flowing Avalanche=Avalanche Corrente
 
 Dirt=Terra
 Dirt Ramp=Terra em Rampa
@@ -53,6 +56,9 @@ Sand Corner=Areia em Quina
 Sand Inside Corner=Areia em Quina Interna
 
 Wet Sand=Areia molhada
+
+Glass=Vidro
+Mirror=Espelho
 
 Basalt=Basalto
 Basalt Ramp=Basalto em Rampa
@@ -101,6 +107,8 @@ Pyrolusite=Pirolusita
 
 Chromite=Cromita
 [Chromium Ore]=[Minério de Cromo]
+Chromium Nugget=Pepita de Cromo
+Chromium Ingot=Lingote de Cromo
 
 Obsidian=Obsidiana
 Peridotite=Peridotito
@@ -219,6 +227,9 @@ Obsidian Pebble=Seixo de Obsidiana
 [Throwable]=[Arremessável]
 Damage: +1=Dano: +1
 (Throw: Q / drop)=(Arremesso: Q / dropar)
+
+Grenade=Granada
+Lit Grenade=Granada Acesa
 
 Chipped Stone=Pedra Lascada
 Obsidian Blade=Lâmina de Obsidiana
