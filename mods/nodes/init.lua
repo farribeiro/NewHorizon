@@ -6,45 +6,35 @@ local S                  = core.get_translator("nh_nodes")
 local footstep_timer     = {}
 local lava_damage_timer  = {}
 local players_with_torch = {}
-
 local LAVA_NODES         = {
-    ["nh_nodes:lava"]             = true,
-    ["nh_nodes:lava_flowing"]     = true,
-    ["nh_nodes:bluelava"]         = true,
+    ["nh_nodes:lava"] = true,
+    ["nh_nodes:lava_flowing"] = true,
+    ["nh_nodes:bluelava"] = true,
     ["nh_nodes:bluelava_flowing"] = true,
 }
-
-local WATER_FULLNODES    = {
-    ["nh_nodes:water"]  = true,
-    ["nh_nodes:water2"] = true,
-}
-
-local WATER_MIDNODES     = {
-    ["nh_nodes:water_flowing"] = true,
-    ["nh_nodes:water2_flowing"] = true,
-}
-
+local WATER_FULLNODES    = { ["nh_nodes:water"] = true, ["nh_nodes:water2"] = true, }
+local WATER_MIDNODES     = { ["nh_nodes:water_flowing"] = true, ["nh_nodes:water2_flowing"] = true, }
 local LEAF_TYPES         = {
-    ["nh_nodes:leaves"]        = true,
-    ["nh_nodes:leaves_nut"]    = true,
-    ["nh_nodes:leaves_nut2"]   = true,
-    ["nh_nodes:leaves_nut3"]   = true,
-    ["nh_nodes:leaves_apple"]  = true,
+    ["nh_nodes:leaves"] = true,
+    ["nh_nodes:leaves_nut"] = true,
+    ["nh_nodes:leaves_nut2"] = true,
+    ["nh_nodes:leaves_nut3"] = true,
+    ["nh_nodes:leaves_apple"] = true,
     ["nh_nodes:leaves_apple2"] = true,
     ["nh_nodes:leaves_apple3"] = true,
 }
 local DECORATIONS        = {
-    ["nh_nodes:smallgrass"]        = true,
-    ["nh_nodes:highgrass"]         = true,
-    ["nh_nodes:rush"]              = true,
-    ["nh_nodes:dandelion"]         = true,
-    ["nh_nodes:grassleaves"]       = true,
+    ["nh_nodes:smallgrass"] = true,
+    ["nh_nodes:highgrass"] = true,
+    ["nh_nodes:rush"] = true,
+    ["nh_nodes:dandelion"] = true,
+    ["nh_nodes:grassleaves"] = true,
     ["nh_nodes:grassleavesmedium"] = true,
-    ["nh_nodes:micaceusfungus"]    = true,
-    ["nh_nodes:flyamanitafungus"]  = true,
-    ["nh_nodes:pebble"]            = true,
-    ["nh_nodes:white_pebble"]      = true,
-    ["nh_nodes:fallenstick"]       = true,
+    ["nh_nodes:micaceusfungus"] = true,
+    ["nh_nodes:flyamanitafungus"] = true,
+    ["nh_nodes:pebble"] = true,
+    ["nh_nodes:white_pebble"] = true,
+    ["nh_nodes:fallenstick"] = true,
 }
 local FLAME_ENTITIES     = {
     ["nh_nodes:campfire_flame_entity"]  = true,
@@ -52,16 +42,12 @@ local FLAME_ENTITIES     = {
     ["nh_nodes:palmstraw_flame_entity"] = true,
     ["nh_nodes:flame_entity"]           = true,
 }
-
 nodes                    = {}
-
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
     for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 2)) do
         local ent = obj:get_luaentity()
-        if ent and ent.name == "nh_nodes:glow_entity" then
-            obj:remove()
-        end
+        if ent and ent.name == "nh_nodes:glow_entity" then obj:remove() end
     end
 end
 -- ao trocar para litgrenade (no on_use do grenade):
@@ -70,29 +56,13 @@ local function attach_glow(player)
     detach_glow(player)
 
     local glow_obj = core.add_entity(player:get_pos(), "nh_nodes:glow_entity")
-    if glow_obj then
-        glow_obj:set_attach(player, "bone_RHand", { x = 1.25, y = 0, z = 0 }, { x = 0, y = 0, z = 0 })
-    end
+    if glow_obj then glow_obj:set_attach(player, "bone_RHand", { x = 1.25, y = 0, z = 0 }, { x = 0, y = 0, z = 0 }) end
 end
-
 core.register_entity("nh_nodes:glow_entity", {
-    initial_properties = {
-        visual = "sprite",
-        textures = { "spark_particle.png^[colorize:#FF8800:150" },
-        visual_size = { x = 0.05, y = 0.05 },
-        collisionbox = { 0, 0, 0, 0, 0, 0 },
-        physical = false,
-        static_save = false,
-        glow = 14,
-    },
-
+    initial_properties = { visual = "sprite", textures = { "spark_particle.png^[colorize:#FF8800:150" }, visual_size = { x = 0.05, y = 0.05 }, collisionbox = { 0, 0, 0, 0, 0, 0 }, physical = false, static_save = false, glow = 14, },
     on_step = function(self, dtime)
         local rot = self.object:get_rotation()
-        self.object:set_rotation({
-            x = rot.x,
-            y = rot.y + 0.15,
-            z = rot.z + 0.07,
-        })
+        self.object:set_rotation({ x = rot.x, y = rot.y + 0.15, z = rot.z + 0.07, })
     end,
 })
 
