@@ -33,15 +33,80 @@ local LEAF_TYPES = {
     ["nh_nodes:leaves_apple2"] = true,
     ["nh_nodes:leaves_apple3"] = true,
 }
+local DECORATIONS = {
+    ["nh_nodes:smallgrass"]        = true,
+    ["nh_nodes:highgrass"]         = true,
+    ["nh_nodes:rush"]              = true,
+    ["nh_nodes:dandelion"]         = true,
+    ["nh_nodes:grassleaves"]       = true,
+    ["nh_nodes:grassleavesmedium"] = true,
+    ["nh_nodes:micaceusfungus"]    = true,
+    ["nh_nodes:flyamanitafungus"]  = true,
+    ["nh_nodes:pebble"]            = true,
+    ["nh_nodes:white_pebble"]       = true,
+    ["nh_nodes:fallenstick"]       = true,
+}
+local FLAME_ENTITIES = {
+    ["nh_nodes:campfire_flame_entity"]  = true,
+    ["nh_nodes:torch_flame_entity"]     = true,
+    ["nh_nodes:palmstraw_flame_entity"] = true,
+    ["nh_nodes:flame_entity"]           = true,
+}
 
 nodes = {}
+
+local function detach_glow(player)
+    -- busca e remove o entity de glow anterior
+    for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 2)) do
+        local ent = obj:get_luaentity()
+        if ent and ent.name == "nh_nodes:glow_entity" then
+            obj:remove()
+        end
+    end
+end
+-- ao trocar para litgranade (no on_use do granade):
+local function attach_glow(player)
+    -- remove glow anterior se existir
+    detach_glow(player)
+
+    local glow_obj = core.add_entity(player:get_pos(), "nh_nodes:glow_entity")
+    if glow_obj then
+        glow_obj:set_attach(player, "bone_RHand", {x=1.25, y=0, z=0}, {x=0,y=0,z=0})
+    end
+end
+
+core.register_entity("nh_nodes:glow_entity", {
+    initial_properties = {
+        visual = "sprite",
+        textures = {"spark_particle.png^[colorize:#FF8800:150"},
+        visual_size = {x = 0.05, y = 0.05},
+        collisionbox = {0, 0, 0, 0, 0, 0},
+        physical = false,
+        static_save = false,
+        glow = 14,
+    },
+    
+    on_step = function(self, dtime)
+        local rot = self.object:get_rotation()
+        self.object:set_rotation({
+            x = rot.x,
+            y = rot.y + 0.15,
+            z = rot.z + 0.07,
+        })
+    end,
+})
 
 core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
         local name = player:get_player_name()
         local pos  = player:get_pos()
-
-        -- ==== PASSOS ====
+        
+        -- remove o glow se o player tirar a litgranade da mão sem arremessar
+        local item = player:get_wielded_item():get_name()
+        if item ~= "nh_nodes:litgranade" then
+            detach_glow(player)
+        end
+        -- PASSOS
         footstep_timer[name] = (footstep_timer[name] or 0) + dtime
         if footstep_timer[name] >= 0.4 then
             footstep_timer[name] = 0
@@ -112,7 +177,7 @@ core.register_globalstep(function(dtime)
         local wielded        = player:get_wielded_item()
         local light_pos_base = {x = pos.x, y = pos.y + 1, z = pos.z}
 
-        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" then
+        if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" or wielded:get_name() == "nh_nodes:litgranade" then
             if not players_with_torch[name] then
                 players_with_torch[name] = {}
             end
@@ -6439,14 +6504,33 @@ core.register_node("nh_nodes:inksac", {
     paramtype2 = "facedir",
     groups = {oddly_breakable_by_hand = 1},
     
-    collision_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.15, -0.5, -0.25, 0.15, -0.375, 0.25}
     },
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.15, -0.5, -0.25, 0.15, -0.375, 0.25}
     },
+})
+
+core.register_node("nh_nodes:mirror", {
+    description = S("Mirror"),
+    --inventory_image = "bottle.png",
+    drawtype = "mesh",
+    mesh = "mirror.obj",
+    tiles = {"mirror.png"},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    walkable = false,
+    
+    collision_box = {type = "fixed",
+        fixed = {-0.5, -0.5, 0.435, 0.5, 0.5, 0.5}
+    },
+    selection_box = {type = "fixed",
+        fixed = {-0.5, -0.5, 0.435, 0.5, 0.5, 0.5}
+    },
+
+    groups = {cracky = 2, oddly_breakable_by_hand = 1},
 })
 
 core.register_node("nh_nodes:bottle", {
@@ -7321,25 +7405,15 @@ core.register_node("nh_nodes:snow_insidecorner", {
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     
-collision_box = {
-    type = "fixed",
+collision_box = {type = "fixed",
     fixed = {
-        -- Base completa (metade inferior)
-        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
-
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- faixa Z-
-        
-        -- Topo braço 1: faixa traseira (Z-)
-        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- faixa Z-
-        
-        -- Topo braço 2: faixa lateral (X-)
-        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- faixa X-
-
+        {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},-- Base completa (metade inferior)
+        {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},  -- Topo braço 1: faixa traseira (Z-) -- faixa Z-
+        {-0.5,  0.0, -0.5,  0.0,  0.5,  0.0},  -- Topo braço 1: faixa traseira (Z-)-- faixa Z-
+        {0.5,  0.0,  0.0,  0.0,  0.5,  0.5},  -- Topo braço 2: faixa lateral (X-)-- faixa X-
     },
 },
-selection_box = {
-    type = "fixed",
+selection_box = {type = "fixed",
     fixed = {
         {-0.5, -0.5, -0.5,  0.5,  0.0,  0.5},
         {-0.5,  0.0, 0.0,  0.0,  0.5,  0.5},
@@ -7355,17 +7429,40 @@ core.register_node("nh_nodes:snow", {
     drawtype = "normal",
     groups = {crumbly = 3, falling_node = 1}, -- como areia, mas sem fluir
     sounds = {
-        footstep = {name = "punchtimber3", gain = 0.5},        
+    footstep = {name = "punchtimber3", gain = 0.5},        
     dug = {name = "punchtimber3", gain = 0.5},
     dig  = {name = "punchtimber3", gain = 0.5},
     place = {name = "punchtimber3", gain = 0.5},
     },
 })
 
-core.register_node("nh_nodes:snow_flowing", {
+core.register_node("nh_nodes:avalanche", {
     description = S("Avalanche"),
+    liquidtype = "source",
+    drawtype = "liquid",
+    tiles = {"neve.png"},
+    groups = {liquid = 3, crumbly = 3, falling_node = 1}, -- como areia e flui
+    sounds = {
+    footstep = {name = "punchtimber3", gain = 0.5},        
+    dug = {name = "punchtimber3", gain = 0.5},
+    dig  = {name = "punchtimber3", gain = 0.5},
+    place = {name = "punchtimber3", gain = 0.5},
+    },
+    
+    walkable = false,
+    liquid_alternative_flowing = "nh_nodes:avalanche_flowing",
+    liquid_alternative_source = "nh_nodes:avalanche",
+    liquid_viscosity = 0,
+    liquid_renewable = false,
+    post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+})
+
+core.register_node("nh_nodes:avalanche_flowing", {
+    description = S("Avalanche Flow"),
+    liquidtype = "flowing",
     drawtype = "flowingliquid",
     tiles = {"neve.png"},
+    groups = {liquid = 3, not_in_creative_inventory = 1},
     special_tiles = {
         {
             name = "neve_flowing_animated.png",
@@ -7378,18 +7475,22 @@ core.register_node("nh_nodes:snow_flowing", {
             animation = {type="vertical_frames", aspect_w=16, aspect_h=16, length=2.0},
         },
     },
-    use_texture_alpha = "blend",
+    --use_texture_alpha = "blend",
     paramtype = "light",
     walkable = false,
     pointable = false,
     buildable_to = true,
-    liquidtype = "flowing",
-    groups = {not_in_creative_inventory=1},
+    liquid_alternative_flowing = "nh_nodes:avalanche_flowing",
+    liquid_alternative_source = "nh_nodes:avalanche",
+
+    liquid_viscosity = 0,
+    liquid_renewable = false,
 })
 
 core.register_node("nh_nodes:water", {
     description = S("Water"),
     drawtype = "liquid",
+    liquidtype = "source",
     tiles = {"agua.png"},
     tiles = {{name = "agua_animated.png", backface_culling = false, 
     animation = {type="vertical_frames", aspect_w=16, aspect_h=16, length=10.0}},
@@ -7402,7 +7503,6 @@ core.register_node("nh_nodes:water", {
     walkable = false,
     pointable = false,
     buildable_to = true,
-    liquidtype = "source",
     liquid_alternative_flowing = "nh_nodes:water_flowing",
     liquid_alternative_source = "nh_nodes:water",
     liquid_viscosity = 1,
@@ -7939,7 +8039,6 @@ core.register_node("nh_nodes:lava_flowing", {
     liquid_viscosity = 1,
     post_effect_color = {a=64, r=255, g=0, b=0},
     groups = {lava=1, liquid=1, hot = 1, not_in_creative_inventory=1},
-
 })
 
 core.register_node("nh_nodes:bluelava", {
@@ -10281,7 +10380,7 @@ core.register_node("nh_nodes:obsidiansword", {
         damage_groups = {fleshy = 7},
     },
     
-        -- cavar node
+    -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
         wear = wear + 4369 -- ~15 usos (65535 / 15)
@@ -10298,18 +10397,12 @@ core.register_node("nh_nodes:obsidiansword", {
     end,
 
 
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
-        },
-    },
-
-    selection_box = {
-        type = "fixed",
+    collision_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
     },
-
+    selection_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.5, 0.125, -0.435, 1.35},
+    },
     -- Configuração mão direita
     wielded_bone_position = {
         pos = {x = 3, y = 0, z = 1.8},
@@ -10318,10 +10411,7 @@ core.register_node("nh_nodes:obsidiansword", {
     wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-
----------------------------
 -- NODE DO SEIXO NO CHÃO
----------------------------
 core.register_node("nh_nodes:pebble", {
     description = S("Pebble") .. "\n" .. S("Damage: +1"),
     drawtype = "mesh",
@@ -10433,15 +10523,10 @@ core.register_node("nh_nodes:chippedstone", {
         return itemstack
     end,
 
-    collision_box = {
-        type = "fixed",
-        fixed = {
-            {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
-        },
+    collision_box = {type = "fixed",
+        fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
     },
-
-    selection_box = {
-        type = "fixed",
+    selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},
     },
 
@@ -11885,6 +11970,35 @@ core.register_node("nh_nodes:white_pebble", {
     end,
 })
 
+-- FUNÇÃO DE ARREMESSO
+local function throw_granade(itemstack, placer, lit)
+    if not placer or not placer:is_player() then
+        return itemstack
+    end
+    detach_glow(placer)
+
+    local pos = placer:get_pos()
+    pos.y = pos.y + 1.5
+
+    local dir = placer:get_look_dir()
+
+    local entity_name = lit and "nh_nodes:litgranade_entity" or "nh_nodes:granade_entity"
+
+    local obj = core.add_entity(pos, entity_name)
+
+    if obj then
+        obj:set_velocity(vector.multiply(dir, 14))
+        obj:set_acceleration({x = 0, y = -10, z = 0})
+        local ent = obj:get_luaentity()
+        if ent then
+            ent._shooter = placer
+        end
+    end
+
+    itemstack:take_item(1)
+    return itemstack
+end
+
 core.register_node("nh_nodes:granade", {
     description = S("Granade"),
     drawtype = "mesh",
@@ -11901,24 +12015,89 @@ core.register_node("nh_nodes:granade", {
     selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
+    on_place = function(itemstack, placer, pointed_thing)
+        return throw_granade(itemstack, placer, false)
+    end,
+    on_drop = function(itemstack, dropper, pos)
+        return throw_granade(itemstack, dropper, false)
+    end,
+    on_use = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "object" then
+            local ent = pointed_thing.ref:get_luaentity()
+            if ent and FLAME_ENTITIES[ent.name] then
+                itemstack:set_name("nh_nodes:litgranade")
+            	attach_glow(user)
+                return itemstack
+            end
+        end
+    end,
 })
 
 core.register_entity("nh_nodes:granade_entity", {
-    description = S("Granade") .. "\n" .. S("[Throwable]"),
-    drawtype = "mesh",
-    mesh = "granade.obj",
-    tiles = {"fusegranade.png"},
-    
-    walkable = false,
-    paramtype = "light",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
-    
-    collision_box = {type = "fixed",
-        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    initial_properties = {
+        physical = true,
+        collide_with_objects = true,
+        pointable = true,
+        static_save = false,
+
+        visual = "mesh",
+        mesh = "granade.obj",
+        textures = {"fusegranade.png"},
+
+        visual_size = {x = 10, y = 10},
+
+        collisionbox = {-0.125, -0.5, -0.125, 0.125, -0.25,  0.125},
     },
-    selection_box = {type = "fixed",
-        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
-    },
+
+    _timer = 0,
+    _shooter = nil,
+
+    on_step = function(self, dtime)
+        local pos = self.object:get_pos()
+        if not pos then return end
+
+        self._timer = self._timer + dtime
+
+        -- rotação
+        local rot = self.object:get_rotation()
+        self.object:set_rotation({
+            x = rot.x + 0.003,
+            y = rot.y + 0.2,
+            z = rot.z,
+        })
+
+        local vel = self.object:get_velocity()
+
+        -- se praticamente parou OU timer expirou, vira node
+        if vector.length(vel) < 0.2 or self._timer >= 5 then
+            local place_pos = vector.round({
+                x = pos.x,
+                y = pos.y - 0.1,
+                z = pos.z
+            })
+
+            local node = core.get_node(place_pos)
+
+            if DECORATIONS[node.name] or node.name == "air" then
+                -- substitui a decoração pela granada
+                core.set_node(place_pos, {name = "nh_nodes:granade"})
+            else
+                -- node sólido abaixo: coloca no air acima
+                local above_pos = vector.round({
+                    x = pos.x,
+                    y = pos.y + 0.9,
+                    z = pos.z
+                })
+                local above_node = core.get_node(above_pos)
+                if above_node.name == "air" then
+                    core.set_node(above_pos, {name = "nh_nodes:granade"})
+                end
+            end
+
+            self.object:remove()
+            return
+        end
+    end
 })
 
 core.register_node("nh_nodes:litgranade", {
@@ -11937,29 +12116,132 @@ core.register_node("nh_nodes:litgranade", {
     selection_box = {type = "fixed",
         fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
     },
+    on_place = function(itemstack, placer, pointed_thing)
+        return throw_granade(itemstack, placer, true)
+    end,
+    on_drop = function(itemstack, dropper, pos)
+        return throw_granade(itemstack, dropper, true)
+    end,
 })
 
 core.register_entity("nh_nodes:litgranade_entity", {
-    description = S("Lit Granade") .. "\n" .. S("[Throwable]"),
-    drawtype = "mesh",
-    mesh = "granade.obj",
-    tiles = {"litgranade.png"},
-    
-    walkable = false,
-    paramtype = "light",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1},
-    
-    collision_box = {type = "fixed",
-        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
+    initial_properties = {
+        physical = true,
+        collide_with_objects = true,
+        pointable = true,
+        static_save = false,
+
+        visual = "mesh",
+        mesh = "granade.obj",
+        textures = {"litgranade.png"},
+
+        glow = 8,
+
+        visual_size = {x = 10, y = 10},
+
+        collisionbox = {-0.125, -0.5, -0.125, 0.125, -0.25,  0.125},
     },
-    selection_box = {type = "fixed",
-        fixed = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125}
-    },
+
+    _timer = 0,
+    _shooter = nil,
+
+    on_step = function(self, dtime)
+        local pos = self.object:get_pos()
+        if not pos then return end
+
+        self._timer = self._timer + dtime
+
+        local rot = self.object:get_rotation()
+        self.object:set_rotation({
+            x = rot.x + 0.003,
+            y = rot.y + 0.2,
+            z = rot.z,
+        })        
+
+        -- explode após 5 segundos
+        if self._timer >= 5 then
+            core.sound_play("tnt_explode", {
+                pos = pos,
+                gain = 1.0,
+                max_hear_distance = 32,
+            })
+
+            core.add_particlespawner({
+                amount = 50,
+                time = 0.3,
+                glow = 14,
+
+                minpos = vector.subtract(pos, 0.5),
+                maxpos = vector.add(pos, 0.5),
+
+                minvel = {x=-4, y=-4, z=-4},
+                maxvel = {x= 4, y= 4, z= 4},
+
+                minexptime = 0.5,
+                maxexptime = 1.5,
+
+                minsize = 0.5,
+                maxsize = 1,
+
+                texture = "spark_particle.png^[colorize:#FF8800:150",
+            })
+
+            -- dano em área
+            for _, obj in ipairs(core.get_objects_inside_radius(pos, 4)) do
+                if obj ~= self.object then
+                    obj:punch(self.object, 1.0, {
+                        damage_groups = {fleshy = 12},
+                    })
+                end
+            end
+
+            -- transforma neve em avalanche
+            local radius = 4
+
+            for x = -radius, radius do
+            for y = -radius, radius do
+            for z = -radius, radius do
+
+                local p = {
+                    x = pos.x + x,
+                    y = pos.y + y,
+                    z = pos.z + z
+                }
+
+                if vector.distance(pos, p) <= radius then
+
+                    local node = core.get_node(p)
+
+                    if node.name == "nh_nodes:snow_ramp"
+                    or node.name == "nh_nodes:snow_insidecorner"
+                    or node.name == "nh_nodes:snow_corner" then
+
+                        core.set_node(p, {
+                            name = "nh_nodes:avalanche"
+                        })
+                    end
+                end
+            end
+            end
+            end
+            
+            self.object:remove()
+            return
+        end
+
+        -- colisão com parede/chão
+        local node = core.get_node(vector.round(pos))
+
+        if core.registered_nodes[node.name]
+        and core.registered_nodes[node.name].walkable then
+
+            self.object:set_velocity({x=0,y=0,z=0})
+            self.object:set_acceleration({x=0,y=0,z=0})
+        end
+    end,
 })
 
----------------------------
 -- NODE DAS FOLHAS DE GRAMA
----------------------------
 core.register_node("nh_nodes:grassleaves", {
     --drawtype = "mesh",
     --mesh = "grassleaves.obj",
