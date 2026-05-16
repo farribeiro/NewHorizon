@@ -24,36 +24,36 @@ Fresh Water=Água Doce
 Flowing Fresh Water=Água Doce Corrente
 
 Ice=Gelo
-Ice Ramp = Gelo em Rampa
+Ice Ramp = Rampa de Gelo
 
 Snow=Neve
-Snow Ramp=Neve em Rampa
-Snow Corner=Neve em Quina
-Snow Inside Corner=Neve em Quina Interna
+Snow Ramp=Rampa de Neve
+Snow Corner=Quina de Neve
+Snow Inside Corner=Quina Interna de Neve
 
 Avalanche=Avalanche
 Flowing Avalanche=Avalanche Corrente
 
 Dirt=Terra
-Dirt Ramp=Terra em Rampa
-Dirt Corner=Terra em Quina
-Dirt Inside Corner=Terra em Quina Interna
+Dirt Ramp=Rampa de Terra
+Dirt Corner=Quina de Terra
+Dirt Inside Corner=Quina Interna de Terra
 
 Wet Dirt=Terra Molhada
 Tilled Dirt=Terra Arada
 Wet Tilled Dirt=Terra Arada Irrigada
 
 Grass=Grama
-Grass Ramp=Grama em Rampa
-Grass Corner=Grama em Quina
-Grass Inside Corner=Grama em Quina Interna
+Grass Ramp=Rampa de Grama
+Grass Corner=Quina de Grama
+Grass Inside Corner=Quina Interna de Grama
 
 Lawn=Gramado
 
 Sand=Areia
-Sand Ramp=Areia em Rampa
-Sand Corner=Areia em Quina
-Sand Inside Corner=Areia em Quina Interna
+Sand Ramp=Rampa de Areia
+Sand Corner=Quina de Areia
+Sand Inside Corner=Quina Interna de Areia
 
 Wet Sand=Areia molhada
 
@@ -61,9 +61,9 @@ Glass=Vidro
 Mirror=Espelho
 
 Basalt=Basalto
-Basalt Ramp=Basalto em Rampa
-Basalt Corner=Basalto em Quina
-Basalt Inside Corner=Basalto em Quina Interna
+Basalt Ramp=Rampa de Basalto
+Basalt Corner=Quina de Basalto
+Basalt Inside Corner=Quina Interna de Basalto
 
 Saprolite=Saprólito
 Gneiss=Gnaisse
