@@ -5,7 +5,7 @@ local S = core.get_translator("nh_nodes")
 
 local function populate_true(names)
     local father = {}
-    for _, name in ipairs(names) do father[("nh_nodes:%s"):format(name)] = true end
+    for _, name in ipairs(names) do father["nh_nodes:" ..name] = true end
     return father
 end
 
