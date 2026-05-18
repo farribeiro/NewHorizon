@@ -5,24 +5,24 @@ local S = core.get_translator("nh_nodes")
 
 local function populate_true(names)
     local father = {}
-    for _, name in ipairs(names) do father[name] = true end
+    for _, name in ipairs(names) do father[("nh_nodes:%s"):format(name)] = true end
     return father
 end
 
 local footstep_timer     = {}
 local lava_damage_timer  = {}
 local players_with_torch = {}
-local LAVA_NODES         = populate_true({ "nh_nodes:lava", "nh_nodes:lava_flowing", "nh_nodes:bluelava",
-    "nh_nodes:bluelava_flowing", })
-local WATER_FULLNODES    = populate_true({ "nh_nodes:water", "nh_nodes:water2", })
-local WATER_MIDNODES     = populate_true({ "nh_nodes:water_flowing", "nh_nodes:water2_flowing", })
-local LEAF_TYPES         = populate_true({ "nh_nodes:leaves", "nh_nodes:leaves_nut", "nh_nodes:leaves_nut2",
-    "nh_nodes:leaves_nut3", "nh_nodes:leaves_apple", "nh_nodes:leaves_apple2", "nh_nodes:leaves_apple3", })
-local DECORATIONS        = populate_true({ "nh_nodes:smallgrass", "nh_nodes:highgrass", "nh_nodes:rush",
-    "nh_nodes:dandelion", "nh_nodes:grassleaves", "nh_nodes:grassleavesmedium", "nh_nodes:micaceusfungus",
-    "nh_nodes:flyamanitafungus", "nh_nodes:pebble", "nh_nodes:white_pebble", "nh_nodes:fallenstick", })
-local FLAME_ENTITIES     = populate_true({ "nh_nodes:campfire_flame_entity", "nh_nodes:torch_flame_entity",
-    "nh_nodes:palmstraw_flame_entity", "nh_nodes:flame_entity", })
+local LAVA_NODES         = populate_true({ "lava", "lava_flowing", "bluelava",
+    "bluelava_flowing", })
+local WATER_FULLNODES    = populate_true({ "water", "water2", })
+local WATER_MIDNODES     = populate_true({ "water_flowing", "water2_flowing", })
+local LEAF_TYPES         = populate_true({ "leaves", "leaves_nut", "leaves_nut2",
+    "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3", })
+local DECORATIONS        = populate_true({ "smallgrass", "highgrass", "rush",
+    "dandelion", "grassleaves", "grassleavesmedium", "micaceusfungus",
+    "flyamanitafungus", "pebble", "white_pebble", "fallenstick", })
+local FLAME_ENTITIES     = populate_true({ "campfire_flame_entity", "torch_flame_entity",
+    "palmstraw_flame_entity", "flame_entity", })
 nodes                    = {}
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
