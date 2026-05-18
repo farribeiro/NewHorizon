@@ -1,47 +1,28 @@
 -- NODES
 core.log("action", "[NODES] init.lua loaded")
 
-local S                  = core.get_translator("nh_nodes")
+local S = core.get_translator("nh_nodes")
+
+local function populate_true(names)
+    local father = {}
+    for _, name in ipairs(names) do father[("nh_nodes:%s"):format(name)] = true end
+    return father
+end
 
 local footstep_timer     = {}
 local lava_damage_timer  = {}
 local players_with_torch = {}
-local LAVA_NODES         = {
-    ["nh_nodes:lava"] = true,
-    ["nh_nodes:lava_flowing"] = true,
-    ["nh_nodes:bluelava"] = true,
-    ["nh_nodes:bluelava_flowing"] = true,
-}
-local WATER_FULLNODES    = { ["nh_nodes:water"] = true, ["nh_nodes:water2"] = true, }
-local WATER_MIDNODES     = { ["nh_nodes:water_flowing"] = true, ["nh_nodes:water2_flowing"] = true, }
-local LEAF_TYPES         = {
-    ["nh_nodes:leaves"] = true,
-    ["nh_nodes:leaves_nut"] = true,
-    ["nh_nodes:leaves_nut2"] = true,
-    ["nh_nodes:leaves_nut3"] = true,
-    ["nh_nodes:leaves_apple"] = true,
-    ["nh_nodes:leaves_apple2"] = true,
-    ["nh_nodes:leaves_apple3"] = true,
-}
-local DECORATIONS        = {
-    ["nh_nodes:smallgrass"] = true,
-    ["nh_nodes:highgrass"] = true,
-    ["nh_nodes:rush"] = true,
-    ["nh_nodes:dandelion"] = true,
-    ["nh_nodes:grassleaves"] = true,
-    ["nh_nodes:grassleavesmedium"] = true,
-    ["nh_nodes:micaceusfungus"] = true,
-    ["nh_nodes:flyamanitafungus"] = true,
-    ["nh_nodes:pebble"] = true,
-    ["nh_nodes:white_pebble"] = true,
-    ["nh_nodes:fallenstick"] = true,
-}
-local FLAME_ENTITIES     = {
-    ["nh_nodes:campfire_flame_entity"] = true,
-    ["nh_nodes:torch_flame_entity"] = true,
-    ["nh_nodes:palmstraw_flame_entity"] = true,
-    ["nh_nodes:flame_entity"] = true,
-}
+local LAVA_NODES         = populate_true({ "lava", "lava_flowing", "bluelava",
+    "bluelava_flowing", })
+local WATER_FULLNODES    = populate_true({ "water", "water2", })
+local WATER_MIDNODES     = populate_true({ "water_flowing", "water2_flowing", })
+local LEAF_TYPES         = populate_true({ "leaves", "leaves_nut", "leaves_nut2",
+    "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3", })
+local DECORATIONS        = populate_true({ "smallgrass", "highgrass", "rush",
+    "dandelion", "grassleaves", "grassleavesmedium", "micaceusfungus",
+    "flyamanitafungus", "pebble", "white_pebble", "fallenstick", })
+local FLAME_ENTITIES     = populate_true({ "campfire_flame_entity", "torch_flame_entity",
+    "palmstraw_flame_entity", "flame_entity", })
 nodes                    = {}
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
@@ -159,7 +140,8 @@ core.register_globalstep(function(dtime)
                 local old_pos  = players_with_torch[name].pos
                 local old_node = core.get_node(old_pos)
                 if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
-                    core.remove_node(old_pos)
+                    core
+                        .remove_node(old_pos)
                 end
                 players_with_torch[name] = nil
             end
