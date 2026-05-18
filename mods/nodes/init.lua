@@ -203,22 +203,8 @@ core.register_globalstep(function(dtime)
     end
 end)
 -- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
-local FLOATING_STUFF = {
-    ["nh_nodes:oaktimber"]  = true,
-    ["nh_nodes:oaklog"]     = true,
-    ["nh_nodes:oakwood"]    = true,
-    ["nh_nodes:stick"]      = true,
-    ["nh_nodes:palmtimber"] = true,
-    ["nh_nodes:palmlog"]    = true,
-    ["nh_nodes:coconut"]    = true,
-    ["nh_nodes:pinetimber"] = true,
-    ["nh_nodes:pinelog"]    = true,
-    ["nh_nodes:pinewood"]   = true,
-    ["nh_nodes:pineraft"]   = true,
-    ["nh_nodes:ice"]        = true,
-    ["nh_nodes:ice2"]       = true,
-    ["nh_nodes:orb_empty"]  = true,
-}
+local FLOATING_STUFF = populate_true({ "oaktimber", "oaklog", "oakwood", "stick", "palmtimber", "palmlog", "coconut",
+    "pinetimber", "pinelog", "pinewood", "pineraft", "ice", "ice2", "orb_empty", })
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
 -- Calcula a direção da corrente da água.
 local function get_liquid_flow_dir(pos)
