@@ -612,6 +612,23 @@ function mobs:effect(pos, amount, texture, min_size, max_size, radius, grav, glo
 	effect(pos, amount, texture, min_size, max_size, radius, grav, glow, fall)
 end
 
+local function spark_effect(pos, radius) -- ← fagulhas aqui
+    core.add_particlespawner({
+        amount = 40,
+        time = 0.4,
+        minpos = pos, maxpos = pos,
+        minvel = {x = -radius*3, y = 0,        z = -radius*3},
+        maxvel = {x =  radius*3, y = radius*4,  z =  radius*3},
+        minacc = {x = 0, y = -10, z = 0},
+        maxacc = {x = 0, y = -10, z = 0},
+        minexptime = 0.3, maxexptime = 0.8,
+        minsize = 0.5,    maxsize = 1.5,
+        texture = "spark_particle.png^[colorize:#FF8800:150",
+        glow = 14,
+        collisiondetection = true,
+    })
+end
+
 -- Thx Wuzzy for easy settings
 
 local HORNY_TIME = 30
@@ -2221,7 +2238,7 @@ function mob_class:do_states(dtime)
 						self.object:set_texture_mod(self.texture_mods)
 						self.object:set_properties({glow = (self.glow or 0)})
 					else
-						self.object:set_texture_mod(self.texture_mods .. "^[brighten")
+						self.object:set_texture_mod(self.texture_mods .. "^[colorize:#FF000044") -- alterei a cor aqui
 						self.object:set_properties({glow = (self.glow or 0) + 3})
 					end
 
@@ -3923,6 +3940,8 @@ function mobs:safe_boom(self, pos, radius, texture)
 
     entity_physics(pos, radius)
 
+    spark_effect(pos, radius)  -- ← fagulhas aqui
+
     effect(pos, 32, texture or "mobs_tnt_smoke.png", radius * 3, radius * 5, radius, 1, 0)
 
     -- quebrar blocos em raio esférico
@@ -3935,11 +3954,10 @@ function mobs:safe_boom(self, pos, radius, texture)
                 if not core.is_protected(p, "") then
                     local node = core.get_node(p)
                     local def = core.registered_nodes[node.name]
-                    if def and def.walkable
-                    and not def.groups.unbreakable
-                    and not def.groups.level then
-                        core.remove_node(p)
-                    end
+                    if def and not def.groups.unbreakable and not def.groups.level
+		    and (def.walkable or def.buildable_to or def.groups.flammable or def.groups.explodable) then -- def e groups pra explodiveis aqui
+			core.remove_node(p)
+		    end
                 end
             end
         end
@@ -3953,6 +3971,8 @@ end
 function mobs:boom(self, pos, node_damage_radius, entity_radius, texture)
 
 	if not pos then return end
+
+	spark_effect(pos, node_damage_radius)  -- ← fagulhas aqui
 
 	texture = texture or "mobs_tnt_smoke.png"
 

@@ -1741,7 +1741,7 @@ mobs:register_mob("nh_mob:spider", {
     explosion_damage_radius = 4, -- raio do dano ao player
     explosion_timer = 2,         -- segundos piscando antes de explodir
     explosion_strength = 3,      -- força da explosão (destrói blocos)
-    --explosion_sound = "tnt_explode", -- som (opcional)
+    explosion_sound = "tnt_explode", -- som (opcional)
     attack_players = true,
     description = S("Spider") .. "\n" .. S("[?]"),
     hp_min = 10,
@@ -1765,9 +1765,6 @@ mobs:register_mob("nh_mob:spider", {
     visual_size = { x = 10, y = 10 },
     -- BRILHO NOS OLHOS
     glow = 3,  -- Intensidade de 0 a 14 (14 = mais brilhante)
-    -- IMPORTANTE: Propriedades para manter na água
-    -- fly = true,               -- Permite "voar" na água
-    -- fly_in = "air",   -- Voa no ar
     walk_velocity = 2,
     run_velocity = 4,
     view_range = 9,
@@ -1775,16 +1772,21 @@ mobs:register_mob("nh_mob:spider", {
     lava_damage = 5,
     light_damage = 0,
     air_damage = 0,
-    animation = {speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 1, walk_end = 2,
-        -- ANIMAÇÃO DE ATAQUE:
-        punch_start = 2, -- Frame inicial do ataque
-        punch_end = 3, -- Frame final do ataque
-    },
- 
+    animation = {speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 1, walk_end = 2, punch_start = 2, punch_end = 3,},
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
-    -- follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
- 
+    follow = {"nh_nodes:torch2"},
+    sounds = { footstep = "GrassFootstep", random = "GrassFootstep", damage = "GrassDig", fuse = "tnt_ignite"},
+    do_custom = function(self, dtime)
+        -- som de passos
+        self._step_timer = (self._step_timer or 0) + dtime
+        if self._step_timer >= 0.4 then  -- intervalo entre passos (segundos)
+            self._step_timer = 0
+            if self.state == "walk" or self.state == "run" or self.state == "attack" then
+                self:mob_sound(self.sounds.footstep)
+            end
+        end
+    end,
     -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     --[[
     on_rightclick = function(self, clicker)
@@ -1798,53 +1800,7 @@ mobs:register_mob("nh_mob:spider", {
             end
         end
     end,
-    sounds = { random = "vulto_som", damage = "vulto_hurt", },
     after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ static_save = true }) end,
-    ]]--
-    --[[
-    do_custom = function(self, dtime)
-       self.lifetimer = 20000
-        self.explosion_timer = (self.explosion_timer or 0) + dtime
-
-        -- Só verifica a cada 0.1s para não sobrecarregar
-        if self.explosion_timer < 0.1 then return end
-        self.explosion_timer = 0
-
-        local pos = self.object:get_pos()
-        if not pos then return end
-
-        -- Verifica todos os jogadores próximos
-        for _, player in ipairs(minetest.get_connected_players()) do
-            local ppos = player:get_pos()
-            local dist = vector.distance(pos, ppos)
-
-            if dist < 2.0 then
-                -- Toca um som (opcional)
-                minetest.sound_play("tnt_explode", { pos = pos, gain = 1.0, max_hear_distance = 20 })
-
-                -- Cria a explosão
-                if minetest.get_modpath("tnt") then
-                    tnt.boom(pos, { radius = 3, damage_radius = 4 })
-                else
-                    -- Sem TNT: causa dano direto ao player
-                    player:set_hp(player:get_hp() - 8)
-                    minetest.add_particlespawner({
-                        amount = 30, time = 0.5,
-                        minpos = vector.subtract(pos, 1), maxpos = vector.add(pos, 1),
-                        minvel = {x=-4,y=2,z=-4}, maxvel = {x=4,y=6,z=4},
-                        minacc = {x=0,y=-10,z=0}, maxacc = {x=0,y=-10,z=0},
-                        minexptime = 0.5, maxexptime = 1.0,
-                        minsize = 2, maxsize = 5,
-                        texture = "tnt_smoke.png",
-                    })
-                end
-
-                -- Remove o mob após explodir
-                self.object:remove()
-                return
-            end
-        end
-    end,
     ]]--
 })
 -- Spawn do dopel (casas, blocos de madeiras)
