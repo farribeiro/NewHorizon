@@ -10396,6 +10396,12 @@ core.register_node("nh_nodes:grenade", {
             if ent and FLAME_ENTITIES[ent.name] then
                 itemstack:set_name("nh_nodes:litgrenade")
                 attach_glow(user)
+                -- toca tnt_ignite uma única vez ao acender
+                core.sound_play("tnt_ignite", {
+                    pos = user:get_pos(),
+                    gain = 1.0,
+                    max_hear_distance = 16,
+                }, true)
                 return itemstack
             end
         end
