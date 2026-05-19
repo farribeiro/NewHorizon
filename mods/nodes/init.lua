@@ -1166,35 +1166,23 @@ local function apply_poison_damage(player, damage_per_tick, total_damage, interv
     local current_tick = 0
     local function apply_tick()
         if not player or not player:is_player() then return end
-
         current_tick = current_tick + 1
-
         -- Aplica o dano na VIDA (HP), não na fome
         local damage_to_apply = math.min(damage_per_tick, total_damage - (current_tick - 1) * damage_per_tick)
         local current_hp = player:get_hp()
         player:set_hp(current_hp - damage_to_apply)
-
         -- Efeito visual/sonoro de dano (opcional)
-        minetest.sound_play("player_damage", {
-            to_player = player:get_player_name(),
-            gain = 0.5,
-        }, true)
-
+        minetest.sound_play("player_damage", { to_player = player:get_player_name(), gain = 0.5, }, true)
         -- Se ainda há dano a aplicar, agenda o próximo tick
-        if current_tick < ticks then
-            minetest.after(interval, apply_tick)
-        end
+        if current_tick < ticks then minetest.after(interval, apply_tick) end
     end
 
     -- Inicia o primeiro tick
     apply_tick()
 end
-
-
 core.register_node("nh_nodes:dirt_ramp", {
     description         = "Dirt Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1203,31 +1191,12 @@ core.register_node("nh_nodes:dirt_ramp", {
     -- Dentro do register_node:
     groups              = { cracky = 3, soil = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:dirt",
-
-    sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds              = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- E adicione essa propriedade:
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
-    selection_box       = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },
-        },
-    },
-    collision_box       = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },
-        },
+    selection_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
+    collision_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, },
     },
 })
 
