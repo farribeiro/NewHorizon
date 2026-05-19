@@ -2200,10 +2200,12 @@ function mob_class:do_states(dtime)
 				self:set_velocity(self.run_velocity)
 			end
 
-			if self.animation and self.animation.run_start then
-				self:set_animation("run")
+			if self.v_start then
+			    self:set_animation("punch")
+			elseif self.animation and self.animation.run_start then
+ 			   self:set_animation("run")
 			else
-				self:set_animation("walk")
+ 			   self:set_animation("walk")
 			end
 
 			if self.v_start then
@@ -3915,13 +3917,35 @@ end
 
 function mobs:safe_boom(self, pos, radius, texture)
 
-	core.sound_play(self and self.sounds and self.sounds.explode or "tnt_explode", {
-		pos = pos, max_hear_distance = (self.sounds and self.sounds.distance) or 32
-	}, true)
+    core.sound_play(self and self.sounds and self.sounds.explode or "tnt_explode", {
+        pos = pos, max_hear_distance = (self.sounds and self.sounds.distance) or 32
+    }, true)
 
-	entity_physics(pos, radius)
+    entity_physics(pos, radius)
 
-	effect(pos, 32, texture, radius * 3, radius * 5, radius, 1, 0)
+    effect(pos, 32, texture or "mobs_tnt_smoke.png", radius * 3, radius * 5, radius, 1, 0)
+
+    -- quebrar blocos em raio esférico
+    if mobs_griefing then
+        for x = -radius, radius do
+        for y = -radius, radius do
+        for z = -radius, radius do
+            if x*x + y*y + z*z <= radius*radius then
+                local p = {x = pos.x+x, y = pos.y+y, z = pos.z+z}
+                if not core.is_protected(p, "") then
+                    local node = core.get_node(p)
+                    local def = core.registered_nodes[node.name]
+                    if def and def.walkable
+                    and not def.groups.unbreakable
+                    and not def.groups.level then
+                        core.remove_node(p)
+                    end
+                end
+            end
+        end
+        end
+        end
+    end
 end
 
 -- explosion with tnt mod checks
@@ -3947,6 +3971,8 @@ function mobs:boom(self, pos, node_damage_radius, entity_radius, texture)
 				explode_center = true,
 				tiles = texture
 			})
+		else
+        		mobs:safe_boom(self, pos, node_damage_radius, texture)
 		end
 	else
 		mobs:safe_boom(self, pos, node_damage_radius, texture)

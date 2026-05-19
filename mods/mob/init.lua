@@ -1278,56 +1278,7 @@ register_mob_spawn({
 })
 register_orb_egg("nh_mob:blackkite", S("Orb with Black Kite"))
 
--------------------------------
--- MOB: PHOENIX (Fênix)
--------------------------------
-mobs:register_mob("nh_mob:phoenix", bird_def({
-    type         = "monster",
-    passive      = false,
-    reach        = 1,
-    damage       = 2,
-    attack_type  = "dogfight",
-    description  = S("Phoenix") .. "\n" .. S("[Altered Animal]"),
-    hp_min = 10,
-    hp_max = 20,
-    armor  = 100,
-    collisionbox = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
-    selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
-    visual      = "mesh",
-    mesh        = "eagle.glb",
-    textures    = { "phoenix.png" },
-    visual_size = { x = 30, y = 30 },
-    glow        = 14,
-    floats      = 3,
-    follow      = { "nh_nodes:torch2" },
-    animation   = { speed_normal = 0.2 }, -- sobrescreve só speed_normal da base
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local name = clicker:get_wielded_item():get_name()
-            if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The phoenix wants fire!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), "...")
-            end
-        end
-    end,
-    do_custom = function(self, dtime)
-        bird_do_custom(self, dtime, "nh_nodes:magma")
-    end,
-}))
--- Spawn da fênix (próximo à basalto)
-register_mob_spawn({
-    name                = "nh_mob:phoenix",
-    nodes               = { "air" },
-    neighbors           = { "nh_nodes:basalt" },
-    max_light           = 15,
-    interval            = 120,
-    chance              = 2000,
-    active_object_count = 1,
-    min_height          = 15,
-    max_height          = 50,
-})
-register_orb_egg("nh_mob:phoenix", S("Orb with Phoenix"))
+
 -------------------------------
 -- SPIKE: DANO POR PROXIMIDADE
 -------------------------------
@@ -1778,6 +1729,272 @@ function remove_dome(placed_list)
     end
 end
  
+-- Spider (Agressivo)
+mobs:register_mob("nh_mob:spider", {
+    type = "monster",
+    passive = false,
+    reach = 1,
+    damage = 2,
+    -- attack_players = true,
+    attack_type = "explode",
+    explosion_radius = 2,        -- raio da explosão
+    explosion_damage_radius = 4, -- raio do dano ao player
+    explosion_timer = 2,         -- segundos piscando antes de explodir
+    explosion_strength = 3,      -- força da explosão (destrói blocos)
+    --explosion_sound = "tnt_explode", -- som (opcional)
+    attack_players = true,
+    description = S("Spider") .. "\n" .. S("[?]"),
+    hp_min = 10,
+    hp_max = 20,
+    armor = 100,
+    collisionbox = { -0.5, 0, -0.5, 0.5, 1, 0.5},
+    selectionbox = { -0.5, 0, -0.5, 0.5, 1, 0.5},
+    physical = true,
+    stepheight = 2, -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -10,
+    fall_damage = 0,
+    floats = 3,
+    --pathfinding = true, -- se move em zig-zag
+    static_save = true,
+    despawn_by_day = false,
+    remove_far = false,
+    visual = "mesh",
+    mesh = "spider.glb",
+    textures = { "spider.png" },
+    -- rotate = 180,
+    visual_size = { x = 10, y = 10 },
+    -- BRILHO NOS OLHOS
+    glow = 3,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- IMPORTANTE: Propriedades para manter na água
+    -- fly = true,               -- Permite "voar" na água
+    -- fly_in = "air",   -- Voa no ar
+    walk_velocity = 2,
+    run_velocity = 4,
+    view_range = 9,
+    water_damage = 2,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,
+    animation = {speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 1, walk_end = 2,
+        -- ANIMAÇÃO DE ATAQUE:
+        punch_start = 2, -- Frame inicial do ataque
+        punch_end = 3, -- Frame final do ataque
+    },
+ 
+    -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
+    -- O seguimento real será feito pelo do_custom abaixo
+    -- follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
+ 
+    -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
+    --[[
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            if name == "" then
+                core.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
+            else
+                core.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))
+            end
+        end
+    end,
+    sounds = { random = "vulto_som", damage = "vulto_hurt", },
+    after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ static_save = true }) end,
+    ]]--
+    --[[
+    do_custom = function(self, dtime)
+       self.lifetimer = 20000
+        self.explosion_timer = (self.explosion_timer or 0) + dtime
+
+        -- Só verifica a cada 0.1s para não sobrecarregar
+        if self.explosion_timer < 0.1 then return end
+        self.explosion_timer = 0
+
+        local pos = self.object:get_pos()
+        if not pos then return end
+
+        -- Verifica todos os jogadores próximos
+        for _, player in ipairs(minetest.get_connected_players()) do
+            local ppos = player:get_pos()
+            local dist = vector.distance(pos, ppos)
+
+            if dist < 2.0 then
+                -- Toca um som (opcional)
+                minetest.sound_play("tnt_explode", { pos = pos, gain = 1.0, max_hear_distance = 20 })
+
+                -- Cria a explosão
+                if minetest.get_modpath("tnt") then
+                    tnt.boom(pos, { radius = 3, damage_radius = 4 })
+                else
+                    -- Sem TNT: causa dano direto ao player
+                    player:set_hp(player:get_hp() - 8)
+                    minetest.add_particlespawner({
+                        amount = 30, time = 0.5,
+                        minpos = vector.subtract(pos, 1), maxpos = vector.add(pos, 1),
+                        minvel = {x=-4,y=2,z=-4}, maxvel = {x=4,y=6,z=4},
+                        minacc = {x=0,y=-10,z=0}, maxacc = {x=0,y=-10,z=0},
+                        minexptime = 0.5, maxexptime = 1.0,
+                        minsize = 2, maxsize = 5,
+                        texture = "tnt_smoke.png",
+                    })
+                end
+
+                -- Remove o mob após explodir
+                self.object:remove()
+                return
+            end
+        end
+    end,
+    ]]--
+})
+-- Spawn do dopel (casas, blocos de madeiras)
+register_mob_spawn({
+    name = "nh_mob:spider",
+    nodes = { "air" },
+    neighbors = { "nh_nodes:top_grass" },
+    max_light = 7,
+    interval = 30,
+    chance = 20,
+    active_object_count = 2,
+    min_height = -50,
+    max_height = 50
+})
+--mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
+register_orb_egg("nh_mob:spider", S("Orb with Spider"))
+ 
+-- MOB 4: Dopel (Agressivo)
+mobs:register_mob("nh_mob:dopel", {
+    type = "monster",
+    passive = false,
+    reach = 1.75,
+    damage = 5,
+    -- attack_players = true,
+    attack_type = "dogfight",
+    description = S("Dopel") .. "\n" .. S("[?]"),
+    hp_min = 20,
+    hp_max = 30,
+    armor = 100,
+    collisionbox = { -0.2, 0, -0.2, 0.2, 2.4, 0.2 },
+    selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
+    physical = true,
+    stepheight = 2, -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -10,
+    fall_damage = 0,
+    floats = 3,
+    --pathfinding = true, -- se move em zig-zag
+    static_save = true,
+    despawn_by_day = false,
+    remove_far = false,
+    visual = "mesh",
+    mesh = "character9.glb",
+    textures = { "skin.png" },
+    -- rotate = 180,
+    visual_size = { x = 1, y = 1 },
+    -- BRILHO NOS OLHOS
+    -- glow = -14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- IMPORTANTE: Propriedades para manter na água
+    -- fly = true,               -- Permite "voar" na água
+    -- fly_in = "air",   -- Voa no ar
+    walk_velocity = 1,
+    run_velocity = 4,
+    view_range = 16,
+    water_damage = 2,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,
+    animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2,
+        -- ANIMAÇÃO DE ATAQUE:
+        punch_start = 11.75, -- Frame inicial do ataque
+        punch_end = 12, -- Frame final do ataque
+    },
+ 
+    -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
+    -- O seguimento real será feito pelo do_custom abaixo
+    -- follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
+ 
+    -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            if name == "" then
+                core.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
+            else
+                core.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))
+            end
+        end
+    end,
+    sounds = { random = "vulto_som", damage = "vulto_hurt", },
+    after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ static_save = true }) end,
+    -- do_custom = function(self, dtime)
+    --     self.lifetimer = 20000
+    --     return true
+    -- end,
+})
+-- Spawn do dopel (casas, blocos de madeiras)
+register_mob_spawn({
+    name = "nh_mob:dopel",
+    nodes = { "air" },
+    neighbors = { "nh_nodes:oakwood" },
+    max_light = 14,
+    interval = 30,
+    chance = 20,
+    active_object_count = 1,
+    min_height = -50,
+    max_height = 50
+})
+--mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
+register_orb_egg("nh_mob:dopel", S("Orb with Dopel"))
+
+-- MOB: PHOENIX (Fênix)
+mobs:register_mob("nh_mob:phoenix", bird_def({
+    type         = "monster",
+    passive      = false,
+    reach        = 1,
+    damage       = 2,
+    attack_type  = "dogfight",
+    description  = S("Phoenix") .. "\n" .. S("[Altered Animal]"),
+    hp_min = 10,
+    hp_max = 20,
+    armor  = 100,
+    collisionbox = { -0.5, 0, -0.2, 0.3, 2.4, 0.2 },
+    selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
+    visual      = "mesh",
+    mesh        = "eagle.glb",
+    textures    = { "phoenix.png" },
+    visual_size = { x = 30, y = 30 },
+    glow        = 14,
+    floats      = 3,
+    follow      = { "nh_nodes:torch2" },
+    animation   = { speed_normal = 0.2 }, -- sobrescreve só speed_normal da base
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local name = clicker:get_wielded_item():get_name()
+            if name == "nh_nodes:torch2" then
+                core.chat_send_player(clicker:get_player_name(), S("The phoenix wants fire!"))
+            else
+                core.chat_send_player(clicker:get_player_name(), "...")
+            end
+        end
+    end,
+    do_custom = function(self, dtime)
+        bird_do_custom(self, dtime, "nh_nodes:magma")
+    end,
+}))
+-- Spawn da fênix (próximo à basalto)
+register_mob_spawn({
+    name                = "nh_mob:phoenix",
+    nodes               = { "air" },
+    neighbors           = { "nh_nodes:basalt" },
+    max_light           = 15,
+    interval            = 120,
+    chance              = 2000,
+    active_object_count = 1,
+    min_height          = 15,
+    max_height          = 50,
+})
+register_orb_egg("nh_mob:phoenix", S("Orb with Phoenix"))
+ 
 -- SENTINEL (BOSS)
 mobs:register_mob("nh_mob:sentinel", {
     type = "monster",
@@ -2173,6 +2390,7 @@ register_mob_spawn({
 })
 --mobs:register_egg("nh_mob:eagle", "Orbe com Águia", "orbspawner.png", 0)
 register_orb_egg("nh_mob:bigbubble", S("Orb with Big Bubble"))
+
 -- MOB 2: COELHO (Passivo/Tímido)
 mobs:register_mob("nh_mob:rabbit", {
     type = "animal",
@@ -3446,6 +3664,7 @@ register_mob_spawn({
 })
 --mobs:register_egg("nh_mob:octoskull", "Orbe com Exopolvo", "orbspawner.png", 0)
 register_orb_egg("nh_mob:exoskull", S("Orb with Exhausted"))
+
 -- MOB 4: Sereia / sirenia /mermaid (Agressivo)
 mobs:register_mob("nh_mob:sirenia", {
     type = "monster",
@@ -3692,6 +3911,7 @@ register_mob_spawn({
     max_height          = -10,
 })
 register_orb_egg("nh_mob:slime3", S("Orb with Large Limu"))
+
 -- MOB 4: VULTO / VISAGE (Agressivo)
 mobs:register_mob("nh_mob:visage", {
     type = "monster",
@@ -3763,6 +3983,7 @@ register_mob_spawn({
 })
 -- mobs:register_egg("nh_mob:visage", "Orbe com Vulto", "orbspawner.png", 0)
 register_orb_egg("nh_mob:visage", S("Orb with Visage"))
+
 -- MOB 4: VULTO / VISAGE (Agressivo)
 mobs:register_mob("nh_mob:visage2", {
     type = "monster",
@@ -3839,89 +4060,7 @@ mobs:register_mob("nh_mob:visage2", {
     end,
     sounds = { random = "vulto_som", damage = "vulto_hurt", },
 })
--- MOB 4: Dopel (Agressivo)
-mobs:register_mob("nh_mob:dopel", {
-    type = "monster",
-    passive = false,
-    reach = 1.75,
-    damage = 5,
-    -- attack_players = true,
-    attack_type = "dogfight",
-    description = S("Dopel") .. "\n" .. S("[?]"),
-    hp_min = 20,
-    hp_max = 30,
-    armor = 100,
-    collisionbox = { -0.2, 0, -0.2, 0.2, 2.4, 0.2 },
-    selectionbox = { -0.5, 0, -0.2, 0.5, 2.4, 0.2 },
-    physical = true,
-    stepheight = 2, -- Consegue subir degraus para conseguir sair da agua (importante!)
-    fall_speed = -10,
-    fall_damage = 0,
-    floats = 3,
-    --pathfinding = true, -- se move em zig-zag
-    static_save = true,
-    despawn_by_day = false,
-    remove_far = false,
-    visual = "mesh",
-    mesh = "character9.glb",
-    textures = { "skin.png" },
-    -- rotate = 180,
-    visual_size = { x = 1, y = 1 },
-    -- BRILHO NOS OLHOS
-    -- glow = -14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
-    -- IMPORTANTE: Propriedades para manter na água
-    -- fly = true,               -- Permite "voar" na água
-    -- fly_in = "air",   -- Voa no ar
-    walk_velocity = 1,
-    run_velocity = 4,
-    view_range = 16,
-    water_damage = 2,
-    lava_damage = 5,
-    light_damage = 0,
-    air_damage = 0,
-    animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2,
-        -- ANIMAÇÃO DE ATAQUE:
-        punch_start = 11.75, -- Frame inicial do ataque
-        punch_end = 12, -- Frame final do ataque
-    },
- 
-    -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
-    -- O seguimento real será feito pelo do_custom abaixo
-    -- follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
- 
-    -- ✅ RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            if name == "" then
-                core.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))
-            end
-        end
-    end,
-    sounds = { random = "vulto_som", damage = "vulto_hurt", },
-    after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ static_save = true }) end,
-    -- do_custom = function(self, dtime)
-    --     self.lifetimer = 20000
-    --     return true
-    -- end,
-})
--- Spawn do dopel (casas, blocos de madeiras)
-register_mob_spawn({
-    name = "nh_mob:dopel",
-    nodes = { "air" },
-    neighbors = { "nh_nodes:oakwood" },
-    max_light = 14,
-    interval = 30,
-    chance = 20,
-    active_object_count = 1,
-    min_height = -50,
-    max_height = 50
-})
---mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
-register_orb_egg("nh_mob:dopel", S("Orb with Dopel"))
+
 -- MOB x: Giant Crab (Agressivo)
 mobs:register_mob("nh_mob:giantcrab", {
     type = "monster",
