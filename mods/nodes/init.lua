@@ -5,20 +5,23 @@ local S = core.get_translator("nh_nodes")
 
 local function populate_true(names)
     local father = {}
-    for _, name in ipairs(names) do father["nh_nodes:" ..name] = true end
+    for _, name in ipairs(names) do father["nh_nodes:" .. name] = true end
     return father
 end
 
 local footstep_timer     = {}
 local lava_damage_timer  = {}
 local players_with_torch = {}
-local WATER_FULLNODES = populate_true({"water", "water2"})
-local WATER_MIDNODES = populate_true({"water_flowing", "water2_flowing"})
-local LAVA_NODES = populate_true({"lava", "lava_flowing", "bluelava", "bluelava_flowing"})
-local FLAME_ENTITIES = populate_true({"campfire_flame_entity", "torch_flame_entity", "palmstraw_flame_entity", "flame_entity"})
-local LEAF_TYPES = populate_true({"leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3"})
-local DECORATIONS = populate_true({"smallgrass", "highgrass", "rush", "dandelion", "grassleaves", "grassleavesmedium", "micaceusfungus", "flyamanitafungus", "pebble", "white_pebble", "fallenstick"})
-nodes = {}
+local WATER_FULLNODES    = populate_true({ "water", "water2" })
+local WATER_MIDNODES     = populate_true({ "water_flowing", "water2_flowing" })
+local LAVA_NODES         = populate_true({ "lava", "lava_flowing", "bluelava", "bluelava_flowing" })
+local FLAME_ENTITIES     = populate_true({ "campfire_flame_entity", "torch_flame_entity", "palmstraw_flame_entity",
+    "flame_entity" })
+local LEAF_TYPES         = populate_true({ "leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple",
+    "leaves_apple2", "leaves_apple3" })
+local DECORATIONS        = populate_true({ "smallgrass", "highgrass", "rush", "dandelion", "grassleaves",
+    "grassleavesmedium", "micaceusfungus", "flyamanitafungus", "pebble", "white_pebble", "fallenstick" })
+nodes                    = {}
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
     for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 2)) do
@@ -274,7 +277,7 @@ core.register_globalstep(function(dtime)
             end
             goto drop_next
         end
-        -- ── Dentro da água ───────────────────────────────────────────────────
+        -- ── Dentro da água
         -- Zera aceleração para que set_velocity abaixo seja o movimento final
         if not drop_was_in_water[uid] then drop_was_in_water[uid] = true end
         obj:set_acceleration({ x = 0, y = 0, z = 0 })
@@ -282,16 +285,15 @@ core.register_globalstep(function(dtime)
         local is_floating = FLOATING_STUFF[item_name]
 
         if in_full and not in_mid then
-            -- ── Água source (parada) ─────────────────────────────────────────
+            -- Água source (parada)
             obj:set_velocity({
                 x = 0,
                 y = is_floating and SPEED_FLOAT or -SPEED_SINK,
                 z = 0,
             })
         else
-            -- ── Água flowing (corrente) ──────────────────────────────────────
+            -- Água flowing (corrente)
             local flow = get_liquid_flow_dir(ipos)
-
             if flow then
                 -- Guarda direção para usar no último node (onde flow vira nil)
                 drop_last_flow[uid] = flow
@@ -304,29 +306,20 @@ core.register_globalstep(function(dtime)
             if flow then
                 obj:set_velocity({
                     x = flow.x * SPEED_CURRENT,
-                    y = (flow.y < 0) and -SPEED_FALL
-                        or (is_floating and SPEED_FLOAT or -SPEED_SINK),
+                    y = (flow.y < 0) and -SPEED_FALL or (is_floating and SPEED_FLOAT or -SPEED_SINK),
                     z = flow.z * SPEED_CURRENT,
                 })
             else
-                obj:set_velocity({
-                    x = 0,
-                    y = is_floating and SPEED_FLOAT or -SPEED_SINK,
-                    z = 0,
-                })
+                obj:set_velocity({ x = 0, y = is_floating and SPEED_FLOAT or -SPEED_SINK, z = 0, })
             end
         end
-
         ::drop_next::
     end
 end)
-
 local drop_rot_timer = 0
-
 core.after(0, function()
     local item_ent = core.registered_entities["__builtin:item"]
     if not item_ent then return end
-
     -- Patch no set_item: é aqui que o automatic_rotate é definido pelo builtin
     local original_set_item = item_ent.set_item
     item_ent.set_item = function(self, item)
@@ -335,27 +328,17 @@ core.after(0, function()
         self.object:set_properties({ automatic_rotate = 0 })
         self.object:set_rotation({ x = 0, y = 0, z = 0 })
     end
-
     local original_on_step = item_ent.on_step
     item_ent.on_step = function(self, dtime, moveresult)
-        if original_on_step then
-            original_on_step(self, dtime, moveresult)
-        end
+        if original_on_step then original_on_step(self, dtime, moveresult) end
         local tremor = (math.floor(drop_rot_timer * 16) % 2 == 0)
             and math.rad(1) or math.rad(-1)
-        self.object:set_rotation({
-            x = math.rad(45) + tremor,
-            y = tremor,
-            z = math.rad(45) + tremor,
-        })
+        self.object:set_rotation({ x = math.rad(45) + tremor, y = tremor, z = math.rad(45) + tremor, })
     end
 end)
-
 core.register_globalstep(function(dtime)
     drop_rot_timer = drop_rot_timer + dtime
 end)
-
-
 -- Limpeza unificada ao deslogar
 core.register_on_leaveplayer(function(player)
     local name              = player:get_player_name()
@@ -370,15 +353,7 @@ core.register_on_leaveplayer(function(player)
         players_with_torch[name] = nil
     end
 end)
-
-
-
-
------
 -- Receitas
------
-
--- --------------------------------------------------
 -- RECEITAS BASICAS (2x2)
 -- Usada por: Nodes do chão
 -- Inclui crafts básicos
@@ -490,8 +465,6 @@ recipes_floor = {
         output = "nh_nodes:messagebottle"
     },
 }
-
--- --------------------------------------------------
 -- RECEITAS DA BANCADA DE PRODUÇÃO (2x2x2)
 -- Usada por: craft_table
 -- Inclui tudo do floor + itens avançados (espada, baú, porta, piões...)
@@ -648,9 +621,6 @@ recipes_table = {
         output = "nh_nodes:spinningtop3"
     },
 }
-
-
--- --------------------------------------------------
 -- RECEITAS DA FOGUEIRA (3x3)
 -- Usada por: campfire
 -- Inclui: alimentos cozidos
@@ -672,12 +642,9 @@ recipes_campfire = {
         output = "nh_nodes:roastbeef"
     },
 }
-
--- --------------------------------------------------
 -- RECEITAS DA FORNALHA (3x3)
 -- Usada por: furnace
 -- Inclui: carvão, alimentos cozidos, fundição de metais, vidro
--- --------------------------------------------------
 recipes_furnace = {
     {
         ingredients = { ["nh_nodes:oaklog"] = 9 },
@@ -766,12 +733,8 @@ recipes_furnace = {
     --},
 }
 
--- ========================================
 -- SISTEMA GENÉRICO DE CRAFTING
--- ========================================
-
 local craft_stations = {}
-
 -- Registra a entidade de display (compartilhada por todas as estações)
 core.register_entity("nh_nodes:display_item", {
     initial_properties = {
@@ -783,10 +746,8 @@ core.register_entity("nh_nodes:display_item", {
         static_save = true, -- Salva entre sessões
         is_visible = true,
     },
-
     itemstring = "",
     station_pos = nil,
-
     on_activate = function(self, staticdata)
         if staticdata and staticdata ~= "" then
             local data = core.deserialize(staticdata)
@@ -797,12 +758,8 @@ core.register_entity("nh_nodes:display_item", {
             end
         end
     end,
-
     get_staticdata = function(self)
-        return core.serialize({
-            itemstring = self.itemstring,
-            station_pos = self.station_pos
-        })
+        return core.serialize({ itemstring = self.itemstring, station_pos = self.station_pos })
     end,
 
     on_step = function(self, dtime)
@@ -815,10 +772,7 @@ core.register_entity("nh_nodes:display_item", {
         end
     end,
 })
-
--- ========================================
 -- FUNÇÕES AUXILIARES
-
 -- Remove apenas entidades desta estação específica
 local function remove_item_entities(pos)
     local objects = core.get_objects_inside_radius(pos, 2)
@@ -826,31 +780,19 @@ local function remove_item_entities(pos)
         local entity = obj:get_luaentity()
         if entity and entity.name == "nh_nodes:display_item" then
             -- Verifica se a entidade pertence a ESTA estação
-            if entity.station_pos and vector.equals(entity.station_pos, pos) then
-                obj:remove()
-            end
+            if entity.station_pos and vector.equals(entity.station_pos, pos) then obj:remove() end
         end
     end
 end
-
 local function update_item_entities(pos, config)
     local meta = core.get_meta(pos)
     local inv = meta:get_inventory()
-
-    -- Verifica se o inventário existe antes de continuar
-    if not inv or inv:get_size("craft") == 0 then
-        return
-    end
-
+    if not inv or inv:get_size("craft") == 0 then return end -- Verifica se o inventário existe antes de continuar
     remove_item_entities(pos)
-
     local craft_list = inv:get_list("craft")
     local output_list = inv:get_list("output")
 
-    -- Proteção adicional
-    if not craft_list or not output_list then
-        return
-    end
+    if not craft_list or not output_list then return end -- Proteção adicional
 
     -- Cria entidades para os slots de craft
     for i = 1, config.grid_size do
@@ -858,7 +800,6 @@ local function update_item_entities(pos, config)
         if not stack:is_empty() then
             local item_pos = vector.add(pos, config.positions[i])
             local obj = core.add_entity(item_pos, "nh_nodes:display_item")
-
             if obj then
                 local entity = obj:get_luaentity()
                 if entity then
@@ -869,32 +810,24 @@ local function update_item_entities(pos, config)
             end
         end
     end
-
     -- Cria entidade para o resultado
     local output_stack = output_list[1]
     if output_stack and not output_stack:is_empty() then
         local output_pos = vector.add(pos, config.output_position)
         local obj = core.add_entity(output_pos, "nh_nodes:display_item")
-
         if obj then
             local entity = obj:get_luaentity()
             if entity then
                 entity.itemstring = output_stack:get_name()
                 entity.station_pos = pos -- Marca a estação dona
-                obj:set_properties({
-                    wield_item = output_stack:get_name(),
-                    visual_size = { x = 0.35, y = 0.35 },
-                    glow = 1,
-                })
+                obj:set_properties({ wield_item = output_stack:get_name(), visual_size = { x = 0.35, y = 0.35 }, glow = 1, })
             end
         end
     end
 end
-
 local function check_recipe(inv, recipe)
     local craft_list = inv:get_list("craft")
     local counts = {}
-
     -- Conta os itens no grid
     for i = 1, #craft_list do
         local stack = craft_list[i]
@@ -903,59 +836,37 @@ local function check_recipe(inv, recipe)
             counts[name] = (counts[name] or 0) + 1
         end
     end
-
     -- Verifica se a receita corresponde
-    for item, required_count in pairs(recipe.ingredients) do
-        if (counts[item] or 0) < required_count then
-            return false
-        end
-    end
-
+    for item, required_count in pairs(recipe.ingredients) do if (counts[item] or 0) < required_count then return false end end
     -- Verifica se não há itens extras (receita exata)
     local total_required = 0
-    for _, count in pairs(recipe.ingredients) do
-        total_required = total_required + count
-    end
-
+    for _, count in pairs(recipe.ingredients) do total_required = total_required + count end
     local total_in_grid = 0
-    for _, count in pairs(counts) do
-        total_in_grid = total_in_grid + count
-    end
-
+    for _, count in pairs(counts) do total_in_grid = total_in_grid + count end
     return total_in_grid == total_required
 end
 
 local function check_and_craft(pos, config)
     local meta = core.get_meta(pos)
     local inv = meta:get_inventory()
-
     -- Lê a ferramenta no slot extra
     local tool_stack = inv:get_stack("tool", 1)
     local tool_name = tool_stack:get_name() -- "" se vazio
-
     for _, recipe in ipairs(config.recipes) do
         -- Se a receita exige ferramenta, verifica
         if recipe.required_tool then
-            if tool_name ~= recipe.required_tool then
-                goto continue -- pula esta receita
-            end
+            -- pula esta receita
+            if tool_name ~= recipe.required_tool then goto continue end
         end
-
         if check_recipe(inv, recipe) then
             inv:set_stack("output", 1, ItemStack(recipe.output))
-            core.after(0.01, function()
-                update_item_entities(pos, config)
-            end)
+            core.after(0.01, function() update_item_entities(pos, config) end)
             return
         end
-
         ::continue::
     end
-
     inv:set_stack("output", 1, ItemStack(""))
-    core.after(0.01, function()
-        update_item_entities(pos, config)
-    end)
+    core.after(0.01, function() update_item_entities(pos, config) end)
 end
 
 local function consume_craft_materials(pos)
@@ -974,17 +885,11 @@ end
 local function show_craft_grid(player, pos, config)
     local player_name = player:get_player_name()
     local pos_string = core.pos_to_string(pos)
-
-    local formspec = "formspec_version[4]" ..
-        "size[10.7,9.7]" ..
-        "label[0.5,0.5;" .. config.title .. "]"
-
+    local formspec = "formspec_version[4]" .. "size[10.7,9.7]" .. "label[0.5,0.5;" .. config.title .. "]"
     local y_offset = 1
     for _, layer in ipairs(config.layers) do
-        formspec = formspec ..
-            "label[" .. layer.x .. "," .. y_offset .. ";" .. layer.name .. "]" ..
-            "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";craft;" ..
-            layer.x ..
+        formspec = formspec .. "label[" .. layer.x .. "," .. y_offset .. ";" .. layer.name .. "]" ..
+            "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";craft;" .. layer.x ..
             "," .. (y_offset + 0.5) .. ";" .. layer.width .. "," .. layer.height .. ";" .. layer.start_index .. "]"
     end
 
@@ -996,34 +901,21 @@ local function show_craft_grid(player, pos, config)
     else
         local grid_top = y_offset + 0.5
         local max_height = 0
-        for _, layer in ipairs(config.layers) do
-            if layer.height > max_height then max_height = layer.height end
-        end
+        for _, layer in ipairs(config.layers) do if layer.height > max_height then max_height = layer.height end end
         tool_x = 3.3
         tool_y = grid_top + (max_height / 2) - 0.5
     end
 
-    formspec = formspec ..
-        "label[" .. tool_x .. "," .. tool_y .. ";" .. S("Tool") .. "]" ..
-        "list[nodemeta:" ..
-        pos.x .. "," .. pos.y .. "," .. pos.z .. ";tool;" .. tool_x .. "," .. (tool_y + 0.5) .. ";1,1;]"
-
-    formspec = formspec ..
-        "label[7,1.5;" .. S("Produces") .. "]" ..
-        "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";output;7,2;1,1;]" ..
-        "button[7,3.2;1,0.8;craft_one;" .. S("Single") .. "]" ..
-        "button[7,4.1;1,0.8;craft_all;" .. S("All") .. "]" ..
-        "list[current_player;main;0.5,5.5;8,2;8]" ..
-        "list[current_player;main;0.5,8.1;8,1;]" ..
-        "listring[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";craft]" ..
-        "listring[current_player;main]"
-
+    formspec = formspec .. "label[" .. tool_x .. "," .. tool_y .. ";" .. S("Tool") .. "]" ..
+        "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";tool;" .. tool_x .. "," .. (tool_y + 0.5) ..
+        ";1,1;]" .. "label[7,1.5;" .. S("Produces") .. "]" .. "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," ..
+        pos.z .. ";output;7,2;1,1;]" .. "button[7,3.2;1,0.8;craft_one;" .. S("Single") .. "]" ..
+        "button[7,4.1;1,0.8;craft_all;" .. S("All") .. "]" .. "list[current_player;main;0.5,5.5;8,2;8]" ..
+        "list[current_player;main;0.5,8.1;8,1;]" .. "listring[nodemeta:" .. pos.x .. "," .. pos.y ..
+        "," .. pos.z .. ";craft]" .. "listring[current_player;main]"
     core.show_formspec(player_name, config.node_name .. "_" .. pos_string, formspec)
 end
--- ========================================
 -- FUNÇÃO PRINCIPAL DE REGISTRO
--- ========================================
-
 function register_craft_station(node_name, config)
     -- Validação da configuração
     assert(config.description, "Config precisa de 'description'")
@@ -1038,7 +930,6 @@ function register_craft_station(node_name, config)
     -- Armazena a configuração
     config.node_name = node_name
     craft_stations[node_name] = config
-
     -- Prepara as propriedades do node
     local node_def = {
         description = config.description,
@@ -1049,127 +940,72 @@ function register_craft_station(node_name, config)
         -- Se tiver mesh, usa drawtype mesh, senão usa normal
         drawtype = config.mesh and "mesh" or "normal",
     }
-
     -- Adiciona mesh apenas se fornecido
-    if config.mesh then
-        node_def.mesh = config.mesh
-    end
-
+    if config.mesh then node_def.mesh = config.mesh end
     -- Adiciona propriedades extras opcionais
-    if config.drop then
-        node_def.drop = config.drop
-    end
-    if config.sunlight_propagates ~= nil then
-        node_def.sunlight_propagates = config.sunlight_propagates
-    end
-    if config.paramtype then
-        node_def.paramtype = config.paramtype
-    end
-    if config.collision_box then
-        node_def.collision_box = config.collision_box
-    end
-    if config.selection_box then
-        node_def.selection_box = config.selection_box
-    end
-
+    if config.drop then node_def.drop = config.drop end
+    if config.sunlight_propagates ~= nil then node_def.sunlight_propagates = config.sunlight_propagates end
+    if config.paramtype then node_def.paramtype = config.paramtype end
+    if config.collision_box then node_def.collision_box = config.collision_box end
+    if config.selection_box then node_def.selection_box = config.selection_box end
     -- Para blocos de craft segurados:
-    if config.wielded_bone_position then
-        node_def.wielded_bone_position = config.wielded_bone_position
-    end
-    if config.offhand_bone_position then
-        node_def.offhand_bone_position = config.offhand_bone_position
-    end
-    if config.wielded_visual_size then
-        node_def.wielded_visual_size = config.wielded_visual_size
-    end
-
-
+    if config.wielded_bone_position then node_def.wielded_bone_position = config.wielded_bone_position end
+    if config.offhand_bone_position then node_def.offhand_bone_position = config.offhand_bone_position end
+    if config.wielded_visual_size then node_def.wielded_visual_size = config.wielded_visual_size end
     -- Função auxiliar para garantir que o inventário existe
     local function ensure_inventory(pos)
         local meta = core.get_meta(pos)
         local inv = meta:get_inventory()
-
-        if inv:get_size("craft") == 0 then
-            inv:set_size("craft", config.grid_size)
-        end
-        if inv:get_size("output") == 0 then
-            inv:set_size("output", 1)
-        end
-        if inv:get_size("tool") == 0 then
-            inv:set_size("tool", 1)
-        end
+        if inv:get_size("craft") == 0 then inv:set_size("craft", config.grid_size) end
+        if inv:get_size("output") == 0 then inv:set_size("output", 1) end
+        if inv:get_size("tool") == 0 then inv:set_size("tool", 1) end
     end
-
-
-    -- ========================================
     -- PRESERVA CALLBACKS CUSTOMIZADOS
-    -- ========================================
     -- Salva callbacks fornecidos no config
     local custom_on_construct = config.on_construct
     local custom_on_timer = config.on_timer
-
     -- MODIFICA on_construct para executar AMBOS
     local original_on_construct = node_def.on_construct
     node_def.on_construct = function(pos)
         ensure_inventory(pos)
-
         -- ✅ EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
-        if custom_on_construct then
-            custom_on_construct(pos)
-        end
-
+        if custom_on_construct then custom_on_construct(pos) end
         -- Depois executa o padrão do crafting
         core.after(0.5, function()
             local node = core.get_node(pos)
-            if node and node.name == node_name then
-                update_item_entities(pos, config)
-            end
+            if node and node.name == node_name then update_item_entities(pos, config) end
         end)
     end
-
     -- MODIFICA on_timer para executar AMBOS
     node_def.on_timer = function(pos, elapsed)
         -- ✅ EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
         if custom_on_timer then
             local result = custom_on_timer(pos, elapsed)
             -- Se retornou false, para aqui
-            if result == false then
-                return false
-            end
+            if result == false then return false end
         end
-
         -- Se não tem callback customizado ou retornou true, continua normal
         return true
     end
-
     -- Adiciona callbacks do crafting (alterado para não dar recursão [crash] com o mobsredo)
     node_def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         local controls = clicker:get_player_control()
-
         if controls.aux1 then
             ensure_inventory(pos)
             show_craft_grid(clicker, pos, config)
             return itemstack
         end
-
         if itemstack and not itemstack:is_empty() then
             local item_def = core.registered_items[itemstack:get_name()]
-
-
-
             if item_def and item_def.type == "node" then
                 local result = core.item_place_node(itemstack, clicker, pointed_thing)
                 -- Toca o som de place manualmente
                 if config.sounds and config.sounds.place then
-                    core.sound_play(config.sounds.place.name, {
-                        pos = pointed_thing.above,
-                        gain = config.sounds.place.gain or 1.0,
-                        max_hear_distance = 16,
-                    })
+                    core.sound_play(config.sounds.place.name,
+                        { pos = pointed_thing.above, gain = config.sounds.place.gain or 1.0, max_hear_distance = 16, })
                 end
                 return result
             end
-
             -- Para spawn eggs e outros itens com on_place,
             -- chama on_place mas com under substituído por "air"
             -- para evitar recursão
@@ -1182,36 +1018,25 @@ function register_craft_station(node_name, config)
                 return item_def.on_place(itemstack, clicker, safe_pointed)
             end
         end
-
         -- Mão vazia e sem (E/Aux1): mostra dica
         if itemstack:is_empty() then
-            core.chat_send_player(
-                clicker:get_player_name(),
+            core.chat_send_player(clicker:get_player_name(),
                 S(
-                    "I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something...")
-            )
+                    "I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something..."))
         end
-
         return itemstack
     end
-
-
     node_def.allow_metadata_inventory_put = function(pos, listname, index, stack, player)
         if listname == "output" then return 0 end
         return stack:get_count()
     end
-
     node_def.allow_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
         if to_list == "output" then return 0 end
         return count
     end
-
     node_def.on_metadata_inventory_put = function(pos, listname, index, stack, player)
-        if listname == "craft" or listname == "tool" then
-            check_and_craft(pos, config)
-        end
+        if listname == "craft" or listname == "tool" then check_and_craft(pos, config) end
     end
-
     node_def.on_metadata_inventory_take = function(pos, listname, index, stack, player)
         if listname == "tool" then
             check_and_craft(pos, config)
@@ -1221,14 +1046,11 @@ function register_craft_station(node_name, config)
             local meta = core.get_meta(pos)
             local inv = meta:get_inventory()
             local player_inv = player:get_inventory()
-
             -- Consome materiais do primeiro craft
             consume_craft_materials(pos)
-
             -- Tenta craftar em loop (funciona tanto para click normal quanto shift)
             local max_crafts = 64
             local crafted = 1
-
             -- Pequeno delay para garantir que o primeiro item já foi movido
             core.after(0.05, function()
                 while crafted < max_crafts do
@@ -1252,34 +1074,24 @@ function register_craft_station(node_name, config)
                             else
                                 -- Inventário cheio ou sem espaço suficiente
                                 -- Coloca de volta no output se sobrou algo
-                                if not leftover:is_empty() then
-                                    inv:set_stack("output", 1, leftover)
-                                end
+                                if not leftover:is_empty() then inv:set_stack("output", 1, leftover) end
                                 break
                             end
-
                             break -- sai do loop de receitas
                         end
                     end
 
                     -- Se não encontrou receita válida, para
-                    if not recipe_found then
-                        break
-                    end
+                    if not recipe_found then break end
                 end
-
                 -- Atualiza o crafting após o loop
                 check_and_craft(pos, config)
             end)
         end
     end
-
     node_def.on_metadata_inventory_move = function(pos, from_list, from_index, to_list, to_index, count, player)
-        if from_list == "craft" or to_list == "craft" then
-            check_and_craft(pos, config)
-        end
+        if from_list == "craft" or to_list == "craft" then check_and_craft(pos, config) end
     end
-
     node_def.on_destruct = function(pos)
         -- Dropa os itens ANTES de destruir
         local meta = core.get_meta(pos)
@@ -1288,26 +1100,16 @@ function register_craft_station(node_name, config)
         -- Dropa todos os itens do grid de craft
         for i = 1, inv:get_size("craft") do
             local stack = inv:get_stack("craft", i)
-            if not stack:is_empty() then
-                core.add_item(pos, stack)
-            end
+            if not stack:is_empty() then core.add_item(pos, stack) end
         end
-
         local tool_stack = inv:get_stack("tool", 1)
-        if not tool_stack:is_empty() then
-            core.add_item(pos, tool_stack)
-        end
-
+        if not tool_stack:is_empty() then core.add_item(pos, tool_stack) end
         -- Dropa o item do output também (se houver)
         local output_stack = inv:get_stack("output", 1)
-        if not output_stack:is_empty() then
-            core.add_item(pos, output_stack)
-        end
-
+        if not output_stack:is_empty() then core.add_item(pos, output_stack) end
         -- Remove as entidades de display
         remove_item_entities(pos)
     end
-
     -- Registra o node com todas as propriedades
     core.register_node(node_name, node_def)
 end
@@ -1341,11 +1143,9 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                 -- Pega tudo que conseguir
                 local max_crafts = 64
                 local crafted = 0
-
                 while crafted < max_crafts do
                     local output_stack = inv:get_stack("output", 1)
                     if output_stack:is_empty() then break end
-
                     local leftover = player_inv:add_item("main", output_stack)
                     if leftover:is_empty() then
                         consume_craft_materials(pos)
@@ -1356,23 +1156,16 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                     end
                 end
             end
-
             return true
         end
     end
 end)
-
----------------------------
 -- FUNÇÃO AUXILIAR PARA DANO CONSECUTIVO
----------------------------
 local function apply_poison_damage(player, damage_per_tick, total_damage, interval)
     local ticks = math.ceil(total_damage / damage_per_tick)
     local current_tick = 0
-
     local function apply_tick()
-        if not player or not player:is_player() then
-            return
-        end
+        if not player or not player:is_player() then return end
 
         current_tick = current_tick + 1
 
