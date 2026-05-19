@@ -1951,7 +1951,6 @@ register_craft_station("nh_nodes:cobblestone", {
     layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
-
 core.register_node("nh_nodes:charcoal", {
     description = S "Charcoal",
     tiles = {
@@ -1962,46 +1961,25 @@ core.register_node("nh_nodes:charcoal", {
     groups = { choppy = 3, armor_head = 1 },
     stack_max = 1,
     drop = "nh_nodes:charcoalnugget 8",
-
     paramtype = "light",
     paramtype2 = "wallmounted",
-
-    selection_box = {
-        type = "wallmounted",
-        wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-    },
-
-    node_box = {
-        type = "wallmounted",
-        wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-    },
-
-
+    selection_box = { type = "wallmounted", wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, },
+    node_box = { type = "wallmounted", wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, },
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Configuração mão esquerda
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Som tocado ao bater no tronco
-    sounds = {
-        dug = { name = "punchtimber", gain = 0.5 },
-        dig = { name = "punchtimber", gain = 0.5 },
-    },
+    sounds = { dug = { name = "punchtimber", gain = 0.5 }, dig = { name = "punchtimber", gain = 0.5 }, },
 })
-
 core.register_node("nh_nodes:charcoal2", {
     description = S "Smaller Charcoal",
     drawtype = "mesh",
@@ -2009,43 +1987,19 @@ core.register_node("nh_nodes:charcoal2", {
     tiles = { "charcoal2.png" },
     stack_max = 4,
     drop = "nh_nodes:charcoalnugget 2",
-
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {
-        snappy = 3,
-        oddly_breakable_by_hand = 1,
-    },
-
+    groups = { snappy = 3, oddly_breakable_by_hand = 1, },
     paramtype = "light",
     paramtype2 = "wallmounted",
-
-
-    selection_box = {
-        type = "wallmounted",
-        wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_side = { -0.5, -0.25, -0.25, 0.5, 0.25, 0.25 },
-    },
-
-    node_box = {
-        type = "wallmounted",
-        wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_side = { -0.5, -0.25, -0.5, 0.5, 0.25, 0.5 },
-    },
-
+    selection_box = { type = "wallmounted", wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 }, wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 }, wall_side = { -0.5, -0.25, -0.25, 0.5, 0.25, 0.25 }, },
+    node_box = { type = "wallmounted", wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 }, wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 }, wall_side = { -0.5, -0.25, -0.5, 0.5, 0.25, 0.5 }, },
     -- Som tocado ao bater no tronco medio (2)
-    sounds = {
-        dug = { name = "punchtimber2", gain = 0.5 },
-        dig = { name = "punchtimber2", gain = 0.5 },
-    },
+    sounds = { dug = { name = "punchtimber2", gain = 0.5 }, dig = { name = "punchtimber2", gain = 0.5 }, }
 })
 
-
-
 core.register_node("nh_nodes:coal", {
-    description = S "Black Coal") .. "\n" .. S("[Coal Ore]",
+    description = S "Black Coal" .. "\n" .. S "[Coal Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "coalore.png" },
@@ -3462,7 +3416,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
 })
 
 core.register_node("nh_nodes:spinningtop", {
-    description = S "Oak Spinningtop") .. "\n" .. S("[Battle Toy]",
+    description = S "Oak Spinningtop" .. "\n" .. S "[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = { "oakpiao.png" },
@@ -3523,7 +3477,7 @@ core.register_node("nh_nodes:spinningtop", {
 })
 
 core.register_node("nh_nodes:spinningtop2", {
-    description = S "Palm Spinningtop") .. "\n" .. S("[Battle Toy]",
+    description = S "Palm Spinningtop" .. "\n" .. S "[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = { "palmpiao.png" },
@@ -3578,7 +3532,7 @@ core.register_node("nh_nodes:spinningtop2", {
 })
 
 core.register_node("nh_nodes:spinningtop3", {
-    description = S "Pine Spinningtop") .. "\n" .. S("[Battle Toy]",
+    description = S "Pine Spinningtop" .. "\n" .. S "[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = { "pinepiao.png" },
@@ -3868,7 +3822,7 @@ core.register_node("nh_nodes:oakboard", {
 
 -- Tarugo
 core.register_node("nh_nodes:oakdowel", {
-    description = S "Oak Dowel") .. "\n" .. S("Reach: +2",
+    description = S "Oak Dowel" .. "\n" .. S "Reach: +2",
     drawtype = "mesh",
     mesh = "oakdowel.obj",
     tiles = { "oakwood.png" },
@@ -4748,7 +4702,7 @@ core.register_node("nh_nodes:leaves_blueberry4", {
 })
 
 core.register_node("nh_nodes:giantcrabstatue", {
-    description = S "Giant Crab Statue") .. "\n" .. S("[Unknown]",
+    description = S "Giant Crab Statue" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "giantcrabstatue.obj",
     tiles = { "giantcrabstatue.png" }, --tiles = {{name = "giantcrabstatue.png", glow = 1}},
@@ -4827,7 +4781,7 @@ core.register_node("nh_nodes:giantcrabstatue", {
 })
 
 core.register_node("nh_nodes:redcrystal", {
-    description = S "Red Crystal") .. "\n" .. S "[Light/Air]" .. "\n" .. S("(Squat down to breathe)",
+    description = S "Red Crystal" .. "\n" .. S "[Light/Air]" .. "\n" .. S "(Squat down to breathe)",
     drawtype = "mesh",
     mesh = "redcrystal.obj",
     tiles = { "redcrystal.png" },
@@ -4875,7 +4829,7 @@ core.register_node("nh_nodes:redcrystal", {
 })
 
 core.register_node("nh_nodes:sentinelstatue", {
-    description = S "Sentinel Statue") .. "\n" .. S("[Unknown]",
+    description = S "Sentinel Statue" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "skydragon.obj",
     tiles = { "sentinelstatue.png" }, --tiles = {{name = "giantcrabstatue.png", glow = 1}},
@@ -4954,7 +4908,7 @@ core.register_node("nh_nodes:sentinelstatue", {
 })
 
 core.register_node("nh_nodes:sphere", {
-    description = S "Sphere of Vertices") .. "\n" .. S("[Unknown]",
+    description = S "Sphere of Vertices" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "ball_crystal.obj",
     tiles = { "ball2.png" },
@@ -4984,7 +4938,7 @@ core.register_node("nh_nodes:sphere", {
 
 -- Nó invisível (versão que fica no mundo)
 core.register_node("nh_nodes:sphere_placed", {
-    description = S "Bubble of Vertices") .. "\n" .. S("[Unknown]",
+    description = S "Bubble of Vertices" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "ball2.obj",
     tiles = { "empty.png" }, -- PNG 1x1 totalmente transparente
@@ -5100,7 +5054,7 @@ core.register_entity("nh_nodes:crystal_anim", {
 
 
 core.register_node("nh_nodes:orb_empty", {
-    description = S "Orb" .. S "(Empty)") .. "\n" .. S("[Mob Catcher]",
+    description = S "Orb" .. S "(Empty)" .. "\n" .. S "[Mob Catcher]",
     drawtype = "mesh",
     mesh = "orb.obj",
     tiles = { "orb_node.png" },
@@ -5172,44 +5126,30 @@ function register_orb_egg(mob_name, description, texture)
 
             -- Só spawna se o player NÃO estiver agachado
             local controls = placer:get_player_control()
-            if controls.sneak then
-                -- Agachado: coloca o node normalmente
-                return minetest.item_place(itemstack, placer, pointed_thing)
-            end
+            -- Agachado: coloca o node normalmente
+            if controls.sneak then return minetest.item_place(itemstack, placer, pointed_thing) end
 
             -- Em pé: spawna o mob
             local pos = pointed_thing.above
             minetest.add_entity(pos, mob_name)
-
-            if not minetest.settings:get_bool("creative_mode") then
-                itemstack:take_item()
-            end
+            if not minetest.settings:get_bool("creative_mode") then itemstack:take_item() end
             return itemstack
         end,
     })
 end
 
 core.register_node("nh_nodes:nut", {
-    description = S "Acorn" .. "\n" .. S "(Nut)") .. "\n" .. S("Nutrition: +1",
+    description = S "Acorn" .. "\n" .. S "(Nut)" .. "\n" .. S "Nutrition: +1",
     drawtype = "mesh",
     mesh = "noz.obj",
     tiles = { "noz.png" },
-
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.08, -0.5, -0.08, 0.08, -0.30, 0.08 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.08, -0.5, -0.08, 0.08, -0.30, 0.08 }
-    },
-
+    collision_box = { type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.30, 0.08 } },
+    selection_box = { type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.30, 0.08 } },
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 1) -- Restaura 1 ponto
@@ -5225,12 +5165,7 @@ core.register_node("nh_nodes:leaves_nut", {
     waving = 3,
     tiles = { "leavesnut1.png" },
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {
-        items = {
-            { items = { "nh_nodes:nut" } },
-            { items = { "nh_nodes:stick" } },
-        }
-    },
+    drop = { items = { { items = { "nh_nodes:nut" } }, { items = { "nh_nodes:stick" } }, } },
     walkable = false,
     use_texture_alpha = 30,
     paramtype = "light",
@@ -5241,16 +5176,12 @@ core.register_node("nh_nodes:leaves_nut", {
     liquid_renewable = false,
     liquid_range = 0,
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
-
     -- Callback ao clicar com botão direito (pegar maçã)
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:nut")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:nut") end
             -- Transforma o node em leaves_apple2
             core.set_node(pos, { name = "nh_nodes:leaves" })
         end
@@ -5265,12 +5196,7 @@ core.register_node("nh_nodes:leaves_nut2", {
     waving = 3,
     tiles = { "leavesnut2.png" },
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {
-        items = {
-            { items = { "nh_nodes:nut 2" } },
-            { items = { "nh_nodes:stick" } },
-        }
-    },
+    drop = { items = { { items = { "nh_nodes:nut 2" } }, { items = { "nh_nodes:stick" } }, } },
     walkable = false,
     use_texture_alpha = 30,
     paramtype = "light",
@@ -5287,10 +5213,7 @@ core.register_node("nh_nodes:leaves_nut2", {
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:nut")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:nut") end
             -- Transforma o node em leaves_apple2
             core.set_node(pos, { name = "nh_nodes:leaves_nut" })
         end
@@ -5305,12 +5228,7 @@ core.register_node("nh_nodes:leaves_nut3", {
     waving = 3,
     tiles = { "leavesnut3.png" },
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {
-        items = {
-            { items = { "nh_nodes:nut 3" } },
-            { items = { "nh_nodes:stick" } },
-        }
-    },
+    drop = { items = { { items = { "nh_nodes:nut 3" } }, { items = { "nh_nodes:stick" } }, } },
     walkable = false,
     use_texture_alpha = 30,
     paramtype = "light",
@@ -5321,44 +5239,29 @@ core.register_node("nh_nodes:leaves_nut3", {
     liquid_renewable = false,
     liquid_range = 0,
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
-
     -- Callback ao clicar com botão direito (pegar maçã)
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:nut")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:nut") end
             -- Transforma o node em leaves_nut2
             core.set_node(pos, { name = "nh_nodes:leaves_nut2" })
         end
         return itemstack
     end,
 })
-
-
 core.register_node("nh_nodes:apple", {
     description = S "Apple" .. "\n" .. S "Nutrition: +2",
     drawtype = "mesh",
     mesh = "apple.obj",
     tiles = { "AppleTexture.png" },
-
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1, falling_node = 1 },
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }
-    },
-
+    collision_box = { type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 } },
+    selection_box = { type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 } },
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 2) -- Restaura 4 pontos
@@ -5366,29 +5269,19 @@ core.register_node("nh_nodes:apple", {
         return itemstack
     end,
 })
-
 core.register_node("nh_nodes:blueberry", {
     description = S "Blueberry" .. "\n" .. S "Nutrition: +1",
     --wield_scale = {x = 10, y = 10, z = 10},
     drawtype = "mesh",
     mesh = "blueberry.obj",
     tiles = { "BlueberryTexture.png" },
-
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.03, -0.5, -0.03, 0.03, -0.44, 0.03 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.03, -0.5, -0.03, 0.03, -0.44, 0.03 }
-    },
-
+    collision_box = { type = "fixed", fixed = { -0.03, -0.5, -0.03, 0.03, -0.44, 0.03 } },
+    selection_box = { type = "fixed", fixed = { -0.03, -0.5, -0.03, 0.03, -0.44, 0.03 } },
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 1) -- Restaura 1 ponto
@@ -5398,24 +5291,16 @@ core.register_node("nh_nodes:blueberry", {
 })
 
 core.register_node("nh_nodes:chickenegg", {
-    description = S "Chicken Egg") .. "\n" .. S("Nutrition: +1",
+    description = S "Chicken Egg" .. "\n" .. S "Nutrition: +1",
     drawtype = "mesh",
     mesh = "chickenegg.obj",
     tiles = { "chickenegg.png" },
-
     paramtype = "light",
     walkable = false,
     groups = { oddly_breakable_by_hand = 1, falling_node = 1 },
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.25, 0, -0.25, 0.25, 0.1, 0.25 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.08, -0.5, -0.08, 0.08, -0.28, 0.08 }
-    },
+    collision_box = { type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0.1, 0.25 } },
+    selection_box = { type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.28, 0.08 } },
     --visual_size = {x = 15, y = 15},
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
@@ -5426,7 +5311,7 @@ core.register_node("nh_nodes:chickenegg", {
 })
 
 core.register_node("nh_nodes:friedchickenegg", {
-    description = S "Fried Egg") .. "\n" .. S "(Chicken Egg)" .. "\n" .. S("Nutrition: +4",
+    description = S "Fried Egg" .. "\n" .. S "(Chicken Egg)" .. "\n" .. S "Nutrition: +4",
     drawtype = "mesh",
     mesh = "friedegg.obj",
     tiles = { "friedegg.png" },
@@ -5452,79 +5337,53 @@ core.register_node("nh_nodes:friedchickenegg", {
         return itemstack
     end,
 })
-
 core.register_node("nh_nodes:worm", {
     description = S "Worm" .. "\n" .. S "[Mob / Item]",
     drawtype = "mesh",
     mesh = "worm_node.obj",
     tiles = { "worm.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.1, -0.5, -0.1, 0.1, -0.4, 0.1 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.1, -0.5, -0.1, 0.1, -0.4, 0.1 }
-    },
+    collision_box = { type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, -0.4, 0.1 } },
+    selection_box = { type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, -0.4, 0.1 } },
     visual_size = { x = 15, y = 15 },
-
     -- Spawna o mob ao colocar o node no chão
     on_place = function(itemstack, placer, pointed_thing)
-        if pointed_thing.type ~= "node" then
-            return itemstack
-        end
-
+        if pointed_thing.type ~= "node" then return itemstack end
         local pos = pointed_thing.above -- posição onde vai spawnar
-
         -- Spawna o mob
         local mob = minetest.add_entity(pos, "nh_mob:worm")
-
         if mob then
             -- Aplica a rotação do jogador ao mob
             if placer then
                 local yaw = placer:get_look_horizontal()
                 mob:set_yaw(yaw)
             end
-
             -- Consome o item da mão
             itemstack:take_item()
         end
-
         return itemstack
     end,
 })
-
 core.register_node("nh_nodes:chicken", {
     description = S "Chicken",
     drawtype = "mesh",
     mesh = "chicken_node.obj",
     tiles = { "chicken.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 }
-    },
+    collision_box = { type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 } },
+    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 } },
     visual_size = { x = 15, y = 15 },
 
 })
 
 core.register_node("nh_nodes:rawchicken", {
-    description = S "Raw Chicken") .. "\n" .. S("Nutrition: +4",
+    description = S "Raw Chicken" .. "\n" .. S "Nutrition: +4",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = { "raw_chicken.png" },
@@ -5561,30 +5420,21 @@ core.register_node("nh_nodes:rawchicken", {
 })
 
 core.register_node("nh_nodes:roastchicken", {
-    description = S "Roast Chicken") .. "\n" .. S("Nutrition: +6",
+    description = S "Roast Chicken" .. "\n" .. S "Nutrition: +6",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = { "roastchicken.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { oddly_breakable_by_hand = 1 },
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 }
-    },
+    collision_box = { type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 } },
+    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 } },
     visual_size = { x = 15, y = 15 },
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 6)
         itemstack:take_item()
-
         local bone = ItemStack("nh_nodes:bone 2")
 
         if itemstack:is_empty() then
@@ -5595,29 +5445,19 @@ core.register_node("nh_nodes:roastchicken", {
         end
     end,
 })
-
 core.register_node("nh_nodes:tuna", {
     description = S "Tuna",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
     tiles = { "tuna.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     use_texture_alpha = "clip",
     walkable = false,
     --sounds = default.node_sound_wood_defaults(),
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 }
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 }
-    },
-
+    collision_box = { type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 } },
+    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 } },
     pointabilities = {
         nodes = {
             ["nh_nodes:water"]          = true,
@@ -5626,25 +5466,18 @@ core.register_node("nh_nodes:tuna", {
             ["nh_nodes:water2_flowing"] = true,
         }
     },
-
     -- Spawna o mob ao colocar o node no chão ou na água
     on_place = function(itemstack, placer, pointed_thing)
-        if pointed_thing.type ~= "node" then
-            return itemstack
-        end
-
+        if pointed_thing.type ~= "node" then return itemstack end
         local pos = pointed_thing.above -- posição onde vai spawnar
-
         -- Spawna o mob
         local mob = minetest.add_entity(pos, "nh_mob:tuna")
-
         if mob then
             -- Aplica a rotação do jogador ao mob
             if placer then
                 local yaw = placer:get_look_horizontal()
                 mob:set_yaw(yaw)
             end
-
             -- Consome o item da mão
             itemstack:take_item()
         end
@@ -5654,11 +5487,10 @@ core.register_node("nh_nodes:tuna", {
 })
 
 core.register_node("nh_nodes:rawtuna", {
-    description = S "Raw Tuna") .. "\n" .. S("Nutrition: +4",
+    description = S "Raw Tuna" .. "\n" .. "Nutrition: +4",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
     tiles = { "rawtuna.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
@@ -5684,11 +5516,10 @@ core.register_node("nh_nodes:rawtuna", {
 })
 
 core.register_node("nh_nodes:roasttuna", {
-    description = S "Roast Tuna") .. "\n" .. S("Nutrition: +6",
+    description = S "Roast Tuna" .. "\n" .. S "Nutrition: +6",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
     tiles = { "roasttuna.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
@@ -5737,7 +5568,7 @@ core.register_node("nh_nodes:bull", {
 })
 
 core.register_node("nh_nodes:rawbeef", {
-    description = S "Raw Beef") .. "\n" .. S("Nutrition: +3",
+    description = S "Raw Beef" .. "\n" .. S "Nutrition: +3",
 
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -5765,7 +5596,7 @@ core.register_node("nh_nodes:rawbeef", {
 })
 
 core.register_node("nh_nodes:roastbeef", {
-    description = S "Roast Beef") .. "\n" .. S("Nutrition: +6",
+    description = S "Roast Beef" .. "\n" .. S "Nutrition: +6",
 
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -5816,7 +5647,7 @@ core.register_node("nh_nodes:cowfur", {
 })
 
 core.register_node("nh_nodes:inksac", {
-    description = S "Ink Sack") .. "\n" .. S("Portion: 1",
+    description = S "Ink Sack" .. "\n" .. S "Portion: 1",
 
     drawtype = "mesh",
     mesh = "inksac.obj",
@@ -6291,7 +6122,7 @@ core.register_abm({
 })
 
 core.register_node("nh_nodes:messagebottle", {
-    description = S "Bottle with Message") .. "\n" .. S("[Floating Item]",
+    description = S "Bottle with Message" .. "\n" .. S "[Floating Item]",
     inventory_image = "bottlepage.png",
     drawtype = "mesh",
     mesh = "bottlepage.obj",
@@ -6492,7 +6323,7 @@ core.register_node("nh_nodes:coconutlinked", {
 
 
 core.register_node("nh_nodes:coconut", {
-    description = S "Coconut" .. "\n" .. S "Nutrition: +3") .. "\n" .. S("Floating Item",
+    description = S "Coconut" .. "\n" .. S "Nutrition: +3" .. "\n" .. S "Floating Item",
     drawtype = "mesh",
     mesh = "coconut.obj",
     tiles = { "CocoTexture.png" },
@@ -8440,7 +8271,7 @@ core.register_node("nh_nodes:oakchest", {
 })
 
 core.register_node("nh_nodes:oak_chest", {
-    description = S "Oak Chest") .. "\n" .. S("[with items]",
+    description = S "Oak Chest" .. "\n" .. S "[with items]",
     drawtype = "mesh",
     mesh = "chest.glb",
     tiles = { "ChestTexture.png" },
@@ -8915,7 +8746,7 @@ local function update_neighbors(pos)
 end
 
 core.register_craftitem("nh_nodes:pebble_item", {
-    description = S "Pebble" .. "\n" .. S "[Throwable]") .. "\n" .. S "Damage: +1" .. "\n" .. S("(Throw: Q / drop)",
+    description = S "Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "seixoarremessavel.png",
     wield_image = "seixoarremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
@@ -9160,7 +8991,7 @@ core.register_entity("nh_nodes:pebble_entity", {
 })
 
 core.register_node("nh_nodes:limb", {
-    description = S "Limb" .. "\n" .. S "Reach: +2") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 10",
+    description = S "Limb" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
     mesh = "branch.obj",
     tiles = { "branchtex.png" }, --oaktimber.png
@@ -9208,7 +9039,7 @@ core.register_node("nh_nodes:limb", {
 })
 
 core.register_node("nh_nodes:stick", {
-    description = S "Stick" .. "\n" .. S "Reach: +1") .. "\n" .. S("Uses: 5",
+    description = S "Stick" .. "\n" .. S "Reach: +1" .. "\n" .. S "Uses: 5",
     drawtype = "mesh",
     mesh = "stick.obj",
     tiles = { "stick.png" },
@@ -9264,7 +9095,7 @@ core.register_node("nh_nodes:fallenstick", {
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidianpebble", {
-    description = S "Obsidian Pebble") .. "\n" .. S("Damage: +1",
+    description = S "Obsidian Pebble" .. "\n" .. S "Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",         --
     tiles = { "obsidiana.png" }, -- tiles = {"pedra.png"},
@@ -9357,7 +9188,7 @@ end
 ---------------------------
 core.register_craftitem("nh_nodes:obsidianpebble_item", {
     description = S "Obsidian Pebble" ..
-        "\n" .. S "[Throwable]") .. "\n" .. S "Damage: +1" .. "\n" .. S("(Throw: Q / drop)",
+        "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "obsidiana_seixo_arremessavel.png",
     wield_image = "obsidiana_seixo_arremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
@@ -9652,7 +9483,7 @@ core.register_node("nh_nodes:obsidianblade", {
 -- NODE DA FERRAMENTA REMO
 ---------------------------
 core.register_node("nh_nodes:rowing", {
-    description = S "Rowing" .. "\n" .. S "Reach: +3") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Rowing" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "rowing.obj",       --
     tiles = { "oakwood.png" }, -- tiles = {"pedra.png"},
@@ -10070,7 +9901,7 @@ core.register_node("nh_nodes:pineraft", {
 -- NODE DA ESPADA DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidiansword", {
-    description = S "Obsidian Sword") .. "\n" .. S "Reach: +3") .. "\n" .. S("Damage: +6" .. "\n" .. S("Uses: 15",
+    description = S "Obsidian Sword" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +6" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "obsidiansword.obj",      --
     tiles = { "obsidiansword.png" }, -- tiles = {"pedra.png"},
@@ -10203,7 +10034,7 @@ core.register_node("nh_nodes:pebble", {
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:chippedstone", {
-    description = S "Chipped Stone") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Chipped Stone" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "pedralascada.obj",
     tiles = { "pedralascada.png" },             -- Ícone 2D no inventário
@@ -10276,7 +10107,7 @@ core.register_node("nh_nodes:chippedstone", {
 -- NODE DA CABEÇA DE MACHADO DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stoneaxehead", {
-    description = S "Stone Axe Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Stone Axe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneaxehead.obj",
     tiles = { "pedralascada.png" },       -- Ícone 2D no inventário
@@ -10352,7 +10183,7 @@ core.register_node("nh_nodes:stoneaxehead", {
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stonepickaxehead", {
-    description = S "Stone Pickaxe Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Stone Pickaxe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonepickaxehead.obj",
     tiles = { "pedralascada.png" },               -- Ícone 2D no inventário
@@ -10428,7 +10259,7 @@ core.register_node("nh_nodes:stonepickaxehead", {
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stonehoehead", {
-    description = S "Stone Pickaxe Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Stone Pickaxe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonehoehead.obj",
     tiles = { "pedralascada.png" },           -- Ícone 2D no inventário
@@ -10504,7 +10335,7 @@ core.register_node("nh_nodes:stonehoehead", {
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stoneadzehead", {
-    description = S "Stone Adze Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Stone Adze Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneadzehead.obj",
     tiles = { "pedralascada.png" },            -- Ícone 2D no inventário
@@ -10581,7 +10412,7 @@ core.register_node("nh_nodes:stoneadzehead", {
 -- NODE DA ESPADA ENFERRUJADA (FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:rustironsword", {
-    description = S "Rusty Iron Sword") .. "\n" .. S "Reach: +3") .. "\n" .. S("Damage: +4" .. "\n" .. S("Uses: 10",
+    description = S "Rusty Iron Sword" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +4" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
     mesh = "rustsword.obj",
     tiles = { "rustsword.png" },
@@ -10652,7 +10483,7 @@ core.register_node("nh_nodes:rustironsword", {
 
 
 core.register_node("nh_nodes:stoneaxe", {
-    description = S "Stone Axe") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +3" .. "\n" .. S("Uses: 15",
+    description = S "Stone Axe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +3" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneaxe.obj",
     tiles = { "stoneaxe.png" },
@@ -10721,7 +10552,7 @@ core.register_node("nh_nodes:stoneaxe", {
 
 
 core.register_node("nh_nodes:stonepickaxe", {
-    description = S "Stone Pickaxe") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +3" .. "\n" .. S("Uses: 15",
+    description = S "Stone Pickaxe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +3" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonepickaxe.obj",
     tiles = { "stonepickaxe.png" },
@@ -10794,7 +10625,7 @@ core.register_node("nh_nodes:stonepickaxe", {
 })
 
 core.register_node("nh_nodes:stoneadze", {
-    description = S "Stone Adze") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Stone Adze" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneadze.obj",
     tiles = { "stoneadze.png" },
@@ -10892,7 +10723,7 @@ core.register_node("nh_nodes:stoneadze", {
 })
 
 core.register_node("nh_nodes:stonehoe", {
-    description = S "Stone Hoe") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Stone Hoe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonehoe.obj",
     tiles = { "stonehoe.png" },
@@ -10992,7 +10823,7 @@ core.register_node("nh_nodes:stonehoe", {
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:chippedstoneknife", {
-    description = S "Chipped Stone Knife") .. "\n" .. S "Reach: +1") .. "\n" .. S("Damage: +2" .. "\n" .. S("Uses: 15",
+    description = S "Chipped Stone Knife" .. "\n" .. S "Reach: +1" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "chippedstoneknife.obj",
     tiles = { "chippedstoneknife.png" },
@@ -11063,7 +10894,7 @@ core.register_node("nh_nodes:chippedstoneknife", {
 
 
 core.register_node("nh_nodes:obsidianknife", {
-    description = S "Obsidian Knife") .. "\n" .. S "Reach: +1") .. "\n" .. S("Damage: +4" .. "\n" .. S("Uses: 10",
+    description = S "Obsidian Knife" .. "\n" .. S "Reach: +1" .. "\n" .. S "Damage: +4" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
     mesh = "obsidianknife.obj",
     tiles = { "obsidianknife.png" },
@@ -11158,7 +10989,7 @@ end
 ---------------------------
 core.register_craftitem("nh_nodes:white_pebble_item", {
     description = S "White Pebble" ..
-        "\n" .. S "[Throwable]") .. "\n" .. S "Damage: +1" .. "\n" .. S("(Throw: Q / drop)",
+        "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
 
     -- Configuração mão direita
@@ -11975,7 +11806,7 @@ core.register_node("nh_nodes:grassleaves", {
     --drawtype = "mesh",
     --mesh = "grassleaves.obj",
     --tiles = {"grassleaves.png"},
-    description = S "Grass Leaves") .. "\n" .. S("[Small]",
+    description = S "Grass Leaves" .. "\n" .. S "[Small]",
     drawtype = "plantlike",
     tiles = { "grassleavesbasic.png" },
 
@@ -12046,7 +11877,7 @@ core.register_node("nh_nodes:grassleaves", {
 -- NODE DAS FOLHAS DE GRAMA
 ---------------------------
 core.register_node("nh_nodes:grassleavesmedium", {
-    description = S "Grass Leaves") .. "\n" .. S("[Medium]",
+    description = S "Grass Leaves" .. "\n" .. S "[Medium]",
     --drawtype = "mesh",
     --mesh = "grassleavesmedium.obj",
     --tiles = {"grama.png"},
@@ -12508,7 +12339,7 @@ core.register_node("nh_nodes:back_chest_open", {
             local drop_meta = drop:get_meta()
             drop_meta:set_string("chest_id", chest_id)
             drop_meta:set_string("description",
-                S "Backpack Chest") .. "\n" .. S "(contains items)"
+                S "Backpack Chest" .. "\n" .. S "(contains items)")
         end
 
         core.remove_node(pos)
@@ -12766,7 +12597,7 @@ core.register_node("nh_nodes:backchest", {
             drop_meta:set_string("chest_id", chest_id)
             -- Mostra indicação visual no item de que tem conteúdo
             drop_meta:set_string("description",
-                S "Backpack Chest") .. "\n" .. S "(contains items)"
+                S "Backpack Chest" .. "\n" .. S "(contains items)")
         end
 
         core.remove_node(pos)
@@ -13129,7 +12960,7 @@ core.register_node("nh_nodes:oakdoor_closed", {
 
 -- Porta aberta
 core.register_node("nh_nodes:oakdoor_open", {
-    description = S "Oak Door") .. "\n" .. S("(Open)",
+    description = S "Oak Door" .. "\n" .. S "(Open)",
     drawtype = "mesh",
     mesh = "oakdoor_open.obj", -- Mesmo mesh mas rotacionado/aberto
     tiles = { "oakwood3x1.png" },
@@ -13438,7 +13269,7 @@ end
 core.register_node("nh_nodes:archion", {
     description           = S "Archion" ..
         "\n" ..
-        S "Grimoire of Materialization") .. "\n" .. S "(completed)" .. "\n" .. S("[only active in creative mode]",
+        S "Grimoire of Materialization" .. "\n" .. S "(completed)" .. "\n" .. S "[only active in creative mode]",
     drawtype              = "mesh",
     mesh                  = "grimorie.obj",
     tiles                 = { "grimorie.png" },
