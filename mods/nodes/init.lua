@@ -1375,38 +1375,17 @@ core.register_node("nh_nodes:wetdirt", {
         -- local light = core.get_node_light(pos)
         -- core.chat_send_all("   Luz: " .. tostring(light))
         if light and light > 4 then
-            local neighbors = {
-                -- Laterais
-                xyz(pos.x + 1, pos.y, pos.z),
-                xyz(pos.x - 1, pos.y, pos.z),
-                xyz(pos.x, pos.y, pos.z + 1),
-                xyz(pos.x, pos.y, pos.z - 1),
-                -- Diagonais
-                xyz(pos.x + 1, pos.y, pos.z + 1),
-                xyz(pos.x + 1, pos.y, pos.z - 1),
-                xyz(pos.x - 1, pos.y, pos.z + 1),
-                xyz(pos.x - 1, pos.y, pos.z - 1),
-                -- Laterais abaixo
-                xyz(pos.x + 1, pos.y - 1, pos.z),
-                xyz(pos.x - 1, pos.y - 1, pos.z),
-                xyz(pos.x, pos.y - 1, pos.z + 1),
-                xyz(pos.x, pos.y - 1, pos.z - 1),
-                -- Diagonais abaixo
-                xyz(pos.x + 1, pos.y - 1, pos.z + 1),
-                xyz(pos.x + 1, pos.y - 1, pos.z - 1),
-                xyz(pos.x - 1, pos.y - 1, pos.z + 1),
-                xyz(pos.x - 1, pos.y - 1, pos.z - 1),
-                -- Laterais acima
-                xyz(pos.x + 1, pos.y + 1, pos.z),
-                xyz(pos.x - 1, pos.y + 1, pos.z),
-                xyz(pos.x, pos.y + 1, pos.z + 1),
-                xyz(pos.x, pos.y + 1, pos.z - 1),
-                -- Diagonais acima
-                xyz(pos.x + 1, pos.y + 1, pos.z + 1),
-                xyz(pos.x + 1, pos.y + 1, pos.z - 1),
-                xyz(pos.x - 1, pos.y + 1, pos.z + 1),
-                xyz(pos.x - 1, pos.y + 1, pos.z - 1),
-            }
+            local neighbors = {}
+            for dx = -1, 1 do
+                for dy = -1, 1 do
+                    for dz = -1, 1 do
+                        -- Ignora a posição central (o próprio bloco)
+                        if not (dx == 0 and dy == 0 and dz == 0) then
+                            table.insert(neighbors, xyz(pos.x + dx, pos.y + dy, pos.z + dz))
+                        end
+                    end
+                end
+            end
 
             local has_grass_neighbor = false
             local grass_found = ""
