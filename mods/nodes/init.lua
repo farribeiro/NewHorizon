@@ -1386,10 +1386,8 @@ core.register_node("nh_nodes:wetdirt", {
                     end
                 end
             end
-
             local has_grass_neighbor = false
             local grass_found = ""
-
             for _, npos in ipairs(neighbors) do
                 local neighbor_name = core.get_node(npos).name
                 if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
@@ -1398,23 +1396,20 @@ core.register_node("nh_nodes:wetdirt", {
                     break
                 end
             end
-
             --core.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
-            if has_grass_neighbor then
-                --core.chat_send_all("   🌱 " .. grass_found)
-            end
-
+            -- if has_grass_neighbor then
+            --core.chat_send_all("   🌱 " .. grass_found)
+            -- end
             if has_grass_neighbor then
                 core.set_node(pos, { name = "nh_nodes:top_grass" })
                 --core.chat_send_all("   🟩 CONVERTEU PARA GRAMA!")
                 return false
-            else
+                -- else
                 --core.chat_send_all("   ⏳ Sem grama ao redor, tentando novamente...")
             end
-        else
+            -- else
             --core.chat_send_all("   🌙 Pouca luz (precisa > 4)")
         end
-
         return true
     end,
 })
@@ -1423,47 +1418,22 @@ core.register_node("nh_nodes:tilleddirt", {
     description = S("Tilled Dirt"),
     tiles = { "tilleddirt.png", "terra.png" },
     groups = { crumbly = 2 },
-
     drop = "nh_nodes:dirt",
-
-    sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
-    wielded_bone_position = {
-        pos = { x = 0.5, y = 0.5, z = 1.65 }
-    },
-
-    offhand_bone_position = {
-        pos = { x = 1.5, y = 0, z = 0 }
-    },
-
-    on_construct = function(pos)
-        core.get_node_timer(pos):start(math.random(30, 60))
-    end,
-
+    sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
+    wielded_bone_position = { pos = xyz(0.5, 0.5, 1.65) },
+    offhand_bone_position = { pos = xyz(1.5, 0, 0) },
+    on_construct = function(pos) core.get_node_timer(pos):start(math.random(30, 60)) end,
     on_timer = function(pos, elapsed)
-        local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local above = xyz(pos.x, pos.y + 1, pos.z)
         local node_above = core.get_node(above).name
-        if node_above ~= "air" then
-            return true
-        end
+        if node_above ~= "air" then return true end
 
-        local laterals = {
-            { x = pos.x + 1, y = pos.y, z = pos.z },
-            { x = pos.x - 1, y = pos.y, z = pos.z },
-            { x = pos.x,     y = pos.y, z = pos.z + 1 },
-            { x = pos.x,     y = pos.y, z = pos.z - 1 },
+        local laterals = { xyz(pos.x + 1, pos.y, pos.z), xyz(pos.x - 1, pos.y, pos.z), xyz(pos.x, pos.y, pos.z + 1),
+            xyz(pos.x, pos.y, pos.z - 1),
             -- diagonais
-            { x = pos.x + 1, y = pos.y, z = pos.z + 1 },
-            { x = pos.x + 1, y = pos.y, z = pos.z - 1 },
-            { x = pos.x - 1, y = pos.y, z = pos.z + 1 },
-            { x = pos.x - 1, y = pos.y, z = pos.z - 1 },
+            xyz(pos.x + 1, pos.y, pos.z + 1), xyz(pos.x + 1, pos.y, pos.z - 1), xyz(pos.x - 1, pos.y, pos.z + 1),
+            xyz(pos.x - 1, pos.y, pos.z - 1),
         }
-
         local has_water = false
         for _, npos in ipairs(laterals) do
             local name = core.get_node(npos).name
@@ -1473,7 +1443,6 @@ core.register_node("nh_nodes:tilleddirt", {
                 break
             end
         end
-
         if has_water then
             core.set_node(pos, { name = "nh_nodes:wettilleddirt" })
         else
