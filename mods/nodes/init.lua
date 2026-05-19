@@ -1200,7 +1200,7 @@ core.register_node("nh_nodes:dirt_ramp", {
     },
 })
 core.register_node("nh_nodes:dirt_corner", {
-    description         = S("Dirt Corner"),
+    description         = S "Dirt Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -1233,7 +1233,7 @@ core.register_node("nh_nodes:dirt_corner", {
 })
 
 core.register_node("nh_nodes:dirt_insidecorner", {
-    description         = S("Dirt Inside Corner"),
+    description         = S "Dirt Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -1321,17 +1321,17 @@ register_craft_station("nh_nodes:dirt", {
         end
         return true
     end,
-    title = S("2x2 Craft on the Dirt"), -- Campo obrigatório!
+    title = S "2x2 Craft on the Dirt", -- Campo obrigatório!
     grid_size = 4,
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
 core.register_node("nh_nodes:wetdirt", {
-    description = S("Wet Dirt"),
+    description = S "Wet Dirt",
     tiles = { "wetdirt.png" },
     groups = { crumbly = 2 },
     sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
@@ -1415,7 +1415,7 @@ core.register_node("nh_nodes:wetdirt", {
 })
 
 core.register_node("nh_nodes:tilleddirt", {
-    description = S("Tilled Dirt"),
+    description = S "Tilled Dirt",
     tiles = { "tilleddirt.png", "terra.png" },
     groups = { crumbly = 2 },
     drop = "nh_nodes:dirt",
@@ -1453,7 +1453,7 @@ core.register_node("nh_nodes:tilleddirt", {
 })
 
 core.register_node("nh_nodes:wettilleddirt", {
-    description = S("Wet Tilled Dirt"),
+    description = S "Wet Tilled Dirt",
     tiles = { "wettilleddirt.png", "wetdirt.png" },
     groups = { crumbly = 2 },
     drop = "nh_nodes:wetdirt",
@@ -1566,7 +1566,7 @@ register_craft_station("nh_nodes:top_grass", {
         "grama_terra_lado.png"  -- lado frente (5)
     },
     sounds = { footstep = { name = "GrassFootstep", gain = 0.5 }, dug = { name = "GrassDig", gain = 0.5 }, dig = { name = "GrassDig", gain = 0.5 }, place = { name = "GrassDig", gain = 0.5 }, },
-    title = S("2x2 Craft on the Grass"),
+    title = S "2x2 Craft on the Grass",
     groups = { crumbly = 3, soil = 1 },
     -- Quando a grama é bloqueada da luz, vira terra
     drop = "nh_nodes:dirt",
@@ -1609,7 +1609,7 @@ register_craft_station("nh_nodes:top_grass", {
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
@@ -1624,7 +1624,7 @@ register_craft_station("nh_nodes:top_grass2", {
         "terra.png"        -- lado frente (5)
     },
     sounds = { footstep = { name = "GrassFootstep", gain = 0.5 }, dug = { name = "GrassDig", gain = 0.5 }, dig = { name = "GrassDig", gain = 0.5 }, place = { name = "GrassDig", gain = 0.5 }, },
-    title = S("2x2 Craft on the Grass"),
+    title = S "2x2 Craft on the Grass",
     groups = { crumbly = 3, soil = 1 },
     -- Quando a grama é bloqueada da luz, vira terra
     drop = "nh_nodes:dirt",
@@ -1666,7 +1666,7 @@ register_craft_station("nh_nodes:top_grass2", {
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
@@ -1715,12 +1715,12 @@ register_craft_station("nh_nodes:grass", {
         --core.chat_send_all("   Não se torna terra, terminada a verificação")
         return false
     end,
-    title = S("2x2 Craft on the Lawn"), -- ✅ Campo obrigatório!
+    title = S "2x2 Craft on the Lawn", -- ✅ Campo obrigatório!
     grid_size = 4,
     positions = { xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2), xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2), },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.4, 0),
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 -- SISTEMA DE DETECÇÃO DE BLOCOS ACIMA DA GRAMA
@@ -1758,7 +1758,7 @@ core.register_on_dignode(function(pos, oldnode, digger)
     end
 end)
 core.register_node("nh_nodes:sand_ramp", {
-    description         = S("Sand Ramp"),
+    description         = S "Sand Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -1777,7 +1777,7 @@ core.register_node("nh_nodes:sand_ramp", {
 })
 
 core.register_node("nh_nodes:sand_corner", {
-    description         = S("Sand Corner"),
+    description         = S "Sand Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -1808,7 +1808,7 @@ core.register_node("nh_nodes:sand_corner", {
     },
 })
 core.register_node("nh_nodes:sand_insidecorner", {
-    description         = S("Sand Inside Corner"),
+    description         = S "Sand Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -1836,7 +1836,7 @@ register_craft_station("nh_nodes:sand", {
     description = S "Sand",
     mesh = nil,
     tiles = { "areia.png" },
-    title = S("2x2 Craft on the Sand"), -- ✅ Campo obrigatório!
+    title = S "2x2 Craft on the Sand", -- ✅ Campo obrigatório!
     grid_size = 4,
     groups = { crumbly = 2, falling_node = 1 },
     sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
@@ -1855,14 +1855,14 @@ register_craft_station("nh_nodes:sand", {
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
 register_craft_station("nh_nodes:wet_sand", {
-    description = S("Wet Sand"),
+    description = S "Wet Sand",
     tiles = { "areia_molhada.png" },
-    title = S("2x2 Craft on the Wet Sand"), -- ✅ Campo obrigatório!
+    title = S "2x2 Craft on the Wet Sand", -- ✅ Campo obrigatório!
     groups = { crumbly = 2 },
     -- Configuração mão direita
     wielded_bone_position = {
@@ -1880,7 +1880,7 @@ register_craft_station("nh_nodes:wet_sand", {
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 core.register_node("nh_nodes:saprolite", {
@@ -1917,12 +1917,12 @@ register_craft_station("nh_nodes:gneiss", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    title = S("2x2 Craft on the Gneiss"), -- ✅ Campo obrigatório!
+    title = S "2x2 Craft on the Gneiss", -- ✅ Campo obrigatório!
     grid_size = 4,
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
@@ -1948,7 +1948,7 @@ register_craft_station("nh_nodes:cobblestone", {
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
@@ -2003,7 +2003,7 @@ core.register_node("nh_nodes:charcoal", {
 })
 
 core.register_node("nh_nodes:charcoal2", {
-    description = S("Smaller Charcoal"),
+    description = S "Smaller Charcoal",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
     tiles = { "charcoal2.png" },
@@ -2045,7 +2045,7 @@ core.register_node("nh_nodes:charcoal2", {
 
 
 core.register_node("nh_nodes:coal", {
-    description = S("Black Coal") .. "\n" .. S("[Coal Ore]"),
+    description = S "Black Coal") .. "\n" .. S("[Coal Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "coalore.png" },
@@ -2073,7 +2073,7 @@ core.register_node("nh_nodes:coal", {
 })
 
 core.register_node("nh_nodes:coalnugget", {
-    description = S("Coal Nugget"),
+    description = S "Coal Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "coalnugget.png" },
@@ -2095,7 +2095,7 @@ core.register_node("nh_nodes:coalnugget", {
 })
 
 core.register_node("nh_nodes:charcoalnugget", {
-    description = S("Charcoal Nugget"),
+    description = S "Charcoal Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "charcoalnugget.png" },
@@ -2117,7 +2117,7 @@ core.register_node("nh_nodes:charcoalnugget", {
 })
 
 core.register_node("nh_nodes:copper", {
-    description = S "Chalcopyrite" .. "\n" .. S("[Copper Ore]"),
+    description = S "Chalcopyrite" .. "\n" .. S "[Copper Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_copperore.png" },
@@ -2145,7 +2145,7 @@ core.register_node("nh_nodes:copper", {
 })
 
 core.register_node("nh_nodes:coppernugget", {
-    description = S("Copper Nugget"),
+    description = S "Copper Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "coppernugget.png" },
@@ -2165,7 +2165,7 @@ core.register_node("nh_nodes:coppernugget", {
 })
 
 core.register_node("nh_nodes:copperingot", {
-    description = S("Copper Ingot"),
+    description = S "Copper Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "copperingot.png" },
@@ -2175,7 +2175,7 @@ core.register_node("nh_nodes:copperingot", {
 })
 
 core.register_node("nh_nodes:tin", {
-    description = S "Cassiterite" .. "\n" .. S("[Tin Ore]"),
+    description = S "Cassiterite" .. "\n" .. S "[Tin Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_tinore.png" },
@@ -2203,7 +2203,7 @@ core.register_node("nh_nodes:tin", {
 })
 
 core.register_node("nh_nodes:tinnugget", {
-    description = S("Tin Nugget"),
+    description = S "Tin Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "tinnugget.png" },
@@ -2223,7 +2223,7 @@ core.register_node("nh_nodes:tinnugget", {
 })
 
 core.register_node("nh_nodes:tiningot", {
-    description = S("Tin Ingot"),
+    description = S "Tin Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "tiningot.png" },
@@ -2233,7 +2233,7 @@ core.register_node("nh_nodes:tiningot", {
 })
 
 core.register_node("nh_nodes:iron", {
-    description = S "Pyrite" .. "\n" .. S("[Iron Ore]"),
+    description = S "Pyrite" .. "\n" .. S "[Iron Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_ironore.png" },
@@ -2261,7 +2261,7 @@ core.register_node("nh_nodes:iron", {
 })
 
 core.register_node("nh_nodes:ironnugget", {
-    description = S("Iron Nugget"),
+    description = S "Iron Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "ironnugget.png" },
@@ -2281,7 +2281,7 @@ core.register_node("nh_nodes:ironnugget", {
 })
 
 core.register_node("nh_nodes:ironingot", {
-    description = S("Iron Ingot"),
+    description = S "Iron Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "ironingot.png" },
@@ -2291,7 +2291,7 @@ core.register_node("nh_nodes:ironingot", {
 })
 
 core.register_node("nh_nodes:nickel", {
-    description = S "Garnierite" .. "\n" .. S("[Nickel Ore]"),
+    description = S "Garnierite" .. "\n" .. S "[Nickel Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_nickelore.png" },
@@ -2313,7 +2313,7 @@ core.register_node("nh_nodes:nickel", {
 })
 
 core.register_node("nh_nodes:manganese", {
-    description = S "Pyrolusite" .. "\n" .. S("[Manganese Ore]"),
+    description = S "Pyrolusite" .. "\n" .. S "[Manganese Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_manganeseore.png" },
@@ -2335,7 +2335,7 @@ core.register_node("nh_nodes:manganese", {
 })
 
 core.register_node("nh_nodes:chromium", {
-    description = S "Chromite" .. "\n" .. S("[Chromium Ore]"),
+    description = S "Chromite" .. "\n" .. S "[Chromium Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_chromeore.png" },
@@ -2357,7 +2357,7 @@ core.register_node("nh_nodes:chromium", {
 })
 
 core.register_node("nh_nodes:chromiumnugget", {
-    description = S("Chromium Nugget"),
+    description = S "Chromium Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "ironnugget.png" },
@@ -2377,7 +2377,7 @@ core.register_node("nh_nodes:chromiumnugget", {
 })
 
 core.register_node("nh_nodes:chromiumingot", {
-    description = S("Chromium Ingot"),
+    description = S "Chromium Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "ironingot.png" },
@@ -2476,7 +2476,7 @@ core.register_node("nh_nodes:obsidian", {
 
 
 core.register_node("nh_nodes:oakresin", {
-    description = S("Oak Resin"),
+    description = S "Oak Resin",
     drawtype = "mesh",
     mesh = "oakresin.obj",
     tiles = { "oakresin.png" },
@@ -2562,7 +2562,7 @@ end
 
 -- Tronco
 core.register_node("nh_nodes:oaktimber", {
-    description = S("Oak Timber"),
+    description = S "Oak Timber",
     tiles = { "oaktimber.png" },
     groups = { choppy = 3, falling_node = 1, armor_head = 1 },
     stack_max = 1,
@@ -2623,7 +2623,7 @@ core.register_node("nh_nodes:oaktimber", {
 
 -- Ramo
 core.register_node("nh_nodes:oakbranch", {
-    description = S("Oak Branch"),
+    description = S "Oak Branch",
     drawtype = "mesh",
     mesh = "oakbranch.obj",
     tiles = { "oaktimber.png" },
@@ -2664,7 +2664,7 @@ core.register_node("nh_nodes:oakbranch", {
 })
 
 core.register_node("nh_nodes:oaklog", {
-    description = S("Oak Log"),
+    description = S "Oak Log",
     tiles = {
         "topdownoaktimber.png", -- topo
         "topdownoaktimber.png", -- base
@@ -2714,7 +2714,7 @@ core.register_node("nh_nodes:oaklog", {
 
 -- Tronco de macieira
 core.register_node("nh_nodes:appletimber", {
-    description = S("Apple Timber"),
+    description = S "Apple Timber",
     drawtype = "mesh",
     mesh = "appletimber.obj",
     tiles = { "appletimber.png" },
@@ -2775,7 +2775,7 @@ core.register_node("nh_nodes:appletimber", {
 
 -- Tronco 3
 core.register_node("nh_nodes:pinetimber", {
-    description = S("Pine Timber"),
+    description = S "Pine Timber",
     tiles = { "pinetimber.png" },
     groups = { choppy = 3, falling_node = 1, armor_head = 1 },
     stack_max = 1,
@@ -2837,7 +2837,7 @@ core.register_node("nh_nodes:pinetimber", {
 })
 
 core.register_node("nh_nodes:pinelog", {
-    description = S("Pine Log"),
+    description = S "Pine Log",
     tiles = {
         "topdownpinetimber.png", -- topo
         "topdownpinetimber.png", -- base
@@ -2886,7 +2886,7 @@ core.register_node("nh_nodes:pinelog", {
 
 -- Madeira
 core.register_node("nh_nodes:oakwood", {
-    description = S("Oak Wood"),
+    description = S "Oak Wood",
     tiles = { "oakwood.png" },
     groups = { choppy = 3 },
 
@@ -2907,7 +2907,7 @@ core.register_node("nh_nodes:oakwood", {
 
 -- Madeira
 core.register_node("nh_nodes:pinewood", {
-    description = S("Pine Wood"),
+    description = S "Pine Wood",
     tiles = { "pinewood.png" },
     groups = { choppy = 3 },
 
@@ -2975,7 +2975,7 @@ core.register_node("nh_nodes:bone", {
 
 -- slime
 core.register_node("nh_nodes:slime", {
-    description = S "Limu" .. "\n" .. S("[collectible]"),
+    description = S "Limu" .. "\n" .. S "[collectible]",
     drawtype = "mesh",
     mesh = "planaria_slime_small2.obj",
     tiles = { "planaria_slime2.png" },
@@ -3004,7 +3004,7 @@ core.register_node("nh_nodes:slime", {
 
 -- grilo
 core.register_node("nh_nodes:cricket", {
-    description = S "Cricket" .. "\n" .. S("[collectible]"),
+    description = S "Cricket" .. "\n" .. S "[collectible]",
     drawtype = "mesh",
     mesh = "cricket.obj",
     tiles = { "cricket.png" },
@@ -3030,7 +3030,7 @@ core.register_node("nh_nodes:cricket", {
 
 -- Madeira
 core.register_node("nh_nodes:campfiretinder", {
-    description = S("Campfire Tinder"),
+    description = S "Campfire Tinder",
     drawtype = "mesh",
     mesh = "iscafogueira.obj",
     tiles = { "iscafogueira.png" },
@@ -3052,7 +3052,7 @@ core.register_node("nh_nodes:campfiretinder", {
 
 -- Tronco de carvalho fatiado
 core.register_node("nh_nodes:oaktimberslice", {
-    description = S("Oak Firewood"),
+    description = S "Oak Firewood",
     drawtype = "mesh",
     mesh = "oaktimberslice.obj",
     tiles = { "oaktimber.png" },
@@ -3098,7 +3098,7 @@ core.register_node("nh_nodes:oaktimberslice", {
 
 -- Lenha de carvalho 1 - 1/4 firewood
 core.register_node("nh_nodes:oaktimberslice1", {
-    description = S("Firewood on the Campfire 1/4"),
+    description = S "Firewood on the Campfire 1/4",
     drawtype = "mesh",
     mesh = "oaktimberslice1.obj",
     tiles = { "fogueira.png" },
@@ -3139,7 +3139,7 @@ core.register_node("nh_nodes:oaktimberslice1", {
 
 -- Lenha de carvalho 2 - 2/4 firewood
 core.register_node("nh_nodes:oaktimberslice2", {
-    description = S("Firewood on the Campfire 2/4"),
+    description = S "Firewood on the Campfire 2/4",
     drawtype = "mesh",
     mesh = "oaktimberslice2.obj",
     tiles = { "fogueira.png" },
@@ -3180,7 +3180,7 @@ core.register_node("nh_nodes:oaktimberslice2", {
 
 -- Lenha de carvalho 3 - 3/4 firewood
 core.register_node("nh_nodes:oaktimberslice3", {
-    description = S("Firewood on the Campfire 3/4"),
+    description = S "Firewood on the Campfire 3/4",
     drawtype = "mesh",
     mesh = "oaktimberslice3.obj",
     tiles = { "fogueira.png" },
@@ -3261,7 +3261,7 @@ register_craft_station("nh_nodes:campfire", {
     output_position = { x = 0, y = 1.4, z = 0 },
 
     layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
+        { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 },
     },
 
     recipes = recipes_campfire,
@@ -3462,7 +3462,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
 })
 
 core.register_node("nh_nodes:spinningtop", {
-    description = S("Oak Spinningtop") .. "\n" .. S("[Battle Toy]"),
+    description = S "Oak Spinningtop") .. "\n" .. S("[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = { "oakpiao.png" },
@@ -3523,7 +3523,7 @@ core.register_node("nh_nodes:spinningtop", {
 })
 
 core.register_node("nh_nodes:spinningtop2", {
-    description = S("Palm Spinningtop") .. "\n" .. S("[Battle Toy]"),
+    description = S "Palm Spinningtop") .. "\n" .. S("[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = { "palmpiao.png" },
@@ -3578,7 +3578,7 @@ core.register_node("nh_nodes:spinningtop2", {
 })
 
 core.register_node("nh_nodes:spinningtop3", {
-    description = S("Pine Spinningtop") .. "\n" .. S("[Battle Toy]"),
+    description = S "Pine Spinningtop") .. "\n" .. S("[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
     tiles = { "pinepiao.png" },
@@ -3638,7 +3638,7 @@ core.register_node("nh_nodes:spinningtop3", {
 
 -- Exemplo 1: Mesa de Craft 2x2x2 (original)
 register_craft_station("nh_nodes:craft_table", {
-    description = S("Production Bench"),
+    description = S "Production Bench",
     drawtype = "mesh",
     mesh = "craft_table.obj",
     tiles = { "craft_table.png" },
@@ -3681,7 +3681,7 @@ register_craft_station("nh_nodes:craft_table", {
 -- Exemplo 2: Fornalha 3x3 simples (SEM mesh, usando drawtype normal)
 register_craft_station("nh_nodes:furnace", {
     description = S "Furnace",
-    title = S("3x3 Furnace"),
+    title = S "3x3 Furnace",
     drawtype = "mesh",
     mesh = "furnace.obj",
     tiles = { "stonefurnace.png" }, --cobblestone.png
@@ -3725,7 +3725,7 @@ register_craft_station("nh_nodes:furnace", {
     output_position = { x = 0, y = 1.2, z = 0 },
 
     layers = {
-        { name = S("3x3 Grid"), x = 0.5, width = 3, height = 3, start_index = 0 },
+        { name = S "3x3 Grid", x = 0.5, width = 3, height = 3, start_index = 0 },
     },
 
     recipes = recipes_furnace
@@ -3733,10 +3733,10 @@ register_craft_station("nh_nodes:furnace", {
 
 -- Bancada Avançada 3x3x3 simples (SEM mesh)
 register_craft_station("nh_nodes:advanced_bench", {
-    description = S("Advanced Bench"),
+    description = S "Advanced Bench",
     -- mesh = nil,  -- Opcional
     tiles = { "" }, --advanced_bench.png
-    title = S("3x3x3 Advanced Bench"),
+    title = S "3x3x3 Advanced Bench",
     grid_size = 4,
 
     positions = {
@@ -3749,7 +3749,7 @@ register_craft_station("nh_nodes:advanced_bench", {
     output_position = { x = 0, y = 1.4, z = 0 },
 
     layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
+        { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 },
     },
 
     recipes = recipes_table
@@ -3758,7 +3758,7 @@ register_craft_station("nh_nodes:advanced_bench", {
 
 -- Prancha
 core.register_node("nh_nodes:oakplank", {
-    description = S("Oak Plank"),
+    description = S "Oak Plank",
     drawtype = "mesh",
     mesh = "oakplank.obj",
     tiles = { "oakwood.png" },
@@ -3798,7 +3798,7 @@ core.register_node("nh_nodes:oakplank", {
 
 -- Tábua
 core.register_node("nh_nodes:oakboard", {
-    description = S("Oak Board"),
+    description = S "Oak Board",
     drawtype = "mesh",
     mesh = "oakboard.obj",
     tiles = { "oakwood.png" },
@@ -3868,7 +3868,7 @@ core.register_node("nh_nodes:oakboard", {
 
 -- Tarugo
 core.register_node("nh_nodes:oakdowel", {
-    description = S("Oak Dowel") .. "\n" .. S("Reach: +2"),
+    description = S "Oak Dowel") .. "\n" .. S("Reach: +2",
     drawtype = "mesh",
     mesh = "oakdowel.obj",
     tiles = { "oakwood.png" },
@@ -3988,7 +3988,7 @@ core.register_node("nh_nodes:torch", {
 })
 
 core.register_node("nh_nodes:torch2", {
-    description = S("Torch Lit"),
+    description = S "Torch Lit",
     drawtype = "mesh",
     mesh = "torch.obj",
     tiles = {
@@ -4276,7 +4276,7 @@ core.register_node("nh_nodes:flame", {
 })
 
 core.register_node("nh_nodes:torch3", {
-    description = S("Torch Extinguished"),
+    description = S "Torch Extinguished",
     drawtype = "mesh",
     mesh = "torch.obj",
     tiles = { "torch3.png" },
@@ -4316,7 +4316,7 @@ core.register_node("nh_nodes:torch3", {
 
 -- Folhas de carvalho
 core.register_node("nh_nodes:leaves", {
-    description = S("Oak Leaves"),
+    description = S "Oak Leaves",
     drawtype = "liquid",
     waving = 3,
     --drawtype = "mesh",
@@ -4344,7 +4344,7 @@ core.register_node("nh_nodes:leaves", {
 
 -- Registra uma versão "dentro d'água" (da folha de carvalho)
 core.register_node("nh_nodes:leavesrelief", {
-    description = S("Leaves Relief"),
+    description = S "Leaves Relief",
     drawtype = "plantlike_rooted",
     waving = 3,
     tiles = { "oakleaves3.png" },
@@ -4388,7 +4388,7 @@ core.register_node("nh_nodes:leavesrelief", {
 })
 
 core.register_node("nh_nodes:leavesrelief", {
-    description = S("Leaves Relief"),
+    description = S "Leaves Relief",
     drawtype = "plantlike_rooted",
     waving = 3,
     tiles = { "oakleaves3.png" },
@@ -4432,7 +4432,7 @@ core.register_node("nh_nodes:leavesrelief", {
 })
 
 core.register_node("nh_nodes:kelp", {
-    description = S "Kelp" .. "\n" .. S("[Algae]"),
+    description = S "Kelp" .. "\n" .. S "[Algae]",
     drawtype = "plantlike_rooted",
     waving = 1,
     tiles = { "areia_molhada.png" },
@@ -4486,7 +4486,7 @@ core.register_node("nh_nodes:kelp", {
                     itemstack:take_item()
                 end
             else
-                minetest.chat_send_player(player_name, S("Node is protected"))
+                minetest.chat_send_player(player_name, S "Node is protected")
                 minetest.record_protection_violation(pos, player_name)
             end
         end
@@ -4499,7 +4499,7 @@ core.register_node("nh_nodes:kelp", {
 
 -- Folhas de pinheiro
 core.register_node("nh_nodes:pineleaves", {
-    description = S("Pine Leaves"),
+    description = S "Pine Leaves",
     drawtype = "mesh",
     mesh = "pineleaves.obj",
     tiles = { "pineleaves.png" },
@@ -4526,7 +4526,7 @@ core.register_node("nh_nodes:pineleaves", {
 
 -- Folhas de macieira
 core.register_node("nh_nodes:appleleaves", {
-    description = S("Apple Tree Leaves"),
+    description = S "Apple Tree Leaves",
     drawtype = "mesh",
     mesh = "appleleaves.obj",
     tiles = { "appleleaves.png" },
@@ -4551,7 +4551,7 @@ core.register_node("nh_nodes:appleleaves", {
 
 -- Folhas com 1 maça
 core.register_node("nh_nodes:leaves_apple", {
-    description = S("Leaves with Apple"),
+    description = S "Leaves with Apple",
     drawtype = "mesh",
     mesh = "leavesapple1.obj",
     tiles = { "appleleaves.png" },
@@ -4592,7 +4592,7 @@ core.register_node("nh_nodes:leaves_apple", {
 
 -- Folhas com 2 maças
 core.register_node("nh_nodes:leaves_apple2", {
-    description = S("Leaves with 2 Apples"),
+    description = S "Leaves with 2 Apples",
     drawtype = "mesh",
     mesh = "leavesapple2.obj",
     tiles = { "appleleaves.png" },
@@ -4633,7 +4633,7 @@ core.register_node("nh_nodes:leaves_apple2", {
 
 -- Folhas com 3 maças
 core.register_node("nh_nodes:leaves_apple3", {
-    description = S("Leaves with 3 Apples"),
+    description = S "Leaves with 3 Apples",
     drawtype = "mesh",
     mesh = "leavesapple3.obj",
     tiles = { "appleleaves.png" },
@@ -4689,7 +4689,7 @@ core.register_node("nh_nodes:leaves_apple3", {
 
 -- Folhas mirtilo
 core.register_node("nh_nodes:blueberryleaves", {
-    description = S("Blueberry Leaves"),
+    description = S "Blueberry Leaves",
     drawtype = "liquid",
     waving = 1,
     tiles = { "folhasmirtilo.png" },
@@ -4709,7 +4709,7 @@ core.register_node("nh_nodes:blueberryleaves", {
 
 -- Folhas com 4 blueberry
 core.register_node("nh_nodes:leaves_blueberry4", {
-    description = S("Leaves with 4 Blueberries"),
+    description = S "Leaves with 4 Blueberries",
     drawtype = "allfaces_optional",
     waving = 1,
     tiles = { "folhasmirtilo4.png" },
@@ -4748,7 +4748,7 @@ core.register_node("nh_nodes:leaves_blueberry4", {
 })
 
 core.register_node("nh_nodes:giantcrabstatue", {
-    description = S("Giant Crab Statue") .. "\n" .. S("[Unknown]"),
+    description = S "Giant Crab Statue") .. "\n" .. S("[Unknown]",
     drawtype = "mesh",
     mesh = "giantcrabstatue.obj",
     tiles = { "giantcrabstatue.png" }, --tiles = {{name = "giantcrabstatue.png", glow = 1}},
@@ -4777,7 +4777,7 @@ core.register_node("nh_nodes:giantcrabstatue", {
 
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
-            core.chat_send_player(puncher:get_player_name(), S("This won't work... I need something more powerful"))
+            core.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
             return
         end
 
@@ -4822,12 +4822,12 @@ core.register_node("nh_nodes:giantcrabstatue", {
         puncher:set_wielded_item(item)
 
         -- Avisa o jogador
-        core.chat_send_player(puncher:get_player_name(), S("The statue shatters... something awakens!"))
+        core.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
     end,
 })
 
 core.register_node("nh_nodes:redcrystal", {
-    description = S("Red Crystal") .. "\n" .. S("[Light/Air]") .. "\n" .. S("(Squat down to breathe)"),
+    description = S "Red Crystal") .. "\n" .. S "[Light/Air]" .. "\n" .. S("(Squat down to breathe)",
     drawtype = "mesh",
     mesh = "redcrystal.obj",
     tiles = { "redcrystal.png" },
@@ -4875,7 +4875,7 @@ core.register_node("nh_nodes:redcrystal", {
 })
 
 core.register_node("nh_nodes:sentinelstatue", {
-    description = S("Sentinel Statue") .. "\n" .. S("[Unknown]"),
+    description = S "Sentinel Statue") .. "\n" .. S("[Unknown]",
     drawtype = "mesh",
     mesh = "skydragon.obj",
     tiles = { "sentinelstatue.png" }, --tiles = {{name = "giantcrabstatue.png", glow = 1}},
@@ -4904,7 +4904,7 @@ core.register_node("nh_nodes:sentinelstatue", {
 
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
-            core.chat_send_player(puncher:get_player_name(), S("This won't work... I need something more powerful"))
+            core.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
             return
         end
 
@@ -4949,12 +4949,12 @@ core.register_node("nh_nodes:sentinelstatue", {
         puncher:set_wielded_item(item)
 
         -- Avisa o jogador
-        core.chat_send_player(puncher:get_player_name(), S("The statue shatters... something awakens!"))
+        core.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
     end,
 })
 
 core.register_node("nh_nodes:sphere", {
-    description = S("Sphere of Vertices") .. "\n" .. S("[Unknown]"),
+    description = S "Sphere of Vertices") .. "\n" .. S("[Unknown]",
     drawtype = "mesh",
     mesh = "ball_crystal.obj",
     tiles = { "ball2.png" },
@@ -4984,7 +4984,7 @@ core.register_node("nh_nodes:sphere", {
 
 -- Nó invisível (versão que fica no mundo)
 core.register_node("nh_nodes:sphere_placed", {
-    description = S("Bubble of Vertices") .. "\n" .. S("[Unknown]"),
+    description = S "Bubble of Vertices") .. "\n" .. S("[Unknown]",
     drawtype = "mesh",
     mesh = "ball2.obj",
     tiles = { "empty.png" }, -- PNG 1x1 totalmente transparente
@@ -5100,7 +5100,7 @@ core.register_entity("nh_nodes:crystal_anim", {
 
 
 core.register_node("nh_nodes:orb_empty", {
-    description = S "Orb" .. S("(Empty)") .. "\n" .. S("[Mob Catcher]"),
+    description = S "Orb" .. S "(Empty)") .. "\n" .. S("[Mob Catcher]",
     drawtype = "mesh",
     mesh = "orb.obj",
     tiles = { "orb_node.png" },
@@ -5138,7 +5138,7 @@ function register_orb_egg(mob_name, description, texture)
     local short_name = mob_name:match(":(.+)") .. "" -- "_orb"
 
     core.register_node("nh_mob:" .. short_name, {
-        description = description .. "\n" .. S("[Mob Spawner]"),
+        description = description .. "\n" .. S "[Mob Spawner]",
         drawtype = "mesh",
         mesh = "orb.obj",
         tiles = { texture or "orb_node.png" },
@@ -5190,7 +5190,7 @@ function register_orb_egg(mob_name, description, texture)
 end
 
 core.register_node("nh_nodes:nut", {
-    description = S "Acorn" .. "\n" .. S("(Nut)") .. "\n" .. S("Nutrition: +1"),
+    description = S "Acorn" .. "\n" .. S "(Nut)") .. "\n" .. S("Nutrition: +1",
     drawtype = "mesh",
     mesh = "noz.obj",
     tiles = { "noz.png" },
@@ -5220,7 +5220,7 @@ core.register_node("nh_nodes:nut", {
 
 -- Folhas com 1 noz
 core.register_node("nh_nodes:leaves_nut", {
-    description = S("Leaves with Nut"),
+    description = S "Leaves with Nut",
     drawtype = "allfaces_optional",
     waving = 3,
     tiles = { "leavesnut1.png" },
@@ -5260,7 +5260,7 @@ core.register_node("nh_nodes:leaves_nut", {
 
 -- Folhas com 2 nozes
 core.register_node("nh_nodes:leaves_nut2", {
-    description = S("Leaves with 2 Nuts"),
+    description = S "Leaves with 2 Nuts",
     drawtype = "allfaces_optional",
     waving = 3,
     tiles = { "leavesnut2.png" },
@@ -5300,7 +5300,7 @@ core.register_node("nh_nodes:leaves_nut2", {
 
 -- Folhas com 3 nozes
 core.register_node("nh_nodes:leaves_nut3", {
-    description = S("Leaves with 3 Nuts"),
+    description = S "Leaves with 3 Nuts",
     drawtype = "allfaces_optional",
     waving = 3,
     tiles = { "leavesnut3.png" },
@@ -5340,7 +5340,7 @@ core.register_node("nh_nodes:leaves_nut3", {
 
 
 core.register_node("nh_nodes:apple", {
-    description = S "Apple" .. "\n" .. S("Nutrition: +2"),
+    description = S "Apple" .. "\n" .. S "Nutrition: +2",
     drawtype = "mesh",
     mesh = "apple.obj",
     tiles = { "AppleTexture.png" },
@@ -5368,7 +5368,7 @@ core.register_node("nh_nodes:apple", {
 })
 
 core.register_node("nh_nodes:blueberry", {
-    description = S "Blueberry" .. "\n" .. S("Nutrition: +1"),
+    description = S "Blueberry" .. "\n" .. S "Nutrition: +1",
     --wield_scale = {x = 10, y = 10, z = 10},
     drawtype = "mesh",
     mesh = "blueberry.obj",
@@ -5398,7 +5398,7 @@ core.register_node("nh_nodes:blueberry", {
 })
 
 core.register_node("nh_nodes:chickenegg", {
-    description = S("Chicken Egg") .. "\n" .. S("Nutrition: +1"),
+    description = S "Chicken Egg") .. "\n" .. S("Nutrition: +1",
     drawtype = "mesh",
     mesh = "chickenegg.obj",
     tiles = { "chickenegg.png" },
@@ -5426,7 +5426,7 @@ core.register_node("nh_nodes:chickenegg", {
 })
 
 core.register_node("nh_nodes:friedchickenegg", {
-    description = S("Fried Egg") .. "\n" .. S("(Chicken Egg)") .. "\n" .. S("Nutrition: +4"),
+    description = S "Fried Egg") .. "\n" .. S "(Chicken Egg)" .. "\n" .. S("Nutrition: +4",
     drawtype = "mesh",
     mesh = "friedegg.obj",
     tiles = { "friedegg.png" },
@@ -5454,7 +5454,7 @@ core.register_node("nh_nodes:friedchickenegg", {
 })
 
 core.register_node("nh_nodes:worm", {
-    description = S "Worm" .. "\n" .. S("[Mob / Item]"),
+    description = S "Worm" .. "\n" .. S "[Mob / Item]",
     drawtype = "mesh",
     mesh = "worm_node.obj",
     tiles = { "worm.png" },
@@ -5524,7 +5524,7 @@ core.register_node("nh_nodes:chicken", {
 })
 
 core.register_node("nh_nodes:rawchicken", {
-    description = S("Raw Chicken") .. "\n" .. S("Nutrition: +4"),
+    description = S "Raw Chicken") .. "\n" .. S("Nutrition: +4",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = { "raw_chicken.png" },
@@ -5561,7 +5561,7 @@ core.register_node("nh_nodes:rawchicken", {
 })
 
 core.register_node("nh_nodes:roastchicken", {
-    description = S("Roast Chicken") .. "\n" .. S("Nutrition: +6"),
+    description = S "Roast Chicken") .. "\n" .. S("Nutrition: +6",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = { "roastchicken.png" },
@@ -5654,7 +5654,7 @@ core.register_node("nh_nodes:tuna", {
 })
 
 core.register_node("nh_nodes:rawtuna", {
-    description = S("Raw Tuna") .. "\n" .. S("Nutrition: +4"),
+    description = S "Raw Tuna") .. "\n" .. S("Nutrition: +4",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
     tiles = { "rawtuna.png" },
@@ -5684,7 +5684,7 @@ core.register_node("nh_nodes:rawtuna", {
 })
 
 core.register_node("nh_nodes:roasttuna", {
-    description = S("Roast Tuna") .. "\n" .. S("Nutrition: +6"),
+    description = S "Roast Tuna") .. "\n" .. S("Nutrition: +6",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
     tiles = { "roasttuna.png" },
@@ -5714,7 +5714,7 @@ core.register_node("nh_nodes:roasttuna", {
 })
 
 core.register_node("nh_nodes:bull", {
-    description = S "Bull" .. "\n" .. S("[collectible]"),
+    description = S "Bull" .. "\n" .. S "[collectible]",
 
     drawtype = "mesh",
     mesh = "bull2.obj",
@@ -5737,7 +5737,7 @@ core.register_node("nh_nodes:bull", {
 })
 
 core.register_node("nh_nodes:rawbeef", {
-    description = S("Raw Beef") .. "\n" .. S("Nutrition: +3"),
+    description = S "Raw Beef") .. "\n" .. S("Nutrition: +3",
 
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -5765,7 +5765,7 @@ core.register_node("nh_nodes:rawbeef", {
 })
 
 core.register_node("nh_nodes:roastbeef", {
-    description = S("Roast Beef") .. "\n" .. S("Nutrition: +6"),
+    description = S "Roast Beef") .. "\n" .. S("Nutrition: +6",
 
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -5794,7 +5794,7 @@ core.register_node("nh_nodes:roastbeef", {
 
 
 core.register_node("nh_nodes:cowfur", {
-    description = S("Bull Fur"),
+    description = S "Bull Fur",
 
     drawtype = "mesh",
     mesh = "cowleather.obj",
@@ -5816,7 +5816,7 @@ core.register_node("nh_nodes:cowfur", {
 })
 
 core.register_node("nh_nodes:inksac", {
-    description = S("Ink Sack") .. "\n" .. S("Portion: 1"),
+    description = S "Ink Sack") .. "\n" .. S("Portion: 1",
 
     drawtype = "mesh",
     mesh = "inksac.obj",
@@ -6291,7 +6291,7 @@ core.register_abm({
 })
 
 core.register_node("nh_nodes:messagebottle", {
-    description = S("Bottle with Message") .. "\n" .. S("[Floating Item]"),
+    description = S "Bottle with Message") .. "\n" .. S("[Floating Item]",
     inventory_image = "bottlepage.png",
     drawtype = "mesh",
     mesh = "bottlepage.obj",
@@ -6346,7 +6346,7 @@ core.register_node("nh_nodes:messagebottle", {
 })
 
 core.register_node("nh_nodes:fireflybottle", {
-    description = S("Bottle with Firefly"),
+    description = S "Bottle with Firefly",
     inventory_image = "bottlefirefly.png",
     drawtype = "mesh",
     mesh = "bottlefirefly.obj",
@@ -6384,7 +6384,7 @@ core.register_node("nh_nodes:fireflybottle", {
 })
 
 core.register_node("nh_nodes:inkbottle", {
-    description = S("Bottle with Ink"),
+    description = S "Bottle with Ink",
     inventory_image = "inkbottle.png",
     drawtype = "mesh",
     mesh = "bottle.obj",
@@ -6466,7 +6466,7 @@ function consume_ink(player)
 end
 
 core.register_node("nh_nodes:coconutlinked", {
-    description = S("Fixed Coconut"),
+    description = S "Fixed Coconut",
     drawtype = "mesh",
     mesh = "coconutlinked.obj",
     tiles = { "CocoTexture.png" },
@@ -6492,7 +6492,7 @@ core.register_node("nh_nodes:coconutlinked", {
 
 
 core.register_node("nh_nodes:coconut", {
-    description = S "Coconut" .. "\n" .. S("Nutrition: +3") .. "\n" .. S("Floating Item"),
+    description = S "Coconut" .. "\n" .. S "Nutrition: +3") .. "\n" .. S("Floating Item",
     drawtype = "mesh",
     mesh = "coconut.obj",
     tiles = { "CocoTexture.png" },
@@ -6552,7 +6552,7 @@ core.register_node("nh_nodes:coconut", {
 })
 
 core.register_node("nh_nodes:palmtimber", {
-    description = S("Palm Trunk"),
+    description = S "Palm Trunk",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
     tiles = { "coqueirotexture.png" },
@@ -6610,7 +6610,7 @@ core.register_node("nh_nodes:palmtimber", {
 
 
 core.register_node("nh_nodes:palmstraws", {
-    description = S("Palm Trunk with Straws"),
+    description = S "Palm Trunk with Straws",
     drawtype = "mesh",
     mesh = "coconutstraws.obj",
     tiles = { "strawstimbertexture.png" },
@@ -6650,7 +6650,7 @@ core.register_node("nh_nodes:palmstraws", {
 })
 
 core.register_node("nh_nodes:palmlog", {
-    description = S("Palm Log"),
+    description = S "Palm Log",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
     tiles = { "coqueirotexture.png" },
@@ -6687,7 +6687,7 @@ core.register_node("nh_nodes:palmlog", {
 })
 
 core.register_node("nh_nodes:palmleafstalks", {
-    description = S("Palm Leaves Stalks"),
+    description = S "Palm Leaves Stalks",
 
     drawtype = "mesh",
     mesh = "TaloCoqueiro.obj",
@@ -6716,7 +6716,7 @@ core.register_node("nh_nodes:palmleafstalks", {
 
 -- Registrar o node da folha de coqueiro
 core.register_node("nh_nodes:palmleaf", {
-    description = S("Palm Leaf"),
+    description = S "Palm Leaf",
 
     drawtype = "mesh",
     mesh = "palm_leaf.obj",
@@ -6774,7 +6774,7 @@ core.register_node("nh_nodes:palmleaf", {
 -- NODE DE PALHA COM CHAMAS
 ---------------------------
 core.register_node("nh_nodes:palmstraw", {
-    description = S("Palm Straw"),
+    description = S "Palm Straw",
 
     drawtype = "mesh",
     mesh = "palmstraw.obj",
@@ -6995,7 +6995,7 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
 
 
 core.register_node("nh_nodes:fireice", {
-    description = S("Fire Ice"),
+    description = S "Fire Ice",
     tiles = { "neve.png" },
     drawtype = "normal",
     groups = { crumbly = 3, falling_node = 1 }, -- como areia, mas sem fluir
@@ -7003,7 +7003,7 @@ core.register_node("nh_nodes:fireice", {
 })
 
 core.register_node("nh_nodes:snow_ramp", {
-    description         = S("Snow Ramp"),
+    description         = S "Snow Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype           = "light",
@@ -7043,7 +7043,7 @@ core.register_node("nh_nodes:snow_ramp", {
 })
 
 core.register_node("nh_nodes:snow_corner", {
-    description         = S("Snow Corner"),
+    description         = S "Snow Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype           = "light",
@@ -7088,7 +7088,7 @@ core.register_node("nh_nodes:snow_corner", {
 })
 
 core.register_node("nh_nodes:snow_insidecorner", {
-    description         = S("Snow Inside Corner"),
+    description         = S "Snow Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype           = "light",
@@ -7166,7 +7166,7 @@ core.register_node("nh_nodes:avalanche", {
 })
 
 core.register_node("nh_nodes:avalanche_flowing", {
-    description = S("Flowing Avalanche"),
+    description = S "Flowing Avalanche",
     liquidtype = "flowing",
     drawtype = "flowingliquid",
     tiles = { "neve.png" },
@@ -7237,7 +7237,7 @@ core.register_node("nh_nodes:water", {
 })
 
 core.register_node("nh_nodes:water_flowing", {
-    description = S("Flowing Water"),
+    description = S "Flowing Water",
     drawtype = "flowingliquid",
     tiles = { "agua.png" },
     special_tiles = {
@@ -7377,7 +7377,7 @@ core.register_node("nh_nodes:ice2", {
 })
 
 core.register_node("nh_nodes:ice2ramp", {
-    description = S("Ice Ramp"),
+    description = S "Ice Ramp",
     drawtype = "mesh",
     mesh = "grass_slope.obj",
     tiles = { "ice2ramp.png" },
@@ -7440,7 +7440,7 @@ core.register_node("nh_nodes:ice2ramp", {
 })
 
 core.register_node("nh_nodes:water2", {
-    description = S("Fresh Water"),
+    description = S "Fresh Water",
     drawtype = "liquid",
     tiles = { "water2.png" },
     tiles = { {
@@ -7465,7 +7465,7 @@ core.register_node("nh_nodes:water2", {
 })
 
 core.register_node("nh_nodes:water2_flowing", {
-    description = S("Flowing Fresh Water"),
+    description = S "Flowing Fresh Water",
     drawtype = "flowingliquid",
     tiles = { "water2.png" },
     special_tiles = {
@@ -7516,7 +7516,7 @@ core.register_node("nh_nodes:basalt", {
 })
 
 core.register_node("nh_nodes:basalt_ramp", {
-    description = S("Basalt Ramp"),
+    description = S "Basalt Ramp",
     paramtype   = "light",
     paramtype2  = "facedir",
     drawtype    = "mesh",
@@ -7553,7 +7553,7 @@ core.register_node("nh_nodes:basalt_ramp", {
 })
 
 core.register_node("nh_nodes:basalt_corner", {
-    description         = S("Basalt Corner"),
+    description         = S "Basalt Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype           = "light",
@@ -7598,7 +7598,7 @@ core.register_node("nh_nodes:basalt_corner", {
 })
 
 core.register_node("nh_nodes:basalt_insidecorner", {
-    description         = S("Basalt Inside Corner"),
+    description         = S "Basalt Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
     paramtype           = "light",
@@ -7735,7 +7735,7 @@ core.register_node("nh_nodes:lava", {
 })
 
 core.register_node("nh_nodes:lava_flowing", {
-    description = S("Flowing Lava"),
+    description = S "Flowing Lava",
     drawtype = "flowingliquid",
     tiles = { "lava.png" },
     special_tiles = {
@@ -7765,7 +7765,7 @@ core.register_node("nh_nodes:lava_flowing", {
 })
 
 core.register_node("nh_nodes:bluelava", {
-    description = S("Blue Lava"),
+    description = S "Blue Lava",
     drawtype = "liquid",
     tiles = { "bluelava.png" },
     tiles = { {
@@ -7789,7 +7789,7 @@ core.register_node("nh_nodes:bluelava", {
 })
 
 core.register_node("nh_nodes:bluelava_flowing", {
-    description = S("Flowing Blue Lava"),
+    description = S "Flowing Blue Lava",
     drawtype = "flowingliquid",
     tiles = { "bluelava.png" },
     special_tiles = {
@@ -7905,13 +7905,13 @@ core.register_node("nh_nodes:page_node", {
         local player_name = clicker:get_player_name()
         local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
         if not has_feather or not has_ink then
-            local msg = S("I think I need ")
+            local msg = S "I think I need "
             if not has_feather and not has_ink then
-                msg = msg .. S("a feather in the hotbar and an ink bottle in the inventory to write.")
+                msg = msg .. S "a feather in the hotbar and an ink bottle in the inventory to write."
             elseif not has_feather then
-                msg = msg .. S("a feather in the hotbar to write.")
+                msg = msg .. S "a feather in the hotbar to write."
             else
-                msg = msg .. S("an ink bottle in the inventory to write.")
+                msg = msg .. S "an ink bottle in the inventory to write."
             end
             core.chat_send_player(player_name, msg)
             return
@@ -7919,7 +7919,7 @@ core.register_node("nh_nodes:page_node", {
 
         core.show_formspec(player_name, "nh_nodes:page_writer:" .. core.pos_to_string(pos),
             "size[8,6]" ..
-            "label[0.3,0;" .. S("Write on the Page:") .. "]" ..
+            "label[0.3,0;" .. S "Write on the Page:" .. "]" ..
             "textarea[0.3,0.5;8,4.5;page_text;;]" ..
             "button[2,5;2,1;save;" .. S "Save" .. "]" ..
             "button[4,5;2,1;cancel;" .. S "Cancel" .. "]"
@@ -7941,7 +7941,7 @@ core.register_node("nh_nodes:page_node", {
 
 -- Node para Página escrita
 core.register_node("nh_nodes:writedpage_node", {
-    description = S("Writed Paper"),
+    description = S "Writed Paper",
     drawtype = "mesh",
     mesh = "page.obj",
     tiles = { "writedpage.png" },
@@ -7972,7 +7972,7 @@ core.register_node("nh_nodes:writedpage_node", {
         local text = meta:get_string("text")
 
         if text == "" then
-            text = S("Blank Paper")
+            text = S "Blank Paper"
         end
 
         core.show_formspec(player_name, "nh_nodes:page_reader",
@@ -8100,7 +8100,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                         writing_utils.consume_ink(player)
                     end
 
-                    core.chat_send_player(player:get_player_name(), S("Text saved on the page!"))
+                    core.chat_send_player(player:get_player_name(), S "Text saved on the page!")
                 end
             end
         end
@@ -8306,7 +8306,7 @@ core.register_node("nh_nodes:oak_chest_open", {
 })
 
 core.register_node("nh_nodes:oakchest", {
-    description = S("Oak Chest"),
+    description = S "Oak Chest",
     drawtype = "mesh",
     mesh = "chest.glb",
     tiles = { "ChestTexture.png" },
@@ -8345,7 +8345,7 @@ core.register_node("nh_nodes:oakchest", {
             "listring[current_player;main]"
         )
 
-        meta:set_string("infotext", S("Oak Chest"))
+        meta:set_string("infotext", S "Oak Chest")
     end,
 
     -- Verificar se pode cavar (não permitir se tiver itens)
@@ -8440,7 +8440,7 @@ core.register_node("nh_nodes:oakchest", {
 })
 
 core.register_node("nh_nodes:oak_chest", {
-    description = S("Oak Chest") .. "\n" .. S("[with items]"),
+    description = S "Oak Chest") .. "\n" .. S("[with items]",
     drawtype = "mesh",
     mesh = "chest.glb",
     tiles = { "ChestTexture.png" },
@@ -8472,15 +8472,15 @@ core.register_node("nh_nodes:oak_chest", {
 
         -- Adiciona páginas com textos pré-definidos
         local page1 = items.create_page_with_text(
-            S("Day 1: I found this abandoned place. It seems someone lived here a long time ago.")
+            S "Day 1: I found this abandoned place. It seems someone lived here a long time ago."
         )
 
         local page2 = items.create_page_with_text(
-            S("Day 15: Supplies are running out. I need to find a way out before it's too late.")
+            S "Day 15: Supplies are running out. I need to find a way out before it's too late."
         )
 
         local page3 = items.create_page_with_text(
-            S("Day 30: I heard strange sounds during the night. I'm not alone here...")
+            S "Day 30: I heard strange sounds during the night. I'm not alone here..."
         )
 
         inv:set_stack("main", 1, page1)
@@ -8510,7 +8510,7 @@ core.register_node("nh_nodes:oak_chest", {
             "listring[current_player;main]"
         )
 
-        meta:set_string("infotext", S("Lost Oak Chest"))
+        meta:set_string("infotext", S "Lost Oak Chest")
     end,
 
     -- Verificar se pode cavar (não permitir se tiver itens)
@@ -8915,7 +8915,7 @@ local function update_neighbors(pos)
 end
 
 core.register_craftitem("nh_nodes:pebble_item", {
-    description = S "Pebble" .. "\n" .. S("[Throwable]") .. "\n" .. S("Damage: +1") .. "\n" .. S("(Throw: Q / drop)"),
+    description = S "Pebble" .. "\n" .. S "[Throwable]") .. "\n" .. S "Damage: +1" .. "\n" .. S("(Throw: Q / drop)",
     inventory_image = "seixoarremessavel.png",
     wield_image = "seixoarremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
@@ -9160,7 +9160,7 @@ core.register_entity("nh_nodes:pebble_entity", {
 })
 
 core.register_node("nh_nodes:limb", {
-    description = S "Limb" .. "\n" .. S("Reach: +2") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 10"),
+    description = S "Limb" .. "\n" .. S "Reach: +2") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 10",
     drawtype = "mesh",
     mesh = "branch.obj",
     tiles = { "branchtex.png" }, --oaktimber.png
@@ -9208,7 +9208,7 @@ core.register_node("nh_nodes:limb", {
 })
 
 core.register_node("nh_nodes:stick", {
-    description = S "Stick" .. "\n" .. S("Reach: +1") .. "\n" .. S("Uses: 5"),
+    description = S "Stick" .. "\n" .. S "Reach: +1") .. "\n" .. S("Uses: 5",
     drawtype = "mesh",
     mesh = "stick.obj",
     tiles = { "stick.png" },
@@ -9236,7 +9236,7 @@ core.register_node("nh_nodes:stick", {
 })
 
 core.register_node("nh_nodes:fallenstick", {
-    description = S("Fallen stick"),
+    description = S "Fallen stick",
     drawtype = "mesh",
     mesh = "stick2.obj",
     tiles = { "stick.png" },
@@ -9264,7 +9264,7 @@ core.register_node("nh_nodes:fallenstick", {
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidianpebble", {
-    description = S("Obsidian Pebble") .. "\n" .. S("Damage: +1"),
+    description = S "Obsidian Pebble") .. "\n" .. S("Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",         --
     tiles = { "obsidiana.png" }, -- tiles = {"pedra.png"},
@@ -9356,8 +9356,8 @@ end
 -- ITEM
 ---------------------------
 core.register_craftitem("nh_nodes:obsidianpebble_item", {
-    description = S("Obsidian Pebble") ..
-        "\n" .. S("[Throwable]") .. "\n" .. S("Damage: +1") .. "\n" .. S("(Throw: Q / drop)"),
+    description = S "Obsidian Pebble" ..
+        "\n" .. S "[Throwable]") .. "\n" .. S "Damage: +1" .. "\n" .. S("(Throw: Q / drop)",
     inventory_image = "obsidiana_seixo_arremessavel.png",
     wield_image = "obsidiana_seixo_arremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
@@ -9605,7 +9605,7 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidianblade", {
-    description = S("Obsidian Blade"),
+    description = S "Obsidian Blade",
     drawtype = "mesh",
     mesh = "obsidianblade.obj",  --
     tiles = { "obsidiana.png" }, -- tiles = {"pedra.png"},
@@ -9652,7 +9652,7 @@ core.register_node("nh_nodes:obsidianblade", {
 -- NODE DA FERRAMENTA REMO
 ---------------------------
 core.register_node("nh_nodes:rowing", {
-    description = S "Rowing" .. "\n" .. S("Reach: +3") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Rowing" .. "\n" .. S "Reach: +3") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "rowing.obj",       --
     tiles = { "oakwood.png" }, -- tiles = {"pedra.png"},
@@ -9999,7 +9999,7 @@ core.register_entity("nh_nodes:pineraft_entity", {
 -- NODE DA JANGADA PRIMITIVA
 ---------------------------
 core.register_node("nh_nodes:pineraft", {
-    description = S("Pine Raft"),
+    description = S "Pine Raft",
     drawtype = "mesh",
     mesh = "pineraft.obj",      --
     tiles = { "pineraft.png" }, -- tiles = {"pedra.png"},
@@ -10070,7 +10070,7 @@ core.register_node("nh_nodes:pineraft", {
 -- NODE DA ESPADA DE OBSIDIANA
 ---------------------------
 core.register_node("nh_nodes:obsidiansword", {
-    description = S("Obsidian Sword") .. "\n" .. S("Reach: +3") .. "\n" .. S("Damage: +6") .. "\n" .. S("Uses: 15"),
+    description = S "Obsidian Sword") .. "\n" .. S "Reach: +3") .. "\n" .. S("Damage: +6" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "obsidiansword.obj",      --
     tiles = { "obsidiansword.png" }, -- tiles = {"pedra.png"},
@@ -10140,7 +10140,7 @@ core.register_node("nh_nodes:obsidiansword", {
 
 -- NODE DO SEIXO NO CHÃO
 core.register_node("nh_nodes:pebble", {
-    description = S "Pebble" .. "\n" .. S("Damage: +1"),
+    description = S "Pebble" .. "\n" .. S "Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",     --
     tiles = { "seixo.png" }, -- tiles = {"pedra.png"},
@@ -10203,7 +10203,7 @@ core.register_node("nh_nodes:pebble", {
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:chippedstone", {
-    description = S("Chipped Stone") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Chipped Stone") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "pedralascada.obj",
     tiles = { "pedralascada.png" },             -- Ícone 2D no inventário
@@ -10276,7 +10276,7 @@ core.register_node("nh_nodes:chippedstone", {
 -- NODE DA CABEÇA DE MACHADO DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stoneaxehead", {
-    description = S("Stone Axe Head") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Axe Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stoneaxehead.obj",
     tiles = { "pedralascada.png" },       -- Ícone 2D no inventário
@@ -10352,7 +10352,7 @@ core.register_node("nh_nodes:stoneaxehead", {
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stonepickaxehead", {
-    description = S("Stone Pickaxe Head") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Pickaxe Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stonepickaxehead.obj",
     tiles = { "pedralascada.png" },               -- Ícone 2D no inventário
@@ -10428,7 +10428,7 @@ core.register_node("nh_nodes:stonepickaxehead", {
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stonehoehead", {
-    description = S("Stone Pickaxe Head") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Pickaxe Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stonehoehead.obj",
     tiles = { "pedralascada.png" },           -- Ícone 2D no inventário
@@ -10504,7 +10504,7 @@ core.register_node("nh_nodes:stonehoehead", {
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:stoneadzehead", {
-    description = S("Stone Adze Head") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Adze Head") .. "\n" .. S "Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stoneadzehead.obj",
     tiles = { "pedralascada.png" },            -- Ícone 2D no inventário
@@ -10581,7 +10581,7 @@ core.register_node("nh_nodes:stoneadzehead", {
 -- NODE DA ESPADA ENFERRUJADA (FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:rustironsword", {
-    description = S("Rusty Iron Sword") .. "\n" .. S("Reach: +3") .. "\n" .. S("Damage: +4") .. "\n" .. S("Uses: 10"),
+    description = S "Rusty Iron Sword") .. "\n" .. S "Reach: +3") .. "\n" .. S("Damage: +4" .. "\n" .. S("Uses: 10",
     drawtype = "mesh",
     mesh = "rustsword.obj",
     tiles = { "rustsword.png" },
@@ -10652,7 +10652,7 @@ core.register_node("nh_nodes:rustironsword", {
 
 
 core.register_node("nh_nodes:stoneaxe", {
-    description = S("Stone Axe") .. "\n" .. S("Reach: +2") .. "\n" .. S("Damage: +3") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Axe") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +3" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stoneaxe.obj",
     tiles = { "stoneaxe.png" },
@@ -10721,7 +10721,7 @@ core.register_node("nh_nodes:stoneaxe", {
 
 
 core.register_node("nh_nodes:stonepickaxe", {
-    description = S("Stone Pickaxe") .. "\n" .. S("Reach: +2") .. "\n" .. S("Damage: +3") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Pickaxe") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +3" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stonepickaxe.obj",
     tiles = { "stonepickaxe.png" },
@@ -10794,7 +10794,7 @@ core.register_node("nh_nodes:stonepickaxe", {
 })
 
 core.register_node("nh_nodes:stoneadze", {
-    description = S("Stone Adze") .. "\n" .. S("Reach: +2") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Adze") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stoneadze.obj",
     tiles = { "stoneadze.png" },
@@ -10892,7 +10892,7 @@ core.register_node("nh_nodes:stoneadze", {
 })
 
 core.register_node("nh_nodes:stonehoe", {
-    description = S("Stone Hoe") .. "\n" .. S("Reach: +2") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Stone Hoe") .. "\n" .. S "Reach: +2") .. "\n" .. S("Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "stonehoe.obj",
     tiles = { "stonehoe.png" },
@@ -10992,7 +10992,7 @@ core.register_node("nh_nodes:stonehoe", {
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
 core.register_node("nh_nodes:chippedstoneknife", {
-    description = S("Chipped Stone Knife") .. "\n" .. S("Reach: +1") .. "\n" .. S("Damage: +2") .. "\n" .. S("Uses: 15"),
+    description = S "Chipped Stone Knife") .. "\n" .. S "Reach: +1") .. "\n" .. S("Damage: +2" .. "\n" .. S("Uses: 15",
     drawtype = "mesh",
     mesh = "chippedstoneknife.obj",
     tiles = { "chippedstoneknife.png" },
@@ -11063,7 +11063,7 @@ core.register_node("nh_nodes:chippedstoneknife", {
 
 
 core.register_node("nh_nodes:obsidianknife", {
-    description = S("Obsidian Knife") .. "\n" .. S("Reach: +1") .. "\n" .. S("Damage: +4") .. "\n" .. S("Uses: 10"),
+    description = S "Obsidian Knife") .. "\n" .. S "Reach: +1") .. "\n" .. S("Damage: +4" .. "\n" .. S("Uses: 10",
     drawtype = "mesh",
     mesh = "obsidianknife.obj",
     tiles = { "obsidianknife.png" },
@@ -11157,8 +11157,8 @@ end
 -- ITEM ARREMESSÁVEL (SEIXO branco)
 ---------------------------
 core.register_craftitem("nh_nodes:white_pebble_item", {
-    description = S("White Pebble") ..
-        "\n" .. S("[Throwable]") .. "\n" .. S("Damage: +1") .. "\n" .. S("(Throw: Q / drop)"),
+    description = S "White Pebble" ..
+        "\n" .. S "[Throwable]") .. "\n" .. S "Damage: +1" .. "\n" .. S("(Throw: Q / drop)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
 
     -- Configuração mão direita
@@ -11515,7 +11515,7 @@ core.register_entity("nh_nodes:flame_entity", {
 -- NODE DO SEIXO BRANCO NO CHÃO
 ---------------------------
 core.register_node("nh_nodes:white_pebble", {
-    description = S("White Pebble"),
+    description = S "White Pebble",
     tiles = { "whitepebble.png" },
     inventory_image = "seixo_branco.png",
     wield_image = "seixo_branco.png",
@@ -11832,7 +11832,7 @@ core.register_entity("nh_nodes:grenade_entity", {
 })
 
 core.register_node("nh_nodes:litgrenade", {
-    description = S("Lit Grenade"),
+    description = S "Lit Grenade",
     drawtype = "mesh",
     mesh = "grenade.obj",
     tiles = { "litgrenade.png" },
@@ -11975,7 +11975,7 @@ core.register_node("nh_nodes:grassleaves", {
     --drawtype = "mesh",
     --mesh = "grassleaves.obj",
     --tiles = {"grassleaves.png"},
-    description = S("Grass Leaves") .. "\n" .. S("[Small]"),
+    description = S "Grass Leaves") .. "\n" .. S("[Small]",
     drawtype = "plantlike",
     tiles = { "grassleavesbasic.png" },
 
@@ -12046,7 +12046,7 @@ core.register_node("nh_nodes:grassleaves", {
 -- NODE DAS FOLHAS DE GRAMA
 ---------------------------
 core.register_node("nh_nodes:grassleavesmedium", {
-    description = S("Grass Leaves") .. "\n" .. S("[Medium]"),
+    description = S "Grass Leaves") .. "\n" .. S("[Medium]",
     --drawtype = "mesh",
     --mesh = "grassleavesmedium.obj",
     --tiles = {"grama.png"},
@@ -12118,7 +12118,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
 -- NODE DAS FOLHAS DE GRAMA
 ---------------------------
 core.register_node("nh_nodes:smallgrass", {
-    description = S("Short Grass"),
+    description = S "Short Grass",
     drawtype = "mesh",
     mesh = "smallgrass.obj",
     tiles = { "highgrass.png" },
@@ -12188,7 +12188,7 @@ core.register_node("nh_nodes:smallgrass", {
 })
 
 core.register_node("nh_nodes:highgrass", {
-    description = S("Tall Grass"),
+    description = S "Tall Grass",
     drawtype = "mesh",
     mesh = "highgrass.obj",
     tiles = { "highgrass.png" },
@@ -12307,7 +12307,7 @@ core.register_node("nh_nodes:rush", {
 -- NODE DO COGUMELO MICACEUS
 ---------------------------
 core.register_node("nh_nodes:micaceusfungus", {
-    description = S("Micaceus Fungus"),
+    description = S "Micaceus Fungus",
     drawtype = "mesh",
     mesh = "micaceusfungus.obj",
     tiles = { "micaceusfungus.png" },
@@ -12337,7 +12337,7 @@ core.register_node("nh_nodes:micaceusfungus", {
 -- NODE DO COGUMELO AMANITA (VERMELHO)
 ---------------------------
 core.register_node("nh_nodes:flyamanitafungus", {
-    description = S("Fly Agaric Fungus"),
+    description = S "Fly Agaric Fungus",
     drawtype = "mesh",
     mesh = "flyagaricfungus.obj",
     tiles = { "flyagaricfungus.png" },
@@ -12370,7 +12370,7 @@ core.register_node("nh_nodes:flyamanitafungus", {
 
 -- Cinto
 core.register_node("nh_nodes:belt", {
-    description = S("Basic Belt"),
+    description = S "Basic Belt",
     inventory_image = "belt_icon.png",
     --wield_image = "belt_icon2.png",
     drawtype = "mesh",
@@ -12508,7 +12508,7 @@ core.register_node("nh_nodes:back_chest_open", {
             local drop_meta = drop:get_meta()
             drop_meta:set_string("chest_id", chest_id)
             drop_meta:set_string("description",
-                S("Backpack Chest") .. "\n" .. S("(contains items)"))
+                S "Backpack Chest") .. "\n" .. S "(contains items)"
         end
 
         core.remove_node(pos)
@@ -12694,7 +12694,7 @@ end)
 
 -- Node principal: backchest (fechado)
 core.register_node("nh_nodes:backchest", {
-    description           = S("Backpack Chest"),
+    description           = S "Backpack Chest",
     drawtype              = "mesh",
     mesh                  = "backchest.obj",
     tiles                 = { "BackChest.png" },
@@ -12730,7 +12730,7 @@ core.register_node("nh_nodes:backchest", {
             "listring[current_name;main]" ..
             "listring[current_player;main]"
         )
-        meta:set_string("infotext", S("Backpack Chest"))
+        meta:set_string("infotext", S "Backpack Chest")
     end,
 
     -- Permite quebrar mesmo com itens dentro
@@ -12766,7 +12766,7 @@ core.register_node("nh_nodes:backchest", {
             drop_meta:set_string("chest_id", chest_id)
             -- Mostra indicação visual no item de que tem conteúdo
             drop_meta:set_string("description",
-                S("Backpack Chest") .. "\n" .. S("(contains items)"))
+                S "Backpack Chest") .. "\n" .. S "(contains items)"
         end
 
         core.remove_node(pos)
@@ -12841,7 +12841,7 @@ core.register_node("nh_nodes:backchest", {
 
 -- Exemplo de luvas gestuais
 core.register_node("nh_nodes:likeglove", {
-    description = S("Like Glove"),
+    description = S "Like Glove",
     drawtype = "mesh",
     mesh = "likeglove.obj",
     tiles = { "likeglove.png" },
@@ -12877,7 +12877,7 @@ core.register_node("nh_nodes:likeglove", {
 
 -- Exemplo de luvas gestuais
 core.register_node("nh_nodes:pointglove", {
-    description = S("Point Glove"),
+    description = S "Point Glove",
     drawtype = "mesh",
     mesh = "pointglove.obj",
     tiles = { "pointglove.png" },
@@ -12913,7 +12913,7 @@ core.register_node("nh_nodes:pointglove", {
 
 -- Exemplo de capacete
 core.register_node("nh_nodes:copperhelmet", {
-    description = S("Copper Helmet"),
+    description = S "Copper Helmet",
     drawtype = "mesh",
     mesh = "helmet.obj",
     tiles = { "copperhelmet.png" },
@@ -12954,7 +12954,7 @@ core.register_node("nh_nodes:copperhelmet", {
 
 -- Exemplo de armadura de tronco
 core.register_node("nh_nodes:copperchestplate", {
-    description = S("Copper Chestplate"),
+    description = S "Copper Chestplate",
     drawtype = "mesh",
     mesh = "chestplate.obj",
     tiles = { "copperchest.png" },
@@ -12990,7 +12990,7 @@ core.register_node("nh_nodes:copperchestplate", {
 
 -- Armadura de cintura
 core.register_node("nh_nodes:fauld", {
-    description = S("Copper Fauld"),
+    description = S "Copper Fauld",
     drawtype = "mesh",
     mesh = "leggings.obj",
     tiles = { "copperlegging.png" },
@@ -13026,7 +13026,7 @@ core.register_node("nh_nodes:fauld", {
 
 -- Exemplo de calças
 core.register_node("nh_nodes:leggings", {
-    description = S("Copper Leggings"),
+    description = S "Copper Leggings",
     drawtype = "mesh",
     mesh = "leggings.obj",
     tiles = { "copperlegging.png" },
@@ -13080,7 +13080,7 @@ core.register_node("nh_nodes:leggings", {
 
 -- Porta fechada
 core.register_node("nh_nodes:oakdoor_closed", {
-    description = S("Oak Door"),
+    description = S "Oak Door",
     drawtype = "mesh",
     mesh = "oakdoor_closed.obj", -- Um único mesh 3x1
     tiles = { "oakwood3x1.png" },
@@ -13129,7 +13129,7 @@ core.register_node("nh_nodes:oakdoor_closed", {
 
 -- Porta aberta
 core.register_node("nh_nodes:oakdoor_open", {
-    description = S("Oak Door") .. "\n" .. S("(Open)"),
+    description = S "Oak Door") .. "\n" .. S("(Open)",
     drawtype = "mesh",
     mesh = "oakdoor_open.obj", -- Mesmo mesh mas rotacionado/aberto
     tiles = { "oakwood3x1.png" },
@@ -13402,7 +13402,7 @@ function show_grimoire(player, page, search)
     local fs        = {
         "formspec_version[4]",
         "size[14,13]",
-        "label[0.3,0.3;" .. S("Complete Materialization Grimoire") .. "]",
+        "label[0.3,0.3;" .. S "Complete Materialization Grimoire" .. "]",
         "field[0.3,0.9;6,0.8;search;;" .. core.formspec_escape(search) .. "]",
         "field_close_on_enter[search;false]",
         "button[6.4,0.9;1.2,0.8;do_search;" .. S "Search" .. "]",
@@ -13438,7 +13438,7 @@ end
 core.register_node("nh_nodes:archion", {
     description           = S "Archion" ..
         "\n" ..
-        S("Grimoire of Materialization") .. "\n" .. S("(completed)") .. "\n" .. S("[only active in creative mode]"),
+        S "Grimoire of Materialization") .. "\n" .. S "(completed)" .. "\n" .. S("[only active in creative mode]",
     drawtype              = "mesh",
     mesh                  = "grimorie.obj",
     tiles                 = { "grimorie.png" },
@@ -13590,41 +13590,41 @@ core.register_on_newplayer(function(player)
     local page = ItemStack("nh_items:writedpage")
     local meta = page:get_meta()
     meta:set_string("text",
-        S("--- THE NEW HORIZON ---") .. "\n\n" ..
+        S "--- THE NEW HORIZON ---" .. "\n\n" ..
         S(
             "If you're reading this, it's because you've lost your memory or perhaps you've never experienced this before...") ..
         "\n\n" ..
-        S("Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore.") .. "\n" ..
-        S("Anywhere you can also:") .. "\n" ..
-        "- " .. S("Wall jump (Quick jump x2 in front of small walls, to climb them)") .. "\n\n" ..
+        S "Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore." .. "\n" ..
+        S "Anywhere you can also:" .. "\n" ..
+        "- " .. S "Wall jump (Quick jump x2 in front of small walls, to climb them)" .. "\n\n" ..
         "- " ..
         S(
             "Vertical climbing (hold jump in front of walls or tree trunks at least 4 blocks high) [If you can't reach a foothold but keep holding jump in contact with the vertical surface, you will fall more slowly sliding down it]") ..
         "\n\n" ..
-        "- " .. S("Crawl (press sneak + hold sneak)") .. "\n" ..
-        "- " .. S("Sit (hold sneak + 2x Aux1 / E)") .. "\n" ..
-        "- " .. S("Lie down (sitting press: 2x Aux1 / E) [Return to sitting: 2x Aux1 / E]") .. "\n\n" ..
-        S("General guide:") .. "\n\n" ..
-        "- " .. S("Collect pebbles on the ground to craft a tool") .. "\n" ..
-        "- " .. S("Some pebbles create sparks when struck together") .. "\n" ..
-        "- " .. S("Try to make fire by spreading a spark onto nearby material") .. "\n" ..
-        "- " .. S("Light torches by using them on fire") .. "\n" ..
-        "- " .. S("Activate your observation (Aux1 / E) and touch ground blocks to idealize crafts") .. "\n" ..
+        "- " .. S "Crawl (press sneak + hold sneak)" .. "\n" ..
+        "- " .. S "Sit (hold sneak + 2x Aux1 / E)" .. "\n" ..
+        "- " .. S "Lie down (sitting press: 2x Aux1 / E) [Return to sitting: 2x Aux1 / E]" .. "\n\n" ..
+        S "General guide:" .. "\n\n" ..
+        "- " .. S "Collect pebbles on the ground to craft a tool" .. "\n" ..
+        "- " .. S "Some pebbles create sparks when struck together" .. "\n" ..
+        "- " .. S "Try to make fire by spreading a spark onto nearby material" .. "\n" ..
+        "- " .. S "Light torches by using them on fire" .. "\n" ..
+        "- " .. S "Activate your observation (Aux1 / E) and touch ground blocks to idealize crafts" .. "\n" ..
         "- " ..
         S(
             "Crafting doesn't depend on the arrangement of the items. Just spread the correct quantities across the grid slots.") ..
         "\n" ..
-        "- " .. S("There are hidden chests around the world, but don't expect great rewards") .. "\n" ..
+        "- " .. S "There are hidden chests around the world, but don't expect great rewards" .. "\n" ..
         "- " ..
-        S("They say there is a lost book called Archion that can grant everything this world has to offer") .. "\n" ..
+        S "They say there is a lost book called Archion that can grant everything this world has to offer" .. "\n" ..
         "- " ..
         S(
             "Someone could have summoned the book using their unlimited creative power by saying: '/grantme all' and '/giveme nh_nodes:archion'") ..
         "\n" ..
-        "- " .. S("According to legend, there are also creatures that only appear in specific locations") .. "\n" ..
-        "- " .. S("Some tried to escape, but couldn't — this world seems to have no limits.") .. "\n" ..
-        "- " .. S("Check the other pages if in doubt") .. "\n\n" ..
-        S("Good luck...") .. "\n\n" ..
+        "- " .. S "According to legend, there are also creatures that only appear in specific locations" .. "\n" ..
+        "- " .. S "Some tried to escape, but couldn't — this world seems to have no limits." .. "\n" ..
+        "- " .. S "Check the other pages if in doubt" .. "\n\n" ..
+        S "Good luck..." .. "\n\n" ..
         "                                                                                                 9"
     )
 
