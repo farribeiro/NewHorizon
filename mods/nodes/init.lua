@@ -12,16 +12,15 @@ end
 local footstep_timer     = {}
 local lava_damage_timer  = {}
 local players_with_torch = {}
-local WATER_FULLNODES    = populate_true({ "water", "water2" })
-local WATER_MIDNODES     = populate_true({ "water_flowing", "water2_flowing" })
-local LAVA_NODES         = populate_true({ "lava", "lava_flowing", "bluelava", "bluelava_flowing" })
-local FLAME_ENTITIES     = populate_true({ "campfire_flame_entity", "torch_flame_entity", "palmstraw_flame_entity",
-    "flame_entity" })
-local LEAF_TYPES         = populate_true({ "leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple",
-    "leaves_apple2", "leaves_apple3" })
-local DECORATIONS        = populate_true({ "smallgrass", "highgrass", "rush", "dandelion", "grassleaves",
-    "grassleavesmedium", "micaceusfungus", "flyamanitafungus", "pebble", "white_pebble", "fallenstick" })
-nodes                    = {}
+-- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
+local WATER_FULLNODES = populate_true({"water", "water2"})
+local WATER_MIDNODES = populate_true({"water_flowing", "water2_flowing"})
+local FLOATING_STUFF = populate_true({"oaktimber", "oaklog", "oakwood", "stick", "palmtimber", "palmlog", "coconut", "pinetimber", "pinelog", "pinewood", "pineraft", "ice", "ice2", "orb_empty"})
+local LAVA_NODES = populate_true({"lava", "lava_flowing", "bluelava", "bluelava_flowing"})
+local FLAME_ENTITIES = populate_true({"campfire_flame_entity", "torch_flame_entity", "palmstraw_flame_entity", "flame_entity"})
+local LEAF_TYPES = populate_true({"leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3"})
+local DECORATIONS = populate_true({"smallgrass", "highgrass", "rush", "dandelion", "grassleaves", "grassleavesmedium", "micaceusfungus", "flyamanitafungus", "pebble", "white_pebble", "fallenstick"})
+nodes = {}
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
     for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 2)) do
@@ -205,9 +204,6 @@ core.register_globalstep(function(dtime)
         end
     end
 end)
--- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
-local FLOATING_STUFF = populate_true({ "oaktimber", "oaklog", "oakwood", "stick", "palmtimber", "palmlog", "coconut",
-    "pinetimber", "pinelog", "pinewood", "pineraft", "ice", "ice2", "orb_empty", })
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
 -- Calcula a direção da corrente da água.
 local function get_liquid_flow_dir(pos)
