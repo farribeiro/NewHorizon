@@ -1683,121 +1683,83 @@ register_craft_station("nh_nodes:grass", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     on_timer = function(pos, elapsed)
         --core.chat_send_all("⏰ TIMER de morte da grama disparou em " .. core.pos_to_string(pos))
-
         -- Verifica se há um bloco bloqueando a luz acima
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = core.get_node(above).name
-
         --core.chat_send_all("   Bloco acima: " .. node_above)
-
         -- Se NÃO é ar, significa que está tampado
         if node_above ~= "air" then
             -- Verifica se a luz está muito baixa
             local light = core.get_node_light(above)
             --core.chat_send_all("   Luz: " .. tostring(light))
-
             if light and light <= 4 then
                 -- Converte para terra
                 core.set_node(pos, { name = "nh_nodes:dirt" })
                 --core.chat_send_all("   🟫 GRAMA VIROU TERRA (sem luz)")
                 return false -- Para o timer
-            else
+                -- else
                 --core.chat_send_all("   ☀️ Ainda tem luz suficiente")
             end
         else
             --core.chat_send_all("   ✅ Ar acima, cancelando timer")
             return false -- Para o timer se o bloco foi removido
         end
-
         -- Continua verificando
         --core.chat_send_all("   Não se torna terra, terminada a verificação")
         return false
     end,
-
-
-
     title = S("2x2 Craft on the Lawn"), -- ✅ Campo obrigatório!
-
-
-
     grid_size = 4,
-
-    positions = {
-        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },
-    },
-
+    positions = { xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2), xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2), },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-
-    output_position = { x = 0, y = 1.4, z = 0 },
-
-    layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
-    },
-
+    output_position = xyz(0, 1.4, 0),
+    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
-
-
--- ========================================
 -- SISTEMA DE DETECÇÃO DE BLOCOS ACIMA DA GRAMA
--- ========================================
-
 -- Callback global que detecta quando qualquer bloco é colocado
 core.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
     -- Verifica a posição ABAIXO do bloco que foi colocado
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
     local node_below = core.get_node(below)
-
     -- Se o bloco abaixo é grama ou top_grass
     if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then
         --core.chat_send_all("📦 Bloco colocado acima da grama em " .. core.pos_to_string(below))
-
         -- Inicia o timer de morte da grama
         core.get_node_timer(below):start(math.random(3, 6))
         --core.chat_send_all("   ⏰ Timer de morte iniciado!")
     end
 end)
-
 -- Callback global que detecta quando qualquer bloco é REMOVIDO
 core.register_on_dignode(function(pos, oldnode, digger)
     -- Verifica a posição ABAIXO do bloco que foi removido
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
     local node_below = core.get_node(below)
-
     -- Se o bloco abaixo é grama ou top_grass
     if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then
         --core.chat_send_all("🌞 Bloco removido de cima da grama em " .. core.pos_to_string(below))
-
         -- PARA o timer (a grama voltou a ter luz)
         core.get_node_timer(below):stop()
         --core.chat_send_all("   ⏸️ Timer cancelado (grama exposta à luz novamente)")
         -- end
-
         -- Se o bloco abaixo é terra
     elseif node_below.name == "nh_nodes:dirt" then
         --core.chat_send_all("🌞 Bloco removido de cima da terra em " .. core.pos_to_string(below))
-
         -- PARA o timer (a grama voltou a ter luz)
         core.get_node_timer(below):start(math.random(3, 6))
         --core.chat_send_all("   ⏸️ Timer iniciado (terra exposta à luz)")
     end
 end)
-
-
 core.register_node("nh_nodes:sand_ramp", {
     description         = S("Sand Ramp"),
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1806,121 +1768,68 @@ core.register_node("nh_nodes:sand_ramp", {
     -- Dentro do register_node:
     groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
-
-    sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds              = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- E adicione essa propriedade:
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
-    selection_box       = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },
-        },
-    },
-    collision_box       = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },
-        },
-    },
+    selection_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
+    collision_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
 })
 
 core.register_node("nh_nodes:sand_corner", {
     description         = S("Sand Corner"),
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_vertix.obj",
     tiles               = { "sand_slope.png" },
-
     groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
-
-    sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds              = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- E adicione essa propriedade:
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
     collision_box       = {
         type = "fixed",
-        fixed = {
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo
-            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base principal
-            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 }, -- Base braço 1
-            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base braço 2
-
+        fixed = { { -0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, -- Topo
+            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base principal
+            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 },     -- Base braço 1
+            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base braço 2
         },
     },
     selection_box       = {
         type = "fixed",
-        fixed = {
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- topo
-            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base principal
-            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 }, -- Base braço 1
-            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base braço 2
+        fixed = { { -0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, -- topo
+            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base principal
+            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 },     -- Base braço 1
+            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base braço 2
         },
     },
 })
-
 core.register_node("nh_nodes:sand_insidecorner", {
     description         = S("Sand Inside Corner"),
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grassinsidecorner.obj",
     tiles               = { "sand_slope.png" },
-
     groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
-
-    sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds              = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- E adicione essa propriedade:
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
     collision_box       = {
         type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo braço 1: faixa traseira (Z-)
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 }, -- Topo braço 1: faixa traseira (Z-)
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo braço 2: faixa lateral (X-)
+        fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
+            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },       -- Topo braço 1: faixa traseira (Z-)
+            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },       -- Topo braço 1: faixa traseira (Z-)
+            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },       -- Topo braço 2: faixa lateral (X-)
         },
     },
-    selection_box       = {
-        type = "fixed",
-        fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },
-        },
-    },
+    selection_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, { -0.5, 0.0, -0.5, 0.0, 0.5, 0.0 }, { 0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, }, },
 })
 
 register_craft_station("nh_nodes:sand", {
@@ -1930,41 +1839,23 @@ register_craft_station("nh_nodes:sand", {
     title = S("2x2 Craft on the Sand"), -- ✅ Campo obrigatório!
     grid_size = 4,
     groups = { crumbly = 2, falling_node = 1 },
-
-    sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
-    },
-
+    sounds = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Configuração mão esquerda
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
-    positions = {
-        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },
-    },
-
+    positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-
     output_position = { x = 0, y = 1.4, z = 0 },
-
-    layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
-    },
-
+    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
@@ -1973,52 +1864,35 @@ register_craft_station("nh_nodes:wet_sand", {
     tiles = { "areia_molhada.png" },
     title = S("2x2 Craft on the Wet Sand"), -- ✅ Campo obrigatório!
     groups = { crumbly = 2 },
-
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Configuração mão esquerda
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     grid_size = 4,
-
-    positions = {
-        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },
-    },
-
+    positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-
     output_position = { x = 0, y = 1.4, z = 0 },
-
-    layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
-    },
-
+    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
-
-
 core.register_node("nh_nodes:saprolite", {
     description = S("Saprolite"),
     tiles = { "saprolite.png" },
     groups = { cracky = 3 },
-
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Configuração mão esquerda
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
@@ -2026,47 +1900,29 @@ core.register_node("nh_nodes:saprolite", {
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
-
 register_craft_station("nh_nodes:gneiss", {
     description = S("Gneiss"),
     tiles = { "pedra.png" },
     groups = { cracky = 3 },
     drop = "nh_nodes:pebble_item 8",
-
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Configuração mão esquerda
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
-
     title = S("2x2 Craft on the Gneiss"), -- ✅ Campo obrigatório!
-
-
-
     grid_size = 4,
-
-    positions = {
-        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },
-    },
-
+    positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-
     output_position = { x = 0, y = 1.4, z = 0 },
-
-    layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
-    },
-
+    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
@@ -2075,40 +1931,24 @@ register_craft_station("nh_nodes:cobblestone", {
     tiles = { "cobblestone.png" },
     groups = { cracky = 3 },
     drop = "nh_nodes:pebble_item 8",
-
     -- Configuração mão direita
     wielded_bone_position = {
         pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     -- Configuração mão esquerda
     offhand_bone_position = {
         pos = { x = 1.5, y = 0, z = 0 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
     title = "Produção 2x2 no Pedregulho", -- ✅ Campo obrigatório!
-
-
-
     grid_size = 4,
-
-    positions = {
-        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },
-    },
-
+    positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-
     output_position = { x = 0, y = 1.4, z = 0 },
-
-    layers = {
-        { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 },
-    },
-
+    layers = { { name = S("2x2 Grid"), x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
 
