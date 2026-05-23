@@ -1399,7 +1399,6 @@ core.register_on_joinplayer(function(player)
             core.after(0.2, verify_and_apply)
         end
     end
-
     -- Delay maior para garantir que o mundo carregou no cliente
     core.after(0.3, function()
         if not (player and player:is_player()) then return end
@@ -1412,12 +1411,19 @@ core.register_on_joinplayer(function(player)
         -- Restaura itens da backchest se estiver equipada
         if bc_has_backchest(player) then bc_load(player) end
     end)
-
     -- Segunda tentativa de segurança: recria o corpo se não existir após 3s
     core.after(2.0, function()
         if not (player and player:is_player()) then return end
         if not body_entities[player_name] or not body_entities[player_name]:get_luaentity() then
             core.log("action", "[BODY MOD] Body not found after 2 seconds, recreating for " .. player_name)
+            create_player_body(player)
+        end
+    end)
+    -- Terceira tentativa de segurança: recria o corpo se não existir após 3s
+    core.after(4.0, function()
+        if not (player and player:is_player()) then return end
+        if not body_entities[player_name] or not body_entities[player_name]:get_luaentity() then
+            core.log("action", "[BODY MOD] Body not found after 4 seconds, recreating for " .. player_name)
             create_player_body(player)
         end
     end)

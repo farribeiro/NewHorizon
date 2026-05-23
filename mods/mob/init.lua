@@ -1776,17 +1776,120 @@ mobs:register_mob("nh_mob:spider", {
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
     follow = {"nh_nodes:torch2"},
-    sounds = { footstep = "GrassFootstep", random = "GrassFootstep", damage = "GrassDig", fuse = "tnt_ignite"},
+    sounds = { footstep = "GrassFootstep", random = "trantula", damage = "GrassDig", fuse = "tnt_ignite"},
     do_custom = function(self, dtime)
-        -- som de passos
+        -- SOM DE PASSOS
         self._step_timer = (self._step_timer or 0) + dtime
-        if self._step_timer >= 0.4 then  -- intervalo entre passos (segundos)
+        if self._step_timer >= 0.4 then
             self._step_timer = 0
             if self.state == "walk" or self.state == "run" or self.state == "attack" then
                 self:mob_sound(self.sounds.footstep)
             end
         end
-    end,
+        -- ESCALADA EM PAREDES
+        local obj = self.object
+        local pos = obj:get_pos()
+        local vel = obj:get_velocity()
+        local yaw = obj:get_yaw()
+
+        -- Inicializa estado de escalada
+        self._climbing = self._climbing or false
+        self._climb_dir = self._climb_dir or nil
+
+        -- Direção que a aranha está "olhando" (frente)
+        local raw_yaw = obj:get_yaw()
+
+        local function dir_from_yaw(y)
+            return -math.sin(y), -math.cos(y)
+        end
+
+        -- Testa yaw direto
+        local dx1, dz1 = dir_from_yaw(raw_yaw)
+        -- Testa yaw com offset
+        local dx2, dz2 = dir_from_yaw(raw_yaw + math.pi)
+
+        local function check_wall(dx, dz)
+            for _, dy in ipairs({0.1, 0.5, 0.9}) do
+                local p = { x = pos.x + dx * 0.55, y = pos.y + dy, z = pos.z + dz * 0.55 }
+                local def = core.registered_nodes[core.get_node(p).name]
+                if def and def.walkable then return true end
+            end
+            return false
+        end
+
+    local dir_x, dir_z
+    if check_wall(dx1, dz1) then
+        dir_x, dir_z = dx1, dz1
+    elseif check_wall(dx2, dz2) then
+        dir_x, dir_z = dx2, dz2
+    else
+        dir_x, dir_z = dx1, dz1 -- fallback
+    end
+
+    -- Posição à frente da aranha (detecta parede)
+    local front_pos = {
+        x = pos.x + dir_x * 0.55,
+        y = pos.y + 0.5,  -- meio do corpo
+        z = pos.z + dir_z * 0.55
+    }
+
+    local front_node = core.get_node(front_pos)
+    local front_def = core.registered_nodes[front_node.name]
+    local wall_ahead = front_def and front_def.walkable == true
+
+    -- Verifica se há chão embaixo
+    local below_pos = { x = pos.x, y = pos.y - 0.2, z = pos.z }
+    local below_node = core.get_node(below_pos)
+    local below_def = core.registered_nodes[below_node.name]
+    local has_floor = below_def and below_def.walkable == true
+
+    if self._climbing then
+        -- ── MODO ESCALADA ──
+        -- Verifica se chegou ao topo (nó acima está livre)
+        local top_pos = {x = pos.x + dir_x * 0.7,y = pos.y + 1.2,z = pos.z + dir_z * 0.7}
+        local top_node = core.get_node(top_pos)
+        local top_def = core.registered_nodes[top_node.name]
+        local wall_top_clear = not top_def or top_def.walkable == false
+
+        -- Verifica se ainda há parede à frente/abaixo-frente
+        local wall_check = {x = pos.x + dir_x * 0.6, y = pos.y - 0.3, z = pos.z + dir_z * 0.6}
+        local wc_node = core.get_node(wall_check)
+        local wc_def = core.registered_nodes[wc_node.name]
+        local still_on_wall = wc_def and wc_def.walkable == true
+
+        if wall_top_clear and not wall_ahead then
+            -- Chegou ao topo da parede, para de escalar
+            self._climbing = false
+            self._climb_dir = nil
+            obj:set_rotation({ x = 0, y = yaw, z = 0 })
+            obj:set_velocity({ x = vel.x, y = 0, z = vel.z })
+        elseif still_on_wall or wall_ahead then
+            -- Continua subindo
+            local speed = self.walk_velocity or 2
+            if self.state == "run" or self.state == "attack" then
+                speed = self.run_velocity or 4
+            end
+            -- Move verticalmente na direção da parede
+            obj:set_velocity({x = dir_x * 0.5, y = speed/2, z = dir_z * 0.5}) -- leve pressão contra em x e z parede e metade da velodidade ao subir
+            -- Rotaciona 90° para ficar paralela à parede (deitada na parede)
+            -- x = -pi/2 faz a frente apontar para cima
+            obj:set_rotation({ x = math.pi / 2, y = yaw, z = 0 })
+        else
+            -- Perdeu contato com a parede
+            self._climbing = false
+            self._climb_dir = nil
+            obj:set_rotation({ x = 0, y = yaw, z = 0 })
+        end
+
+        return  -- Não executa lógica normal de movimento durante escalada
+
+    elseif wall_ahead and has_floor and
+           (self.state == "walk" or self.state == "run" or self.state == "attack") then
+        -- ── INICIA ESCALADA ──
+        self._climbing = true
+        self._climb_dir = { x = dir_x, z = dir_z }
+    end
+end,
     -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     --[[
     on_rightclick = function(self, clicker)
@@ -1989,6 +2092,7 @@ mobs:register_mob("nh_mob:sentinel", {
     light_damage = 0,
     air_damage = 0,
     follow = { "nh_nodes:torch2", "nh_nodes:redcrystal" },
+    drops = { { name = "nh_nodes:wings", chance = 1, min = 1, max = 1 }},
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             core.chat_send_player(clicker:get_player_name(), S("Is it a wasp?..."))
@@ -4031,8 +4135,7 @@ mobs:register_mob("nh_mob:giantcrab", {
     hp_max = 50,
     -- armor = 100,
     armor = 100,
-    drops = { { name = "nh_nodes:redcrystal", chance = 1, min = 1, max = 3 }, -- 1-3 cristais (sempre)
-    },
+    drops = { { name = "nh_nodes:redcrystal", chance = 1, min = 1, max = 3 },}, -- 1-3 cristais (sempre)
     collisionbox = { -7, 0, -5, 5, 8.5, 5 },
     selectionbox = { -7, 5.5, -5, 5, 8.5, 5 },
     physical = true,

@@ -218,6 +218,10 @@ Copper Chestplate=Peitoral de Cobre
 Copper Fauld=Escarcelas de Cobre
 Copper Leggings=Calça de Cobre
 
+Wings=Asas
+The wings are active! Use [flight] (k or enable in the menu) to fly.=As asas estão ativas! Use [voo] (k ou habilitar no menu) para voar.
+The wings were removed.=As asas foram removidas.
+
 Like Glove=Luva Legal
 Point Glove=Luva Apontar
 
@@ -280,6 +284,7 @@ Firewood on the Campfire 1/4=Lenha na Fogueira 1/4
 Firewood on the Campfire 2/4=Lenha na Fogueira 2/4
 Firewood on the Campfire 3/4=Lenha na Fogueira 3/4
 Campfire=Fogueira
+I forgot that a bonfire needs to be lit to prepare...=Esqueci que fogueira precisa estar acesa para preparar...
 
 Oak Spinningtop=Pião de Carvalho
 Pine Spinningtop=Pião de Pinheiro

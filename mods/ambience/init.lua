@@ -7,6 +7,7 @@ local GAIN_THRESHOLD = 0.15 -- só recriar se mudou mais que isso
 local timers = {}
 local wind_handles = {}
 local water_handles = {}
+local portal_handles = {}
 local GRASS_NODES = {
     --["nh_nodes:grass"]     = true,
     --["nh_nodes:top_grass"] = true,
@@ -34,6 +35,18 @@ local function count_nearby(pos, node_table, radius)
     end
     return count
 end
+local function count_nearby_portals(pos, radius)
+    local count = 0
+    for x = -radius, radius do
+        for y = -3, 3 do
+            for z = -radius, radius do
+                local n = core.get_node({x = pos.x+x, y = pos.y+y, z = pos.z+z}).name
+                if n == "nh_nodes:portal" then count = count + 1 end
+            end
+        end
+    end
+    return count
+end
 core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
         local name = player:get_player_name()
@@ -54,6 +67,25 @@ core.register_globalstep(function(dtime)
         local gain_wind      = (not is_underground and not in_snow) and (grass_ratio * 0.9) or 0
         local gain_water     = (not is_underground) and (water_ratio * 0.9) or 0
         gain_wind            = gain_wind * (1.0 - water_ratio * 0.8)
+        local portal_count  = count_nearby_portals(pos, 5)
+        local portal_ratio  = math.min(1.0, portal_count / 3) -- satura com 3 portais próximos
+        local gain_portal   = portal_ratio * 0.2
+        -- Som de portal
+        if portal_handles[name] then
+            local diff = math.abs((gain_atual[name .. "_portal"] or 0) - gain_portal)
+            if gain_portal <= 0.05 or diff > GAIN_THRESHOLD then
+                core.sound_stop(portal_handles[name])
+                portal_handles[name] = nil
+            end
+        end
+        if not portal_handles[name] and gain_portal > 0.05 then
+            portal_handles[name] = core.sound_play("vortex", {
+                to_player = name,
+                gain = gain_portal,
+                loop = true,
+            })
+            gain_atual[name .. "_portal"] = gain_portal
+        end
         -- Som de vento (grama, terra, areia)
         if wind_handles[name] then
             local diff = math.abs((gain_atual[name .. "_wind"] or 0) - gain_wind)
@@ -91,13 +123,8 @@ core.register_globalstep(function(dtime)
 end)
 core.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
-    if wind_handles[name] then
-        core.sound_stop(wind_handles[name])
-        wind_handles[name] = nil
-    end
-    if water_handles[name] then
-        core.sound_stop(water_handles[name])
-        water_handles[name] = nil
-    end
+    if portal_handles[name] then core.sound_stop(portal_handles[name]) portal_handles[name] = nil end
+    if wind_handles[name] then core.sound_stop(wind_handles[name]) wind_handles[name] = nil end
+    if water_handles[name] then core.sound_stop(water_handles[name]) water_handles[name] = nil end
     timers[name] = nil
 end)

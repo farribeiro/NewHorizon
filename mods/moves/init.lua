@@ -192,7 +192,6 @@ core.register_globalstep(function(dtime)
         -- Mantém climb: já estava escalando, só precisa de parede presente e pulo segurado
         elseif ctrl.jump and not jump_just_pressed and not climb_blocked and
                (is_climbing[name] or climb_start_wall) then
-
             is_climbing[name] = true
             local vel = player:get_velocity() or {x = 0, y = 0, z = 0}
             player:set_velocity({
@@ -205,7 +204,6 @@ core.register_globalstep(function(dtime)
                 gravity = 0,
                 jump    = 0,
             })
-
         -- PADRÃO — física normal
         else
             if not is_climbing[name] then

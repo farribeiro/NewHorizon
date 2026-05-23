@@ -12,7 +12,6 @@ end
 local footstep_timer     = {}
 local lava_damage_timer  = {}
 local players_with_torch = {}
-local portal_cooldown = {} -- evita teleporte no portal em loop
 -- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
 local WATER_FULLNODES = populate_true({"water", "water2"})
 local WATER_MIDNODES = populate_true({"water_flowing", "water2_flowing"})
@@ -22,12 +21,6 @@ local FLAME_ENTITIES = populate_true({"campfire_flame_entity", "torch_flame_enti
 local LEAF_TYPES = populate_true({"leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3"})
 local DECORATIONS = populate_true({"smallgrass", "highgrass", "rush", "dandelion", "grassleaves", "grassleavesmedium", "micaceusfungus", "flyamanitafungus", "pebble", "white_pebble", "fallenstick"})
 nodes = {}
--- Vetores de direção por facedir (face frontal do node) para portal e espelho
-local facedir_to_dir = {
-    [0] = {x=0, y=0, z=-1},  -- sul
-    [1] = {x=-1, y=0, z=0},  -- leste
-    [2] = {x=0, y=0, z=1},   -- norte
-    [3] = {x=1, y=0, z=0},}  -- oeste
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
     for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 2)) do
@@ -39,6 +32,7 @@ end
 local function attach_glow(player)
     -- remove glow anterior se existir
     detach_glow(player)
+
     local glow_obj = core.add_entity(player:get_pos(), "nh_nodes:glow_entity")
     if glow_obj then glow_obj:set_attach(player, "bone_RHand", { x = 1.25, y = 0, z = 0 }, { x = 0, y = 0, z = 0 }) end
 end
@@ -52,10 +46,12 @@ core.register_entity("nh_nodes:glow_entity", {
         self.object:set_rotation({ x = rot.x, y = rot.y + 0.15, z = rot.z + 0.07, })
     end,
 })
+
 core.register_globalstep(function(dtime)
     for _, player in ipairs(core.get_connected_players()) do
         local name = player:get_player_name()
         local pos  = player:get_pos()
+
         -- remove o glow se o player tirar a litgrenade da mão sem arremessar
         local item = player:get_wielded_item():get_name()
         if item ~= "nh_nodes:litgrenade" then detach_glow(player) end
@@ -761,6 +757,7 @@ core.register_entity("nh_nodes:display_item", {
     get_staticdata = function(self)
         return core.serialize({ itemstring = self.itemstring, station_pos = self.station_pos })
     end,
+
     on_step = function(self, dtime)
         self.object:set_velocity({ x = 0, y = 0, z = 0 })
         self.object:set_acceleration({ x = 0, y = 0, z = 0 })
@@ -790,7 +787,9 @@ local function update_item_entities(pos, config)
     remove_item_entities(pos)
     local craft_list = inv:get_list("craft")
     local output_list = inv:get_list("output")
+
     if not craft_list or not output_list then return end -- Proteção adicional
+
     -- Cria entidades para os slots de craft
     for i = 1, config.grid_size do
         local stack = craft_list[i]
@@ -843,20 +842,10 @@ local function check_recipe(inv, recipe)
     return total_in_grid == total_required
 end
 
-local function check_and_craft(pos, config, player)
+local function check_and_craft(pos, config)
     local meta = core.get_meta(pos)
     local inv = meta:get_inventory()
-    if config.can_craft then
-        local ok, reason = config.can_craft(pos)
-        if not ok then
-            inv:set_stack("output", 1, ItemStack(""))
-            core.after(0.01, function() update_item_entities(pos, config) end)
-            if player and reason then
-                core.chat_send_player(player:get_player_name(), reason)
-            end
-            return
-        end
-    end
+    -- Lê a ferramenta no slot extra
     local tool_stack = inv:get_stack("tool", 1)
     local tool_name = tool_stack:get_name() -- "" se vazio
     for _, recipe in ipairs(config.recipes) do
@@ -879,6 +868,7 @@ end
 local function consume_craft_materials(pos)
     local meta = core.get_meta(pos)
     local inv = meta:get_inventory()
+
     for i = 1, inv:get_size("craft") do
         local stack = inv:get_stack("craft", i)
         if not stack:is_empty() then
@@ -888,28 +878,10 @@ local function consume_craft_materials(pos)
     end
 end
 
--- Verifica se o jogador tem o backchest equipado no slot de costas
-local function player_has_backchest_equipped(player)
-    local inv = player:get_inventory()
-    local back_list = inv:get_list("armor_back")
-    if not back_list then return false end
-    for _, stack in ipairs(back_list) do
-        if stack:get_name() == "nh_nodes:backchest" then
-            return true
-        end
-    end
-    return false
-end
-
 local function show_craft_grid(player, pos, config)
     local player_name = player:get_player_name()
     local pos_string = core.pos_to_string(pos)
-
-    -- Verifica se o backchest está equipado para mostrar slots extras
-    local has_backchest = player_has_backchest_equipped(player)
-    local form_height   = has_backchest and 9.7 or 7.5
-
-    local formspec = "formspec_version[4]" .. "size[10.7," .. form_height .. "]" .. "label[0.5,0.5;" .. config.title .. "]"
+    local formspec = "formspec_version[4]" .. "size[10.7,9.7]" .. "label[0.5,0.5;" .. config.title .. "]"
     local y_offset = 1
     for _, layer in ipairs(config.layers) do
         formspec = formspec .. "label[" .. layer.x .. "," .. y_offset .. ";" .. layer.name .. "]" ..
@@ -930,23 +902,12 @@ local function show_craft_grid(player, pos, config)
         tool_y = grid_top + (max_height / 2) - 0.5
     end
 
-    local player_slots
-    if has_backchest then
-        -- Com backchest: mostra slots extras (8x2) + hotbar (8x1)
-        player_slots =
-            "list[current_player;main;0.5,5.5;8,2;8]" ..
-            "list[current_player;main;0.5,8.1;8,1;]"
-    else
-        -- Sem backchest: mostra apenas a hotbar (8x1)
-        player_slots = "list[current_player;main;0.5,6;8,1;]"
-    end
-
     formspec = formspec .. "label[" .. tool_x .. "," .. tool_y .. ";" .. S "Tool" .. "]" ..
         "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";tool;" .. tool_x .. "," .. (tool_y + 0.5) ..
         ";1,1;]" .. "label[7,1.5;" .. S "Produces" .. "]" .. "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," ..
         pos.z .. ";output;7,2;1,1;]" .. "button[7,3.2;1,0.8;craft_one;" .. S "Single" .. "]" ..
-        "button[7,4.1;1,0.8;craft_all;" .. S "All" .. "]" .. player_slots ..
-        "listring[nodemeta:" .. pos.x .. "," .. pos.y ..
+        "button[7,4.1;1,0.8;craft_all;" .. S "All" .. "]" .. "list[current_player;main;0.5,5.5;8,2;8]" ..
+        "list[current_player;main;0.5,8.1;8,1;]" .. "listring[nodemeta:" .. pos.x .. "," .. pos.y ..
         "," .. pos.z .. ";craft]" .. "listring[current_player;main]"
     core.show_formspec(player_name, config.node_name .. "_" .. pos_string, formspec)
 end
@@ -999,7 +960,6 @@ function register_craft_station(node_name, config)
     -- Salva callbacks fornecidos no config
     local custom_on_construct = config.on_construct
     local custom_on_timer = config.on_timer
-    local custom_on_punch = config.on_punch
     -- MODIFICA on_construct para executar AMBOS
     local original_on_construct = node_def.on_construct
     node_def.on_construct = function(pos)
@@ -1071,7 +1031,7 @@ function register_craft_station(node_name, config)
         return count
     end
     node_def.on_metadata_inventory_put = function(pos, listname, index, stack, player)
-        if listname == "craft" or listname == "tool" then check_and_craft(pos, config, player) end
+        if listname == "craft" or listname == "tool" then check_and_craft(pos, config) end
     end
     node_def.on_metadata_inventory_take = function(pos, listname, index, stack, player)
         if listname == "tool" then
@@ -1147,7 +1107,6 @@ function register_craft_station(node_name, config)
         remove_item_entities(pos)
     end
     -- Registra o node com todas as propriedades
-    if custom_on_punch then node_def.on_punch = custom_on_punch end
     core.register_node(node_name, node_def)
 end
 
@@ -1167,12 +1126,13 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             local player_inv = player:get_inventory()
 
             if fields.craft_one then
+                -- Pega apenas 1
                 local output_stack = inv:get_stack("output", 1)
                 if not output_stack:is_empty() then
                     local leftover = player_inv:add_item("main", output_stack)
                     if leftover:is_empty() then
                         consume_craft_materials(pos)
-                        check_and_craft(pos, config, player)   -- ← passa player
+                        check_and_craft(pos, config)
                     end
                 end
             elseif fields.craft_all then
@@ -1185,7 +1145,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                     local leftover = player_inv:add_item("main", output_stack)
                     if leftover:is_empty() then
                         consume_craft_materials(pos)
-                        check_and_craft(pos, config, player) 
+                        check_and_craft(pos, config)
                         crafted = crafted + 1
                     else
                         break
@@ -2954,19 +2914,19 @@ register_craft_station("nh_nodes:campfire", {
     tiles = { "fogueira.png" },
     use_texture_alpha = "blend",
     paramtype = "light",
-    groups = {choppy = 3, oddly_breakable_by_hand = 1},
+    groups = { choppy = 3 },
     stack_max = 1,
     drop = {items = {
-            { items = { "nh_nodes:oaktimberslice 4"} },
+            { items = { "nh_nodes:oaktimberslice 4" } },
             { items = { "nh_nodes:campfiretinder" } },
     }},
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
-    title = "Produção 2x2 na Fogueira", -- Campo obrigatório!
+    title = "Produção 2x2 na Fogueira", -- ✅ Campo obrigatório!
     grid_size = 4,
     positions = {
-        { x = -0.4, y = 0.2, z = -0.25 }, { x = 0.4, y = 0.2, z = -0.25 },
-        { x = -0.4, y = 0.2, z = 0.25 }, { x = 0.4, y = 0.2, z = 0.25 },},
+        { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 },
+        { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 },},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
     layers = {{ name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 },},
@@ -3000,22 +2960,27 @@ register_craft_station("nh_nodes:campfire", {
             end)
         end
     end,
+
     -- Quando a fogueira é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then
             return
         end
+
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = core.get_meta(pos)
+
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
         end
+
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
+
             -- Cria a entidade da chama
             local obj = core.add_entity(pos, "nh_nodes:campfire_flame_entity")
             if obj then
@@ -3024,7 +2989,8 @@ register_craft_station("nh_nodes:campfire", {
                     ent._straw_pos = pos
                 end
             end
-            -- Efeito sonoro
+
+            -- Efeito sonoro (opcional)
             core.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
@@ -3032,13 +2998,7 @@ register_craft_station("nh_nodes:campfire", {
             }, true)
         end
     end,
-    can_craft = function(pos)
-        local meta = core.get_meta(pos)
-        if meta:get_int("has_flame") ~= 1 then
-            return false, S "I forgot that a bonfire needs to be lit to prepare..."
-        end
-        return true
-    end,
+
     -- Quando a fogueira for removida, remove as chamas
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local objs = core.get_objects_inside_radius(pos, 0.5)
@@ -3063,7 +3023,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
         visual = "mesh",
         mesh = "flame.obj",
         textures = { "fire_basic_flame_animated.png" },
-        visual_size = { x = 7, y = 7 }, -- Menor que a chama da grama
+        visual_size = { x = 10, y = 10 }, -- Menor que a chama da grama
         static_save = true,
         pointable = true,
         glow = 14,
@@ -3566,9 +3526,12 @@ core.register_node("nh_nodes:torch2", {
     description = S "Torch Lit",
     drawtype = "mesh",
     mesh = "torch.obj",
-    tiles = {"torchfire.png"}, -- Textura da madeira/base
+    tiles = {
+        "torchfire.png", -- Textura da madeira/base
+    },
     --inventory_image = "tocha_inventario.png",
     --wield_image = "tocha_inventario.png",
+
     paramtype = "light",
     --paramtype2 = "wallmounted",
     sunlight_propagates = true,
@@ -3578,20 +3541,26 @@ core.register_node("nh_nodes:torch2", {
     groups = { choppy = 2, oddly_breakable_by_hand = 3, flammable = 1 }, -- REMOVIDO: attached_node = 1, dig_immediate = 3
     collision_box = {type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, 0.37, 0.1 }},
     selection_box = {type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, 0.37, 0.1 }},
-    --selection_box = {type = "wallmounted",
+
+    --selection_box = {
+    --    type = "wallmounted",
     --    wall_top = {-0.1, 0.5-0.6, -0.1, 0.1, 0.5, 0.1},
     --    wall_bottom = {-0.1, -0.5, -0.1, 0.1, -0.5+0.6, 0.1},
-    --    wall_side = {-0.5, -0.1, -0.1, -0.5+0.3, 0.5, 0.1},
+    --     wall_side = {-0.5, -0.1, -0.1, -0.5+0.3, 0.5, 0.1},
     --},
-    --node_box = {type = "wallmounted",
+
+    --node_box = {
+    --    type = "wallmounted",
     --    wall_top = {-0.0625, 0.5-0.5625, -0.0625, 0.0625, 0.5, 0.0625},
     --    wall_bottom = {-0.0625, -0.5, -0.0625, 0.0625, -0.5+0.5625, 0.0625},
     --    wall_side = {-0.5, -0.0625, -0.0625, -0.5+0.28125, 0.5, 0.0625},
     --},
+
     -- Quando colocada, adiciona a chama no mesmo lugar
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         -- Posição da chama (1 bloco acima)
         local flame_pos = { x = pos.x, y = pos.y + 1, z = pos.z }
+
         -- Cria a ENTIDADE da chama
         local obj = core.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
         if obj then
@@ -3601,6 +3570,7 @@ core.register_node("nh_nodes:torch2", {
             end
         end
     end,
+
     -- Quando a tocha é destruída, remove a entidade da chama
     after_destruct = function(pos)
         local flame_pos = { x = pos.x, y = pos.y + 1, z = pos.z }
@@ -3640,22 +3610,32 @@ core.register_node("nh_nodes:crystal_light", {
 core.register_node("nh_nodes:torch_flame", {
     drawtype = "mesh",
     mesh = "torchflame.obj", -- Você precisará criar esse mesh
-    tiles = {{name = "fire_basic_flame_animated.png",
-            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.0},
-    }},
+    tiles = {
+        {
+            name = "fire_basic_flame_animated.png",
+            animation = {
+                type = "vertical_frames",
+                aspect_w = 16,
+                aspect_h = 16,
+                length = 1.0,
+            },
+        }
+    },
     stack_max = 1,               -- limita a 1 tocha acesa por slot
     paramtype = "light",
-    paramtype2 = "facedir",     
+    paramtype2 = "facedir",      -- ADICIONEI: necessário para meshes com transparência
     sunlight_propagates = true,
-    use_texture_alpha = "blend", 
+    use_texture_alpha = "blend", -- ADICIONEI: ativa a transparência
     walkable = false,
-    pointable = false,
+    pointable = true,
     diggable = false,
-    buildable_to = true,
+    buildable_to = false,
     damage_per_second = 4,
     groups = { not_in_creative_inventory = 1 },
     drop = "",
+
     --visual_scale = 1,
+
 })
 
 
@@ -3692,24 +3672,35 @@ core.register_entity("nh_nodes:torch_flame_entity", {
         self._timer = 0
 
         -- Configura a animação da textura
-        self.object:set_sprite({ x = 0, y = 0 }, 1, 1.0, false)
+        self.object:set_sprite(
+            { x = 0, y = 0 },
+            1,
+            1.0,
+            false
+        )
+
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
+
     get_staticdata = function(self)
         return core.serialize({ torch_pos = self._torch_pos })
     end,
+
     -- Detecta quando é golpeado com tocha apagada
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
         if not puncher or not puncher:is_player() then
             return
         end
+
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
+
         -- Verifica se está segurando uma tocha apagada
         if wielded_name == "nh_nodes:torch" then
             -- Remove a tocha apagada do inventário
             wielded:take_item()
             puncher:set_wielded_item(wielded)
+
             -- Adiciona a tocha acesa ao inventário
             local inv = puncher:get_inventory()
             if inv then
@@ -3720,12 +3711,14 @@ core.register_entity("nh_nodes:torch_flame_entity", {
                     core.add_item(pos, leftover)
                 end
             end
+
             -- Efeito sonoro
             core.sound_play("fire_flint_and_steel", {
                 pos = self.object:get_pos(),
                 gain = 0.5,
                 max_hear_distance = 8,
             }, true)
+
             -- Partículas de faísca
             core.add_particlespawner({
                 amount = 5,
@@ -3745,6 +3738,7 @@ core.register_entity("nh_nodes:torch_flame_entity", {
             })
         end
     end,
+
     on_step = function(self, dtime)
         self._timer = self._timer + dtime
         self._anim_timer = self._anim_timer + dtime
@@ -3776,177 +3770,24 @@ core.register_entity("nh_nodes:torch_flame_entity", {
     end,
 })
 
-local c = core
-local portal_particles = {}
-local linked_portals = {} -- Armazena os portais colocados
-local storage = core.get_mod_storage() -- PERSISTÊNCIA
-local function save_portals()
-    local list = {}
-    for _, p in ipairs(linked_portals) do
-        table.insert(list, p.x .. "," .. p.y .. "," .. p.z)
-    end
-    storage:set_string("linked_portals", table.concat(list, ";"))
-end
-local function load_portals()
-    linked_portals = {}
-    local raw = storage:get_string("linked_portals")
-    if raw == "" then return end
-    for entry in raw:gmatch("[^;]+") do
-        local x, y, z = entry:match("(-?%d+),(-?%d+),(-?%d+)")
-        if x then
-            table.insert(linked_portals, {x=tonumber(x), y=tonumber(y), z=tonumber(z)})
-        end
-    end
-end
-load_portals() -- Carrega ao iniciar o mod
--- Recria partículas nos portais salvos ao iniciar
-core.register_on_joinplayer(function(player)
-    -- Pequeno delay pra garantir que os chunks carregaram
-    core.after(3, function()
-        -- Filtra portais que sumiram enquanto o servidor estava offline
-        local valid = {}
-        for _, pos in ipairs(linked_portals) do
-            if core.get_node(pos).name == "nh_nodes:portal" then
-                table.insert(valid, pos)
-            end
-        end
-        -- Se algum portal sumiu, atualiza a lista salva
-        if #valid ~= #linked_portals then
-            linked_portals = valid
-            save_portals()
-        end
-        -- Recria partículas só nos que ainda não têm spawner ativo
-        for _, pos in ipairs(linked_portals) do
-            local key = pos.x .. "," .. pos.y .. "," .. pos.z
-            if not portal_particles[key] then
-                portal_particles[key] = core.add_particlespawner({
-                    amount = 25,
-                    time = 0,
-                    minpos = vector.subtract(pos, 0.25),
-                    maxpos = vector.add(pos, 0.25),
-                    minvel = xyz(-0.5, -0.5, -0.5),
-                    maxvel = xyz(0.5, 0.5, 0.5),
-                    minsize = 0.1,
-                    maxsize = 0.2,
-                    texture = "spark_particle.png^[colorize:#028dde:200^[opacity:120",
-                    glow = 7
-                })
-            end
-        end
-    end)
-end)
-local function get_portal_front(pos, node)
-    local dir = facedir_to_dir[node.param2 % 4] -- % 4 ignora rotações verticais
-    if not dir then dir = {x=0, y=0, z=1} end
-    return vector.add(pos, vector.multiply(dir, 1.2)) -- 1.2 nodes à frente
-end
--- Bloco do portal normal
-c.register_node("nh_nodes:portal", {
-    description = "Portal",
-    drawtype = "nodebox",
-    tiles = {"blank.png", "blank.png", "blank.png", "blank.png", "blank.png",
-        {name = "portal2_animated.png^[brighten",
-        backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.5}}},
-    overlay_tiles = {"", "", "", "", "",
-        {name = "portal2_animated.png^[opacity:220",
-        backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.5 }}},
-    use_texture_alpha = "blend",
-    paramtype = "light",
-    paramtype2 = "facedir",
-    sunlight_propagates = true,
-    --walkable = false,       -- jogador atravessa
-    pointable = true,
-    node_box = {type = "fixed", fixed = {-0.5, -0.5, 0.48, 0.5, 0.5, 0.5},}, -- plano fino
-    collision_box = {type = "fixed", fixed = {-0.5, -0.5, 0.5, 0.5, 1, 1}},
-    selection_box = {type = "fixed", fixed = {-0.5, -0.5, 0.48, 0.5, 0.5, 0.5}},
-    light_source = 3,
-    post_effect_color = { a = 150, r = 0, g = 0, b = 50 },
-    --walkable = false,
-    pointable = true,
-    groups = { cracky = 1, oddly_breakable_by_hand = 1 },
-    on_construct = function(pos)
-	-- Adiciona o portal à lista
-	table.insert(linked_portals, pos)
-	save_portals()  -- salva portais
-	if #linked_portals == 2 then c.chat_send_all("Os portais foram conectados!") end -- Se houver dois portais, conectá-los
-	local key = pos.x .. "," .. pos.y .. "," .. pos.z
-	-- Efeito de partículas
-	local spawner_id = c.add_particlespawner({
-		amount = 25,
-		time = 0,
-		minpos = vector.subtract(pos, 0.25),
-		maxpos = vector.add(pos, 0.25),
-		minvel = xyz(-0.5, -0.5, -0.5),
-		maxvel = xyz(0.5, 0.5, 0.5),
-		minsize = 0.1,
-        	maxsize = 0.2,
-		texture = "spark_particle.png^[colorize:#028dde:200^[opacity:120", -- opacidade completa de pintura sobre textura: 255 - hexa pra azul: #028dde
-		glow = 7
-	})
-        portal_particles[key] = spawner_id
-    end,
-    on_destruct = function(pos)
-        for i, p in ipairs(linked_portals) do
-            if vector.equals(p, pos) then table.remove(linked_portals, i) break end
-        end
-        save_portals()  -- salva portais
-        local key = pos.x .. "," .. pos.y .. "," .. pos.z
-        if portal_particles[key] then
-            c.delete_particlespawner(portal_particles[key])
-            portal_particles[key] = nil
-        end
-    end,
-})
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
-        local name = player:get_player_name()
-        -- Cooldown
-        if portal_cooldown[name] then
-            portal_cooldown[name] = portal_cooldown[name] - dtime
-            if portal_cooldown[name] <= 0 then portal_cooldown[name] = nil end
-            goto continue
-        end
-        local pos = player:get_pos()
-        -- Centro aproximado do player (pés + 0.9 = centro do corpo)
-        local player_center = {x = pos.x, y = pos.y + 0.9, z = pos.z}
-        for _, portal_pos in ipairs(linked_portals) do
-            -- Checa se o player está dentro do voxel do portal (±0.5 em cada eixo)
-            if math.abs(player_center.x - portal_pos.x) <= 0.5 and
-               math.abs(player_center.y - portal_pos.y) <= 2.5 and
-               math.abs(player_center.z - portal_pos.z) <= 0.5 then
-                if #linked_portals < 2 then break end
-                -- Acha o portal de destino
-                local target_pos
-                if vector.equals(portal_pos, linked_portals[1]) then target_pos = linked_portals[2]
-                else target_pos = linked_portals[1] end
-                local target_node = c.get_node(target_pos)
-                local dir = facedir_to_dir[target_node.param2 % 4] or {x=0, y=0, z=1}
-                local spawn = vector.add(target_pos, vector.multiply(dir, 1))
-                local function dir_to_yaw(d) return math.atan2(-d.x, d.z) end
-                player:set_look_horizontal(dir_to_yaw(dir))
-                player:set_pos(spawn)
-                c.chat_send_player(name, S "I entered the portal!")
-                c.sound_play("vortex", {pos = portal_pos, gain = 0.1})
-                portal_cooldown[name] = 3.0 -- segundos de cooldown após teleporte
-                break
-            end
-        end
-        ::continue::
-    end
-end)
-
 core.register_node("nh_nodes:flame", {
     drawtype = "mesh",
     mesh = "flame.obj", -- Você precisará criar esse mesh
-    tiles = {{name = "fire_basic_flame_animated.png",
-            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.0},
-    }},
+    tiles = {
+        {
+            name = "fire_basic_flame_animated.png",
+            animation = {
+                type = "vertical_frames",
+                aspect_w = 16,
+                aspect_h = 16,
+                length = 1.0,
+            },
+        }
+    },
     paramtype = "light",
-    paramtype2 = "facedir",      
+    paramtype2 = "facedir",      -- ADICIONEI: necessário para meshes com transparência
     sunlight_propagates = true,
-    use_texture_alpha = "blend", 
+    use_texture_alpha = "blend", -- ADICIONEI: ativa a transparência
     walkable = false,
     pointable = false,
     diggable = false,
@@ -3954,7 +3795,9 @@ core.register_node("nh_nodes:flame", {
     damage_per_second = 4,
     groups = { not_in_creative_inventory = 1 },
     drop = "",
+
     --visual_scale = 1,
+
 })
 
 core.register_node("nh_nodes:torch3", {
@@ -4147,18 +3990,18 @@ core.register_node("nh_nodes:kelp", {
                     name = "nh_nodes:kelp",
                     param2 = height * 16
                 })
-                if not core.is_creative_enabled(player_name) then
+                if not minetest.is_creative_enabled(player_name) then
                     itemstack:take_item()
                 end
             else
-                core.chat_send_player(player_name, S "Node is protected")
-                core.record_protection_violation(pos, player_name)
+                minetest.chat_send_player(player_name, S "Node is protected")
+                minetest.record_protection_violation(pos, player_name)
             end
         end
         return itemstack
     end,
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        core.set_node(pos, { name = "nh_nodes:wet_sand" })
+        minetest.set_node(pos, { name = "nh_nodes:wet_sand" })
     end
 })
 
@@ -4473,6 +4316,7 @@ core.register_node("nh_nodes:redcrystal", {
     light_source = 14,
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
+
     on_punch = function(pos, node, puncher, pointed_thing)
         -- Efeito de partículas de destruição
         core.add_particlespawner({
@@ -4489,10 +4333,13 @@ core.register_node("nh_nodes:redcrystal", {
             minsize = 0.5,
             maxsize = 2,
             glow = 14,
-            texture = {name = "spark_particle.png^[colorize:#76008d:150"}, -- purpura
+            texture = {
+                name = "spark_particle.png^[colorize:#76008d:150", -- purpura
+            },
         })
-        -- Som de destruição
-        core.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
+
+        -- Som de destruição (usa o som de dano do caranguejo)
+        --core.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
     end,
 })
 
@@ -4508,15 +4355,19 @@ core.register_node("nh_nodes:sentinelstatue", {
     light_source = 7,
     collision_box = {type = "fixed", fixed = { -0.65, -0.5, -0.65, 0.65, 3.5, 0.65 }},
     selection_box = {type = "fixed", fixed = { -0.65, -0.5, -0.65, 0.65, 3.5, 0.65 }},
+
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
+
         local item = puncher:get_wielded_item()
         local item_name = item:get_name()
+
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
             core.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
             return
         end
+
         -- Efeito de partículas de destruição
         core.add_particlespawner({
             amount = 50,
@@ -4536,18 +4387,27 @@ core.register_node("nh_nodes:sentinelstatue", {
                 name = "spark_particle.png^[colorize:#FF8800:150", -- dourado
             },
         })
-        -- Som de destruição
-        core.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
+
+        -- Som de destruição (usa o som de dano do caranguejo)
+        --core.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
+
         -- Remove a estátua
         core.remove_node(pos)
+
+        -- Coloca grama na posição da estátua imediatamente
+        --core.set_node(pos, {name = "nh_nodes:wet_sand"})
+
+        -- Spawna o Giant Crab na posição da estátua
         -- Spawna o mob após 2 segundos
         core.after(0.25, function()
             core.add_entity(pos, "nh_mob:sentinel")
         end)
+
         -- Consome a esfera da mão do jogador
         local inv = puncher:get_inventory()
         item:take_item(1)
         puncher:set_wielded_item(item)
+
         -- Avisa o jogador
         core.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
     end,
@@ -5209,6 +5069,14 @@ core.register_node("nh_nodes:glass", {
     --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
     --connects_to = {"nh_nodes:ice"},
 })
+
+-- Converte facedir para vetor de direção frontal do espelho
+local facedir_to_dir = {
+    [0] = vector.new(0, 0, -1), -- sul   (frente padrão)
+    [1] = vector.new(-1, 0, 0), -- oeste
+    [2] = vector.new(0, 0, 1),  -- norte
+    [3] = vector.new(1, 0, 0),  -- leste
+}
 
 -- Calcula posição da entidade na frente do espelho
 local function get_surface_pos(mirror_pos, param2)
@@ -6361,8 +6229,11 @@ core.register_node("nh_nodes:water", {
     drawtype = "liquid",
     liquidtype = "source",
     tiles = { "agua.png" },
-    tiles = {{name = "agua_animated.png", backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 10}},
+    tiles = { {
+        name = "agua_animated.png",
+        backface_culling = false,
+        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 10.0 }
+    },
         "agua.png" }, -- resto das faces
     paramtype = "light",
     waving = 3,
@@ -6932,7 +6803,6 @@ core.register_abm({
 -- Limpa o timer quando jogador sai
 core.register_on_leaveplayer(function(player)
     lava_damage_timer[player:get_player_name()] = nil
-    portal_cooldown[player:get_player_name()] = nil
 end)
 
 core.register_abm({
@@ -7202,6 +7072,19 @@ end)
 ---------
 -- Baú geral
 --------
+-- Verifica se o jogador tem o backchest equipado no slot de costas
+local function player_has_backchest_equipped(player)
+    local inv = player:get_inventory()
+    local back_list = inv:get_list("armor_back")
+    if not back_list then return false end
+    for _, stack in ipairs(back_list) do
+        if stack:get_name() == "nh_nodes:backchest" then
+            return true
+        end
+    end
+    return false
+end
+
 -- Monta o formspec do baú dinamicamente conforme o backchest estar equipado
 local function build_chest_formspec(clicker)
     local chest_slots = "list[current_name;main;0,0.3;8,2;]"
@@ -10539,35 +10422,51 @@ core.register_entity("nh_nodes:litgrenade_entity", {
         visual_size = { x = 10, y = 10 },
         collisionbox = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 },
     },
+
     _timer = 0,
     _shooter = nil,
+
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then return end
+
         self._timer = self._timer + dtime
+
         local rot = self.object:get_rotation()
         self.object:set_rotation({
             x = rot.x + 0.003,
             y = rot.y + 0.2,
             z = rot.z,
         })
+
         -- explode após 5 segundos
         if self._timer >= 5 then
-            core.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 32})
+            core.sound_play("tnt_explode", {
+                pos = pos,
+                gain = 1.0,
+                max_hear_distance = 32,
+            })
+
             core.add_particlespawner({
                 amount = 50,
                 time = 0.3,
                 glow = 14,
+
                 minpos = vector.subtract(pos, 0.5),
                 maxpos = vector.add(pos, 0.5),
+
                 minvel = { x = -4, y = -4, z = -4 },
                 maxvel = { x = 4, y = 4, z = 4 },
+
                 minexptime = 0.5,
                 maxexptime = 1.5,
+
                 minsize = 0.5,
                 maxsize = 1,
+
                 texture = "spark_particle.png^[colorize:#FF8800:150",
             })
+
             -- dano em área
             for _, obj in ipairs(core.get_objects_inside_radius(pos, 4)) do
                 if obj ~= self.object then
@@ -10576,8 +10475,10 @@ core.register_entity("nh_nodes:litgrenade_entity", {
                     })
                 end
             end
+
             -- transforma neve em avalanche
             local radius = 4
+
             for x = -radius, radius do
                 for y = -radius, radius do
                     for z = -radius, radius do
@@ -10586,8 +10487,10 @@ core.register_entity("nh_nodes:litgrenade_entity", {
                             y = pos.y + y,
                             z = pos.z + z
                         }
+
                         if vector.distance(pos, p) <= radius then
                             local node = core.get_node(p)
+
                             if node.name == "nh_nodes:snow_ramp"
                                 or node.name == "nh_nodes:snow_insidecorner"
                                 or node.name == "nh_nodes:snow_corner" then
@@ -10599,11 +10502,14 @@ core.register_entity("nh_nodes:litgrenade_entity", {
                     end
                 end
             end
+
             self.object:remove()
             return
         end
+
         -- colisão com parede/chão
         local node = core.get_node(vector.round(pos))
+
         if core.registered_nodes[node.name]
             and core.registered_nodes[node.name].walkable then
             self.object:set_velocity({ x = 0, y = 0, z = 0 })
@@ -10626,22 +10532,27 @@ core.register_node("nh_nodes:grassleaves", {
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then
             return
         end
+
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = core.get_meta(pos)
+
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
         end
+
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
+
             -- Cria a entidade da chama
             local obj = core.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
@@ -10650,6 +10561,7 @@ core.register_node("nh_nodes:grassleaves", {
                     ent._grass_pos = pos
                 end
             end
+
             -- Efeito sonoro (opcional)
             core.sound_play("fire_flint_and_steel", {
                 pos = pos,
@@ -10658,6 +10570,7 @@ core.register_node("nh_nodes:grassleaves", {
             }, true)
         end
     end,
+
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local objs = core.get_objects_inside_radius(pos, 0.5)
@@ -10687,6 +10600,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then
@@ -10703,6 +10617,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
+
             -- Cria a entidade da chama
             local obj = core.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
@@ -10719,6 +10634,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
             }, true)
         end
     end,
+
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local objs = core.get_objects_inside_radius(pos, 0.5)
@@ -10731,7 +10647,9 @@ core.register_node("nh_nodes:grassleavesmedium", {
     end,
 })
 
+---------------------------
 -- NODE DAS FOLHAS DE GRAMA
+---------------------------
 core.register_node("nh_nodes:smallgrass", {
     description = S "Short Grass",
     drawtype = "mesh",
@@ -10762,6 +10680,7 @@ core.register_node("nh_nodes:smallgrass", {
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
+
             -- Cria a entidade da chama
             local obj = core.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
@@ -10778,6 +10697,7 @@ core.register_node("nh_nodes:smallgrass", {
             }, true)
         end
     end,
+
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local objs = core.get_objects_inside_radius(pos, 0.5)
@@ -10804,22 +10724,27 @@ core.register_node("nh_nodes:highgrass", {
     --buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 1.5, 0.5 }},
+
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then
             return
         end
+
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = core.get_meta(pos)
+
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
         end
+
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
+
             -- Cria a entidade da chama
             local obj = core.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
@@ -10828,6 +10753,7 @@ core.register_node("nh_nodes:highgrass", {
                     ent._grass_pos = pos
                 end
             end
+
             -- Efeito sonoro (opcional)
             core.sound_play("fire_flint_and_steel", {
                 pos = pos,
@@ -10836,6 +10762,7 @@ core.register_node("nh_nodes:highgrass", {
             }, true)
         end
     end,
+
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local objs = core.get_objects_inside_radius(pos, 0.5)
@@ -10848,7 +10775,9 @@ core.register_node("nh_nodes:highgrass", {
     end,
 })
 
+---------------------------
 -- NODE DAS FLORES DE DENTE DE LEAO
+---------------------------
 core.register_node("nh_nodes:dandelion", {
     description = S "Dandelion",
     drawtype = "mesh",
@@ -10862,7 +10791,10 @@ core.register_node("nh_nodes:dandelion", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
 })
 
+
+---------------------------
 -- NODE DE JUNCO
+---------------------------
 core.register_node("nh_nodes:rush", {
     description = S "Rush",
     drawtype = "plantlike",
@@ -10875,7 +10807,9 @@ core.register_node("nh_nodes:rush", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
 })
 
+---------------------------
 -- NODE DO COGUMELO MICACEUS
+---------------------------
 core.register_node("nh_nodes:micaceusfungus", {
     description = S "Micaceus Fungus",
     drawtype = "mesh",
@@ -10896,7 +10830,9 @@ core.register_node("nh_nodes:micaceusfungus", {
     end,
 })
 
+---------------------------
 -- NODE DO COGUMELO AMANITA (VERMELHO)
+---------------------------
 core.register_node("nh_nodes:flyamanitafungus", {
     description = S "Fly Agaric Fungus",
     drawtype = "mesh",
@@ -10916,6 +10852,10 @@ core.register_node("nh_nodes:flyamanitafungus", {
         return itemstack
     end,
 })
+
+------------------------------------------------------------
+-- EXEMPLO: REGISTRAR ITENS DE VESTUÁRIO (tá como tool por enquanto)
+------------------------------------------------------------
 
 -- Cinto
 core.register_node("nh_nodes:belt", {
@@ -10942,8 +10882,10 @@ core.register_node("nh_nodes:belt", {
 })
 
 -- Mochila: BACKCHEST – funciona exatamente como o oakchest
+-- =============================================================
 -- Tabela global: armazena conteúdo de backchests quebrados
 -- Chave: ID único (string) gravado no meta do item dropado
+-- =============================================================
 backchest_stored_items = backchest_stored_items or {}
 
 local function backchest_new_id()
@@ -10972,6 +10914,8 @@ local function backchest_restore_inv(pos, slots)
 end
 
 -- Função auxiliar: atualiza itens visuais no backchest aberto
+
+
 -- Node: backchest aberto (estado intermediário)
 core.register_node("nh_nodes:back_chest_open", {
     drawtype         = "mesh",
@@ -10981,9 +10925,12 @@ core.register_node("nh_nodes:back_chest_open", {
     pointable        = true,
     paramtype        = "light",
     paramtype2       = "facedir",
+
     selection_box    = { type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },
     collision_box    = { type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },
+
     groups           = { not_in_creative_inventory = 1 },
+
     on_rightclick    = function(pos, node, clicker, itemstack, pointed_thing)
         local meta        = core.get_meta(pos)
         local player_name = clicker:get_player_name()
@@ -10993,31 +10940,38 @@ core.register_node("nh_nodes:back_chest_open", {
             build_chest_formspec(clicker))
         return itemstack
     end,
+
     on_construct     = function(pos)
         core.after(0.1, function() back_chest_update_items(pos) end)
     end,
+
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         core.after(0.1, function() back_chest_update_items(pos) end)
     end,
+
     -- Permite quebrar o baú mesmo estando aberto
     can_dig          = function(pos, player)
         return true
     end,
+
     -- Mesma lógica de salvamento do node fechado
     on_dig           = function(pos, node, digger)
         local meta      = core.get_meta(pos)
         local inv       = meta:get_inventory()
         local has_items = not inv:is_empty("main")
+
         local chest_id  = meta:get_string("chest_id")
         if chest_id == "" then
             chest_id = backchest_new_id()
         end
+
         if has_items then
             backchest_stored_items[chest_id] = backchest_save_inv(pos)
         else
             backchest_stored_items[chest_id] = nil
             chest_id = ""
         end
+
         local drop = ItemStack("nh_nodes:backchest")
         if chest_id ~= "" then
             local drop_meta = drop:get_meta()
@@ -11025,8 +10979,10 @@ core.register_node("nh_nodes:back_chest_open", {
             drop_meta:set_string("description",
                 S "Backpack Chest" .. "\n" .. S "(contains items)")
         end
+
         core.remove_node(pos)
         core.add_item(pos, drop)
+
         -- Remove todas as entidades visuais ligadas ao baú aberto
         for _, obj in ipairs(core.get_objects_inside_radius(pos, 1)) do
             local ent = obj:get_luaentity()
@@ -11055,14 +11011,17 @@ core.register_entity("nh_nodes:back_chest_entity", {
         paramtype            = "light",
         paramtype2           = "facedir",
     },
+
     node_pos           = nil,
     original_param2    = 0,
     timer              = 0,
     animation_finished = false,
     is_invisible       = false,
+
     on_activate        = function(self, staticdata)
         self.object:set_armor_groups({ immortal = 1 })
     end,
+
     on_step            = function(self, dtime)
         if self.is_invisible then return end
         self.timer = self.timer + dtime
@@ -11087,12 +11046,15 @@ core.register_entity("nh_nodes:back_chest_close_entity", {
         paramtype            = "light",
         paramtype2           = "facedir",
     },
+
     node_pos           = nil,
     original_param2    = 0,
     timer              = 0,
+
     on_activate        = function(self, staticdata)
         self.object:set_armor_groups({ immortal = 1 })
     end,
+
     on_step            = function(self, dtime)
         self.timer = self.timer + dtime
         if self.timer > 0.3 then
@@ -11101,15 +11063,20 @@ core.register_entity("nh_nodes:back_chest_close_entity", {
                 local objects = core.get_objects_inside_radius(self.node_pos, 1)
                 for _, obj in ipairs(objects) do
                     local luaent = obj:get_luaentity()
-                    if luaent and luaent.name == "nh_nodes:chest_item" then obj:remove() end
+                    if luaent and luaent.name == "nh_nodes:chest_item" then
+                        obj:remove()
+                    end
                 end
             end
+
             self.object:remove()
+
             -- Troca de volta para node fechado
             if self.node_pos then
                 local node = core.get_node(self.node_pos)
                 if node.name == "nh_nodes:back_chest_open" then
-                    core.swap_node(self.node_pos, { name = "nh_nodes:backchest", param2 = self.original_param2 })
+                    core.swap_node(self.node_pos,
+                        { name = "nh_nodes:backchest", param2 = self.original_param2 })
                 end
             end
         end
@@ -11120,16 +11087,22 @@ core.register_entity("nh_nodes:back_chest_close_entity", {
 core.register_on_player_receive_fields(function(player, formname, fields)
     local prefix = "nh_nodes:back_chest_"
     if formname:sub(1, #prefix) ~= prefix then return end
+
     local pos_string = formname:sub(#prefix + 1)
     local pos        = core.string_to_pos(pos_string)
     if not pos then return end
+
     local node = core.get_node(pos)
     if node.name ~= "nh_nodes:back_chest_open" then return end
+
     local meta         = core.get_meta(pos)
     local current_user = meta:get_string("current_user")
     local player_name  = player:get_player_name()
+
     if current_user ~= player_name then return end
+
     meta:set_string("current_user", "")
+
     local objects      = core.get_objects_inside_radius(pos, 0.5)
     local chest_entity = nil
     for _, obj in ipairs(objects) do
@@ -11139,11 +11112,13 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             break
         end
     end
+
     local close_entity = core.add_entity(pos, "nh_nodes:back_chest_close_entity")
     if close_entity and close_entity:get_luaentity() then
         local luaentity           = close_entity:get_luaentity()
         luaentity.node_pos        = pos
         luaentity.original_param2 = node.param2
+
         if chest_entity then
             for _, obj in ipairs(objects) do
                 local luaent = obj:get_luaentity()
@@ -11154,6 +11129,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             end
             chest_entity:remove()
         end
+
         local yaw = core.facedir_to_dir(node.param2)
         close_entity:set_yaw(core.dir_to_yaw(yaw) + math.pi)
         close_entity:set_animation({ x = 0.25, y = 0 }, 30, 0, false)
@@ -11164,9 +11140,11 @@ end)
 core.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
     if action ~= "move" and action ~= "put" and action ~= "take" then return end
     if inventory_info.to_list ~= "main" and inventory_info.from_list ~= "main" then return end
+
     local player_name = player:get_player_name()
     local player_pos  = player:get_pos()
     if not player_pos then return end
+
     for _, obj in ipairs(core.get_objects_inside_radius(player_pos, 10)) do
         if obj:is_player() then goto backcontinue end
         local pos = obj:get_pos()
@@ -11191,15 +11169,23 @@ core.register_node("nh_nodes:backchest", {
     tiles                 = { "BackChest.png" },
     walkable              = true,
     pointable             = true,
+
     paramtype             = "light",
     paramtype2            = "facedir",
     groups                = { snappy = 3, oddly_breakable_by_hand = 1, armor_back = 1 },
     stack_max             = 1,
+
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.7 }},
-    offhand_bone_position = {pos = { x = -1, y = -0.5, z = 1.8 }},
+    wielded_bone_position = {
+        pos = { x = 0.5, y = 0.5, z = 1.7 }
+    },
+    offhand_bone_position = {
+        pos = { x = -1, y = -0.5, z = 1.8 }
+    },
+
     collision_box         = { type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },
     selection_box         = { type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },
+
     -- Criar inventário ao construir
     on_construct          = function(pos)
         local meta = core.get_meta(pos)
@@ -11215,20 +11201,24 @@ core.register_node("nh_nodes:backchest", {
         )
         meta:set_string("infotext", S "Backpack Chest")
     end,
+
     -- Permite quebrar mesmo com itens dentro
     can_dig               = function(pos, player)
         return true
     end,
+
     -- Ao quebrar: salva o conteúdo na tabela global e grava o ID no item dropado
     on_dig                = function(pos, node, digger)
         local meta      = core.get_meta(pos)
         local inv       = meta:get_inventory()
         local has_items = not inv:is_empty("main")
+
         -- Gera ou reutiliza ID existente (caso o baú já tenha sido colocado antes)
         local chest_id  = meta:get_string("chest_id")
         if chest_id == "" then
             chest_id = backchest_new_id()
         end
+
         if has_items then
             -- Salva todos os slots na tabela global
             backchest_stored_items[chest_id] = backchest_save_inv(pos)
@@ -11237,6 +11227,7 @@ core.register_node("nh_nodes:backchest", {
             backchest_stored_items[chest_id] = nil
             chest_id = ""
         end
+
         -- Remove o node e dropa o item
         local drop = ItemStack("nh_nodes:backchest")
         if chest_id ~= "" then
@@ -11246,8 +11237,10 @@ core.register_node("nh_nodes:backchest", {
             drop_meta:set_string("description",
                 S "Backpack Chest" .. "\n" .. S "(contains items)")
         end
+
         core.remove_node(pos)
         core.add_item(pos, drop)
+
         -- Remove entidades visuais que possam ter sobrado
         for _, obj in ipairs(core.get_objects_inside_radius(pos, 1)) do
             local ent = obj:get_luaentity()
@@ -11260,6 +11253,7 @@ core.register_node("nh_nodes:backchest", {
             end
         end
     end,
+
     -- Abrir baú ao clicar
     on_rightclick         = function(pos, node, clicker, itemstack, pointed_thing)
         local current_node = core.get_node(pos)
@@ -11272,6 +11266,7 @@ core.register_node("nh_nodes:backchest", {
                 obj:remove()
             end
         end
+
         -- Cria entidade de animação de abertura
         local entity = core.add_entity(pos, "nh_nodes:back_chest_entity")
         if entity and entity:get_luaentity() then
@@ -11282,6 +11277,7 @@ core.register_node("nh_nodes:backchest", {
             entity:set_yaw(core.dir_to_yaw(yaw) + math.pi)
             entity:set_animation({ x = 0, y = 0.25 }, 1, 0, false)
         end
+
         local meta        = core.get_meta(pos)
         local player_name = clicker:get_player_name()
         meta:set_string("current_user", player_name)
@@ -11291,12 +11287,15 @@ core.register_node("nh_nodes:backchest", {
         core.show_formspec(player_name,
             "nh_nodes:back_chest_" .. core.pos_to_string(pos),
             build_chest_formspec(clicker))
+
         return itemstack
     end,
+
     -- Ao colocar: restaura inventário a partir da tabela global via ID do item
     after_place_node      = function(pos, placer, itemstack, pointed_thing)
         local item_meta = itemstack:get_meta()
         local chest_id  = item_meta:get_string("chest_id")
+
         if chest_id ~= "" and backchest_stored_items[chest_id] then
             local meta = core.get_meta(pos)
             -- Grava o mesmo ID no node para futuras quebras
@@ -11352,12 +11351,28 @@ core.register_node("nh_nodes:pointglove", {
     mesh = "pointglove.obj",
     tiles = { "pointglove.png" },
     stack_max = 1, -- limita a 1 por slot
+
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {armor_hands = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5, },
+
+    groups = {
+        armor_hands = 1,
+        oddly_breakable_by_hand = 3,
+        snappy = 3,
+        fleshy = 5,
+    },
+
     walkable = false,
-    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+
+    selection_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+    collision_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+
     -- Define posição customizada quando equipado
     armor_bone_position = {
         pos = { x = 0.9, y = 0, z = 0 },  -- Ajuste Y para descer
@@ -11365,45 +11380,81 @@ core.register_node("nh_nodes:pointglove", {
     },
 })
 
--- Capacete
+-- Exemplo de capacete
 core.register_node("nh_nodes:copperhelmet", {
     description = S "Copper Helmet",
     drawtype = "mesh",
     mesh = "helmet.obj",
     tiles = { "copperhelmet.png" },
     stack_max = 1, -- limita a 1 por slot
-    groups = {armor_head = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
+
+    groups = {
+        armor_head = 1,
+        oddly_breakable_by_hand = 3,
+        snappy = 3,
+        fleshy = 5,
+    },
+
     paramtype = "light",
     paramtype2 = "facedir",
+
+
     walkable = false,
-    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+
+    selection_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+    collision_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+
     -- Define posição customizada quando equipado
     armor_bone_position = {
         pos = { x = 0, y = 2.7, z = 0 }, -- Ajuste Y para descer
         rot = { x = 0, y = -90, z = 0 }  -- Ajuste Y para girar (90° = direita)
     },
+
     --armor_texture = "copperhelmet.png",
     --armor_groups = {fleshy = 5},  -- Proteção
 })
 
--- Armadura peitoral
+
+-- Exemplo de armadura de tronco
 core.register_node("nh_nodes:copperchestplate", {
     description = S "Copper Chestplate",
     drawtype = "mesh",
     mesh = "chestplate.obj",
     tiles = { "copperchest.png" },
     stack_max = 1, -- limita a 1 por slot
+
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {armor_torso = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
+
+    groups = {
+        armor_torso = 1,
+        oddly_breakable_by_hand = 3,
+        snappy = 3,
+        fleshy = 5,
+    },
+
     walkable = false,
-    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+
+    selection_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+    collision_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+
     -- Define posição customizada quando equipado
     armor_bone_position = {
         pos = { x = 0.6, y = 4.1, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},    -- Ajuste Y para girar (90° = direita)
+        rot = { x = 0, y = -90, z = 0 }    -- Ajuste Y para girar (90° = direita)
+    },
 })
 
 -- Armadura de cintura
@@ -11413,16 +11464,33 @@ core.register_node("nh_nodes:fauld", {
     mesh = "leggings.obj",
     tiles = { "copperlegging.png" },
     stack_max = 1, -- limita a 1 por slot
+
     paramtype = "light",
     paramtype2 = "facedir",
+
+    groups = {
+        armor_waist = 1,
+        oddly_breakable_by_hand = 3,
+        snappy = 3,
+        fleshy = 5,
+    },
+
     walkable = false,
-    groups = {armor_waist = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
-    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+
+    selection_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+    collision_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+
     -- Define posição customizada quando equipado
     armor_bone_position = {
         pos = { x = 0.6, y = 2.1, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},    -- Ajuste Y para girar (90° = direita)
+        rot = { x = 0, y = -90, z = 0 }    -- Ajuste Y para girar (90° = direita)
+    },
 })
 
 -- Exemplo de calças
@@ -11432,17 +11500,35 @@ core.register_node("nh_nodes:leggings", {
     mesh = "leggings.obj",
     tiles = { "copperlegging.png" },
     stack_max = 1, -- limita a 1 por slot
+
     paramtype = "light",
     paramtype2 = "facedir",
+
+    groups = {
+        armor_legs = 1,
+        oddly_breakable_by_hand = 3,
+        snappy = 3,
+        fleshy = 5,
+    },
+
     walkable = false,
-    groups = {armor_legs = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5,},
-    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+
+    selection_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+    collision_box = {
+        type = "fixed",
+        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
+    },
+
     -- Define posição customizada quando equipado
     armor_bone_position = {
         pos = { x = 0.6, y = 2.1, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},    -- Ajuste Y para girar (90° = direita)
+        rot = { x = 0, y = -90, z = 0 }    -- Ajuste Y para girar (90° = direita)
+    },
 })
+
 
 -- Exemplo de botas
 --core.register_node("nh_nodes:boots", {
@@ -11455,107 +11541,6 @@ core.register_node("nh_nodes:leggings", {
 --    paramtype2 = "facedir",
 --})
 
--- Asas
-core.register_node("nh_nodes:closedwings", {
-    description = S "Wings",
-    drawtype = "mesh",
-    mesh = "closedwings.obj",
-    tiles = {"sentinelstatue.png"},
-    stack_max = 1, -- limita a 1 por slot
-    groups = {oddly_breakable_by_hand = 3},
-    paramtype = "light",
-    paramtype2 = "facedir",
-    walkable = false,
-    selection_box = {type = "fixed", fixed = { -0.55, -0.5, -0.02, 0.55, 1.7, 0.11 }},
-    collision_box = {type = "fixed", fixed = { -0.55, -0.5, -0.02, 0.55, 1.7, 0.11 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = -0.25, y = -0.5, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},  -- Ajuste Y para girar (90° = direita)
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -2, y = 0, z = 0 }},
-    offhand_bone_position = {pos = { x = -2, y = 0, z = -0.25 }},
-    drop = "nh_nodes:wings"
-})
-
-core.register_node("nh_nodes:wings", {
-    description = S "Wings",
-    drawtype = "mesh",
-    mesh = "wings.obj",
-    tiles = {"sentinelstatue.png"},
-    stack_max = 1, -- limita a 1 por slot
-    groups = {armor_back = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
-    paramtype = "light",
-    paramtype2 = "facedir",
-    walkable = false,
-    selection_box = {type = "fixed", fixed = { -1.5, -0.5, 0, 1.5, 1.5, 0.1 }},
-    collision_box = {type = "fixed", fixed = { -1.5, -0.5, 0, 1.5, 1.5, 0.1 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = -0.25, y = -0.5, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},  -- Ajuste Y para girar (90° = direita)
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -2, y = 0, z = 0 }},
-    offhand_bone_position = {pos = { x = -2, y = 0, z = -0.25 }},
-    after_place_node = function(pos, placer, itemstack, pointed_thing)
-        -- Substitui o nó colocado pelo closedwings, mantendo o facedir
-        local node = core.get_node(pos)
-        core.set_node(pos, {name = "nh_nodes:closedwings", param2 = node.param2}) -- param2 preserva a rotação/direção
-    end,
-})
-
--- ASAS: concede voo enquanto equipado nas costas
-local players_with_wings = {}
-
-local function has_wings_equipped(player)
-    local inv = player:get_inventory()
-    local back_list = inv:get_list("armor_back")
-    if not back_list then return false end
-    for _, stack in ipairs(back_list) do
-        if stack:get_name() == "nh_nodes:wings" then
-            return true
-        end
-    end
-    return false
-end
-
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
-        local name = player:get_player_name()
-        local wearing = has_wings_equipped(player)
-
-        if wearing and not players_with_wings[name] then
-            -- Equipou as asas: concede voo
-            players_with_wings[name] = true
-            local privs = core.get_player_privs(name)
-            privs.fly = true
-            core.set_player_privs(name, privs)
-            -- Aplica física de voo imediatamente
-            player:set_physics_override({ gravity = 0.5 })
-            core.chat_send_player(name, S "The wings are active! Use [flight] (k or enable in the menu) to fly.")
-
-        elseif not wearing and players_with_wings[name] then
-            -- Desequipou as asas: remove voo
-            players_with_wings[name] = nil
-            local privs = core.get_player_privs(name)
-            privs.fly = nil
-            core.set_player_privs(name, privs)
-            player:set_physics_override({ gravity = 1.0 })
-            core.chat_send_player(name, S "The wings were removed.")
-        end
-    end
-end)
-
--- Garante que o voo é removido ao deslogar
-core.register_on_leaveplayer(function(player)
-    local name = player:get_player_name()
-    if players_with_wings[name] then
-        players_with_wings[name] = nil
-        local privs = core.get_player_privs(name)
-        privs.fly = nil
-        core.set_player_privs(name, privs)
-    end
-end)
 
 -- PORTA DE CARVALHO 3x1
 -- Porta fechada
@@ -11571,15 +11556,19 @@ core.register_node("nh_nodes:oakdoor_closed", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, -0.375 }}, -- 3 blocos de altura, fina
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.3, 0.5, 2.5, 0.05 }},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -2, y = -0.9, z = 1.35 }
+    wielded_bone_position = {
+        pos = { x = -2, y = -0.9, z = 1.35 }
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 3, y = -1, z = 0.7 },
-        rot = { x = 0, y = 0, z = 90 }},
+    offhand_bone_position = {
+        pos = { x = 3, y = -1, z = 0.7 },
+        rot = { x = 0, y = 0, z = 90 }
+    },
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        core.set_node(pos, { name = "nh_nodes:oakdoor_open", param2 = node.param2 }) -- Abre a porta
+        -- Abre a porta
+        core.set_node(pos, { name = "nh_nodes:oakdoor_open", param2 = node.param2 })
         core.sound_play("door_open", { pos = pos, gain = 0.3, max_hear_distance = 10 })
     end,
 })
@@ -11608,10 +11597,12 @@ core.register_node("nh_nodes:oakdoor_open", {
         rot = { x = 0, y = 90, z = 90 }},
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        core.set_node(pos, { name = "nh_nodes:oakdoor_closed", param2 = node.param2 }) -- Fecha a porta
+        -- Fecha a porta
+        core.set_node(pos, { name = "nh_nodes:oakdoor_closed", param2 = node.param2 })
         core.sound_play("door_close", { pos = pos, gain = 0.3, max_hear_distance = 10 })
     end,
 })
+
 
 -- GRIMÓRIO DE MATERIALIZAÇÃO - Archion
 local ITEMS_PER_PAGE  = 40

@@ -505,8 +505,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
             if data[vi] ~= C.air then break end
             -- Caso contrário, coloca a folha
             data[vi] = C.palmleaf
-            table.insert(leaf_nodes,
-                { pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z }, rotation = dir.rotation })
+            table.insert(leaf_nodes, { pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z }, rotation = dir.rotation })
         end
     end
     --  FOLHAS EM CRUZ - CAMADA SUPERIOR
@@ -517,20 +516,17 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
             local vi = area:index(leaf_pos.x, leaf_pos.y, leaf_pos.z)
             if data[vi] ~= C.air then break end
             data[vi] = C.palmleaf
-            table.insert(leaf_nodes,
-                { pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z }, rotation = dir.rotation })
+            table.insert(leaf_nodes, { pos = { x = leaf_pos.x, y = leaf_pos.y, z = leaf_pos.z }, rotation = dir.rotation })
         end
     end
-
     --  COCOS (0 a 4 aleatórios)
     local num_coconuts = rng:next(0, 4)
-
     -- Posições possíveis para cocos (embaixo das folhas da camada inferior)
     local possible_positions = {
-        { x = pos.x + 1, y = bottom_layer - 1, z = pos.z,     rotation = 1 }, -- Leste
-        { x = pos.x - 1, y = bottom_layer - 1, z = pos.z,     rotation = 3 }, -- Oeste
-        { x = pos.x,     y = bottom_layer - 1, z = pos.z + 1, rotation = 0 }, -- Sul
-        { x = pos.x,     y = bottom_layer - 1, z = pos.z - 1, rotation = 2 }, -- Norte
+        {x = pos.x + 1, y = bottom_layer - 1, z = pos.z,     rotation = 1}, -- Leste
+        {x = pos.x - 1, y = bottom_layer - 1, z = pos.z,     rotation = 3}, -- Oeste
+        {x = pos.x,     y = bottom_layer - 1, z = pos.z + 1, rotation = 0}, -- Sul
+        {x = pos.x,     y = bottom_layer - 1, z = pos.z - 1, rotation = 2}, -- Norte
     }
     -- Embaralha as posições
     for i = #possible_positions, 2, -1 do
