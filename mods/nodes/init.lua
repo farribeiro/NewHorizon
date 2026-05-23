@@ -3806,13 +3806,10 @@ core.register_on_joinplayer(function(player)
         -- Filtra portais que sumiram enquanto o servidor estava offline
         local valid = {}
         for _, pos in ipairs(linked_portals) do
-            if core.get_node(pos).name == "nh_nodes:portal" then
-                table.insert(valid, pos)
-            end
+            if core.get_node(pos).name == "nh_nodes:portal" then table.insert(valid, pos) end
         end
         -- Se algum portal sumiu, atualiza a lista salva
-        if #valid ~= #linked_portals then
-            linked_portals = valid
+        if #valid ~= #linked_portals then linked_portals = valid
             save_portals()
         end
         -- Recria partículas só nos que ainda não têm spawner ativo
@@ -3870,7 +3867,7 @@ c.register_node("nh_nodes:portal", {
 	-- Adiciona o portal à lista
 	table.insert(linked_portals, pos)
 	save_portals()  -- salva portais
-	if #linked_portals == 2 then c.chat_send_all("Os portais foram conectados!") end -- Se houver dois portais, conectá-los
+	if #linked_portals == 2 then c.chat_send_all(S"[Connected Portals]") end -- Se houver dois portais, conectá-los
 	local key = pos.x .. "," .. pos.y .. "," .. pos.z
 	-- Efeito de partículas
 	local spawner_id = c.add_particlespawner({
