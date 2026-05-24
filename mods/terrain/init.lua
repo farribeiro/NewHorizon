@@ -1,12 +1,9 @@
 -- Terrain
-
-local function xyz(fx, fy, fz) -- table_xyz
-    return { x = fx, y = fy, z = fz }
-end
-
 core.log("action", "[TERRAIN] init.lua loaded")
 local S = core.get_translator "nh_terrain"
--- CONFIGURAÇÕES DO MUNDO
+-- table_xyz
+local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
+-- WORLD CONFIG
 local MIN_XZ = config.MIN_XZ
 local MAX_XZ = config.MAX_XZ
 local VOID_Y = config.VOID_Y
