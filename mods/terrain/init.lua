@@ -10,7 +10,8 @@ local VOID_Y = config.VOID_Y
 local SIZE = MAX_XZ - MIN_XZ + 1
 -- DESATIVAR MAPGEN NATIVO
 core.set_mapgen_setting("mg_name", "singlenode", true)
-local gcid        = core.get_content_id
+local c = core
+local gcid        = c.get_content_id
 -- REGISTRO DOS IDS
 local C           = {
     ignore             = core.CONTENT_IGNORE,
