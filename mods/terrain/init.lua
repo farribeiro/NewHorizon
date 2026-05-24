@@ -1,6 +1,8 @@
 -- Terrain
-core.log("action", "[TERRAIN] init.lua loaded")
-local S = core.get_translator "nh_terrain"
+local c = core
+local gcid        = c.get_content_id
+c.log("action", "[TERRAIN] init.lua loaded")
+local S = c.get_translator "nh_terrain"
 -- table_xyz
 local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
 -- WORLD CONFIG
@@ -9,13 +11,11 @@ local MAX_XZ = config.MAX_XZ
 local VOID_Y = config.VOID_Y
 local SIZE = MAX_XZ - MIN_XZ + 1
 -- DESATIVAR MAPGEN NATIVO
-core.set_mapgen_setting("mg_name", "singlenode", true)
-local c = core
-local gcid        = c.get_content_id
+c.set_mapgen_setting("mg_name", "singlenode", true)
 -- REGISTRO DOS IDS
 local C           = {
-    ignore             = core.CONTENT_IGNORE,
-    air                = core.CONTENT_AIR,
+    ignore             = c.CONTENT_IGNORE,
+    air                = c.CONTENT_AIR,
     grass              = gcid "nh_nodes:grass",
     topgrass           = gcid "nh_nodes:top_grass",
     topgrass2          = gcid "nh_nodes:top_grass2",
@@ -543,7 +543,7 @@ local function spawn_palm_tree(area, data, pos, wx, wz)
             end
         end
     end
-    -- Retorna lista de folhas para rotacionar depois (via core.set_node)
+    -- Retorna lista de folhas para rotacionar depois (via c.set_node)
     return leaf_nodes
 end
 -- FUNÇÃO DE SPAWN DE ARBUSTO (só folhas)
@@ -1160,9 +1160,9 @@ local function spawn_ship(area, data, base_pos)
     end
     -- porta traseira (gap em dx = width-2, dz = depth-3)
     local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
-    core.after(0, function()
+    c.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
-        core.set_node(door_pos, {
+        c.set_node(door_pos, {
             name   = "nh_nodes:oakdoor_closed", -- substitua pelo nome real do C.oakdoor
             param2 = 2                          -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
         })
@@ -1189,13 +1189,13 @@ local function place_tent_chest(area, data, base_pos)
     if #candidates == 0 then return end
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
     local idx = rng_chest:next(1, #candidates)
-    local c = candidates[idx]
-    local chest_pos = { x = base_pos.x + c.dx, y = base_pos.y, z = base_pos.z + c.dz }
-    -- Passa chest_pos como argumento ao core.after para evitar
+    local cd = candidates[idx]
+    local chest_pos = { x = base_pos.x + cd.dx, y = base_pos.y, z = base_pos.z + cd.dz }
+    -- Passa chest_pos como argumento ao c.after para evitar
     -- condição de corrida entre threads de emerge paralelos
-    core.after(0, function(pos)
-        core.set_node(pos, { name = "nh_nodes:oak_chest", param2 = 2 })
-        local def = core.registered_nodes["nh_nodes:oak_chest"]
+    c.after(0, function(pos)
+        c.set_node(pos, { name = "nh_nodes:oak_chest", param2 = 2 })
+        local def = c.registered_nodes["nh_nodes:oak_chest"]
         if def and def.on_construct then def.on_construct(pos) end
     end, chest_pos)
 end
@@ -1265,9 +1265,9 @@ local function spawn_house(area, data, base_pos)
     end
     -- porta traseira (gap em dx = width-2, dz = depth-3)
     local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
-    core.after(0, function()
+    c.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
-        core.set_node(door_pos, {
+        c.set_node(door_pos, {
             name   = "nh_nodes:oakdoor_closed", -- substitua pelo nome real do C.oakdoor
             param2 = 2                          -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
         })
@@ -1294,11 +1294,11 @@ local function place_ship_chest(area, data, base_pos)
     if #candidates == 0 then return end
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
     local idx = rng_chest:next(1, #candidates)
-    local c = candidates[idx]
-    local chest_pos = xyz(base_pos.x + c.dx, base_pos.y, base_pos.z + c.dz)
-    core.after(0, function(pos)
-        core.set_node(pos, { name = "nh_nodes:oak_chest", param2 = 2 })
-        local def = core.registered_nodes["nh_nodes:oak_chest"]
+    local cd = candidates[idx]
+    local chest_pos = xyz(base_pos.x + cd.dx, base_pos.y, base_pos.z + cd.dz)
+    c.after(0, function(pos)
+        c.set_node(pos, { name = "nh_nodes:oak_chest", param2 = 2 })
+        local def = c.registered_nodes["nh_nodes:oak_chest"]
         if def and def.on_construct then def.on_construct(pos) end
     end, chest_pos)
 end
@@ -1308,8 +1308,8 @@ local function safe_index(area, x, y, z, minp, maxp)
 end
 -- FUNÇÃO DE INICIALIZAÇÃO DOS PERLIN MAPS
 local function init_perlin_maps()
-    local gpl = core.get_perlin
-    local gplm = core.get_perlin_map
+    local gpl = c.get_perlin
+    local gplm = c.get_perlin_map
     -- Já inicializados
     if biome then return end
     -- Mantém os perlins antigos para compatibilidade com funções que ainda os usam
@@ -1346,7 +1346,7 @@ local function init_perlin_maps()
     PM.saprolite    = gplm(NOISE.saprolite, chunksize)
     PM.ore_master   = gplm(NOISE.ore_master, chunksize)
 end
-core.log("action", "[terrain] Perlin and Perlin Maps initialized")
+c.log("action", "[terrain] Perlin and Perlin Maps initialized")
 -- FUNÇÃO DE GERAÇÃO DOS NOISE MAPS EM BATCH
 local function generate_noise_maps(minp, maxp)
     local minposxz = { x = minp.x, y = minp.z }
@@ -1568,7 +1568,7 @@ local function find_volcano_position()
     local angle = math.random() * math.pi * 2
     local distance = min_dist + math.random() * (max_dist - min_dist)
     VOLCANO_POS = { x = CENTER_X + math.cos(angle) * distance, z = CENTER_Z + math.sin(angle) * distance }
-    core.log("action", "[terrain] Volcano generated in: x=" .. VOLCANO_POS.x .. ", z=" .. VOLCANO_POS.z)
+    c.log("action", "[terrain] Volcano generated in: x=" .. VOLCANO_POS.x .. ", z=" .. VOLCANO_POS.z)
     return VOLCANO_POS
 end
 -- FUNÇÃO DE GERAÇÃO DA ILHA VULCÂNICA
@@ -1672,10 +1672,10 @@ local function try_spawn_crab_statue(minp, maxp, volcano_pos)
             local cz = math.floor(volcano_pos.z + math.sin(angle) * radius)
             -- Varre Y na mesma faixa de profundidade do kelp (-18 a -13)
             for cy = -18, -13 do
-                local node = core.get_node({ x = cx, y = cy, z = cz })
+                local node = c.get_node({ x = cx, y = cy, z = cz })
                 if node.name == "nh_nodes:wet_sand" then
                     -- Bloco acima deve ser água (estamos submersos)
-                    local above = core.get_node({ x = cx, y = cy + 1, z = cz })
+                    local above = c.get_node({ x = cx, y = cy + 1, z = cz })
                     if above.name == "nh_nodes:water" then
                         local ok = false
                         if pass == 1 then
@@ -1683,7 +1683,7 @@ local function try_spawn_crab_statue(minp, maxp, volcano_pos)
                             for kx = -3, 3 do
                                 for kz = -3, 3 do
                                     for ky = -2, 3 do
-                                        if core.get_node({ x = cx + kx, y = cy + ky, z = cz + kz }).name == "nh_nodes:kelp" then
+                                        if c.get_node({ x = cx + kx, y = cy + ky, z = cz + kz }).name == "nh_nodes:kelp" then
                                             ok = true
                                             break
                                         end
@@ -1695,13 +1695,13 @@ local function try_spawn_crab_statue(minp, maxp, volcano_pos)
                         else
                             -- 2ª passagem: aceita qualquer wet_sand submerso (kelp pode não ter carregado)
                             ok = true
-                            core.log("action", "[terrain] Crab Statue: Fallback without kelp (pass 2)")
+                            c.log("action", "[terrain] Crab Statue: Fallback without kelp (pass 2)")
                         end
                         if ok then
-                            core.set_node({ x = cx, y = cy, z = cz }, { name = "nh_nodes:giantcrabstatue" })
+                            c.set_node({ x = cx, y = cy, z = cz }, { name = "nh_nodes:giantcrabstatue" })
                             statue_spawned = true
                             statue_pos = { x = cx, y = cy, z = cz }
-                            core.log("action",
+                            c.log("action",
                                 "[terrain] Crab statue placed in x=" ..
                                 cx .. " y=" .. (cy + 1) .. " z=" .. cz .. " (pass " .. pass .. ")")
                             return
@@ -1984,13 +1984,13 @@ local function apply_decorations(area, data, param2_data, decorations)
             if rng_page:next(1, 15) == 1 then
                 local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
                 local dir = dirs[rng_page:next(1, 4)]
-                core.after(0.1, function()
+                c.after(0.1, function()
                     local found_y = nil
                     for try_y = spawn_data.y + 2, spawn_data.y + 1, -1 do
                         local trunk_pos  = { x = spawn_data.x, y = try_y, z = spawn_data.z }
                         local side_pos   = { x = spawn_data.x + dir.x, y = try_y, z = spawn_data.z + dir.z }
-                        local trunk_node = core.get_node(trunk_pos).name
-                        local side_node  = core.get_node(side_pos).name
+                        local trunk_node = c.get_node(trunk_pos).name
+                        local side_node  = c.get_node(side_pos).name
                         if trunk_node == "nh_nodes:oaktimber" and side_node == "air" then
                             found_y = try_y
                             break
@@ -2001,8 +2001,8 @@ local function apply_decorations(area, data, param2_data, decorations)
                         local dir_to_param2 = { [1] = { [0] = 2 }, [-1] = { [0] = 3 }, [0] = { [1] = 4, [-1] = 5 }, }
                         local param2 = dir_to_param2[dir.x] and dir_to_param2[dir.x][dir.z]
                         if param2 then
-                            core.set_node(page_pos, { name = "nh_nodes:writedpage_node", param2 = param2 })
-                            local meta = core.get_meta(page_pos)
+                            c.set_node(page_pos, { name = "nh_nodes:writedpage_node", param2 = param2 })
+                            local meta = c.get_meta(page_pos)
                             local list = page_texts.message
                             local text = list[rng_page:next(1, #list)]
                             meta:set_string("text", text)
@@ -2107,12 +2107,12 @@ local function generate_obsidian_towers(area, data, minp, maxp)
             data[vi] = C.sphere
             -- Agenda as trocas e spawns após o chunk ser finalizado
             local pos = { x = sx, y = sy, z = sz }
-            core.after(0, function()
-                local node = core.get_node(pos)
+            c.after(0, function()
+                local node = c.get_node(pos)
                 if node.name == "nh_nodes:sphere" then
-                    core.set_node(pos, { name = "nh_nodes:sphere_placed" })
-                    core.add_entity(pos, "nh_nodes:sphere_anim")
-                    core.add_entity(pos, "nh_nodes:crystal_anim")
+                    c.set_node(pos, { name = "nh_nodes:sphere_placed" })
+                    c.add_entity(pos, "nh_nodes:sphere_anim")
+                    c.add_entity(pos, "nh_nodes:crystal_anim")
                 end
             end)
         end
@@ -2193,13 +2193,13 @@ end
 
 
 -- GERAÇÃO DO MUNDO (OTIMIZADA E REFATORADA)
-core.register_on_generated(function(minp, maxp)
+c.register_on_generated(function(minp, maxp)
     -- Inicializa Perlin maps (apenas uma vez)
     init_perlin_maps()
     -- Otimização: ignora chunks muito altos ou muito baixos
     if maxp.y < -100 or minp.y > 1000 then return end
     -- Setup do voxelmanip
-    local vm = core.get_voxel_manip()
+    local vm = c.get_voxel_manip()
     local emin, emax = vm:read_from_map(minp, maxp)
     local area = VoxelArea:new { MinEdge = emin, MaxEdge = emax }
     local data = vm:get_data()
@@ -2273,69 +2273,69 @@ core.register_on_generated(function(minp, maxp)
         vm:update_map()
     end
     -- Rotaciona folhas de coqueiro e inicializa baús
-    core.after(0, function()
+    c.after(0, function()
         -- Spawna estátua do caranguejo perto do vulcão (uma única vez)
         if chunk_near_volcano and not statue_spawned then
-            core.after(0.5, function() try_spawn_crab_statue(minp, maxp, volcano_pos) end)
+            c.after(0.5, function() try_spawn_crab_statue(minp, maxp, volcano_pos) end)
         end
         -- Rotação das folhas de palmeira
         for _, leaf_info in ipairs(palm_leaf_rotations) do
-            local node = core.get_node(leaf_info.pos)
+            local node = c.get_node(leaf_info.pos)
             if node.name == "nh_nodes:palmleaf" then
-                core.set_node(leaf_info.pos, { name = "nh_nodes:palmleaf", param2 = leaf_info.rotation })
+                c.set_node(leaf_info.pos, { name = "nh_nodes:palmleaf", param2 = leaf_info.rotation })
             elseif node.name == "nh_nodes:coconutlinked" then
-                core.set_node(leaf_info.pos, { name = "nh_nodes:coconutlinked", param2 = leaf_info.rotation })
+                c.set_node(leaf_info.pos, { name = "nh_nodes:coconutlinked", param2 = leaf_info.rotation })
             end
         end
         -- Inicializa baús do pebble
         for _, pebble_pos in ipairs(pebble_positions) do
             local chest_pos = { x = pebble_pos.x, y = pebble_pos.y - 2, z = pebble_pos.z }
-            local node = core.get_node(chest_pos)
+            local node = c.get_node(chest_pos)
             if node.name == "nh_nodes:oak_chest" then
-                local node_def = core.registered_nodes["nh_nodes:oak_chest"]
+                local node_def = c.registered_nodes["nh_nodes:oak_chest"]
                 if node_def and node_def.on_construct then node_def.on_construct(chest_pos) end
             end
         end
     end)
 end) -- FIM do register_on_generated
-if not core.registered_nodes["nh_nodes:grass"] then core.log("warning", "[terrain] nh_nodes:grass is not registered.") end
+if not c.registered_nodes["nh_nodes:grass"] then c.log("warning", "[terrain] nh_nodes:grass is not registered.") end
 
 
 --  FUNÇÕES AUXILIARES COMPARTILHADAS PELOS LBMs DE RAMPA
 local function clear_above(pos)
     local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-    if DECORATIONS[gcid(core.get_node(above).name)] then
-        core.set_node(above, { name = "air" })
+    if DECORATIONS[gcid(c.get_node(above).name)] then
+        c.set_node(above, { name = "air" })
     end
 end
 
 -- Converte o nó abaixo se for "nh_nodes:dirt" para `target`
 local function convert_below(pos, src, target)
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-    if core.get_node(below).name == src then
-        core.set_node(below, { name = target })
+    if c.get_node(below).name == src then
+        c.set_node(below, { name = target })
     end
 end
 
 --  REGISTRO DOS LBMs SIMPLIFICADOS
-core.register_lbm({
+c.register_lbm({
     name              = "nh_terrain:grass_conversion",
     nodenames         = { "nh_nodes:top_grass" },
     run_at_every_load = true,
     action            = function(pos)
         local x, y, z = pos.x, pos.y, pos.z
-        local current = core.get_node(pos).name
+        local current = c.get_node(pos).name
 
         local function is_solid_below(p)
-            return SOLID_GRASS[gcid(core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
+            return SOLID_GRASS[gcid(c.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
         end
         local function is_solid_same(p)
-            return SOLID_GRASS[gcid(core.get_node(p).name)] == true
+            return SOLID_GRASS[gcid(c.get_node(p).name)] == true
         end
         local function is_passthrough(p)
-            local cid = gcid(core.get_node(p).name)
+            local cid = gcid(c.get_node(p).name)
             if not PASSABLE[cid] then return false end
-            return SOLID_GRASS[gcid(core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
+            return SOLID_GRASS[gcid(c.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
         end
 
         local below = {
@@ -2362,22 +2362,22 @@ core.register_lbm({
         -- PRIORIDADE 1: INSIDE CORNER (roda para top_grass e variantes)
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
                 clear_above(pos)
                 return
             end
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
                 clear_above(pos)
                 return
             end
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
                 clear_above(pos)
                 return
             end
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
                 clear_above(pos)
                 return
             end
@@ -2391,19 +2391,19 @@ core.register_lbm({
             local a, b = drops[1], drops[2]
             local function match(x1, x2) return (a == x1 and b == x2) or (a == x2 and b == x1) end
             if match("south", "west") then
-                core.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 0 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 0 })
                 clear_above(pos)
                 convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             elseif match("west", "north") then
-                core.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 3 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 3 })
                 clear_above(pos)
                 convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             elseif match("north", "east") then
-                core.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 2 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 2 })
                 clear_above(pos)
                 convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             elseif match("east", "south") then
-                core.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 1 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_corner", param2 = 1 })
                 clear_above(pos)
                 convert_below(pos, "nh_nodes:dirt", "nh_nodes:top_grass2")
             end
@@ -2412,16 +2412,16 @@ core.register_lbm({
 
         -- PRIORIDADE 3: RAMPA
         if below.north and not below.south then
-            core.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 0 })
+            c.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 0 })
             clear_above(pos)
         elseif below.south and not below.north then
-            core.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 2 })
+            c.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 2 })
             clear_above(pos)
         elseif below.east and not below.west then
-            core.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 3 })
+            c.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 3 })
             clear_above(pos)
         elseif below.west and not below.east then
-            core.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 1 })
+            c.set_node(pos, { name = "nh_nodes:top_grass_ramp", param2 = 1 })
             clear_above(pos)
         end
     end,
@@ -2439,7 +2439,7 @@ local function make_slope_lbm(cfg)
     local on_corner = cfg.on_corner
     local on_ic     = cfg.on_insidecorner
 
-    local function get_cid(p) return gcid(core.get_node(p).name) end
+    local function get_cid(p) return gcid(c.get_node(p).name) end
 
     local function is_edge(p)
         return edge[get_cid(p)] == true
@@ -2454,7 +2454,7 @@ local function make_slope_lbm(cfg)
     end
 
     local function action(pos)
-        if req_air and core.get_node({ x = pos.x, y = pos.y + 1, z = pos.z }).name ~= "air" then return end
+        if req_air and c.get_node({ x = pos.x, y = pos.y + 1, z = pos.z }).name ~= "air" then return end
 
         local x, y, z = pos.x, pos.y, pos.z
 
@@ -2489,7 +2489,7 @@ local function make_slope_lbm(cfg)
             }
             for _, ic in ipairs(ic_cases) do
                 if ic[1] and is_passthrough(ic[2]) then
-                    core.set_node(pos, { name = nodes.insidecorner, param2 = ic[3] })
+                    c.set_node(pos, { name = nodes.insidecorner, param2 = ic[3] })
                     if do_clear then clear_above(pos) end
                     if on_ic then on_ic(pos) end
                     return
@@ -2509,7 +2509,7 @@ local function make_slope_lbm(cfg)
             }
             for _, cm in ipairs(corner_map) do
                 if cm[1] then
-                    core.set_node(pos, { name = nodes.corner, param2 = cm[2] })
+                    c.set_node(pos, { name = nodes.corner, param2 = cm[2] })
                     if do_clear then clear_above(pos) end
                     if on_corner then on_corner(pos) end
                     return
@@ -2527,14 +2527,14 @@ local function make_slope_lbm(cfg)
         }
         for _, rm in ipairs(ramp_map) do
             if rm[1] then
-                core.set_node(pos, { name = nodes.ramp, param2 = rm[2] })
+                c.set_node(pos, { name = nodes.ramp, param2 = rm[2] })
                 if do_clear then clear_above(pos) end
                 return
             end
         end
     end
 
-    core.register_lbm({
+    c.register_lbm({
         name              = cfg.lbm_name,
         nodenames         = cfg.nodenames,
         run_at_every_load = true,
@@ -2599,7 +2599,7 @@ make_slope_lbm({
     -- sem on_corner (convert_wetsand estava comentado no original)
 })
 
---core.register_abm({
+--c.register_abm({
 --    name = "nh_terrain:corner_dirt_conversion",
 --    nodenames = {"nh_nodes:top_grass_corner"},
 --    interval = 1,
@@ -2608,13 +2608,13 @@ make_slope_lbm({
 
 --    action = function(pos, node)
 --        local below = {x = pos.x, y = pos.y - 1, z = pos.z}
---        if core.get_node(below).name == "nh_nodes:dirt" then
---            core.set_node(below, {name = "nh_nodes:top_grass2"})
+--        if c.get_node(below).name == "nh_nodes:dirt" then
+--            c.set_node(below, {name = "nh_nodes:top_grass2"})
 --        end
 --    end
 --})
 
-core.register_abm({
+c.register_abm({
     name = "nh_terrain:grass_conversion2",
     nodenames = { "nh_nodes:top_grass2" },
     interval = 1,
@@ -2622,20 +2622,20 @@ core.register_abm({
     catch_up = true,
     action = function(pos, node)
         local x, y, z = pos.x, pos.y, pos.z
-        local current = core.get_node(pos).name
+        local current = c.get_node(pos).name
 
         local function is_solid_below(p)
-            return SOLID_GRASS[gcid(core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
+            return SOLID_GRASS[gcid(c.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
         end
         local function is_solid_same(p)
-            return SOLID_GRASS[gcid(core.get_node(p).name)] == true
+            return SOLID_GRASS[gcid(c.get_node(p).name)] == true
         end
 
         local function is_passthrough(p)
-            local cid = gcid(core.get_node(p).name)
+            local cid = gcid(c.get_node(p).name)
             if not PASSABLE[cid] then return false end
 
-            local below_diag = gcid(core.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)
+            local below_diag = gcid(c.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)
             return SOLID_GRASS[below_diag] == true
         end
 
@@ -2665,22 +2665,22 @@ core.register_abm({
         -- Roda para top_grass e grass
         if not any_below then
             if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
                 clear_above(pos)
                 return
             end
             if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
                 clear_above(pos)
                 return
             end
             if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
                 clear_above(pos)
                 return
             end
             if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
-                core.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
+                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
                 clear_above(pos)
                 return
             end
@@ -2695,7 +2695,7 @@ core.register_abm({
 -- então qualquer decoração gerada em cima deles fica flutuando.
 -----------------------------
 --[[
-core.register_abm({
+c.register_abm({
     name = "nh_terrain:clear_decorations_on_slopes",
     nodenames = {
         "nh_nodes:top_grass_ramp",
@@ -2708,32 +2708,32 @@ core.register_abm({
 
     action = function(pos, node)
         local above = {x = pos.x, y = pos.y + 1, z = pos.z}
-        if DECORATIONS[gcid(core.get_node(above).name)] then
-            core.set_node(above, {name = "air"})
+        if DECORATIONS[gcid(c.get_node(above).name)] then
+            c.set_node(above, {name = "air"})
         end
     end
 })
 ]] --
 
 -- Pré-geração da área
-core.after(1, function()
-    core.log("action", "[terrain] Pre-generating spawn area...")
-    core.emerge_area(
+c.after(1, function()
+    c.log("action", "[terrain] Pre-generating spawn area...")
+    c.emerge_area(
         { x = -48, y = -16, z = -48 },
         { x = 48, y = 80, z = 48 },
         function(blockpos, action, calls_remaining)
             if calls_remaining == 0 then
-                core.log("action", "[terrain] Spawn area successfully pre-generated")
+                c.log("action", "[terrain] Spawn area successfully pre-generated")
             end
         end)
 end)
 
 -- COMANDO PARA VOLTAR A ORIGEM
-core.register_chatcommand("origin", {
+c.register_chatcommand("origin", {
     description = S("Teleport to the origin"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2747,11 +2747,11 @@ core.register_chatcommand("origin", {
 })
 
 -- COMANDO PARA IR ATÉ A CASA
-core.register_chatcommand("house", {
+c.register_chatcommand("house", {
     description = S("Teleport to the house"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2767,7 +2767,7 @@ core.register_chatcommand("house", {
     end,
 })
 -- Comando para só ver as coordenadas sem teleportar
-core.register_chatcommand("local_house", {
+c.register_chatcommand("local_house", {
     description = S("Shows the coordinates of the house"),
     func = function(name)
         if not house_pos then
@@ -2779,11 +2779,11 @@ core.register_chatcommand("local_house", {
 })
 
 -- COMANDO PARA IR AO BARCO AFUNDADO
-core.register_chatcommand("ship", {
+c.register_chatcommand("ship", {
     description = S("Teleport to the sunken ship"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2800,7 +2800,7 @@ core.register_chatcommand("ship", {
     end,
 })
 -- Comando só para ver as coordenadas do barco
-core.register_chatcommand("local_ship", {
+c.register_chatcommand("local_ship", {
     description = S("Shows the coordinates of the sunken ship"),
     func = function(name)
         if not ship_pos then
@@ -2813,11 +2813,11 @@ core.register_chatcommand("local_ship", {
 })
 
 -- COMANDO PARA ENCONTRAR O VULCÃO
-core.register_chatcommand("vulcan", {
+c.register_chatcommand("vulcan", {
     description = S("Teleport to the volcanic island"),
     privs = { teleport = true }, -- Requer privilégio de teleporte
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2842,7 +2842,7 @@ core.register_chatcommand("vulcan", {
     end,
 })
 -- Comando alternativo sem necessidade de privilégios (para testes)
-core.register_chatcommand("local_vulcan", {
+c.register_chatcommand("local_vulcan", {
     description = S("Shows the coordinates of the volcanic island"),
     func = function(name)
         local volcano_pos = find_volcano_position()
@@ -2856,11 +2856,11 @@ core.register_chatcommand("local_vulcan", {
 })
 
 -- COMANDO PARA IR ATÉ O CARANGUEJO
-core.register_chatcommand("crab", {
+c.register_chatcommand("crab", {
     description = S("Teleport to the giant crab statue"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2879,7 +2879,7 @@ core.register_chatcommand("crab", {
     end,
 })
 -- Comando para só ver as coordenadas sem teleportar
-core.register_chatcommand("local_crab", {
+c.register_chatcommand("local_crab", {
     description = S("Show the coordinates of the giant crab statue"),
     func = function(name)
         if not statue_pos then
@@ -2891,11 +2891,11 @@ core.register_chatcommand("local_crab", {
 })
 
 -- COMANDO PARA IR ATÉ O MAR DE AR
-core.register_chatcommand("airsea", {
+c.register_chatcommand("airsea", {
     description = S("Teleport to the air sea"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2909,11 +2909,11 @@ core.register_chatcommand("airsea", {
 })
 
 -- COMANDO PARA IR ATÉ A ILHA MAIS BAIXA
-core.register_chatcommand("flyisland", {
+c.register_chatcommand("flyisland", {
     description = S("Teleport to the fly island"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2931,7 +2931,7 @@ core.register_chatcommand("flyisland", {
     end,
 })
 -- Comando para só ver as coordenadas sem teleportar
-core.register_chatcommand("local_flyisland", {
+c.register_chatcommand("local_flyisland", {
     description = S("Shows the coordinates of the fly island"),
     func = function(name)
         if not lowest_island_pos then
@@ -2944,11 +2944,11 @@ core.register_chatcommand("local_flyisland", {
 })
 
 -- COMANDO PARA IR ATÉ O SENTINELA
-core.register_chatcommand("sentinel", {
+c.register_chatcommand("sentinel", {
     description = S("Teleport to the sentinel statue"),
     privs = { teleport = true },
     func = function(name)
-        local player = core.get_player_by_name(name)
+        local player = c.get_player_by_name(name)
         if not player then
             return false, S("Player not found")
         end
@@ -2967,7 +2967,7 @@ core.register_chatcommand("sentinel", {
     end,
 })
 -- Comando para só ver as coordenadas sem teleportar
-core.register_chatcommand("local_sentinel", {
+c.register_chatcommand("local_sentinel", {
     description = S("Shows the coordinates of the sentinel statue"),
     func = function(name)
         if not sentinel_pos then
@@ -2978,4 +2978,4 @@ core.register_chatcommand("local_sentinel", {
     end,
 })
 
-core.log("action", "[TERRAIN] Continental generation with biomes, trees, coconut palms and more loaded")
+c.log("action", "[TERRAIN] Continental generation with biomes, trees, coconut palms and more loaded")
