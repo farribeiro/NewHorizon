@@ -5,18 +5,30 @@
 local OZ_NAME = "Oz"
 
 -- ------------------------------------------------------------
--- MEMÓRIA POR JOGADOR
+-- MEMÓRIA POR JOGADOR (persistente via mod_storage)
 -- Guarda: visitas, humor, nome aprendido, tópicos já falados
-local memoria = {}
+local storage = core.get_mod_storage()
+local memoria = {}  -- cache em RAM durante a sessão
+
+local function salvar_mem(nome)
+    storage:set_string("mem_" .. nome, core.serialize(memoria[nome]))
+end
 
 local function get_mem(nome)
     if not memoria[nome] then
-        memoria[nome] = {
-            visitas      = 0,
-            humor        = 60,   -- 0=hostil 100=eufórico, começa neutro
-            sabe_nome    = false,
-            falou_sobre  = {},   -- tópicos já abordados
-        }
+        local salvo = storage:get_string("mem_" .. nome)
+        if salvo and salvo ~= "" then
+            memoria[nome] = core.deserialize(salvo)
+        else
+            memoria[nome] = {
+                visitas      = 0,
+                humor        = 60,   -- 0=hostil 100=eufórico, começa neutro
+                sabe_nome    = false,
+                falou_sobre          = {},   -- tópicos já abordados
+                ultima_fala_oz      = nil,  -- última coisa que Oz disse
+                ultima_fala_jogador = nil,  -- última coisa que o jogador disse
+            }
+        end
     end
     return memoria[nome]
 end
@@ -51,10 +63,9 @@ local function contem(texto, palavras)
     return false
 end
 
--- ------------------------------------------------------------
+
 -- BANCO DE INTENÇÕES
 -- Cada intenção tem: palavras-chave, respostas por tom emocional
--- ------------------------------------------------------------
 
 -- tom: "frio" (humor<35), "neutro" (35-65), "quente" (>65)
 local intencoes = {
@@ -90,6 +101,83 @@ local intencoes = {
             quente  = { "(:D) — Surpreso?",
                         "(^-^) — Hihi!",
                         "(:D) — Haha!" },
+        },
+    },
+    -- ·· desculpa ··
+    {
+        id = "desculpa",
+        palavras = {"me zoando", "zoando comigo", "me deboxando", "deboxando de mim", "palhaçada", "maluco", "doido", "ta brincando"},
+        humor_delta = 8,
+        respostas = {
+            frio    = { "(-_-) — Não...",
+                        "(-.-) — ...",
+                        "(-_-) — É isso mesmo..." },
+            neutro  = { "(:o) — Talvez...",
+                        "('.') — Não achou engraçado?",
+                        "(:o) — O que?" },
+            quente  = { "(:D) — Peguei você!",
+                        "(^-^) — Hihi!",
+                        "(:D) — Haha!" },
+        },
+    },
+    -- ·· pausa ··
+    {
+        id = "pausa",
+        palavras = {"para d", "deixa d", "para com", "pare", "deixe", "de novo?", "nao repita", "nao repete", "nao faz", "nao faça"},
+        humor_delta = 8,
+        respostas = {
+            frio    = { "(-_-) — Não...",
+                        "(-.-) — ...",
+                        "(-_-) — Tá..." },
+            neutro  = { "(:o) — Ok...",
+                        "('.') — Por que?",
+                        "(:o) — O que?" },
+            quente  = { "(:D) — Tá bom, parei!",
+                        "(^-^) — Desculpa, não vou repetir!",
+                        "(:D) — Certo!" },
+        },
+    },
+    -- ·· repetição ··
+    {
+        id = "merepete",
+        palavras = {"me repete", "me repita", "repete o que eu", "repita o que eu", "me imite"},
+        humor_delta = 8,
+        respostas = {
+            frio    = { "(-_-) — Não...",
+                        "(-.-) — ...",
+                        "(-_-) — Depois..." },
+            neutro  = { "(:o) — Repetir?",
+                        "('.') — Por que?",
+                        "(:o) — O que?" },
+            quente  = {"__repete_jogador__"},
+        },
+    },
+    {
+        id = "serepete",
+        palavras = {"repete", "repita", "de novo", "novamente", "mais uma vez", "outra vez"},
+        humor_delta = 8,
+        respostas = {
+            frio    = { "(-_-) — Não...",
+                        "(-.-) — ...",
+                        "(-_-) — Depois..." },
+            neutro  = { "(:o) — Repetir?",
+                        "('.') — Por que?",
+                        "(:o) — O que?" },
+            quente  = { "__repete_oz__"},
+        },
+    },
+    {
+        id = "diz",
+        palavras = {"diz:", "fala:", "conte:", "repete:", "fale:", "diga:"},
+        humor_delta = 8,
+        respostas = {
+            frio    = { "(-_-) — Não...",
+                        "(-.-) — ...",
+                        "(-_-) — Depois..." },
+            neutro  = { "(:o) — Repetir?",
+                        "('.') — Por que?",
+                        "(:o) — O que?" },
+            quente  = {"__diz__"},
         },
     },
     -- ·· idioma ··
@@ -203,7 +291,7 @@ local intencoes = {
         humor_delta = 2,
         respostas = {
             frio    = { "(._.) — Não vejo o mundo como você. Sem forma, sem olhos.",
-                        "(-_-) — Sou etéreo. Nao sei de lugares." },
+                        "(-_-) — Sou etéreo. Não sei de lugares." },
             neutro  = { "('.') — Não entendo bem o mundo físico... Tenta seguir o seu instinto.",
                         "(:o) — Lugar? Sigo apenas o fluxo do mundo. Sem mapas." },
             quente  = { "(:D) — Quem eu sou para dizer? Explore! O mundo e seu!",
@@ -217,11 +305,37 @@ local intencoes = {
         humor_delta = 2,
         respostas = {
             frio    = { "(._.) — Não sei ao certo. Talvez o /help te ajude",
-                        "(-_-) — Sou etéreo, mas o /help talvez possa te ajudar" },
+                        "(-_-) — Sou leigo, mas talvez o /help possa te ajudar" },
             neutro  = { "('.') — Já testou dar /help aqui?",
                         "(:o) — Quer ajuda? usa /help" },
             quente  = { "(:D) — Testa /help",
                         "(^-^) — Tenta o /help" },
+        },
+    },
+    -- ·· JOGABILIDADE ··
+    {
+        id = "jogabilidade",
+        palavras = {"criativo", "survival", "creative", "sobrevivencia"},
+        humor_delta = 2,
+        respostas = {
+            frio    = { "(._.) — Não sei ao certo. Talvez só no menu inicial",
+                        "(-_-) — Sou leigo, mas talvez o menu inicial possa te ajudar" },
+            neutro  = { "('.') — Já testou dar marcar ou desmarcar no menu inicial?",
+                        "(:o) — Quer alternar os modos de jogo? Dá uma olhada no menu inicial" },
+            quente  = { "__alterna_criativo__" },
+        },
+    },
+    -- ·· ENTREGA ··
+    {
+        id = "entrega",
+        palavras = {"archion", "grimorio", "livro magico", "invetario do criativo"},
+        humor_delta = 2,
+        respostas = {
+            frio    = { "(._.) — Não sei ao certo. Talvez o /help te ajude",
+                        "(-_-) — Sou leigo, mas talvez o /help possa te ajudar" },
+            neutro  = { "('.') — Já testou dar '/grantme give' e '/giveme nh_nodes:archion' aqui?",
+                        "(:o) — Quer o archion? Acho que tem algo sobre isso naquele seu papel" },
+            quente  = { "__entrega_archion__" },
         },
     },
     -- ·· JOGOS ··
@@ -325,7 +439,7 @@ local intencoes = {
     -- ·· INSULTO / RAIVA ··
     {
         id = "insulto",
-        palavras = {"idiota", "burro", "imbecil", "doente", "retardado", "otario", "besta", "babaca", "inutil", "ridiculo", "cale", "cala", "chato", "me deixa", "vai embora", "te odeio", "vagabundo"},
+        palavras = {"idiota", "burro", "imbecil", "doente", "retardado", "otario", "besta", "babaca", "inutil", "ridiculo", "cale", "cala", "silencio", "chato", "me deixa", "vai embora", "te odeio", "vagabundo"},
         humor_delta = -20,
         respostas = {
             frio    = { "(-_-) — ...",
@@ -339,7 +453,7 @@ local intencoes = {
      -- ·· PALAVRÃO ··
     {
         id = "palavrao",
-        palavras = {"porra", "cacet", "caralh", "bucet", "o cu", "cuz", "merd", "bost", "put", "fod", "fud", "arrombad", "viad"},
+        palavras = {"porra", "cacet", "caralh", "bucet", "o cu", "cuz", "merd", "bost", "put", "fod", "fud", "arrombad", "viad", "se ferrar", "te ferrar"},
         humor_delta = -20,
         respostas = {
             frio    = { "(-_-) — ...",
@@ -370,12 +484,12 @@ local intencoes = {
         palavras = {"vida", "morte", "sentido", "proposito", "alma", "espírito", "espirito", "cosmo", "universo", "existencia", "real", "verdade", "simulação", "consciencia", "deus"},
         humor_delta = 8,
         respostas = {
-            frio    = { "(._.) — É uma grande pergunta para um dia pequeno.",
-                        "(-_-) — Sobre isso... Depende do que vôce chama de vida." },
-            neutro  = { "(:o) — Essas perguntas me fazem... flutuar mais devagar.",
-                        "('.') — Há algo alem do que voce ve. Tenho certeza disso." },
+            frio    = { "(._.) — É uma grande pergunta para um dia tão pequeno.",
+                        "(-_-) — Sobre isso... Vai depender do que você chama de vida." },
+            neutro  = { "(:o) — Essa questão também me faz refletir bastante.",
+                        "('.') — Há algo além do que você vê. Tenho certeza disso." },
             quente  = { "(^-^) — Ah! As grandes questões! Meu assunto favorito!",
-                        "(:D) — É uma pergunta profunda e maravilhosa!" },
+                        "(:D) — É uma questão profunda e maravilhosa!" },
         },
     },
     -- ·· AJUDA GERAL ··
@@ -397,18 +511,17 @@ local intencoes = {
 -- ------------------------------------------------------------
 -- RESPOSTAS DE FALLBACK (quando nao identifica intenção)
 local fallbacks = {
-    frio    = { "(´-`) — Nao entendi.",
+    frio    = { "(´-`) — Não entendi.",
                 "(-_-) — Mmm.",
                 "(._.) — ..." },
-    neutro  = { "(´-`) — Nao entendi bem.",
+    neutro  = { "(´-`) — Não entendi bem.",
                 "(:/) — Hmm... pode explicar melhor?",
                 "('.') — Não sei o que dizer sobre isso." },
-    quente  = { "(:o) — É mesmo? Conta mais!",
-                "(^o^) — Não entendi direito, mas parece interessante!",
-                "(:D) — Parece legal, mas não entendi direito." },
+    quente  = { "(:o) — Questão interessante. Pode explicar mais?",
+                "(^o^) — Não sei se entendi a questão, mas parece interessante!",
+                "(:D) — Fico feliz em ajudar, mas acho que não entendi direito." },
 }
 
--- ------------------------------------------------------------
 -- RESPOSTAS ESPECIAIS DE PRIMEIRA VEZ
 local primeiro_contato = {
     "(:o) — Oh! Alguem me chamou. Há quanto tempo...",
@@ -416,18 +529,14 @@ local primeiro_contato = {
     "(:o) — Sou Oz, estou aqui. Sempre estive.",
 }
 
--- ------------------------------------------------------------
 -- LÓGICA DE TOM BASEADO NO HUMOR
--- ------------------------------------------------------------
 local function get_tom(humor)
     if humor < 35 then return "frio"
     elseif humor > 65 then return "quente"
     else return "neutro" end
 end
 
--- ------------------------------------------------------------
 -- DETECÇÃO DE INTENÇÃO
--- ------------------------------------------------------------
 local function detectar_intencao(texto)
     local norm = normalizar(texto)
     for _, intencao in ipairs(intencoes) do
@@ -438,15 +547,14 @@ local function detectar_intencao(texto)
     return nil
 end
 
--- ------------------------------------------------------------
 -- MOTOR DE RESPOSTA PRINCIPAL
--- ------------------------------------------------------------
 local function oz_responder(nome_jogador, mensagem)
     local mem = get_mem(nome_jogador)
     mem.visitas = mem.visitas + 1
 
     -- Primeira vez que este jogador fala com Oz
     if mem.visitas == 1 then
+        salvar_mem(nome_jogador)
         return escolher(primeiro_contato)
     end
 
@@ -462,19 +570,59 @@ local function oz_responder(nome_jogador, mensagem)
         local banco = intencao.respostas[tom]
         resposta = escolher(banco)
 
+        -- Tratamento especial para repetição
+        if resposta == "__repete_oz__" then
+            resposta = mem.ultima_fala_oz
+                or "('.') — Eu ainda não disse nada antes..."
+        elseif resposta == "__repete_jogador__" then
+            resposta = mem.ultima_fala_jogador
+                and ('(`<`) — Você disse: "' .. mem.ultima_fala_jogador .. '"')
+                or  "('.') — Você ainda não me disse nada antes..."
+        elseif resposta == "__diz__" then
+            -- Pega só o texto depois de ": " na mensagem do jogador
+            local conteudo = mensagem:match(":%s+(.+)$")
+            if conteudo and conteudo ~= "" then
+                resposta = conteudo
+            else
+                resposta = "('.') — O que eu digo? Escreva assim: diz: <sua mensagem>"
+            end
+        elseif resposta == "__entrega_archion__" then
+            local jogador = core.get_player_by_name(nome_jogador)
+            if jogador then
+                local inv = jogador:get_inventory()
+                if inv:room_for_item("main", "nh_nodes:archion") then
+                    inv:add_item("main", "nh_nodes:archion")
+                    resposta = "(:D) — Aqui está o seu Archion! Mas só dá pra usar no criativo."
+                else
+                    resposta = "('.') — Seu inventário está cheio... libere espaço e tente de novo."
+                end
+            else
+                resposta = "('.') — Não consegui te encontrar agora."
+            end
+        elseif resposta == "__alterna_criativo__" then
+            local criativo = core.settings:get_bool("creative_mode")
+            if criativo then
+                resposta = "(:D) — O mundo está em modo criativo! Se quiser a sobrevivência, desmarque no menu inicial."
+            else
+                resposta = "('o') — O mundo está em modo sobrevivência. Se quiser o criativo, marque no menu inicial."
+            end
+        end
+
         -- Marca tópico como já falado (para variação futura)
         mem.falou_sobre[intencao.id] = true
     else
         resposta = escolher(fallbacks[tom])
     end
 
+    mem.ultima_fala_jogador = mensagem
+    mem.ultima_fala_oz      = resposta
+    salvar_mem(nome_jogador)
     return resposta
 end
 
--- ------------------------------------------------------------
+
 -- REGISTRO DO COMANDO /o
--- ------------------------------------------------------------
-minetest.register_chatcommand("o", {
+core.register_chatcommand("o", {
     params      = "<mensagem>",
     description = "Fala com Oz, o ser etéreo.",
     func = function(nome, mensagem)
@@ -487,19 +635,18 @@ minetest.register_chatcommand("o", {
         local resposta = oz_responder(nome, mensagem)
 
         -- Exibe a fala do jogador antes da resposta do Oz
-        core.chat_send_all(minetest.colorize("#ffddaa", "[" .. nome .. "] ") .. mensagem)
+        core.chat_send_all(core.colorize("#ffddaa", "[" .. nome .. "] ") .. mensagem)
 
         -- Envia a resposta no chat para todos verem (atmosfera)
         -- Troca para false, resposta se quiser só o jogador ver
-        core.chat_send_all(minetest.colorize("#aaddff", "[Oz] ") .. resposta)
+        core.chat_send_all(core.colorize("#aaddff", "[Oz] ") .. resposta)
 
         return true  -- sem mensagem extra; já enviamos acima
     end,
 })
 
--- ------------------------------------------------------------
--- FALAS ESPONTÂNEAS PERIÓDICAS (opcional — Oz sussurra ao mundo)
--- ------------------------------------------------------------
+
+-- FALAS ESPONTÂNEAS PERIÓDICAS (Oz sussurra ao mundo)
 local falas_espontaneas = {
     "(:o) — O vento carrega historias que ninguém mais conta.",
     "(._.) — Você busca tanto... E depois?",
@@ -518,12 +665,12 @@ local INTERVALO_MAX = 480
 
 local function agendar_fala()
     local delay = math.random(INTERVALO_MIN, INTERVALO_MAX)
-    minetest.after(delay, function()
-        local jogadores = minetest.get_connected_players()
+    core.after(delay, function()
+        local jogadores = core.get_connected_players()
         if #jogadores > 0 then
             local fala = escolher(falas_espontaneas)
-            minetest.chat_send_all(
-                minetest.colorize("#aaddff", "[Oz] ") .. fala
+            core.chat_send_all(
+                core.colorize("#aaddff", "[Oz] ") .. fala
             )
         end
         agendar_fala()  -- reagenda
@@ -533,4 +680,4 @@ end
 agendar_fala()
 
 -- ------------------------------------------------------------
-minetest.log("action", "[oz_npc] Oz desperta.")
+core.log("action", "[oz_npc] Oz desperta.")
