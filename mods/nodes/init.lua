@@ -1,9 +1,8 @@
 -- NODES
 core.log("action", "[NODES] init.lua loaded")
 local S = core.get_translator("nh_nodes")
-local function xyz(fx, fy, fz) -- table_xyz
-    return { x = fx, y = fy, z = fz }
-end
+-- table_xyz
+local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
 local function populate_true(names)
     local father = {}
     for _, name in ipairs(names) do father["nh_nodes:" .. name] = true end
