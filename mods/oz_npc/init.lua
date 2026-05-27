@@ -82,10 +82,8 @@ local function aplicar_decaimento(mem)
     if horas <= 0 then return end
 
     local delta = horas * DECAIMENTO_POR_HORA
-    if mem.humor > NEUTRO then
-        mem.humor = math.max(NEUTRO, mem.humor - delta)
-    else
-        mem.humor = math.min(NEUTRO, mem.humor + delta)
+    if mem.humor > NEUTRO then mem.humor = math.max(NEUTRO, mem.humor - delta)
+    else mem.humor = math.min(NEUTRO, mem.humor + delta)
     end
 end
 
@@ -94,42 +92,8 @@ end
 
 -- tom: "cold" (humor<35), "neutral" (35-65), "hot" (>65)
 local intencoes = {
-    -- ·· SAUDAÇÃO ··
-    {
-        id = "greeting",
-        words = {"hello", "hey", "hi ", "hi!", "hi,", "hi.", "good morning", "gm", "good afternoon", "good evening", "good night", "gn", "whats up", "wazzup", "wazup"}, -- hi sobrepoe palavras com hi
-        humor_delta = 8,
-        responses = {
-            cold    = { "(-_-) — No talking...",
-                        "(-.-) — ...",
-                        "(-_-) — Who is it?" },
-            neutral  = { "(:o) — Hello, traveler.",
-                        "( '.' ) — I'm here.",
-                        "(:o) — Presente." },
-            hot  = { "(:D) — It's good to see you!",
-                        "(^-^) — Hello! I was expecting you.",
-                        "(:D) — Traveler!" },
-        },
-    },
-    {
-        id = "saudacao",
-        words = {"oi", "ola", "salve", "bom dia", "boa tarde", "boa noite", "eai", "e ai"},
-        humor_delta = 8,
-        responses = {
-            cold    = { "(-_-) — Sem papo...",
-                        "(-.-) — ...",
-                        "(-_-) — Quem é?" },
-            neutral  = { "(:o) — Ola, viajante.",
-                        "( '.' ) — Estou aqui.",
-                        "(:o) — Presente." },
-            hot  = { "(:D) — Que bom te ver!",
-                        "(^-^) — Ola! Estava esperando.",
-                        "(:D) — Viajante!" },
-        },
-    },
     -- ·· surpresa ··
-    {
-        id = "surpresa",
+    {id = "surpresa",
         words = {"eita", "nossa", "vixe", "oxe", "poxa", "serio", "kk", "hah", "hih", "lol", "vei", "caramba", "como pode"},
         humor_delta = 8,
         responses = {
@@ -145,8 +109,7 @@ local intencoes = {
         },
     },
     -- ·· desculpa ··
-    {
-        id = "desculpa",
+    {id = "desculpa",
         words = {"me zoando", "zoando comigo", "me deboxando", "deboxando de mim", "palhacada", "maluco", "doido", "ta brincando"},
         humor_delta = 8,
         responses = {
@@ -162,9 +125,8 @@ local intencoes = {
         },
     },
     -- ·· pausa ··
-    {
-        id = "pause",
-        words = {"stop", "dont do", "don't do", "again?", "no repeat", "without repeat"},
+    {id = "pause",
+        words = {"stop", "dont do", "don't do", "not again", "no repeat", "without repeat"},
         humor_delta = 0,
         responses = {
             cold    = { "(-_-) — No...",
@@ -178,9 +140,8 @@ local intencoes = {
                         "(:D) — Okay!" },
         },
     },
-    {
-        id = "pausa",
-        words = {"para d", "deixa d", "para com", "pare", "deixe", "de novo?", "nao repita", "nao repete", "nao faz", "nao faça"},
+    {id = "pausa",
+        words = {"para d", "deixa d", "para com", "pare", "deixe", "de novo nao", "nao repita", "nao repete", "nao faz", "nao faça"},
         humor_delta = 8,
         responses = {
             cold    = { "(-_-) — Não...",
@@ -195,8 +156,7 @@ local intencoes = {
         },
     },
     -- ·· repetição ··
-    {
-        id = "repeatme",
+    {id = "repeatme",
         words = {"repeat me", "repeat what", "imitate me"},
         humor_delta = 8,
         responses = {
@@ -209,8 +169,7 @@ local intencoes = {
             hot  = {"__repete_jogador__"},
         },
     },
-    {
-        id = "merepete",
+    {id = "merepete",
         words = {"me repete", "me repita", "repete o que eu", "repita o que eu", "me imite"},
         humor_delta = 8,
         responses = {
@@ -223,8 +182,7 @@ local intencoes = {
             hot  = {"__repete_jogador__"},
         },
     },
-    {
-        id = "selfrepeat",
+    {id = "selfrepeat",
         words = {"repeat", "again", "one more time", "anew"},
         humor_delta = 8,
         responses = {
@@ -237,8 +195,7 @@ local intencoes = {
             hot  = { "__repete_oz__"},
         },
     },
-    {
-        id = "serepete",
+    {id = "serepete",
         words = {"repete", "repita", "de novo", "novamente", "mais uma vez", "outra vez"},
         humor_delta = 8,
         responses = {
@@ -251,8 +208,7 @@ local intencoes = {
             hot  = { "__repete_oz__"},
         },
     },
-    {
-        id = "say",
+    {id = "say",
         words = {"say:", "speak:", "tell:", "tell me:", "repeat:"},
         humor_delta = 8,
         responses = {
@@ -265,8 +221,7 @@ local intencoes = {
             hot  = {"__diz__"},
         },
     },
-    {
-        id = "diz",
+    {id = "diz",
         words = {"diz:", "fala:", "conte:", "repete:", "fale:", "diga:"},
         humor_delta = 8,
         responses = {
@@ -280,8 +235,7 @@ local intencoes = {
         },
     },
     -- ·· idioma ··
-    {
-        id = "language",
+    {id = "language",
         words = {"english", "spanish", "language", "speak", "say", "understand", "know", "can", "you"},
         humor_delta = 8,
         responses = {
@@ -296,8 +250,7 @@ local intencoes = {
                         "(:D) — Try speaking to me in Portuguese!" },
         },
     },
-    {
-        id = "idioma",
+    {id = "idioma",
         words = {"ingles", "espanhol", "frances", "lingua", "idioma", "me entende?"},
         humor_delta = 8,
         responses = {
@@ -313,8 +266,7 @@ local intencoes = {
         },
     },
     -- ·· Continuidade ··
-    {
-        id = "call",
+    {id = "call",
         words = {"oz"},
         humor_delta = 8,
         responses = {
@@ -329,8 +281,7 @@ local intencoes = {
                     "(:D) — " .. S("Whats up!")},
         },
     },
-    {
-        id = "Continuity",
+    {id = "Continuity",
         words = {"hey", "you there", "you listening", "you reading"},
         humor_delta = 8,
         responses = {
@@ -345,8 +296,7 @@ local intencoes = {
                     "(:D) — Whats up!"},
         },
     },
-    {
-        id = "Continuidade",
+    {id = "Continuidade",
         words = {"ei", "opa", "ta ai", "ta ouvindo", "ta lendo"},
         humor_delta = 8,
         responses = {
@@ -362,8 +312,7 @@ local intencoes = {
         },
     },
     -- ·· INSULTO / RAIVA ··
-    {
-        id = "insulto",
+    {id = "insulto",
         words = {"idiota", "burro", "imbecil", "doente", "retardado", "otario", "besta", "babaca", "inutil", "ridiculo", "cale", "cala", "silencio", "chato", "me deixa", "vai embora", "te odeio", "vagabundo"},
         humor_delta = -20,
         responses = {
@@ -376,8 +325,7 @@ local intencoes = {
         },
     },
      -- ·· PALAVRÃO ··
-    {
-        id = "swore",
+    {id = "swore",
         words = {" cum ", "dick", "cock", "pussy", " ass ", "asshole", "your hole", "butthole", "shit", "bitch", "fuck", "bastard", "fag ", "nigga", "cunt"}, --seu, teu, meu
         humor_delta = -20,
         responses = {
@@ -389,8 +337,7 @@ local intencoes = {
                         "(:c) — I didn't expect that from you." },
         },
     },
-    {
-        id = "palavrao",
+    {id = "palavrao",
         words = {"porra", "goz", "cacet", "caralh", "a rola", "bucet", "o cu", "eu cu", "cuz", "merd", "bost", "put", "fod", "fud", "arrombad", "viad", "se ferrar", "te ferrar"}, --seu, teu, meu
         humor_delta = -20,
         responses = {
@@ -403,8 +350,7 @@ local intencoes = {
         },
     },
     -- ·· ELOGIO ··
-    {
-        id = "praise",
+    {id = "praise",
         words = {"u're cool", "ure cool", "ur cool", "u're amazing", "ure amazing", "ur amazing", "u're great", "ure great", "ur great", "u're fun", "ure fun", "ur fun", "u're a good", "ure a good", "ur a good", "u're smart", "ure smart", "ur smart", "u're cool", "ure cool", "ur cool", "I like you", "I like u", "I love you", "I love u"},
         humor_delta = 15,
         responses = {
@@ -416,8 +362,7 @@ local intencoes = {
                     "(^o^) — Ahh! That's so good to hear!" },
         },
     },
-    {
-        id = "elogio",
+    {id = "elogio",
         words = {"voce e legal", "voce e incrivel", "voce e otimo", "voce e divertido", "voce e gente", "gosto de voce", "gostei de voce", "voce e gente boa", "voce e bacana", "voce e inteligente"},
         humor_delta = 15,
         responses = {
@@ -430,8 +375,7 @@ local intencoes = {
         },
     },
     -- ·· DESPEDIDA ··
-    {
-        id = "farewell",
+    {id = "farewell",
         words = {"bye", "sleepy", "see you", "m leaving", "c u", " cu"},
         humor_delta = -3,
         responses = {
@@ -443,8 +387,7 @@ local intencoes = {
                      "(:D) — That was good! Take care."},
         },
     },
-    {
-        id = "despedida",
+    {id = "despedida",
         words = {"tchau", "sono", "ate logo", "ate mais", "ou indo", "o indo", "adeus", "ate", "xau", "fui", "flw", "falou"}, -- estou, tou, to, vou, vo
         humor_delta = -3,
         responses = {
@@ -457,9 +400,8 @@ local intencoes = {
         },
     },
     -- ·· COMO VOCÊ ESTÁ ··
-    {
-        id = "state",
-        words = {"how are you", "s it going", "how are things?", "how are you doing?", "what are you up to?", "everything alright", "everything good", "alright?", "everything okay?", "are you well?", "u okay?", "u ok?"},
+    {id = "state",
+        words = {"how are you", "s it going", "how are things", "how are you doing", "what are you up to", "everything alright%?", "everything good%?", "alright%?", "everything okay%?", "are you well", "u okay%?", "u ok%?"},
         humor_delta = 5,
         responses = {
             cold = { "(´-`) — Existing. And you?",
@@ -470,9 +412,8 @@ local intencoes = {
                     "(^-^) — Full of cosmic energy today!" },
         },
     },
-    {
-        id = "estado",
-        words = {"como va", "como esta", "como ta", "tudo bem?", "tudo bom", "tudo certo?", "tudo ok?", "como voce", "esta bem?", "ta bem?", "anda fazendo?", "ta fazendo?"}, -- vai, vao, esta, estao, ta, tao
+    {id = "estado",
+        words = {"como va", "como esta", "como ta", "tudo bem%?", "tudo bom", "tudo certo%?", "tudo ok%?", "como voce", "ta bem%?", "anda fazendo%?", "ta fazendo%?"}, -- vai, vao, esta, estao, ta, tao
         humor_delta = 5,
         responses = {
             cold    = { "(´-`) — Existindo. E você?",
@@ -484,8 +425,7 @@ local intencoes = {
         },
     },
     -- ·· QUEM É OZ ··
-    {
-        id = "identity",
+    {id = "identity",
         words = {"who are you", "who are u", "what are you", "what are u", "what r u", "what you are", "you exist", "are you real", "where are you from", "you have a body"},
         humor_delta = 10,
         responses = {
@@ -497,8 +437,7 @@ local intencoes = {
                     "(:D) — I am Oz! I have no body, but I have a lot to say!" },
         },
     },
-    {
-        id = "identidade",
+    {id = "identidade",
         words = {"quem e voce", "quem es", "o que e voce", "o que voce e", "o que tu e", "o que es", "voce existe", "voce e real", "de onde voce", "tem corpo"},
         humor_delta = 10,
         responses = {
@@ -511,9 +450,8 @@ local intencoes = {
         },
     },
     -- ·· PERIGO / MONSTROS ··
-    {
-        id = "globaldanger",
-        words = {"mob", "slime", "limu", "sirenia"}, 
+    {id = "globaldanger",
+        words = {"mob", "slime", "limu", "sirenia", "animal"}, 
         humor_delta = -5,
         responses = {
             cold = { "(._.) — " .. S("Danger? There's danger everywhere."),
@@ -524,9 +462,8 @@ local intencoes = {
                     "(>_<) — " .. S("That's not good! Run!") },
         },
     },
-    {
-        id = "danger",
-        words = {"danger", "lost", "monster", "attacked me", "enemy", "creature", "bull", "shark", "spider", "skeleton", "boss", "giant crab", "visage", "sentinel", "die", "kill me"}, --die, died
+    {id = "danger",
+        words = {"danger", "illegal", "lost", "monster", "attacked me", "enemy", "creature", "bull", "shark", "spider", "skeleton", "boss", "giant crab", "visage", "sentinel", "die", "kill me"}, --die, died
         humor_delta = -5,
         responses = {
             cold = { "(._.) — Danger? There's danger everywhere.",
@@ -537,9 +474,8 @@ local intencoes = {
                     "(>_<) — That's not good! Run!" },
         },
     },
-    {
-        id = "perigo",
-        words = {"perigo", "perdi", "monstro", "me atac", "inimigo", "criatura", "touro", "tubarao", "aranha", "esqueleto", "chefe", "caranguejo gigante", "vulto", "sentinel", "morr", "me matar"}, --morra, morri, atacar, matar, tem, spawnam, 
+    {id = "perigo",
+        words = {"perigo", "ilegal", "perdi", "monstro", "me atac", "inimigo", "criatura", "touro", "tubarao", "aranha", "esqueleto", "chefe", "caranguejo gigante", "vulto", "sentinel", "morr", "me matar"}, --morra, morri, atacar, matar, tem, spawnam, 
         humor_delta = -5,
         responses = {
             cold    = { "(._.) — Perigo? Há perigo em todo lugar.",
@@ -551,8 +487,7 @@ local intencoes = {
         },
     },
     -- ·· LOCALIZAÇÃO / DIREÇÕES ··
-    {
-        id = "direction",
+    {id = "direction",
         words = {"where", "way", "north", "south", "east", "west", "front", "back", "left", "right", "up", "down", "tavern", "village", "town", "city", "house", "blacksmith", "market", "forest", "ocean", "sea", "desert", "field", "tower", "volcano"},
         humor_delta = 2,
         responses = {
@@ -564,8 +499,7 @@ local intencoes = {
                      "(^-^) — Adventure is everywhere. Go with courage!" },
         },
     },
-    {
-        id = "direcao",
+    {id = "direcao",
         words = {"onde", "caminho", "norte", "sul", "leste", "oeste", "frente", "tras", "esquerda", "direita", "cima", "embaixo", "taverna", "aldeia", "vila", "cidade", "casa", "ferreiro", "mercado", "floresta", "oceano", "mar", "deserto", "campo", "torre", "vulcao"},
         humor_delta = 2,
         responses = {
@@ -578,8 +512,7 @@ local intencoes = {
         },
     },
     -- ·· AJUDA ··
-    {
-        id = "help",
+    {id = "help",
         words = {"help me", "need help", "to teleport", "teleport me", "command", "coordinates", "location", "place"},
         humor_delta = 2,
         responses = {
@@ -591,8 +524,7 @@ local intencoes = {
                      "(^-^) — Try /help" },
         },
     },
-    {
-        id = "ajuda",
+    {id = "ajuda",
         words = {"ajuda", "teletransporte", "teleport", "comando", "coordenadas", "localizacao", "local"},
         humor_delta = 2,
         responses = {
@@ -605,8 +537,7 @@ local intencoes = {
         },
     },
     -- ·· JOGABILIDADE ··
-    {
-        id = "gameplay",
+    {id = "gameplay",
         words = {"survival", "creative", "mode"},
         humor_delta = 2,
         responses = {
@@ -617,8 +548,7 @@ local intencoes = {
             hot  = { "__alterna_criativo__" },
         },
     },
-    {
-        id = "jogabilidade",
+    {id = "jogabilidade",
         words = {"criativo", "o survival", "a survival", "o creative", "a cretive", "sobrevivencia", "modo"},
         humor_delta = 2,
         responses = {
@@ -630,8 +560,7 @@ local intencoes = {
         },
     },
     -- ·· GIVE ··
-    {
-        id = "give",
+    {id = "give",
         words = {"the archion", "grimoire", "magic book", "creative mode inventory"},
         humor_delta = 2,
         responses = {
@@ -643,8 +572,7 @@ local intencoes = {
         },
     },
     -- ·· ENTREGA ··
-    {
-        id = "entrega",
+    {id = "entrega",
         words = {"o archion", "grimorio", "livro magico", "inventario do criativo", "inventario do modo criativo"},
         humor_delta = 2,
         responses = {
@@ -656,8 +584,7 @@ local intencoes = {
         },
     },
     -- ·· JOGOS ··
-    {
-        id = "jogos",
+    {id = "jogos",
         words = {"outro jogo", "outro mundo", "jogos", "mito", "lenda", "de plataforma", "de luta", "de tiro", "de guerra", "de estrategia", "de voxel", "de mineração"}, --mito, mitologia
         humor_delta = 2,
         responses = {
@@ -669,8 +596,7 @@ local intencoes = {
                      "(^-^) — Parece divertido." },
         },
     },
-    {
-        id = "globalgames",
+    {id = "globalgames",
         words = {"game", "procedural", "voxel", "minecraft", "mine", "terraria", "hytale", "vintagestory", "vintage story", "other game", "other world", "seed", "tetris", "pong", "mario", "menu", "luanti", "minetest", "voxelibre", "mineclonia", "megaman", "bomberman", "final fantasy", "god of war", " mu?", "mu online", "arcade"},
         humor_delta = 2,
         responses = {
@@ -683,8 +609,7 @@ local intencoes = {
         },
     },
     -- ·· assistir ··
-    {
-        id = "assitir",
+    {id = "assitir",
         words = {"assist", "a show", "tv", "pc", "anime", "movie", "filme", "cartoon", "animation", "animação", "desenho", "serie", "naruto", "one piece", "dragon ball", "sonic", "pokemon", "digimon", "bleach", "evangelion", "beyblade", "yugioh", "avatar", "matrix", "titanic", "senhor dos aneis", "lord of the rings"},
         humor_delta = 2,
         responses = {
@@ -697,8 +622,7 @@ local intencoes = {
         },
     },
     -- ·· RESPOSTA ··
-    {
-        id = "commonanswer",
+    {id = "globalanswer",
         words = {"ok", "Hm", "hum", "top ", "yep", "nop"},
         humor_delta = 2,
         responses = {
@@ -710,36 +634,9 @@ local intencoes = {
                      "(^-^) — " .. S("Okay.") },
         },
     },    
-    {
-        id = "answer",
-        words = {"yes", "fine", "not", "no!", "noo", "so so", "so-so", "more or less", "maybe", "perhaps", "right", "nice", "cool", "yeah"},
-        humor_delta = 2,
-        responses = {
-            cold    = { "(._.) — Ok.",
-                        "(-_-) — Good." },
-            neutral  = { "( '.' ) — Right.",
-                        "(:o) — No problem." },
-            hot  = { "(:D) — Excellent!",
-                     "(^-^) — Okay." },
-        },
-    },
-    {
-        id = "resposta",
-        words = {"sim", "nao", "talvez", "mais ou menos", "pode ser", "beleza", "tranquilo", "massa", "certo"},
-        humor_delta = 2,
-        responses = {
-            cold    = { "(._.) — Ok.",
-                        "(-_-) — Tá." },
-            neutral  = { "( '.' ) — Certo.",
-                        "(:o) — Tranquilo." },
-            hot  = { "(:D) — Ótimo!",
-                     "(^-^) — Tá bom." },
-        },
-    },
-    -- ·· ITENS / RECURSOS ··
-    {
-        id = "resources",
-        words = {"items", "cube", "sword", "tool", "wood", "stone", "iron", "gold", "diamond", "food", "bread", "fruit", "meat", "craft", "craft", "how to do", "produce", "recipe"},
+    -- RECURSOS
+    {id = "resources",
+        words = {"items", "cube", "sword", "axe", "tool", "wood", "stone", "iron", "gold", "diamond", "food", "bread", "fruit", "meat", "beef", "craft", "craft", "how to do", "produce", "recipe", "apple", "blueberry", "mushiroom"},
         humor_delta = 0,
         responses = {
         cold = {"(._.) — Objects. I'm not interested.",
@@ -750,22 +647,34 @@ local intencoes = {
                "(:D) — Tools! Civilization in miniature!" },
         },
     },
-    {
-        id = "recursos",
-        words = {"itens", "cubo", "espada", "ferramenta", "madeira", "pedra", "ferro", "ouro", "diamante", "comida", "pao", "fruta", "carne", "craftar", "como faço", "como faz", "produzir", "receita"},
+    {id = "recursos",
+        words = {"itens", "cubo", "espada", "machado", "ferramenta", "madeira", "pedra", "ferro", "ouro", "diamante", "comida", "pao", "fruta", "carne", "bife", "craftar", "como faço", "como faz", "produzir", "receita", "maca", "mirtilo", "cogumelo"},
         humor_delta = 0,
         responses = {
             cold    = { "(._.) — Objetos. Não me interessam.",
                         "(-_-) — Sem mãos. Sem itens. Me pergunta outra coisa." },
             neutral  = { "( '.' ) — Sobre itens... não e minha área. Sou de outro plano.",
                         "(:o) — Não sei muito sobre o mundo material. Mas parece útil." },
-            hot  = { "(^-^) — Ah, o mundo dos objetos! Apaixonante pra você, imagino.",
+            hot  = { "(^-^) — Ah, o mundo dos objetos! Fascinante pra você, imagino.",
                      "(:D) — Ferramentas! Civilização em miniatura!" },
+        },
+    },
+    -- ·· ITENS / RECURSOS ··
+    {id = "globalresources",
+        words = {"item", "metal", "mineral", "material", "banana"},
+        humor_delta = 0,
+        responses = {
+        cold = {"(._.) — " .. S("Objects. I'm not interested."),
+                "(-_-) — " .. S("No hands. No items. Ask me something else.") },
+        neutral = {"( '.' ) — " .. S("About items... it's not my area. I'm from another plane."),
+                   "(:o) — " .. S("I don't know much about the material world. But it seems useful.") },
+        hot = {"(^-^) — " .. S("Ah, the world of objects! Fascinating for you, I imagine."),
+               "(:D) — " .. S("Tools! Civilization in miniature!") },
         },
     },
     -- ·· TEMPO··
     {id = "time",
-        words = {"hour", "what time", " the time", "day?", "night?", "afternoon?", "dawn?", "morning?"},
+        words = {"hour", "what time", " the time", "day%?", "night%?", "afternoon%?", "dawn%?", "morning%?"},
         humor_delta = 3,
         responses = {
         cold = { "(._.) — The moment? I'm ethereal. I don't quite know the difference.",
@@ -776,7 +685,7 @@ local intencoes = {
         },
     },
     {id = "tempo",
-        words = {"hora", "dia?", "noite?", "de tarde?", "madruga?", "de manha?"},
+        words = {"hora", "dia%?", "noite%?", "de tarde%?", "madruga%?", "de manha%?"},
         humor_delta = 3,
         responses = {
             cold    = { "(._.) — O momento? Sou etéreo. Não sei bem a diferença.",
@@ -799,8 +708,7 @@ local intencoes = {
                     "(:D) — Whether it's sun or rain, it's a beautiful day to exist!"},
         },
     },
-    {
-        id = "clima",
+    {id = "clima",
         words = {"chuva", "chove", "sol", "tempo", "clima", "frio", "calor", "escuro", "seco", "umido", "vento", "nublado"},
         humor_delta = 3,
         responses = {
@@ -813,8 +721,7 @@ local intencoes = {
         },
     },
     -- ·· AGRADECIMENTO ··
-    {
-        id = "gratitude",
+    {id = "gratitude",
         words = {"thank you", "thanks", "thx", "grateful", "thankful", "grated"},
         humor_delta = 12,
         responses = {
@@ -826,8 +733,7 @@ local intencoes = {
                     "(^o^) — You're welcome! I'll be here when you need me!" },
         },
     },
-    {
-        id = "agradecimento",
+    {id = "agradecimento",
         words = {"obrigado", "obrigada", "valeu", "vlw", "grato", "grata", "agradecido"},
         humor_delta = 12,
         responses = {
@@ -835,13 +741,12 @@ local intencoes = {
                         "(._.) — Nao precisa agradecer." },
             neutral  = { "(:o) — Fico feliz em poder ajudar, de alguma forma.",
                         "( '.' ) — Sempre por aqui." },
-            hot  = { "(:D) — Que otimo! Fico contente!",
+            hot  = { "(:D) — Que ótimo! Fico contente!",
                      "(^o^) — De nada! Estarei aqui quando precisar!" },
         },
     },
     -- ·· MALDADE ··
-    {
-        id = "maldade",
+    {id = "maldade",
         words = {"mau", "malvad", "maligno", "perverso", "vilão", "voce e ruim", "voce nao presta", "voce e inimigo"},
         humor_delta = 12,
         responses = {
@@ -854,8 +759,7 @@ local intencoes = {
         },
     },
     -- ·· FILOSOFIA / EXISTÊNCIA ··
-    {
-        id = "philosophy",
+    {id = "philosophy",
         words = {"life", "death", "meaning", "purpose", "soul", "spirit", "spiritual", "cosmos", "universe", "existence", "is real", "truth", "simulation", "consciousness", "god"},
         humor_delta = 8,
         responses = {
@@ -867,8 +771,7 @@ local intencoes = {
                     "(:D) — It's a profound and wonderful question!" },
         },
     },
-    {
-        id = "filosofia",
+    {id = "filosofia",
         words = {"vida", "morte", "sentido", "proposito", "alma", "espírito", "espiritual", "cosmo", "universo", "existencia", "e real", "verdade", "simulação", "consciencia", "deus"},
         humor_delta = 8,
         responses = {
@@ -877,7 +780,7 @@ local intencoes = {
             neutral  = { "(:o) — Essa questão também me faz refletir bastante.",
                         "( '.' ) — Há algo além do que você vê. Tenho certeza disso." },
             hot  = { "(^-^) — Ah! As grandes questões! Meu assunto favorito!",
-                        "(:D) — É uma questão profunda e maravilhosa!" },
+                     "(:D) — É uma questão profunda e maravilhosa!" },
         },
     },
     -- ·· Capacidade ··
@@ -906,8 +809,7 @@ local intencoes = {
         },
     }, 
     -- ·· Duvida ··
-    {
-        id = "doubt",
+    {id = "doubt",
         words = {"why", "how", "which", "know", "what", " a mod", "the mod", "at mod"},
         humor_delta = 1,
         responses = {
@@ -919,9 +821,8 @@ local intencoes = {
                      "(^-^) — The answer is everywhere. You'll find out!" },
         },
     },
-    {
-        id = "duvida",
-        words = {"porque", "por que", "como?", "qual", "sabe?", "o que", "que tipo", "que modo", "o mod", "um mod"},
+    {id = "duvida",
+        words = {"porque", "por que", "como%?", "qual", "sabe%?", "o que", "que tipo", "que modo", "o mod", "um mod"},
         humor_delta = 1,
         responses = {
             cold    = { "(._.) — Não sei...",
@@ -929,12 +830,11 @@ local intencoes = {
             neutral  = { "( '.' ) — Não tenho resposta...",
                         "(:o) — Por que a pergunta?" },
             hot  = { "(:D) — Talvez você já saiba!",
-                        "(^-^) — A resposta esta em todo canto. Você vai descobrir!" },
+                     "(^-^) — A resposta esta em todo canto. Você vai descobrir!" },
         },
     },
     -- ·· AJUDA GERAL ··
-    {
-        id = "order",
+    {id = "order",
         words = {"rescue", "I need", "can you", "you know how", "give me"},
         humor_delta = 5,
         responses = {
@@ -946,8 +846,7 @@ local intencoes = {
                 "(^-^) — I'm here! What do you need?" },
         },
     },
-    {
-        id = "pedido",
+    {id = "pedido",
         words = {"socorro", "preciso", "pode me", "consegue", "sabe como", "me da"},
         humor_delta = 5,
         responses = {
@@ -956,7 +855,62 @@ local intencoes = {
             neutral  = { "(:o) — Tentarei. O que aconteceu?",
                         "( '.' ) — Acho que não posso fazer muito... Só posso tentar dar uma boa resposta." },
             hot  = { "(:D) — Claro! Me conta!",
-                        "(^-^) — Estou aqui! O que precisa?" },
+                     "(^-^) — Estou aqui! O que precisa?" },
+        },
+    },
+    -- ·· SAUDAÇÃO ··
+    {id = "greeting",
+        words = {"hello", "hey", "hi", "good morning", "gm", "good afternoon", "good evening", "good night", "gn", "whats up", "wazzup", "wazup"}, -- hi sobrepoe palavras com hi
+        humor_delta = 8,
+        responses = {
+            cold    = { "(-_-) — No talking...",
+                        "(-.-) — ...",
+                        "(-_-) — Who is it?" },
+            neutral  = { "(:o) — Hello, traveler.",
+                        "( '.' ) — I'm here.",
+                        "(:o) — Presente." },
+            hot  = { "(:D) — It's good to see you!",
+                        "(^-^) — Hello! I was expecting you.",
+                        "(:D) — Traveler!" },
+        },
+    },
+    {id = "saudacao",
+        words = {"oi", "ola", "salve", "bom dia", "boa tarde", "boa noite", "eai", "e ai"},
+        humor_delta = 8,
+        responses = {
+            cold    = { "(-_-) — Sem papo...",
+                        "(-.-) — ...",
+                        "(-_-) — Quem é?" },
+            neutral  = { "(:o) — Ola, viajante.",
+                        "( '.' ) — Estou aqui.",
+                        "(:o) — Presente." },
+            hot  = { "(:D) — Que bom te ver!",
+                        "(^-^) — Ola! Estava te esperando.",
+                        "(:D) — Viajante!" },
+        },
+    },
+    {id = "answer",
+        words = {"yes", "fine", "not ", "no%!", "noo", "no%,", "so so", "so-so", "more or less", "maybe", "perhaps", "right", "nice", "cool", "yeah"},
+        humor_delta = 2,
+        responses = {
+            cold    = { "(._.) — Ok.",
+                        "(-_-) — Good." },
+            neutral  = { "( '.' ) — Right.",
+                        "(:o) — No problem." },
+            hot  = { "(:D) — Excellent!",
+                     "(^-^) — Okay." },
+        },
+    },
+    {id = "resposta",
+        words = {"sim", "nao", "talvez", "mais ou menos", "pode ser", "beleza", "tranquilo", "massa", "certo", "legal"},
+        humor_delta = 2,
+        responses = {
+            cold    = { "(._.) — Ok.",
+                        "(-_-) — Tá." },
+            neutral  = { "( '.' ) — Certo.",
+                        "(:o) — Tranquilo." },
+            hot  = { "(:D) — Ótimo!",
+                     "(^-^) — Tá bom." },
         },
     },
 }
@@ -1074,15 +1028,15 @@ local function oz_responder(nome_jogador, mensagem)
             local m = minutos_totais % 60
             local periodo
             if h >= 5 and h < 12 then
-                periodo = "manhã"
+                periodo = S("in the world. It's morning")
             elseif h >= 12 and h < 18 then
-                periodo = "tarde"
+                periodo = S("in the world. It's afternoon")
             elseif h >= 18 and h < 24 then
-                periodo = "noite"
+                periodo = S("in the world. It's night")
             else
-                periodo = "madrugada"
+                periodo = S("in the world. It's dawn")
             end
-            resposta = "(:D) — " .. string.format(S("It's %02d:%02d in the world. It's %s!"), h, m, periodo)
+            resposta = "(:D) — " .. S("It's") .. string.format(" %02d:%02d " .. periodo .. ".", h, m)
         end
 
         -- Marca tópico como já falado (para variação futura)
