@@ -15,10 +15,11 @@ local portal_cooldown = {} -- evita teleporte no portal em loop
 -- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
 local WATER_FULLNODES = populate_true({"water", "water2"})
 local WATER_MIDNODES = populate_true({"water_flowing", "water2_flowing"})
-local FLOATING_STUFF = populate_true({"oaktimber", "oaklog", "oakwood", "stick", "palmtimber", "palmlog", "coconut", "pinetimber", "pinelog", "pinewood", "pineraft", "ice", "ice2", "orb_empty"})
+local water_nodes = populate_true({"water", "water_flowing", "water2", "water2_flowing"})
 local LAVA_NODES = populate_true({"lava", "lava_flowing", "bluelava", "bluelava_flowing"})
 local FLAME_ENTITIES = populate_true({"campfire_flame_entity", "torch_flame_entity", "palmstraw_flame_entity", "flame_entity"})
 local LEAF_TYPES = populate_true({"leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3"})
+local FLOATING_STUFF = populate_true({"oaktimber", "oaklog", "oakwood", "stick", "palmtimber", "palmlog", "coconut", "pinetimber", "pinelog", "pinewood", "pineraft", "ice", "ice2", "orb_empty"})
 local DECORATIONS = populate_true({"smallgrass", "highgrass", "rush", "dandelion", "grassleaves", "grassleavesmedium", "micaceusfungus", "flyamanitafungus", "pebble", "white_pebble", "fallenstick"})
 nodes = {}
 -- Vetores de direção por facedir (face frontal do node) para portal e espelho
@@ -5044,14 +5045,7 @@ core.register_node("nh_nodes:tuna", {
     --sounds = default.node_sound_wood_defaults(),
     collision_box = { type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 } },
     selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 } },
-    pointabilities = {
-        nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-        }
-    },
+    pointabilities = {nodes = water_nodes},
     -- Spawna o mob ao colocar o node no chão ou na água
     on_place = function(itemstack, placer, pointed_thing)
         if pointed_thing.type ~= "node" then return itemstack end
@@ -5067,7 +5061,6 @@ core.register_node("nh_nodes:tuna", {
             -- Consome o item da mão
             itemstack:take_item()
         end
-
         return itemstack
     end,
 })
@@ -5633,13 +5626,7 @@ core.register_node("nh_nodes:messagebottle", {
     groups = { oddly_breakable_by_hand = 1 },
     collision_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
     selection_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
-    pointabilities = {nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-    }},
-
+    pointabilities = {nodes = water_nodes},
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         if placer and placer:is_player() then
@@ -5792,20 +5779,13 @@ core.register_node("nh_nodes:coconut", {
     --sounds = default.node_sound_wood_defaults(),
     collision_box = {type = "fixed", fixed = { -0.25, -0.5, -0.25, 0.25, 0, 0.25 }},
     selection_box = {type = "fixed", fixed = { -0.25, -0.5, -0.25, 0.25, 0, 0.25 }},
-    pointabilities = {nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-    }},
-
+    pointabilities = {nodes = water_nodes},
     -- Tornar comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 3) -- Restaura 3 pontos
         itemstack:take_item()
         return itemstack
     end,
-
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         if placer and placer:is_player() then
@@ -6420,6 +6400,90 @@ core.register_node("nh_nodes:water_flowing", {
     groups = { water = 1, liquid = 1, not_in_creative_inventory = 1 },
 })
 
+core.register_node("nh_nodes:bucket", {
+    description = S("Bucket"),
+    drawtype = "mesh",
+    mesh = "bucket.obj",
+    tiles = { "bucket.png" },
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    stack_max = 1,
+    groups = { dig_immediate = 1, falling_node = 1 },
+    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
+    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
+    -- Configuração mão direita
+    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    pointabilities = {nodes = WATER_FULLNODES},
+    on_place = function(itemstack, placer, pointed_thing)
+        if placer:get_player_control().sneak then
+            return core.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack end
+        local name = core.get_node(pointed_thing.under).name
+        if name == "nh_nodes:water" then
+            core.remove_node(pointed_thing.under)
+            return ItemStack("nh_nodes:bucketwater")
+        elseif name == "nh_nodes:water2" then
+            core.remove_node(pointed_thing.under)
+            return ItemStack("nh_nodes:bucketwater2")
+        end
+        return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:bucketwater", {
+    description = S("Bucket with Water"),
+    drawtype = "mesh",
+    mesh = "bucket.obj",
+    tiles = { "bucketwater.png" },
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    stack_max = 1,
+    groups = { dig_immediate = 1, falling_node = 1 },
+    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
+    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
+    -- Configuração mão direita
+    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    on_place = function(itemstack, placer, pointed_thing)
+        if placer:get_player_control().sneak then
+            return core.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack end
+        local pos = pointed_thing.above
+        if core.get_node(pos).name == "air" then
+            core.set_node(pos, { name = "nh_nodes:water" })
+            return ItemStack("nh_nodes:bucket")
+        end
+        return itemstack
+    end,
+})
+
+core.register_node("nh_nodes:bucketwater2", {
+    description = S("Bucket with Fresh Water"),
+    drawtype = "mesh",
+    mesh = "bucket.obj",
+    tiles = { "bucketwater2.png" },
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    stack_max = 1,
+    groups = { dig_immediate = 1, falling_node = 1 },
+    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
+    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
+    -- Configuração mão direita
+    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    on_place = function(itemstack, placer, pointed_thing)
+        if placer:get_player_control().sneak then
+            return core.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack end
+        local pos = pointed_thing.above
+        if core.get_node(pos).name == "air" then
+            core.set_node(pos, { name = "nh_nodes:water2" })
+            return ItemStack("nh_nodes:bucket")
+        end
+        return itemstack
+    end,
+})
 
 core.register_node("nh_nodes:barrier", {
     description = S "Barrier",
@@ -6495,13 +6559,7 @@ core.register_node("nh_nodes:ice2", {
     sunlight_propagates = true, -- deixa a luz passar, como gelo real         -- não flui
     --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
     --connects_to = {"nh_nodes:ice"},
-    pointabilities = {nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-    }},
-
+    pointabilities = {nodes = water_nodes},
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         if placer and placer:is_player() then
@@ -6540,21 +6598,9 @@ core.register_node("nh_nodes:ice2ramp", {
     sunlight_propagates = true, -- deixa a luz passar, como gelo real         -- não flui
     --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
     --connects_to = {"nh_nodes:ice2"},
-
-    selection_box = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
-    collision_box = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
-
-    pointabilities = {nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-    }},
-
+    selection_box = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    collision_box = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    pointabilities = {nodes = water_nodes},
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         if placer and placer:is_player() then
@@ -8752,23 +8798,12 @@ core.register_entity("nh_nodes:pineraft_entity", {
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then return end
-
         local node_at     = core.get_node({ x = pos.x, y = pos.y + 0.5, z = pos.z })
         local node_below  = core.get_node({ x = pos.x, y = pos.y - 0.5, z = pos.z })
         local node_below2 = core.get_node({ x = pos.x, y = pos.y + 0.35, z = pos.z }) -- logo abaixo do centro
-
-        local water_nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-        }
-
         local submerged   = water_nodes[node_at.name]                       -- entidade está dentro da água
         local on_surface  = water_nodes[node_below2.name] and not submerged -- entidade está na superfície
-
         local vel         = self.object:get_velocity()
-
         if submerged then
             self.object:set_acceleration({ x = 0, y = 0, z = 0 })
             self.object:set_velocity({ x = vel.x, y = 2, z = vel.z })
@@ -8814,15 +8849,12 @@ core.register_entity("nh_nodes:pineraft_entity", {
                         self._oar_msg_timer = 5 -- segundos antes de repetir
                     end
                 end
-
                 if self._oar_msg_timer and self._oar_msg_timer > 0 then
                     self._oar_msg_timer = self._oar_msg_timer - dtime
                 end
             end
-
             local speed    = 3
             local raft_yaw = self.object:get_yaw()
-
             if has_oar then
                 local ctrl       = self.driver:get_player_control()
                 local mouse_yaw  = self.driver:get_look_horizontal()
@@ -8985,12 +9017,7 @@ core.register_node("nh_nodes:pineraft", {
     offhand_bone_position = {
         pos = { x = 0, y = -1, z = -0.5 },
         rot = { x = 90, y = 0, z = 90 },},
-    pointabilities = {nodes = {
-            ["nh_nodes:water"]          = true,
-            ["nh_nodes:water_flowing"]  = true,
-            ["nh_nodes:water2"]         = true,
-            ["nh_nodes:water2_flowing"] = true,
-    }},
+    pointabilities = {nodes = water_nodes},
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         -- Se segurou agachar, deixa como nó estático (não vira entidade)
