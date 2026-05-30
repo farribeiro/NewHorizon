@@ -2525,7 +2525,6 @@ mobs:register_mob("nh_mob:karibo", {
     visual = "mesh",
     mesh = "karibo.glb",
     textures = {"karibo.png"},
-    -- rotate = 180,
     visual_size = {x = 7, y = 7},
     backface_culling = false, 
     attack_animals = true, -- permite atacar outros mobs
@@ -2536,7 +2535,7 @@ mobs:register_mob("nh_mob:karibo", {
     water_damage = 0,
     lava_damage = 5,
     light_damage = 0,
-    floats = 0,
+    floats = 1,
     animation = {
         speed_normal = 1.5,
         stand_start = 0,
@@ -4133,7 +4132,6 @@ mobs:register_mob("nh_mob:giantcrab", {
     blood_amount = 5,                 -- quantidade de partículas
     hp_min = 50,
     hp_max = 50,
-    -- armor = 100,
     armor = 100,
     drops = { { name = "nh_nodes:redcrystal", chance = 1, min = 1, max = 3 },}, -- 1-3 cristais (sempre)
     collisionbox = { -7, 0, -5, 5, 8.5, 5 },
@@ -4265,5 +4263,268 @@ register_mob_spawn({
 ]] --
 --mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
 register_orb_egg("nh_mob:giantcrab", S("Orb with Giant Crab"))
+
+
+mobs:register_arrow("nh_mob:plasma2", {
+    visual = "sprite",
+    textures = { "plasmasprite.png^[colorize:#028dde:100" },
+    velocity = 25,
+    glow = 14,
+    lifetime = 3,
+    _last_light_pos = nil,
+    on_activate = function(self, staticdata, dtime_s)
+        core.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25})
+    end,
+    hit_player = function(self, player)
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+        player:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
+        local place_pos = vector.round(player:get_pos())
+        -- Encontra o player mais próximo para orientar o portal
+        local nearest_player = nil
+        local min_dist = math.huge
+        for _, player in ipairs(core.get_connected_players()) do
+            local d = vector.distance(place_pos, player:get_pos())
+            if d < min_dist then
+                min_dist = d
+                nearest_player = player
+            end
+        end
+        local param2 = 0
+        if nearest_player then
+            local player_pos = nearest_player:get_pos()
+            -- Vetor da posição do portal até o player
+            local dir = vector.direction(place_pos, player_pos)
+            dir = vector.multiply(dir, -1)  -- inverte 180° no eixo Y
+            param2 = core.dir_to_facedir(dir) -- Converte a direção em param2 facedir
+        end
+        core.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
+    end,
+    hit_mob = function(self, mob)
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+        mob:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
+        local place_pos = vector.round(mob:get_pos())
+        -- Encontra o player mais próximo para orientar o portal
+        local nearest_player = nil
+        local min_dist = math.huge
+        for _, player in ipairs(core.get_connected_players()) do
+            local d = vector.distance(place_pos, player:get_pos())
+            if d < min_dist then
+                min_dist = d
+                nearest_player = player
+            end
+        end
+        local param2 = 0
+        if nearest_player then
+            local player_pos = nearest_player:get_pos()
+            local dir = vector.direction(place_pos, player_pos) -- Vetor da posição do portal até o player
+            param2 = core.dir_to_facedir(dir) -- Converte a direção em param2 facedir
+        end
+        core.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
+    end,
+    hit_node = function(self, pos, node)
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+        local place_pos = vector.round(pos)
+        -- Encontra o player mais próximo para orientar o portal
+        local nearest_player = nil
+        local min_dist = math.huge
+        for _, player in ipairs(core.get_connected_players()) do
+            local d = vector.distance(place_pos, player:get_pos())
+            if d < min_dist then
+                min_dist = d
+                nearest_player = player
+            end
+        end
+        local param2 = 0
+        if nearest_player then
+            local player_pos = nearest_player:get_pos()
+            -- Vetor da posição do portal até o player
+            local dir = vector.direction(place_pos, player_pos)
+            dir = vector.multiply(dir, -1)  -- inverte 180° no eixo Y
+            param2 = core.dir_to_facedir(dir) -- Converte a direção em param2 facedir
+        end
+        core.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
+    end,
+})
+
+-- MOB: camarão/lagosta gigante
+-- Projétil customizado do camarão gigante
+mobs:register_arrow("nh_mob:plasma", {
+    visual = "sprite",
+    textures = { "plasmasprite.png^[colorize:#028dde:100" },
+    velocity = 25,
+    glow = 14,
+    lifetime = 3,
+    _last_light_pos = nil,
+    on_activate = function(self, staticdata, dtime_s)
+        core.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25}) -- toca o som no projétil
+    end,
+    hit_player = function(self, player)
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+        player:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
+    end,
+    hit_mob = function(self, mob)
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+        mob:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 },}, nil)
+    end,
+    hit_node = function(self, pos, node)
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+    end,
+})
+-- Após o register_arrow, o mobs já criou a entidade internamente.
+-- Pegamos ela e injetamos o on_step de luz por cima, preservando o original.
+local plasma_def = core.registered_entities["nh_mob:plasma"]
+local original_on_step = plasma_def.on_step
+core.register_entity("nh_mob:plasma", table.copy(plasma_def))  -- força re-registro com override abaixo
+local PASSTHROUGH_LIGHT = {["air"] = true, ["nh_mob:plasma_light"] = true, ["nh_nodes:water"] = true, ["nh_nodes:water2"] = true, ["nh_nodes:water_flowing"] = true, ["nh_nodes:water2_flowing"] = true,}
+core.registered_entities["nh_mob:plasma"].on_step = function(self, dtime, moveresult)
+    -- Timer de lifetime manual
+    self._lifetime_timer = (self._lifetime_timer or 0) + dtime
+    if self._lifetime_timer >= 3 then  -- mesmo valor do lifetime
+        if self._last_light_pos then
+            local n = core.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+        end
+        self.object:remove()
+        return
+    end
+    -- Lógica do bloco de luz
+    local pos = self.object:get_pos()
+    if pos then
+        local node_pos = vector.round(pos)
+        if self._last_light_pos and not vector.equals(self._last_light_pos, node_pos) then
+            local old = core.get_node(self._last_light_pos)
+            if old.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            self._last_light_pos = nil
+        end
+        local current = core.get_node(node_pos)
+        if PASSTHROUGH_LIGHT[current.name] and current.name ~= "nh_mob:plasma_light" then
+            core.set_node(node_pos, { name = "nh_mob:plasma_light" })
+            self._last_light_pos = node_pos
+        end
+    end
+    original_on_step(self, dtime, moveresult)
+end
+core.register_node("nh_mob:plasma_light", {
+    drawtype = "airlike", -- invisível
+    walkable = false,
+    pointable = false,
+    diggable = false,
+    buildable_to = true,
+    sunlight_propagates = true,
+    light_source = 13,          
+    drop = "",
+    groups = { not_in_creative_inventory = 1 },
+    tiles = { "blank.png" },     -- textura em branco/transparente
+})
+mobs:register_mob("nh_mob:giantshrimp", {
+    type = "monster",
+    passive = false,
+    reach = 6,
+    damage = 8,
+    attack_type = "dogshoot",
+    arrow = "nh_mob:plasma",   -- entidade do projétil (use uma existente ou crie a sua)
+    shoot_interval = 2,             -- intervalo entre tiros (segundos)
+    shoot_offset = 1,             -- altura de onde sai o projétil (relativo ao mob)
+    description = S("Giant Shrimp") .. "\n" .. S("[Mutant]"),
+    blood_texture = "mob_blueblood.png", -- sua textura customizada
+    blood_amount = 5,                 -- quantidade de partículas
+    hp_min = 20,
+    hp_max = 20,
+    armor = 100,
+    drops = {{ name = "nh_nodes:shrimpclaw", chance = 0.2, min = 0, max = 1 },}, -- 0-1 garra (20% de chance)
+    collisionbox = { -2, 0, -2, 2, 1, 2 },
+    selectionbox = { -2, 0, -2, 2, 1, 2 },
+    physical = true,
+    stepheight = 10, -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -15,
+    fall_damage = 0,
+    floats = 0,
+    -- pathfinding = true,
+    -- tamed = true,
+    static_save = true,
+    despawn_by_day = false,
+    remove_far = false,
+    visual = "mesh",
+    mesh = "shrimp.glb",
+    textures = { "shrimp.png" },
+    visual_size = { x = 10, y = 10 },
+    -- BRILHO NOS OLHOS
+    glow = 5, -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- IMPORTANTE: Propriedades para manter na água
+    -- fly = true,               -- Permite "voar" na água
+    -- fly_in = "nh_nodes:water",   -- Voa no ar
+    walk_velocity = 5,
+    run_velocity = 10,
+    view_range = 50,
+    water_damage = 0,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,
+    animation = {speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 1, shoot_start = 0, shoot_end = 2.5, punch_start = 0, punch_end = 2.5},
+    -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            if name == "" then core.chat_send_player(clicker:get_player_name(), S("?!"))
+            else core.chat_send_player(clicker:get_player_name(), S("Crrrr!"))
+            end
+        end
+    end,
+    sounds = { random = "vulto_som", damage = "vulto_hurt"}, --
+    custom_attack = function(self, to_attack)
+        self.attack_count = (self.attack_count or 0) + 1
+        if self.attack_count < 3 then return end
+        self.attack_count = 0
+        self:set_animation("shoot", false)
+        core.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25})
+        return true
+    end,
+})
+-- Spawn
+register_mob_spawn({
+    name = "nh_mob:giantshrimp",
+    nodes = { "nh_nodes:water" },
+    neighbors = { "nh_nodes:wet_sand" },
+    max_light = 15,
+    interval = 30,
+    chance = 20,
+    active_object_count = 3,
+    min_height = -20,
+    max_height = -18
+})
+register_orb_egg("nh_mob:giantshrimp", S("Orb with Giant Shrimp"))
+core.register_on_mods_loaded(function() end) -- Roda uma vez na inicialização do servidor -- Varre a área ativa de cada jogador ao reconectar
+core.register_on_joinplayer(function(player)
+    core.after(5, function()
+        local pos = player:get_pos()
+        if not pos then return end
+        local LIMIT = 100
+        local MIN = vector.new(pos.x - LIMIT, pos.y - LIMIT, pos.z - LIMIT)
+        local MAX = vector.new(pos.x + LIMIT, pos.y + LIMIT, pos.z + LIMIT)
+        local positions = core.find_nodes_in_area(MIN, MAX, { "nh_mob:plasma_light" })
+        for _, p in ipairs(positions) do
+            core.remove_node(p)
+        end
+    end)
+end)
 -- LOGS FINAIS
 core.register_on_mods_loaded(function() log("All mobs 'init.lua' initialized successfully!") end)

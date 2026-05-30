@@ -1,7 +1,7 @@
 -- Terrain
 local c = core
-local gcid        = c.get_content_id
 c.log("action", "[TERRAIN] init.lua loaded")
+local gcid = c.get_content_id
 local S = c.get_translator "nh_terrain"
 -- table_xyz
 local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
@@ -410,13 +410,13 @@ local NOISE = {
     --},
     -- CONFIGURAÇÃO DOS NOISES DE MINÉRIOS
     ore_master = { offset = 0, scale = 1, spread = xyz(30, 30, 30), seed = 9130, octaves = 3, persist = 0.6, lacunarity = 2.0, },
-    coal = { offset = 0, scale = 0.5, spread = xyz(30, 30, 30), seed = 19283, octaves = 3, persist = 0.6, },
-    copper = { offset = 0, scale = 0.5, spread = xyz(35, 35, 35), seed = 28374, octaves = 3, persist = 0.6, },
-    tin = { offset = 0, scale = 0.5, spread = xyz(32, 32, 32), seed = 37465, octaves = 3, persist = 0.6, },
-    iron = { offset = 0, scale = 0.5, spread = { x = 28, y = 28, z = 28 }, seed = 46556, octaves = 3, persist = 0.6, },
-    nickel = { offset = 0, scale = 0.5, spread = { x = 25, y = 25, z = 25 }, seed = 55647, octaves = 3, persist = 0.6, },
-    manganese = { offset = 0, scale = 0.5, spread = { x = 22, y = 22, z = 22 }, seed = 64738, octaves = 3, persist = 0.6, },
-    chromium = { offset = 0, scale = 0.5, spread = { x = 20, y = 20, z = 20 }, seed = 73829, octaves = 3, persist = 0.6, }
+    coal       = { offset = 0, scale = 0.5, spread = xyz(30, 30, 30), seed = 19283, octaves = 3, persist = 0.6, },
+    copper     = { offset = 0, scale = 0.5, spread = xyz(35, 35, 35), seed = 28374, octaves = 3, persist = 0.6, },
+    tin        = { offset = 0, scale = 0.5, spread = xyz(32, 32, 32), seed = 37465, octaves = 3, persist = 0.6, },
+    iron       = { offset = 0, scale = 0.5, spread = xyz(28, 28, 28), seed = 46556, octaves = 3, persist = 0.6, },
+    nickel     = { offset = 0, scale = 0.5, spread = xyz(25, 25, 25), seed = 55647, octaves = 3, persist = 0.6, },
+    manganese  = { offset = 0, scale = 0.5, spread = xyz(22, 22, 22), seed = 64738, octaves = 3, persist = 0.6, },
+    chromium   = { offset = 0, scale = 0.5, spread = xyz(20, 20, 20), seed = 73829, octaves = 3, persist = 0.6, }
 }
 -- FUNÇÃO PARA VERIFICAR SE DEVE GERAR MINÉRIO
 local function check_ore(x, y, z, perlin_ore, threshold, min_y, max_y)
@@ -804,7 +804,6 @@ local function spawn_tree(area, data, param2_data, pos, wx, wz)
             attempts = attempts + 1
         end
     end
-    --]]--
 end
 -- FUNÇÃO DE SPAWN DE PINHEIRO
 local function spawn_pine_tree(area, data, pos, wx, wz)
@@ -1267,10 +1266,8 @@ local function spawn_house(area, data, base_pos)
     local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
     c.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
-        c.set_node(door_pos, {
-            name   = "nh_nodes:oakdoor_closed", -- substitua pelo nome real do C.oakdoor
-            param2 = 2                          -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
-        })
+        c.set_node(door_pos, {name   = "nh_nodes:oakdoor_closed", -- substituir pelo nome real do C.oakdoor
+            param2 = 2 })                         -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
     end)
     -- parede lateral esquerda fechada (dx = 0)
     for dz = 0, depth - 3 do
@@ -2722,9 +2719,7 @@ c.after(1, function()
         { x = -48, y = -16, z = -48 },
         { x = 48, y = 80, z = 48 },
         function(blockpos, action, calls_remaining)
-            if calls_remaining == 0 then
-                c.log("action", "[terrain] Spawn area successfully pre-generated")
-            end
+            if calls_remaining == 0 then c.log("action", "[terrain] Spawn area successfully pre-generated") end
         end)
 end)
 
@@ -2734,16 +2729,11 @@ c.register_chatcommand("origin", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
+        if not player then return false, S("Player not found") end 
         -- Teleporta 2 blocos acima da estátua
         local tp_pos = { x = 0, y = 50, z = 0 }
         player:set_pos(tp_pos)
-
-        return true, S("Teleported to the origin at X: 0 Y: 50 Z: 0")
-    end,
+        return true, S("Teleported to the origin at X: 0 Y: 50 Z: 0") end,
 })
 
 -- COMANDO PARA IR ATÉ A CASA
@@ -2752,30 +2742,17 @@ c.register_chatcommand("house", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
-        if not house_pos then
-            return false, S("The house has not yet been generated. Explore the area near spawn first")
-        end
-
+        if not player then return false, S("Player not found") end
+        if not house_pos then return false, S("The house has not yet been generated. Explore the area near spawn first") end
         player:set_pos(house_pos)
-
-        return true,
-            S("Teleported to the house at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
-    end,
+        return true, S("Teleported to the house at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z end,
 })
 -- Comando para só ver as coordenadas sem teleportar
 c.register_chatcommand("local_house", {
     description = S("Shows the coordinates of the house"),
     func = function(name)
-        if not house_pos then
-            return false, S("The house has not yet been generated. Explore the area near spawn first")
-        end
-
-        return true, S("House at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z
-    end,
+        if not house_pos then return false, S("The house has not yet been generated. Explore the area near spawn first") end
+        return true, S("House at X:") .. house_pos.x .. " Y:" .. house_pos.y .. " Z:" .. house_pos.z end,
 })
 
 -- COMANDO PARA IR AO BARCO AFUNDADO
@@ -2784,32 +2761,17 @@ c.register_chatcommand("ship", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
-        if not ship_pos then
-            return false, S("The sunken ship has not yet been generated. Explore the lakes near spawn first")
-        end
-
+        if not player then return false, S("Player not found") end
+        if not ship_pos then return false, S("The sunken ship has not yet been generated. Explore the lakes near spawn first") end
         player:set_pos(ship_pos)
-
-        return true,
-            S("Teleported to the sunken ship at X:") ..
-            ship_pos.x .. " Y:" .. ship_pos.y .. " Z:" .. ship_pos.z
-    end,
+        return true, S("Teleported to the sunken ship at X:") .. ship_pos.x .. " Y:" .. ship_pos.y .. " Z:" .. ship_pos.z end,
 })
 -- Comando só para ver as coordenadas do barco
 c.register_chatcommand("local_ship", {
     description = S("Shows the coordinates of the sunken ship"),
     func = function(name)
-        if not ship_pos then
-            return false, S("The sunken ship has not yet been generated. Explore the ocean near spawn first")
-        end
-
-        return true,
-            S("Sunken ship at X:") .. ship_pos.x .. " Y:" .. ship_pos.y .. " Z:" .. ship_pos.z
-    end,
+        if not ship_pos then return false, S("The sunken ship has not yet been generated. Explore the ocean near spawn first") end
+        return true, S("Sunken ship at X:") .. ship_pos.x .. " Y:" .. ship_pos.y .. " Z:" .. ship_pos.z end,
 })
 
 -- COMANDO PARA ENCONTRAR O VULCÃO
@@ -2818,41 +2780,25 @@ c.register_chatcommand("vulcan", {
     privs = { teleport = true }, -- Requer privilégio de teleporte
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
+        if not player then return false, S("Player not found") end
         local volcano_pos = find_volcano_position()
-
-        if not volcano_pos then
-            return false, S("The volcano has not yet been generated. Please wait a moment")
-        end
-
+        if not volcano_pos then return false, S("The volcano has not yet been generated. Please wait a moment") end
         -- Teleporta para o topo do vulcão
         local tp_pos = {
             x = volcano_pos.x - 8,
             y = VOLCANO_HEIGHT - 1, -- Pouco abaixo da altura da cratera
             z = volcano_pos.z - 8
         }
-
         player:set_pos(tp_pos)
-
-        return true,
-            S("Teleported to the volcano in X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
-    end,
+        return true, S("Teleported to the volcano in X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z) end,
 })
 -- Comando alternativo sem necessidade de privilégios (para testes)
 c.register_chatcommand("local_vulcan", {
     description = S("Shows the coordinates of the volcanic island"),
     func = function(name)
         local volcano_pos = find_volcano_position()
-
-        if not volcano_pos then
-            return false, S("The volcano has not yet been generated. Please wait a moment")
-        end
-
-        return true, S("Volcanic island at X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z)
-    end,
+        if not volcano_pos then return false, S("The volcano has not yet been generated. Please wait a moment") end
+        return true, S("Volcanic island at X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z) end,
 })
 
 -- COMANDO PARA IR ATÉ O CARANGUEJO
@@ -2861,33 +2807,19 @@ c.register_chatcommand("crab", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
-        if not statue_pos then
-            return false, S("The crab statue has not yet been generated. Explore the volcano area first")
-        end
-
+        if not player then return false, S("Player not found") end
+        if not statue_pos then return false, S("The crab statue has not yet been generated. Explore the volcano area first") end
         -- Teleporta 2 blocos acima da estátua para não ficar preso na água
         local tp_pos = { x = statue_pos.x, y = statue_pos.y + 2, z = statue_pos.z }
         player:set_pos(tp_pos)
-
-        return true,
-            S("Teleported to the giant crab statue at X:") ..
-            statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
-    end,
+        return true, S("Teleported to the giant crab statue at X:") .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z end,
 })
 -- Comando para só ver as coordenadas sem teleportar
 c.register_chatcommand("local_crab", {
     description = S("Show the coordinates of the giant crab statue"),
     func = function(name)
-        if not statue_pos then
-            return false, S("The crab statue has not yet been generated. Explore the volcano area first")
-        end
-
-        return true, S("Giant crab statue at X:") .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z
-    end,
+        if not statue_pos then return false, S("The crab statue has not yet been generated. Explore the volcano area first") end
+        return true, S("Giant crab statue at X:") .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z end,
 })
 
 -- COMANDO PARA IR ATÉ O MAR DE AR
@@ -2896,16 +2828,11 @@ c.register_chatcommand("airsea", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
+        if not player then return false, S("Player not found") end
         -- Teleporta 2 blocos acima da estátua
         local tp_pos = { x = -700, y = 1, z = 700 }
         player:set_pos(tp_pos)
-
-        return true, S("Teleported to the air sea at X: -700, Y = 1, Z = 700")
-    end,
+        return true, S("Teleported to the air sea at X: -700, Y = 1, Z = 700") end,
 })
 
 -- COMANDO PARA IR ATÉ A ILHA MAIS BAIXA
@@ -2914,33 +2841,18 @@ c.register_chatcommand("flyisland", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
-        if not lowest_island_pos then
-            return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first")
-        end
-
+        if not player then return false, S("Player not found") end
+        if not lowest_island_pos then return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first") end
         local tp_pos = { x = lowest_island_pos.x, y = lowest_island_pos.y + 2, z = lowest_island_pos.z }
         player:set_pos(tp_pos)
-
-        return true,
-            S("Teleported to the fly island at X:") ..
-            lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z
-    end,
+        return true, S("Teleported to the fly island at X:") .. lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z end,
 })
 -- Comando para só ver as coordenadas sem teleportar
 c.register_chatcommand("local_flyisland", {
     description = S("Shows the coordinates of the fly island"),
     func = function(name)
-        if not lowest_island_pos then
-            return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first")
-        end
-
-        return true,
-            S("Fly island at X:") .. lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z
-    end,
+        if not lowest_island_pos then return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first") end
+        return true, S("Fly island at X:") .. lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z end,
 })
 
 -- COMANDO PARA IR ATÉ O SENTINELA
@@ -2949,33 +2861,20 @@ c.register_chatcommand("sentinel", {
     privs = { teleport = true },
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then
-            return false, S("Player not found")
-        end
-
-        if not sentinel_pos then
-            return false, S("The sentinel statue has not yet spawned. Explore the floating islands first")
-        end
-
+        if not player then return false, S("Player not found") end
+        if not sentinel_pos then return false, S("The sentinel statue has not yet spawned. Explore the floating islands first") end
         -- Teleporta 2 blocos acima da estátua
         local tp_pos = { x = sentinel_pos.x, y = sentinel_pos.y + 2, z = sentinel_pos.z }
         player:set_pos(tp_pos)
-
-        return true,
-            S("Teleported to the sentinel statue at X:") ..
-            sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
+        return true, S("Teleported to the sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
     end,
 })
 -- Comando para só ver as coordenadas sem teleportar
 c.register_chatcommand("local_sentinel", {
     description = S("Shows the coordinates of the sentinel statue"),
     func = function(name)
-        if not sentinel_pos then
-            return false, S("The sentinel statue has not yet spawned. Explore the floating islands first")
-        end
-
-        return true, S("Sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z
-    end,
+        if not sentinel_pos then return false, S("The sentinel statue has not yet spawned. Explore the floating islands first") end
+        return true, S("Sentinel statue at X:") .. sentinel_pos.x .. " Y:" .. sentinel_pos.y .. " Z:" .. sentinel_pos.z end,
 })
 
 c.log("action", "[TERRAIN] Continental generation with biomes, trees, coconut palms and more loaded")

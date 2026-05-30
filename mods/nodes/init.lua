@@ -1,6 +1,7 @@
 -- NODES
-core.log("action", "[NODES] init.lua loaded")
-local S = core.get_translator("nh_nodes")
+local c = core
+c.log("action", "[NODES] init.lua loaded")
+local S = c.get_translator("nh_nodes")
 -- table_xyz
 local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
 local function populate_true(names)
@@ -30,7 +31,7 @@ local facedir_to_dir = {
     [3] = {x=1, y=0, z=0},}  -- oeste
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
-    for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 2)) do
+    for _, obj in ipairs(c.get_objects_inside_radius(player:get_pos(), 2)) do
         local ent = obj:get_luaentity()
         if ent and ent.name == "nh_nodes:glow_entity" then obj:remove() end
     end
@@ -39,10 +40,10 @@ end
 local function attach_glow(player)
     -- remove glow anterior se existir
     detach_glow(player)
-    local glow_obj = core.add_entity(player:get_pos(), "nh_nodes:glow_entity")
+    local glow_obj = c.add_entity(player:get_pos(), "nh_nodes:glow_entity")
     if glow_obj then glow_obj:set_attach(player, "bone_RHand", { x = 1.25, y = 0, z = 0 }, { x = 0, y = 0, z = 0 }) end
 end
-core.register_entity("nh_nodes:glow_entity", {
+c.register_entity("nh_nodes:glow_entity", {
     initial_properties = {
         visual = "sprite", textures = { "spark_particle.png^[colorize:#FF8800:150" }, 
         visual_size = {x = 0.05, y = 0.05}, collisionbox = {0, 0, 0, 0, 0, 0}, 
@@ -52,8 +53,8 @@ core.register_entity("nh_nodes:glow_entity", {
         self.object:set_rotation({ x = rot.x, y = rot.y + 0.15, z = rot.z + 0.07, })
     end,
 })
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
+c.register_globalstep(function(dtime)
+    for _, player in ipairs(c.get_connected_players()) do
         local name = player:get_player_name()
         local pos  = player:get_pos()
         -- remove o glow se o player tirar a litgrenade da mão sem arremessar
@@ -73,11 +74,11 @@ core.register_globalstep(function(dtime)
                     y = math.floor(pos.y + feet_offset),
                     z = math.floor(pos.z + 0.5),
                 }
-                local node        = core.get_node(below)
-                local node_def    = core.registered_nodes[node.name]
+                local node        = c.get_node(below)
+                local node_def    = c.registered_nodes[node.name]
                 if node_def and node_def.sounds and node_def.sounds.footstep then
                     local snd = node_def.sounds.footstep
-                    core.sound_play(snd.name,
+                    c.sound_play(snd.name,
                         { pos = pos, gain = snd.gain or 0.5, max_hear_distance = 10, })
                 end
             end
@@ -86,13 +87,13 @@ core.register_globalstep(function(dtime)
         lava_damage_timer[name] = (lava_damage_timer[name] or 0) + dtime
         if lava_damage_timer[name] >= 1.0 then
             lava_damage_timer[name] = 0
-            local feet_node = core.get_node({ x = pos.x, y = pos.y, z = pos.z })
-            local head_node = core.get_node({ x = pos.x, y = pos.y + 1, z = pos.z })
+            local feet_node = c.get_node({ x = pos.x, y = pos.y, z = pos.z })
+            local head_node = c.get_node({ x = pos.x, y = pos.y + 1, z = pos.z })
             if LAVA_NODES[feet_node.name] or LAVA_NODES[head_node.name] then player:set_hp(player:get_hp() - 22) end
         end
         -- DANO DAS FOLHAS CAINDO
         local above_pos = { x = pos.x, y = pos.y + 2, z = pos.z }
-        for _, obj in pairs(core.get_objects_inside_radius(above_pos, 1.5)) do
+        for _, obj in pairs(c.get_objects_inside_radius(above_pos, 1.5)) do
             local entity = obj:get_luaentity()
             if entity and entity.name == "__builtin:falling_node" then
                 local node = entity.node
@@ -104,8 +105,8 @@ core.register_globalstep(function(dtime)
         end
         -- TOCHA NA AGUA (troca torch2 por torch3)
         local head_pos  = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local head_node = core.get_node(head_pos)
-        if core.get_item_group(head_node.name, "water") > 0 then
+        local head_node = c.get_node(head_pos)
+        if c.get_item_group(head_node.name, "water") > 0 then
             local inv = player:get_inventory()
             for i = 1, inv:get_size("main") do
                 local stack = inv:get_stack("main", i)
@@ -123,26 +124,26 @@ core.register_globalstep(function(dtime)
             -- Remove luz antiga
             if players_with_torch[name].pos then
                 local old_pos  = players_with_torch[name].pos
-                local old_node = core.get_node(old_pos)
+                local old_node = c.get_node(old_pos)
                 if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
-                    core.remove_node(old_pos)
+                    c.remove_node(old_pos)
                 end
             end
             -- Coloca nova luz invisivel
             local light_pos  = vector.round(light_pos_base)
-            local light_node = core.get_node(light_pos)
+            local light_node = c.get_node(light_pos)
             if light_node.name == "air" then
-                core.set_node(light_pos, { name = "nh_nodes:torch_light" })
+                c.set_node(light_pos, { name = "nh_nodes:torch_light" })
                 players_with_torch[name].pos = light_pos
             elseif light_node.name == "nh_nodes:water" then
-                core.set_node(light_pos, { name = "nh_nodes:crystal_light" })
+                c.set_node(light_pos, { name = "nh_nodes:crystal_light" })
                 players_with_torch[name].pos = light_pos
             end
         else
             -- Remove luz se parou de segurar
             if players_with_torch[name] and players_with_torch[name].pos then
                 local old_pos  = players_with_torch[name].pos
-                local old_node = core.get_node(old_pos)
+                local old_node = c.get_node(old_pos)
                 if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
                     core
                         .remove_node(old_pos)
@@ -159,7 +160,7 @@ local function spawn_lava_burn_particles(pos)
     -- 'pos' é a posição do node de lava (canto inferior-esquerdo = pos - 0.5)
     -- As partículas sobem da base (pos.y - 0.5) até o topo (pos.y + 0.5) do node.
     local base_y = pos.y - 0.5
-    core.add_particlespawner({
+    c.add_particlespawner({
         amount             = 24,  -- quantidade de partículas por emissão
         time               = 0.4, -- duração total do spawner (segundos)
         -- Origem: espalhada na face superior do node de lava
@@ -184,11 +185,11 @@ local function spawn_lava_burn_particles(pos)
     })
 end
 local lava_drop_timer = 0
-core.register_globalstep(function(dtime)
+c.register_globalstep(function(dtime)
     lava_drop_timer = lava_drop_timer + dtime
     if lava_drop_timer < 0.5 then return end
     lava_drop_timer = 0
-    for _, obj in ipairs(core.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
+    for _, obj in ipairs(c.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
         if not obj:is_player() then
             local entity = obj:get_luaentity()
             if entity and entity.name == "__builtin:item" then
@@ -196,7 +197,7 @@ core.register_globalstep(function(dtime)
                 if pos then
                     -- Node abaixo do drop (parte inferior do item)
                     local below = { x = math.floor(pos.x + 0.5), y = math.floor(pos.y), z = math.floor(pos.z + 0.5), }
-                    local node_below = core.get_node(below)
+                    local node_below = c.get_node(below)
                     if LAVA_NODES[node_below.name] then
                         -- Emite partículas antes de remover
                         spawn_lava_burn_particles({
@@ -211,10 +212,10 @@ core.register_globalstep(function(dtime)
         end
     end
 end)
-local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
+local gravity = tonumber(c.settings:get("movement_gravity")) or 9.81
 -- Calcula a direção da corrente da água.
 local function get_liquid_flow_dir(pos)
-    local node_here = core.get_node(pos)
+    local node_here = c.get_node(pos)
     local p2_here = node_here.param2
     -- Só opera em flowing (source não tem corrente direcional)
     if not WATER_MIDNODES[node_here.name] then return nil end
@@ -227,8 +228,8 @@ local function get_liquid_flow_dir(pos)
     local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
     for _, d in ipairs(dirs) do
         local nb_pos = { x = pos.x + d.x, y = pos.y, z = pos.z + d.z }
-        local nb     = core.get_node(nb_pos)
-        local nb_def = core.registered_nodes[nb.name]
+        local nb     = c.get_node(nb_pos)
+        local nb_def = c.registered_nodes[nb.name]
         if not nb_def then goto next_dir end
         local is_flowing = WATER_MIDNODES[nb.name]
         -- Vizinho é source → nível máximo (param2 = 0 equivalente)
@@ -258,15 +259,15 @@ local SPEED_FALL        = 2.0 -- queda em correnteza vertical (m/s)
 -- de gravidade uma única vez ao sair, sem chamar set_acceleration toda tick)
 local drop_was_in_water = {}
 local drop_last_flow    = {} -- última direção de corrente detectada por drop
-core.register_globalstep(function(dtime)
-    for _, obj in ipairs(core.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
+c.register_globalstep(function(dtime)
+    for _, obj in ipairs(c.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
         if obj:is_player() then goto drop_next end
         local entity = obj:get_luaentity()
         if not (entity and entity.name == "__builtin:item") then goto drop_next end
         local pos = obj:get_pos()
         if not pos then goto drop_next end
         local ipos     = { x = math.floor(pos.x + 0.5), y = math.floor(pos.y + 0.5), z = math.floor(pos.z + 0.5), }
-        local node     = core.get_node(ipos)
+        local node     = c.get_node(ipos)
         local in_full  = WATER_FULLNODES[node.name]
         local in_mid   = WATER_MIDNODES[node.name]
         local in_water = in_full or in_mid
@@ -320,8 +321,8 @@ core.register_globalstep(function(dtime)
     end
 end)
 local drop_rot_timer = 0
-core.after(0, function()
-    local item_ent = core.registered_entities["__builtin:item"]
+c.after(0, function()
+    local item_ent = c.registered_entities["__builtin:item"]
     if not item_ent then return end
     -- Patch no set_item: é aqui que o automatic_rotate é definido pelo builtin
     local original_set_item = item_ent.set_item
@@ -339,19 +340,19 @@ core.after(0, function()
         self.object:set_rotation({ x = math.rad(45) + tremor, y = tremor, z = math.rad(45) + tremor, })
     end
 end)
-core.register_globalstep(function(dtime)
+c.register_globalstep(function(dtime)
     drop_rot_timer = drop_rot_timer + dtime
 end)
 -- Limpeza unificada ao deslogar
-core.register_on_leaveplayer(function(player)
+c.register_on_leaveplayer(function(player)
     local name              = player:get_player_name()
     footstep_timer[name]    = nil
     lava_damage_timer[name] = nil
     if players_with_torch[name] and players_with_torch[name].pos then
         local old_pos  = players_with_torch[name].pos
-        local old_node = core.get_node(old_pos)
+        local old_node = c.get_node(old_pos)
         if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
-            core.remove_node(old_pos)
+            c.remove_node(old_pos)
         end
         players_with_torch[name] = nil
     end
@@ -739,7 +740,7 @@ recipes_furnace = {
 -- SISTEMA GENÉRICO DE CRAFTING
 local craft_stations = {}
 -- Registra a entidade de display (compartilhada por todas as estações)
-core.register_entity("nh_nodes:display_item", {
+c.register_entity("nh_nodes:display_item", {
     initial_properties = {
         visual = "wielditem", visual_size = { x = 0.25, y = 0.25 },
         physical = false, collide_with_objects = false,
@@ -750,7 +751,7 @@ core.register_entity("nh_nodes:display_item", {
     station_pos = nil,
     on_activate = function(self, staticdata)
         if staticdata and staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data then
                 self.itemstring = data.itemstring or ""
                 self.station_pos = data.station_pos
@@ -759,7 +760,7 @@ core.register_entity("nh_nodes:display_item", {
         end
     end,
     get_staticdata = function(self)
-        return core.serialize({ itemstring = self.itemstring, station_pos = self.station_pos })
+        return c.serialize({ itemstring = self.itemstring, station_pos = self.station_pos })
     end,
     on_step = function(self, dtime)
         self.object:set_velocity({ x = 0, y = 0, z = 0 })
@@ -774,7 +775,7 @@ core.register_entity("nh_nodes:display_item", {
 -- FUNÇÕES AUXILIARES
 -- Remove apenas entidades desta estação específica
 local function remove_item_entities(pos)
-    local objects = core.get_objects_inside_radius(pos, 2)
+    local objects = c.get_objects_inside_radius(pos, 2)
     for _, obj in pairs(objects) do
         local entity = obj:get_luaentity()
         if entity and entity.name == "nh_nodes:display_item" then
@@ -784,7 +785,7 @@ local function remove_item_entities(pos)
     end
 end
 local function update_item_entities(pos, config)
-    local meta = core.get_meta(pos)
+    local meta = c.get_meta(pos)
     local inv = meta:get_inventory()
     if not inv or inv:get_size("craft") == 0 then return end -- Verifica se o inventário existe antes de continuar
     remove_item_entities(pos)
@@ -796,7 +797,7 @@ local function update_item_entities(pos, config)
         local stack = craft_list[i]
         if not stack:is_empty() then
             local item_pos = vector.add(pos, config.positions[i])
-            local obj = core.add_entity(item_pos, "nh_nodes:display_item")
+            local obj = c.add_entity(item_pos, "nh_nodes:display_item")
             if obj then
                 local entity = obj:get_luaentity()
                 if entity then
@@ -811,7 +812,7 @@ local function update_item_entities(pos, config)
     local output_stack = output_list[1]
     if output_stack and not output_stack:is_empty() then
         local output_pos = vector.add(pos, config.output_position)
-        local obj = core.add_entity(output_pos, "nh_nodes:display_item")
+        local obj = c.add_entity(output_pos, "nh_nodes:display_item")
         if obj then
             local entity = obj:get_luaentity()
             if entity then
@@ -844,15 +845,15 @@ local function check_recipe(inv, recipe)
 end
 
 local function check_and_craft(pos, config, player)
-    local meta = core.get_meta(pos)
+    local meta = c.get_meta(pos)
     local inv = meta:get_inventory()
     if config.can_craft then
         local ok, reason = config.can_craft(pos)
         if not ok then
             inv:set_stack("output", 1, ItemStack(""))
-            core.after(0.01, function() update_item_entities(pos, config) end)
+            c.after(0.01, function() update_item_entities(pos, config) end)
             if player and reason then
-                core.chat_send_player(player:get_player_name(), reason)
+                c.chat_send_player(player:get_player_name(), reason)
             end
             return
         end
@@ -867,17 +868,17 @@ local function check_and_craft(pos, config, player)
         end
         if check_recipe(inv, recipe) then
             inv:set_stack("output", 1, ItemStack(recipe.output))
-            core.after(0.01, function() update_item_entities(pos, config) end)
+            c.after(0.01, function() update_item_entities(pos, config) end)
             return
         end
         ::continue::
     end
     inv:set_stack("output", 1, ItemStack(""))
-    core.after(0.01, function() update_item_entities(pos, config) end)
+    c.after(0.01, function() update_item_entities(pos, config) end)
 end
 
 local function consume_craft_materials(pos)
-    local meta = core.get_meta(pos)
+    local meta = c.get_meta(pos)
     local inv = meta:get_inventory()
     for i = 1, inv:get_size("craft") do
         local stack = inv:get_stack("craft", i)
@@ -903,7 +904,7 @@ end
 
 local function show_craft_grid(player, pos, config)
     local player_name = player:get_player_name()
-    local pos_string = core.pos_to_string(pos)
+    local pos_string = c.pos_to_string(pos)
 
     -- Verifica se o backchest está equipado para mostrar slots extras
     local has_backchest = player_has_backchest_equipped(player)
@@ -948,7 +949,7 @@ local function show_craft_grid(player, pos, config)
         "button[7,4.1;1,0.8;craft_all;" .. S "All" .. "]" .. player_slots ..
         "listring[nodemeta:" .. pos.x .. "," .. pos.y ..
         "," .. pos.z .. ";craft]" .. "listring[current_player;main]"
-    core.show_formspec(player_name, config.node_name .. "_" .. pos_string, formspec)
+    c.show_formspec(player_name, config.node_name .. "_" .. pos_string, formspec)
 end
 -- FUNÇÃO PRINCIPAL DE REGISTRO
 function register_craft_station(node_name, config)
@@ -989,7 +990,7 @@ function register_craft_station(node_name, config)
     if config.wielded_visual_size then node_def.wielded_visual_size = config.wielded_visual_size end
     -- Função auxiliar para garantir que o inventário existe
     local function ensure_inventory(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
         if inv:get_size("craft") == 0 then inv:set_size("craft", config.grid_size) end
         if inv:get_size("output") == 0 then inv:set_size("output", 1) end
@@ -1007,8 +1008,8 @@ function register_craft_station(node_name, config)
         -- ✅ EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
         if custom_on_construct then custom_on_construct(pos) end
         -- Depois executa o padrão do crafting
-        core.after(0.5, function()
-            local node = core.get_node(pos)
+        c.after(0.5, function()
+            local node = c.get_node(pos)
             if node and node.name == node_name then update_item_entities(pos, config) end
         end)
     end
@@ -1032,12 +1033,12 @@ function register_craft_station(node_name, config)
             return itemstack
         end
         if itemstack and not itemstack:is_empty() then
-            local item_def = core.registered_items[itemstack:get_name()]
+            local item_def = c.registered_items[itemstack:get_name()]
             if item_def and item_def.type == "node" then
-                local result = core.item_place_node(itemstack, clicker, pointed_thing)
+                local result = c.item_place_node(itemstack, clicker, pointed_thing)
                 -- Toca o som de place manualmente
                 if config.sounds and config.sounds.place then
-                    core.sound_play(config.sounds.place.name,
+                    c.sound_play(config.sounds.place.name,
                         { pos = pointed_thing.above, gain = config.sounds.place.gain or 1.0, max_hear_distance = 16, })
                 end
                 return result
@@ -1056,7 +1057,7 @@ function register_craft_station(node_name, config)
         end
         -- Mão vazia e sem (E/Aux1): mostra dica
         if itemstack:is_empty() then
-            core.chat_send_player(clicker:get_player_name(),
+            c.chat_send_player(clicker:get_player_name(),
                 S(
                     "I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something..."))
         end
@@ -1079,7 +1080,7 @@ function register_craft_station(node_name, config)
         elseif listname == "craft" then
             check_and_craft(pos, config)
         elseif listname == "output" then
-            local meta = core.get_meta(pos)
+            local meta = c.get_meta(pos)
             local inv = meta:get_inventory()
             local player_inv = player:get_inventory()
             -- Consome materiais do primeiro craft
@@ -1088,7 +1089,7 @@ function register_craft_station(node_name, config)
             local max_crafts = 64
             local crafted = 1
             -- Pequeno delay para garantir que o primeiro item já foi movido
-            core.after(0.05, function()
+            c.after(0.05, function()
                 while crafted < max_crafts do
                     local recipe_found = false
 
@@ -1130,28 +1131,28 @@ function register_craft_station(node_name, config)
     end
     node_def.on_destruct = function(pos)
         -- Dropa os itens ANTES de destruir
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
 
         -- Dropa todos os itens do grid de craft
         for i = 1, inv:get_size("craft") do
             local stack = inv:get_stack("craft", i)
-            if not stack:is_empty() then core.add_item(pos, stack) end
+            if not stack:is_empty() then c.add_item(pos, stack) end
         end
         local tool_stack = inv:get_stack("tool", 1)
-        if not tool_stack:is_empty() then core.add_item(pos, tool_stack) end
+        if not tool_stack:is_empty() then c.add_item(pos, tool_stack) end
         -- Dropa o item do output também (se houver)
         local output_stack = inv:get_stack("output", 1)
-        if not output_stack:is_empty() then core.add_item(pos, output_stack) end
+        if not output_stack:is_empty() then c.add_item(pos, output_stack) end
         -- Remove as entidades de display
         remove_item_entities(pos)
     end
     -- Registra o node com todas as propriedades
     if custom_on_punch then node_def.on_punch = custom_on_punch end
-    core.register_node(node_name, node_def)
+    c.register_node(node_name, node_def)
 end
 
-core.register_on_player_receive_fields(function(player, formname, fields)
+c.register_on_player_receive_fields(function(player, formname, fields)
     -- Verifica se é um formspec de craft station
     for node_name, config in pairs(craft_stations) do
         if formname:find(node_name) then
@@ -1159,10 +1160,10 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             local pos_string = formname:match("_(.+)$")
             if not pos_string then return end
 
-            local pos = core.string_to_pos(pos_string)
+            local pos = c.string_to_pos(pos_string)
             if not pos then return end
 
-            local meta = core.get_meta(pos)
+            local meta = c.get_meta(pos)
             local inv = meta:get_inventory()
             local player_inv = player:get_inventory()
 
@@ -1216,7 +1217,7 @@ local function apply_poison_damage(player, damage_per_tick, total_damage, interv
     -- Inicia o primeiro tick
     apply_tick()
 end
-core.register_node("nh_nodes:dirt_ramp", {
+c.register_node("nh_nodes:dirt_ramp", {
     description         = "Dirt Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1236,7 +1237,7 @@ core.register_node("nh_nodes:dirt_ramp", {
     selection_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
     collision_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
 })
-core.register_node("nh_nodes:dirt_corner", {
+c.register_node("nh_nodes:dirt_corner", {
     description         = S "Dirt Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1265,7 +1266,7 @@ core.register_node("nh_nodes:dirt_corner", {
                 { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
 })
 
-core.register_node("nh_nodes:dirt_insidecorner", {
+c.register_node("nh_nodes:dirt_insidecorner", {
     description         = S "Dirt Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1315,22 +1316,22 @@ register_craft_station("nh_nodes:dirt", {
     },
     on_construct = function(pos)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
-        local light = core.get_node_light(above)
-        --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
-        -- core.chat_send_all("   Bloco acima: " .. node_above)
+        local node_above = c.get_node(above).name
+        local light = c.get_node_light(above)
+        --c.chat_send_all("🟤 DIRT construído em " .. c.pos_to_string(pos))
+        -- c.chat_send_all("   Bloco acima: " .. node_above)
         if light and light > 4 then
-            core.get_node_timer(pos):start(math.random(30, 60))
-            -- core.chat_send_all("   ✅ Timer iniciado!")
+            c.get_node_timer(pos):start(math.random(30, 60))
+            -- c.chat_send_all("   ✅ Timer iniciado!")
         else
-            --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
+            --c.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
         end
     end,
 
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
-        local light = core.get_node_light(above)
+        local node_above = c.get_node(above).name
+        local light = c.get_node_light(above)
         -- Bloco líquido ou lava acima impede virar grama
         local blocked_nodes = populate_true({ "water", "water_flowing", "water2", "water2_flowing", "lava",
             "lava_flowing", "bluelava", "bluelava_flowing" })
@@ -1342,14 +1343,14 @@ register_craft_station("nh_nodes:dirt", {
             local neighbors = { { x = pos.x + 1, y = pos.y, z = pos.z }, }
             local has_grass_neighbor = false
             for _, npos in ipairs(neighbors) do
-                local neighbor_name = core.get_node(npos).name
+                local neighbor_name = c.get_node(npos).name
                 if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
                     has_grass_neighbor = true
                     break
                 end
             end
             if has_grass_neighbor then
-                core.set_node(pos, { name = "nh_nodes:top_grass" })
+                c.set_node(pos, { name = "nh_nodes:top_grass" })
                 return false
             end
         end
@@ -1364,7 +1365,7 @@ register_craft_station("nh_nodes:dirt", {
     recipes = recipes_floor
 })
 
-core.register_node("nh_nodes:wetdirt", {
+c.register_node("nh_nodes:wetdirt", {
     description = S "Wet Dirt",
     tiles = { "wetdirt.png" },
     groups = { crumbly = 2 },
@@ -1388,30 +1389,30 @@ core.register_node("nh_nodes:wetdirt", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_construct = function(pos)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
-        local light = core.get_node_light(above)
-        --core.chat_send_all("🟤 DIRT construído em " .. core.pos_to_string(pos))
-        -- core.chat_send_all("   Bloco acima: " .. node_above)
+        local node_above = c.get_node(above).name
+        local light = c.get_node_light(above)
+        --c.chat_send_all("🟤 DIRT construído em " .. c.pos_to_string(pos))
+        -- c.chat_send_all("   Bloco acima: " .. node_above)
         if light and light > 4 then
-            core.get_node_timer(pos):start(math.random(30, 60))
-            -- core.chat_send_all("   ✅ Timer iniciado!")
+            c.get_node_timer(pos):start(math.random(30, 60))
+            -- c.chat_send_all("   ✅ Timer iniciado!")
         else
-            --core.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
+            --c.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
         end
     end,
     on_timer = function(pos, elapsed)
-        --core.chat_send_all("⏰ TIMER disparou em " .. core.pos_to_string(pos))
+        --c.chat_send_all("⏰ TIMER disparou em " .. c.pos_to_string(pos))
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
-        local light = core.get_node_light(above)
-        --core.chat_send_all("   Bloco acima: " .. node_above)
+        local node_above = c.get_node(above).name
+        local light = c.get_node_light(above)
+        --c.chat_send_all("   Bloco acima: " .. node_above)
 
         if light and light <= 4 then
-            -- core.chat_send_all("   ❌ Tem bloco em cima escurecendo, parando timer")
+            -- c.chat_send_all("   ❌ Tem bloco em cima escurecendo, parando timer")
             return false
         end
-        -- local light = core.get_node_light(pos)
-        -- core.chat_send_all("   Luz: " .. tostring(light))
+        -- local light = c.get_node_light(pos)
+        -- c.chat_send_all("   Luz: " .. tostring(light))
         if light and light > 4 then
             local neighbors = {}
             for dx = -1, 1 do
@@ -1427,32 +1428,32 @@ core.register_node("nh_nodes:wetdirt", {
             local has_grass_neighbor = false
             local grass_found = ""
             for _, npos in ipairs(neighbors) do
-                local neighbor_name = core.get_node(npos).name
+                local neighbor_name = c.get_node(npos).name
                 if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
                     has_grass_neighbor = true
-                    grass_found = neighbor_name .. " em " .. core.pos_to_string(npos)
+                    grass_found = neighbor_name .. " em " .. c.pos_to_string(npos)
                     break
                 end
             end
-            --core.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
+            --c.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
             -- if has_grass_neighbor then
-            --core.chat_send_all("   🌱 " .. grass_found)
+            --c.chat_send_all("   🌱 " .. grass_found)
             -- end
             if has_grass_neighbor then
-                core.set_node(pos, { name = "nh_nodes:top_grass" })
-                --core.chat_send_all("   🟩 CONVERTEU PARA GRAMA!")
+                c.set_node(pos, { name = "nh_nodes:top_grass" })
+                --c.chat_send_all("   🟩 CONVERTEU PARA GRAMA!")
                 return false
                 -- else
-                --core.chat_send_all("   ⏳ Sem grama ao redor, tentando novamente...")
+                --c.chat_send_all("   ⏳ Sem grama ao redor, tentando novamente...")
             end
             -- else
-            --core.chat_send_all("   🌙 Pouca luz (precisa > 4)")
+            --c.chat_send_all("   🌙 Pouca luz (precisa > 4)")
         end
         return true
     end,
 })
 
-core.register_node("nh_nodes:tilleddirt", {
+c.register_node("nh_nodes:tilleddirt", {
     description = S "Tilled Dirt",
     tiles = { "tilleddirt.png", "terra.png" },
     groups = { crumbly = 2 },
@@ -1464,10 +1465,10 @@ core.register_node("nh_nodes:tilleddirt", {
         place = { name = "punchtimber3", gain = 0.5 },},
     wielded_bone_position = { pos = xyz(0.5, 0.5, 1.65) },
     offhand_bone_position = { pos = xyz(1.5, 0, 0) },
-    on_construct = function(pos) core.get_node_timer(pos):start(math.random(30, 60)) end,
+    on_construct = function(pos) c.get_node_timer(pos):start(math.random(30, 60)) end,
     on_timer = function(pos, elapsed)
         local above = xyz(pos.x, pos.y + 1, pos.z)
-        local node_above = core.get_node(above).name
+        local node_above = c.get_node(above).name
         if node_above ~= "air" then return true end
 
         local laterals = { xyz(pos.x + 1, pos.y, pos.z), xyz(pos.x - 1, pos.y, pos.z), xyz(pos.x, pos.y, pos.z + 1),
@@ -1478,22 +1479,22 @@ core.register_node("nh_nodes:tilleddirt", {
         }
         local has_water = false
         for _, npos in ipairs(laterals) do
-            local name = core.get_node(npos).name
+            local name = c.get_node(npos).name
             if name == "nh_nodes:water" or name == "nh_nodes:water2" or name == "nh_nodes:water_flowing" or name == "nh_nodes:water2_flowing" then
                 has_water = true
                 break
             end
         end
         if has_water then
-            core.set_node(pos, { name = "nh_nodes:wettilleddirt" })
+            c.set_node(pos, { name = "nh_nodes:wettilleddirt" })
         else
-            core.set_node(pos, { name = "nh_nodes:dirt" })
+            c.set_node(pos, { name = "nh_nodes:dirt" })
         end
         return false
     end,
 })
 
-core.register_node("nh_nodes:wettilleddirt", {
+c.register_node("nh_nodes:wettilleddirt", {
     description = S "Wet Tilled Dirt",
     tiles = { "wettilleddirt.png", "wetdirt.png" },
     groups = { crumbly = 2 },
@@ -1513,17 +1514,17 @@ core.register_node("nh_nodes:wettilleddirt", {
         --rot = {x = 0, y = 0, z = -110}
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    on_construct = function(pos) core.get_node_timer(pos):start(math.random(60, 120)) end,
+    on_construct = function(pos) c.get_node_timer(pos):start(math.random(60, 120)) end,
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
+        local node_above = c.get_node(above).name
         -- tem bloco em cima, aguarda e tenta de novo
         if node_above ~= "air" then return true end
-        core.set_node(pos, { name = "nh_nodes:wetdirt" })
+        c.set_node(pos, { name = "nh_nodes:wetdirt" })
         return false
     end,
 })
-core.register_node("nh_nodes:top_grass_ramp", {
+c.register_node("nh_nodes:top_grass_ramp", {
     description         = "Grass Ramp",
     mesh                = "grass_slope.obj",
     tiles               = { "grass_slope.png" },
@@ -1542,7 +1543,7 @@ core.register_node("nh_nodes:top_grass_ramp", {
     collision_box       = { type = "fixed", fixed = { { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }, }, },
 })
 
-core.register_node("nh_nodes:top_grass_corner", {
+c.register_node("nh_nodes:top_grass_corner", {
     description         = "Grass Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1568,7 +1569,7 @@ core.register_node("nh_nodes:top_grass_corner", {
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
 })
 
-core.register_node("nh_nodes:top_grass_insidecorner", {
+c.register_node("nh_nodes:top_grass_insidecorner", {
     description         = "Grass Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1620,20 +1621,20 @@ register_craft_station("nh_nodes:top_grass", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
+        local node_above = c.get_node(above).name
         -- Bloco líquido ou lava acima faz virar terra imediatamente
         local blocked_nodes = populate_true({ "water", "water_flowing", "water2", "water2_flowing", "lava",
             "lava_flowing", "bluelava", "bluelava_flowing", })
 
         if blocked_nodes[node_above] then
-            core.set_node(pos, { name = "nh_nodes:dirt" })
+            c.set_node(pos, { name = "nh_nodes:dirt" })
             return false -- Grama virou terra, para o timer
         end
         -- Se NÃO é ar, verifica luz
         if node_above ~= "air" then
-            local light = core.get_node_light(above)
+            local light = c.get_node_light(above)
             if light and light <= 4 then
-                core.set_node(pos, { name = "nh_nodes:dirt" })
+                c.set_node(pos, { name = "nh_nodes:dirt" })
                 return false
             end
         else
@@ -1676,19 +1677,19 @@ register_craft_station("nh_nodes:top_grass2", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_timer = function(pos, elapsed)
         local above = xyz(pos.x, pos.y + 1, pos.z)
-        local node_above = core.get_node(above).name
+        local node_above = c.get_node(above).name
         -- Bloco líquido ou lava acima faz virar terra imediatamente
         local blocked_nodes = populate_true({ "water", "water_flowing", "water2", "water2_flowing", "lava",
             "lava_flowing", "bluelava", "bluelava_flowing", })
         if blocked_nodes[node_above] then
-            core.set_node(pos, { name = "nh_nodes:dirt" })
+            c.set_node(pos, { name = "nh_nodes:dirt" })
             return false -- Grama virou terra, para o timer
         end
         -- Se NÃO é ar, verifica luz
         if node_above ~= "air" then
-            local light = core.get_node_light(above)
+            local light = c.get_node_light(above)
             if light and light <= 4 then
-                core.set_node(pos, { name = "nh_nodes:dirt" })
+                c.set_node(pos, { name = "nh_nodes:dirt" })
                 return false
             end
         else
@@ -1728,30 +1729,30 @@ register_craft_station("nh_nodes:grass", {
     },
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_timer = function(pos, elapsed)
-        --core.chat_send_all("⏰ TIMER de morte da grama disparou em " .. core.pos_to_string(pos))
+        --c.chat_send_all("⏰ TIMER de morte da grama disparou em " .. c.pos_to_string(pos))
         -- Verifica se há um bloco bloqueando a luz acima
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local node_above = core.get_node(above).name
-        --core.chat_send_all("   Bloco acima: " .. node_above)
+        local node_above = c.get_node(above).name
+        --c.chat_send_all("   Bloco acima: " .. node_above)
         -- Se NÃO é ar, significa que está tampado
         if node_above ~= "air" then
             -- Verifica se a luz está muito baixa
-            local light = core.get_node_light(above)
-            --core.chat_send_all("   Luz: " .. tostring(light))
+            local light = c.get_node_light(above)
+            --c.chat_send_all("   Luz: " .. tostring(light))
             if light and light <= 4 then
                 -- Converte para terra
-                core.set_node(pos, { name = "nh_nodes:dirt" })
-                --core.chat_send_all("   🟫 GRAMA VIROU TERRA (sem luz)")
+                c.set_node(pos, { name = "nh_nodes:dirt" })
+                --c.chat_send_all("   🟫 GRAMA VIROU TERRA (sem luz)")
                 return false -- Para o timer
                 -- else
-                --core.chat_send_all("   ☀️ Ainda tem luz suficiente")
+                --c.chat_send_all("   ☀️ Ainda tem luz suficiente")
             end
         else
-            --core.chat_send_all("   ✅ Ar acima, cancelando timer")
+            --c.chat_send_all("   ✅ Ar acima, cancelando timer")
             return false -- Para o timer se o bloco foi removido
         end
         -- Continua verificando
-        --core.chat_send_all("   Não se torna terra, terminada a verificação")
+        --c.chat_send_all("   Não se torna terra, terminada a verificação")
         return false
     end,
     title = S "2x2 Craft on the Lawn", -- ✅ Campo obrigatório!
@@ -1768,39 +1769,39 @@ register_craft_station("nh_nodes:grass", {
 })
 -- SISTEMA DE DETECÇÃO DE BLOCOS ACIMA DA GRAMA
 -- Callback global que detecta quando qualquer bloco é colocado
-core.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
+c.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
     -- Verifica a posição ABAIXO do bloco que foi colocado
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-    local node_below = core.get_node(below)
+    local node_below = c.get_node(below)
     -- Se o bloco abaixo é grama ou top_grass
     if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then
-        --core.chat_send_all("📦 Bloco colocado acima da grama em " .. core.pos_to_string(below))
+        --c.chat_send_all("📦 Bloco colocado acima da grama em " .. c.pos_to_string(below))
         -- Inicia o timer de morte da grama
-        core.get_node_timer(below):start(math.random(3, 6))
-        --core.chat_send_all("   ⏰ Timer de morte iniciado!")
+        c.get_node_timer(below):start(math.random(3, 6))
+        --c.chat_send_all("   ⏰ Timer de morte iniciado!")
     end
 end)
 -- Callback global que detecta quando qualquer bloco é REMOVIDO
-core.register_on_dignode(function(pos, oldnode, digger)
+c.register_on_dignode(function(pos, oldnode, digger)
     -- Verifica a posição ABAIXO do bloco que foi removido
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-    local node_below = core.get_node(below)
+    local node_below = c.get_node(below)
     -- Se o bloco abaixo é grama ou top_grass
     if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then
-        --core.chat_send_all("🌞 Bloco removido de cima da grama em " .. core.pos_to_string(below))
+        --c.chat_send_all("🌞 Bloco removido de cima da grama em " .. c.pos_to_string(below))
         -- PARA o timer (a grama voltou a ter luz)
-        core.get_node_timer(below):stop()
-        --core.chat_send_all("   ⏸️ Timer cancelado (grama exposta à luz novamente)")
+        c.get_node_timer(below):stop()
+        --c.chat_send_all("   ⏸️ Timer cancelado (grama exposta à luz novamente)")
         -- end
         -- Se o bloco abaixo é terra
     elseif node_below.name == "nh_nodes:dirt" then
-        --core.chat_send_all("🌞 Bloco removido de cima da terra em " .. core.pos_to_string(below))
+        --c.chat_send_all("🌞 Bloco removido de cima da terra em " .. c.pos_to_string(below))
         -- PARA o timer (a grama voltou a ter luz)
-        core.get_node_timer(below):start(math.random(3, 6))
-        --core.chat_send_all("   ⏸️ Timer iniciado (terra exposta à luz)")
+        c.get_node_timer(below):start(math.random(3, 6))
+        --c.chat_send_all("   ⏸️ Timer iniciado (terra exposta à luz)")
     end
 end)
-core.register_node("nh_nodes:sand_ramp", {
+c.register_node("nh_nodes:sand_ramp", {
     description         = S "Sand Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1826,7 +1827,7 @@ core.register_node("nh_nodes:sand_ramp", {
                 {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5 },},},
 })
 
-core.register_node("nh_nodes:sand_corner", {
+c.register_node("nh_nodes:sand_corner", {
     description         = S "Sand Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1855,7 +1856,7 @@ core.register_node("nh_nodes:sand_corner", {
                 {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0},     -- Base braço 1
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5},},},     -- Base braço 2
 })
-core.register_node("nh_nodes:sand_insidecorner", {
+c.register_node("nh_nodes:sand_insidecorner", {
     description         = S "Sand Inside Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
@@ -1935,7 +1936,7 @@ register_craft_station("nh_nodes:wet_sand", {
     layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
-core.register_node("nh_nodes:saprolite", {
+c.register_node("nh_nodes:saprolite", {
     description = S "Saprolite",
     tiles = { "saprolite.png" },
     groups = { cracky = 3 },
@@ -2004,7 +2005,7 @@ register_craft_station("nh_nodes:cobblestone", {
     layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
-core.register_node("nh_nodes:charcoal", {
+c.register_node("nh_nodes:charcoal", {
     description = S "Charcoal",
     tiles = {
         "topdowncharcoal.png", -- topo
@@ -2036,7 +2037,7 @@ core.register_node("nh_nodes:charcoal", {
     -- Som tocado ao bater no tronco
     sounds = { dug = { name = "punchtimber", gain = 0.5 }, dig = { name = "punchtimber", gain = 0.5 }, },
 })
-core.register_node("nh_nodes:charcoal2", {
+c.register_node("nh_nodes:charcoal2", {
     description = S "Smaller Charcoal",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
@@ -2062,7 +2063,7 @@ core.register_node("nh_nodes:charcoal2", {
         dig = { name = "punchtimber2", gain = 0.5 }, }
 })
 
-core.register_node("nh_nodes:coal", {
+c.register_node("nh_nodes:coal", {
     description = S "Black Coal" .. "\n" .. S "[Coal Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2080,7 +2081,7 @@ core.register_node("nh_nodes:coal", {
     drop = { items = { { items = { "nh_nodes:coalnugget 8" } }, }},
 })
 
-core.register_node("nh_nodes:coalnugget", {
+c.register_node("nh_nodes:coalnugget", {
     description = S "Coal Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
@@ -2092,7 +2093,7 @@ core.register_node("nh_nodes:coalnugget", {
     selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
 })
 
-core.register_node("nh_nodes:charcoalnugget", {
+c.register_node("nh_nodes:charcoalnugget", {
     description = S "Charcoal Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
@@ -2104,7 +2105,7 @@ core.register_node("nh_nodes:charcoalnugget", {
     selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
 })
 
-core.register_node("nh_nodes:copper", {
+c.register_node("nh_nodes:copper", {
     description = S "Chalcopyrite" .. "\n" .. S "[Copper Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2122,7 +2123,7 @@ core.register_node("nh_nodes:copper", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:coppernugget", {
+c.register_node("nh_nodes:coppernugget", {
     description = S "Copper Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
@@ -2134,7 +2135,7 @@ core.register_node("nh_nodes:coppernugget", {
     selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
 })
 
-core.register_node("nh_nodes:copperingot", {
+c.register_node("nh_nodes:copperingot", {
     description = S "Copper Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
@@ -2144,7 +2145,7 @@ core.register_node("nh_nodes:copperingot", {
     walkable = false,
 })
 
-core.register_node("nh_nodes:tin", {
+c.register_node("nh_nodes:tin", {
     description = S "Cassiterite" .. "\n" .. S "[Tin Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2162,7 +2163,7 @@ core.register_node("nh_nodes:tin", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:tinnugget", {
+c.register_node("nh_nodes:tinnugget", {
     description = S "Tin Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
@@ -2174,7 +2175,7 @@ core.register_node("nh_nodes:tinnugget", {
     selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
 })
 
-core.register_node("nh_nodes:tiningot", {
+c.register_node("nh_nodes:tiningot", {
     description = S "Tin Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
@@ -2184,7 +2185,7 @@ core.register_node("nh_nodes:tiningot", {
     walkable = false,
 })
 
-core.register_node("nh_nodes:iron", {
+c.register_node("nh_nodes:iron", {
     description = S "Pyrite" .. "\n" .. S "[Iron Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2202,7 +2203,7 @@ core.register_node("nh_nodes:iron", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:ironnugget", {
+c.register_node("nh_nodes:ironnugget", {
     description = S "Iron Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
@@ -2214,7 +2215,7 @@ core.register_node("nh_nodes:ironnugget", {
     selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
 })
 
-core.register_node("nh_nodes:ironingot", {
+c.register_node("nh_nodes:ironingot", {
     description = S "Iron Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
@@ -2224,7 +2225,7 @@ core.register_node("nh_nodes:ironingot", {
     walkable = false,
 })
 
-core.register_node("nh_nodes:nickel", {
+c.register_node("nh_nodes:nickel", {
     description = S "Garnierite" .. "\n" .. S "[Nickel Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2241,7 +2242,7 @@ core.register_node("nh_nodes:nickel", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:manganese", {
+c.register_node("nh_nodes:manganese", {
     description = S "Pyrolusite" .. "\n" .. S "[Manganese Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2258,7 +2259,7 @@ core.register_node("nh_nodes:manganese", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:chromium", {
+c.register_node("nh_nodes:chromium", {
     description = S "Chromite" .. "\n" .. S "[Chromium Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
@@ -2275,7 +2276,7 @@ core.register_node("nh_nodes:chromium", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:chromiumnugget", {
+c.register_node("nh_nodes:chromiumnugget", {
     description = S "Chromium Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
@@ -2287,7 +2288,7 @@ core.register_node("nh_nodes:chromiumnugget", {
     selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
 })
 
-core.register_node("nh_nodes:chromiumingot", {
+c.register_node("nh_nodes:chromiumingot", {
     description = S "Chromium Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
@@ -2297,7 +2298,7 @@ core.register_node("nh_nodes:chromiumingot", {
     walkable = false,
 })
 
-core.register_node("nh_nodes:peridotite", {
+c.register_node("nh_nodes:peridotite", {
     description = S "Peridotite",
     tiles = { "peridotite.png" },
     groups = { cracky = 3 },
@@ -2312,7 +2313,7 @@ core.register_node("nh_nodes:peridotite", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:redrock", {
+c.register_node("nh_nodes:redrock", {
     description = S "Ruborita",
     tiles = { "lava.png" },
     groups = { unbreakable = 1, not_in_creative_inventory = 1 }, --{unbreakable = 1, not_in_creative_inventory = 1},
@@ -2328,7 +2329,7 @@ core.register_node("nh_nodes:redrock", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:bedrock", {
+c.register_node("nh_nodes:bedrock", {
     description = S "Bridgmanite",
     tiles = { "matriz.png" },
     drawtype = "glasslike_framed_optional",
@@ -2347,7 +2348,7 @@ core.register_node("nh_nodes:bedrock", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:obsidian", {
+c.register_node("nh_nodes:obsidian", {
     description = S "Obsidian",
     tiles = { "obsidiana.png" },
     groups = { cracky = 3 }, --{cracky = 1, oddly_breakable_by_hand = 1},
@@ -2364,7 +2365,7 @@ core.register_node("nh_nodes:obsidian", {
 })
 
 
-core.register_node("nh_nodes:oakresin", {
+c.register_node("nh_nodes:oakresin", {
     description = S "Oak Resin",
     drawtype = "mesh",
     mesh = "oakresin.obj",
@@ -2383,13 +2384,13 @@ core.register_node("nh_nodes:oakresin", {
 -- Função para verificar se um nó tem suporte sólido
 local function has_solid_support(pos, checked)
     checked = checked or {}
-    local hash = core.hash_node_position(pos)
+    local hash = c.hash_node_position(pos)
     if checked[hash] then return false end
     checked[hash] = true
     if #checked > 100 then return false end
     local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-    local below_node = core.get_node(below)
-    local def = core.registered_nodes[below_node.name]
+    local below_node = c.get_node(below)
+    local def = c.registered_nodes[below_node.name]
     if not def then return false end
     -- Algo sólido que NÃO seja árvore
     if below_node.name ~= "air"
@@ -2414,15 +2415,15 @@ local function make_leaves_fall(pos)
         for y = radius_vertical, -radius_vertical, -1 do -- Aumentado para pegar folhas mais altas
             for z = -radius_horizontal, radius_horizontal do
                 local check_pos = { x = pos.x + x, y = pos.y + y, z = pos.z + z }
-                local node = core.get_node(check_pos)
+                local node = c.get_node(check_pos)
 
-                if core.get_item_group(node.name, "tree_leaves") > 0 then
+                if c.get_item_group(node.name, "tree_leaves") > 0 then
                     local delay = math.random(2, 10) / 10
-                    core.after(delay, function()
-                        local current_node = core.get_node(check_pos)
-                        if core.get_item_group(current_node.name, "tree_leaves") > 0 then
-                            core.remove_node(check_pos)
-                            local obj = core.add_entity(check_pos, "__builtin:falling_node")
+                    c.after(delay, function()
+                        local current_node = c.get_node(check_pos)
+                        if c.get_item_group(current_node.name, "tree_leaves") > 0 then
+                            c.remove_node(check_pos)
+                            local obj = c.add_entity(check_pos, "__builtin:falling_node")
                             if obj then
                                 obj:get_luaentity():set_node(current_node)
                             end
@@ -2435,7 +2436,7 @@ local function make_leaves_fall(pos)
 end
 
 -- Tronco
-core.register_node("nh_nodes:oaktimber", {
+c.register_node("nh_nodes:oaktimber", {
     description = S "Oak Timber",
     tiles = { "oaktimber.png" },
     groups = { choppy = 3, falling_node = 1, armor_head = 1 },
@@ -2457,7 +2458,7 @@ core.register_node("nh_nodes:oaktimber", {
         -- Verifica se tinha suporte antes de ser quebrado
         -- Se não tinha, significa que vai cair
         local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-        local below_node = core.get_node(below)
+        local below_node = c.get_node(below)
         -- Se abaixo é ar ou outro tronco/folha, faz folhas caírem
         if below_node.name == "air" or below_node.name == "nh_nodes:oaktimber" or below_node.name:find("nh_nodes:leaves") or below_node.name:find("nh_nodes:leaves_nut") or below_node.name:find("nh_nodes:leaves_nut2") or below_node.name:find("nh_nodes:leaves_nut3") or below_node.name:find("nh_nodes:oakbranch") then
             make_leaves_fall(pos)
@@ -2465,10 +2466,10 @@ core.register_node("nh_nodes:oaktimber", {
     end,
     -- Detecta quando o tronco começa a se mover
     on_construct = function(pos)
-        core.get_node_timer(pos):start(0.5)
+        c.get_node_timer(pos):start(0.5)
     end,
     on_timer = function(pos)
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
         if node.name == "nh_nodes:oaktimber" then
             -- Se não tem suporte, vai começar a cair
             if not has_solid_support(pos) then
@@ -2483,7 +2484,7 @@ core.register_node("nh_nodes:oaktimber", {
 })
 
 -- Ramo
-core.register_node("nh_nodes:oakbranch", {
+c.register_node("nh_nodes:oakbranch", {
     description = S "Oak Branch",
     drawtype = "mesh",
     mesh = "oakbranch.obj",
@@ -2506,7 +2507,7 @@ core.register_node("nh_nodes:oakbranch", {
         dig = { name = "punchtimber", gain = 0.5 },},
 })
 
-core.register_node("nh_nodes:oaklog", {
+c.register_node("nh_nodes:oaklog", {
     description = S "Oak Log",
     tiles = {
         "topdownoaktimber.png", -- topo
@@ -2539,7 +2540,7 @@ core.register_node("nh_nodes:oaklog", {
 })
 
 -- Tronco de macieira
-core.register_node("nh_nodes:appletimber", {
+c.register_node("nh_nodes:appletimber", {
     description = S "Apple Timber",
     drawtype = "mesh",
     mesh = "appletimber.obj",
@@ -2556,7 +2557,7 @@ core.register_node("nh_nodes:appletimber", {
     -- Detecta quando o tronco é quebrado ou vai cair
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-        local below_node = core.get_node(below)
+        local below_node = c.get_node(below)
 
         -- CORRIGIDO: Verifica TODAS as folhas de macieira
         if below_node.name == "air"
@@ -2570,11 +2571,11 @@ core.register_node("nh_nodes:appletimber", {
     end,
 
     on_construct = function(pos)
-        core.get_node_timer(pos):start(0.5)
+        c.get_node_timer(pos):start(0.5)
     end,
 
     on_timer = function(pos)
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
         if node.name == "nh_nodes:appletimber" then
             if not has_solid_support(pos) then
                 make_leaves_fall(pos)
@@ -2587,7 +2588,7 @@ core.register_node("nh_nodes:appletimber", {
 })
 
 -- Tronco 3
-core.register_node("nh_nodes:pinetimber", {
+c.register_node("nh_nodes:pinetimber", {
     description = S "Pine Timber",
     tiles = { "pinetimber.png" },
     groups = { choppy = 3, falling_node = 1, armor_head = 1 },
@@ -2601,7 +2602,7 @@ core.register_node("nh_nodes:pinetimber", {
         -- Verifica se tinha suporte antes de ser quebrado
         -- Se não tinha, significa que vai cair
         local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-        local below_node = core.get_node(below)
+        local below_node = c.get_node(below)
 
         -- Se abaixo é ar ou outro tronco/folha, faz folhas caírem
         if below_node.name == "air" or below_node.name == "nh_nodes:pinetimber" or below_node.name:find("nh_nodes:leaves") then
@@ -2620,10 +2621,10 @@ core.register_node("nh_nodes:pinetimber", {
 
 -- Detecta quando o tronco começa a se mover
     on_construct = function(pos)
-        core.get_node_timer(pos):start(0.5)
+        c.get_node_timer(pos):start(0.5)
     end,
     on_timer = function(pos)
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
         if node.name == "nh_nodes:pinetimber" then
             -- Se não tem suporte, vai começar a cair
             if not has_solid_support(pos) then
@@ -2636,7 +2637,7 @@ core.register_node("nh_nodes:pinetimber", {
     end,
 })
 
-core.register_node("nh_nodes:pinelog", {
+c.register_node("nh_nodes:pinelog", {
     description = S "Pine Log",
     tiles = {
         "topdownpinetimber.png", -- topo
@@ -2677,11 +2678,13 @@ core.register_node("nh_nodes:pinelog", {
 })
 
 -- Madeira
-core.register_node("nh_nodes:oakwood", {
+c.register_node("nh_nodes:oakwood", {
     description = S "Oak Wood",
     tiles = { "oakwood.png" },
     groups = { choppy = 3 },
-
+    sounds = {
+        dug = { name = "punchtimber", gain = 0.5 },
+        dig = { name = "punchtimber", gain = 0.5 },},
     -- Configuração mão direita
     wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
         --rot = {x = 0, y = 0, z = -110}
@@ -2694,23 +2697,18 @@ core.register_node("nh_nodes:oakwood", {
 })
 
 -- Madeira
-core.register_node("nh_nodes:pinewood", {
+c.register_node("nh_nodes:pinewood", {
     description = S "Pine Wood",
     tiles = { "pinewood.png" },
     groups = { choppy = 3 },
-
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    sounds = {
+        dug = { name = "punchtimber", gain = 0.5 },
+        dig = { name = "punchtimber", gain = 0.5 },},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
-core.register_node("nh_nodes:bone", {
+c.register_node("nh_nodes:bone", {
     description = S "Bone",
     drawtype = "mesh",
     mesh = "bone.obj",
@@ -2734,19 +2732,11 @@ core.register_node("nh_nodes:bone", {
     wielded_bone_position = {
         pos = { x = 0.25, y = 0, z = 0 },
         rot = { x = 90, y = 90, z = 90 },},
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
-    -- Configuração mão esquerda
-    --offhand_bone_position = {
-    --    pos = {x = 0, y = 0, z = 0}
-    --rot = {x = 0, y = 0, z = -110}
-    --},
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
 
 -- slime
-core.register_node("nh_nodes:slime", {
+c.register_node("nh_nodes:slime", {
     description = S "Limu" .. "\n" .. S "[collectible]",
     drawtype = "mesh",
     mesh = "planaria_slime_small2.obj",
@@ -2768,7 +2758,7 @@ core.register_node("nh_nodes:slime", {
 })
 
 -- grilo
-core.register_node("nh_nodes:cricket", {
+c.register_node("nh_nodes:cricket", {
     description = S "Cricket" .. "\n" .. S "[collectible]",
     drawtype = "mesh",
     mesh = "cricket.obj",
@@ -2788,7 +2778,7 @@ core.register_node("nh_nodes:cricket", {
 })
 
 -- Madeira
-core.register_node("nh_nodes:campfiretinder", {
+c.register_node("nh_nodes:campfiretinder", {
     description = S "Campfire Tinder",
     drawtype = "mesh",
     mesh = "iscafogueira.obj",
@@ -2802,7 +2792,7 @@ core.register_node("nh_nodes:campfiretinder", {
 
 
 -- Tronco de carvalho fatiado
-core.register_node("nh_nodes:oaktimberslice", {
+c.register_node("nh_nodes:oaktimberslice", {
     description = S "Oak Firewood",
     drawtype = "mesh",
     mesh = "oaktimberslice.obj",
@@ -2813,41 +2803,41 @@ core.register_node("nh_nodes:oaktimberslice", {
         -- Verifica se o jogador está agachado
         if placer and placer:is_player() and placer:get_player_control().sneak then
             -- Comportamento normal de colocação (com shift)
-            return core.item_place(itemstack, placer, pointed_thing)
+            return c.item_place(itemstack, placer, pointed_thing)
         end
 
         -- Se está clicando em um node (sem agachar)
         if pointed_thing.type == "node" then
             local pos = pointed_thing.under
-            local node = core.get_node(pos)
+            local node = c.get_node(pos)
 
             -- Verifica qual estágio está e evolui (apenas se mirar em campfiretinder)
             if node.name == "nh_nodes:campfiretinder" then
-                core.set_node(pos, { name = "nh_nodes:oaktimberslice1" })
+                c.set_node(pos, { name = "nh_nodes:oaktimberslice1" })
                 itemstack:take_item()
                 return itemstack
             elseif node.name == "nh_nodes:oaktimberslice1" then
-                core.set_node(pos, { name = "nh_nodes:oaktimberslice2" })
+                c.set_node(pos, { name = "nh_nodes:oaktimberslice2" })
                 itemstack:take_item()
                 return itemstack
             elseif node.name == "nh_nodes:oaktimberslice2" then
-                core.set_node(pos, { name = "nh_nodes:oaktimberslice3" })
+                c.set_node(pos, { name = "nh_nodes:oaktimberslice3" })
                 itemstack:take_item()
                 return itemstack
             elseif node.name == "nh_nodes:oaktimberslice3" then
-                core.set_node(pos, { name = "nh_nodes:campfire" })
+                c.set_node(pos, { name = "nh_nodes:campfire" })
                 itemstack:take_item()
                 return itemstack
             end
         end
 
         -- Comportamento normal de colocação para outros casos
-        return core.item_place(itemstack, placer, pointed_thing)
+        return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
 
 -- Lenha de carvalho 1 - 1/4 firewood
-core.register_node("nh_nodes:oaktimberslice1", {
+c.register_node("nh_nodes:oaktimberslice1", {
     description = S "Firewood on the Campfire 1/4",
     drawtype = "mesh",
     mesh = "oaktimberslice1.obj",
@@ -2866,22 +2856,22 @@ core.register_node("nh_nodes:oaktimberslice1", {
         end
 
         local pos = pointed_thing.under
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
 
         if placer and placer:is_player() and placer:get_player_control().sneak then
             if node.name == "nh_nodes:oaktimberslice1" and itemstack:get_name() == "nh_nodes:oaktimberslice" then
-                core.set_node(pos, { name = "nh_nodes:oaktimberslice2" })
+                c.set_node(pos, { name = "nh_nodes:oaktimberslice2" })
                 itemstack:take_item()
                 return itemstack
             end
         end
 
-        return core.item_place(itemstack, placer, pointed_thing)
+        return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
 
 -- Lenha de carvalho 2 - 2/4 firewood
-core.register_node("nh_nodes:oaktimberslice2", {
+c.register_node("nh_nodes:oaktimberslice2", {
     description = S "Firewood on the Campfire 2/4",
     drawtype = "mesh",
     mesh = "oaktimberslice2.obj",
@@ -2899,22 +2889,22 @@ core.register_node("nh_nodes:oaktimberslice2", {
         end
 
         local pos = pointed_thing.under
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
 
         if placer and placer:is_player() and placer:get_player_control().sneak then
             if node.name == "nh_nodes:oaktimberslice2" and itemstack:get_name() == "nh_nodes:oaktimberslice" then
-                core.set_node(pos, { name = "nh_nodes:oaktimberslice3" })
+                c.set_node(pos, { name = "nh_nodes:oaktimberslice3" })
                 itemstack:take_item()
                 return itemstack
             end
         end
 
-        return core.item_place(itemstack, placer, pointed_thing)
+        return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
 
 -- Lenha de carvalho 3 - 3/4 firewood
-core.register_node("nh_nodes:oaktimberslice3", {
+c.register_node("nh_nodes:oaktimberslice3", {
     description = S "Firewood on the Campfire 3/4",
     drawtype = "mesh",
     mesh = "oaktimberslice3.obj",
@@ -2932,17 +2922,17 @@ core.register_node("nh_nodes:oaktimberslice3", {
         end
 
         local pos = pointed_thing.under
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
 
         if placer and placer:is_player() and placer:get_player_control().sneak then
             if node.name == "nh_nodes:oaktimberslice3" and itemstack:get_name() == "nh_nodes:oaktimberslice" then
-                core.set_node(pos, { name = "nh_nodes:campfire" })
+                c.set_node(pos, { name = "nh_nodes:campfire" })
                 itemstack:take_item()
                 return itemstack
             end
         end
 
-        return core.item_place(itemstack, placer, pointed_thing)
+        return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
 
@@ -2973,12 +2963,12 @@ register_craft_station("nh_nodes:campfire", {
     recipes = recipes_campfire,
     -- Quando a fogueira é colocada, verifica se deve criar chama
     on_construct = function(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tiver chama marcada, cria a entidade
         if meta:get_int("has_flame") == 1 then
-            core.after(0.1, function()
+            c.after(0.1, function()
                 -- Verifica se não existe chama já
-                local objs = core.get_objects_inside_radius(pos, 0.5)
+                local objs = c.get_objects_inside_radius(pos, 0.5)
                 local has_flame = false
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
@@ -2989,7 +2979,7 @@ register_craft_station("nh_nodes:campfire", {
                 end
 
                 if not has_flame then
-                    local obj = core.add_entity(pos, "nh_nodes:campfire_flame_entity")
+                    local obj = c.add_entity(pos, "nh_nodes:campfire_flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
                         if ent then
@@ -3007,7 +2997,7 @@ register_craft_station("nh_nodes:campfire", {
         end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
@@ -3017,7 +3007,7 @@ register_craft_station("nh_nodes:campfire", {
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
             -- Cria a entidade da chama
-            local obj = core.add_entity(pos, "nh_nodes:campfire_flame_entity")
+            local obj = c.add_entity(pos, "nh_nodes:campfire_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -3025,7 +3015,7 @@ register_craft_station("nh_nodes:campfire", {
                 end
             end
             -- Efeito sonoro
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -3033,7 +3023,7 @@ register_craft_station("nh_nodes:campfire", {
         end
     end,
     can_craft = function(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         if meta:get_int("has_flame") ~= 1 then
             return false, S "I forgot that a bonfire needs to be lit to prepare..."
         end
@@ -3041,7 +3031,7 @@ register_craft_station("nh_nodes:campfire", {
     end,
     -- Quando a fogueira for removida, remove as chamas
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        local objs = core.get_objects_inside_radius(pos, 0.5)
+        local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:campfire_flame_entity" then
@@ -3054,7 +3044,7 @@ register_craft_station("nh_nodes:campfire", {
 ---------------------------
 -- ENTIDADE DA CHAMA DA PALHA
 ---------------------------
-core.register_entity("nh_nodes:campfire_flame_entity", {
+c.register_entity("nh_nodes:campfire_flame_entity", {
     initial_properties = {
         physical = false,
         collide_with_objects = false,
@@ -3076,7 +3066,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
 
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data and data.straw_pos then
                 self._straw_pos = data.straw_pos
             end
@@ -3094,7 +3084,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
     end,
 
     get_staticdata = function(self)
-        return core.serialize({ straw_pos = self._straw_pos })
+        return c.serialize({ straw_pos = self._straw_pos })
     end,
 
     -- Detecta quando é golpeado para acender tochas
@@ -3116,11 +3106,11 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
                 local leftover = inv:add_item("main", "nh_nodes:torch2")
                 if not leftover:is_empty() then
                     local pos = puncher:get_pos()
-                    core.add_item(pos, leftover)
+                    c.add_item(pos, leftover)
                 end
             end
 
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = self.object:get_pos(),
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -3148,7 +3138,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
                 return
             end
 
-            local node = core.get_node(self._straw_pos)
+            local node = c.get_node(self._straw_pos)
 
             -- Se a palha foi removida, remove a chama
             if node.name ~= "nh_nodes:campfire" then
@@ -3157,7 +3147,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
             end
 
             -- Verifica se ainda deve ter chama
-            local meta = core.get_meta(self._straw_pos)
+            local meta = c.get_meta(self._straw_pos)
             if meta:get_int("has_flame") ~= 1 then
                 self.object:remove()
                 return
@@ -3166,7 +3156,7 @@ core.register_entity("nh_nodes:campfire_flame_entity", {
     end,
 })
 
-core.register_node("nh_nodes:spinningtop", {
+c.register_node("nh_nodes:spinningtop", {
     description = S "Oak Spinningtop" .. "\n" .. S "[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
@@ -3206,7 +3196,7 @@ core.register_node("nh_nodes:spinningtop", {
     end,
 })
 
-core.register_node("nh_nodes:spinningtop2", {
+c.register_node("nh_nodes:spinningtop2", {
     description = S "Palm Spinningtop" .. "\n" .. S "[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
@@ -3245,7 +3235,7 @@ core.register_node("nh_nodes:spinningtop2", {
     end,
 })
 
-core.register_node("nh_nodes:spinningtop3", {
+c.register_node("nh_nodes:spinningtop3", {
     description = S "Pine Spinningtop" .. "\n" .. S "[Battle Toy]",
     drawtype = "mesh",
     mesh = "piao.obj",
@@ -3375,7 +3365,7 @@ register_craft_station("nh_nodes:advanced_bench", {
 })
 
 -- Prancha
-core.register_node("nh_nodes:oakplank", {
+c.register_node("nh_nodes:oakplank", {
     description = S "Oak Plank",
     drawtype = "mesh",
     mesh = "oakplank.obj",
@@ -3403,7 +3393,7 @@ core.register_node("nh_nodes:oakplank", {
 })
 
 -- Tábua
-core.register_node("nh_nodes:oakboard", {
+c.register_node("nh_nodes:oakboard", {
     description = S "Oak Board",
     drawtype = "mesh",
     mesh = "oakboard.obj",
@@ -3434,8 +3424,8 @@ core.register_node("nh_nodes:oakboard", {
 
         -- Pega a direção horizontal do jogador
         local yaw = placer:get_look_horizontal()
-        local player_dir = core.yaw_to_dir(yaw)
-        local player_facedir = core.dir_to_facedir(player_dir)
+        local player_dir = c.yaw_to_dir(yaw)
+        local player_facedir = c.dir_to_facedir(player_dir)
 
         local facedir
 
@@ -3447,19 +3437,19 @@ core.register_node("nh_nodes:oakboard", {
             facedir = player_facedir + 20
         elseif click_dir.z ~= 0 then
             -- Parede Norte/Sul (eixo Z)
-            local wall_facedir = core.dir_to_facedir(click_dir)
+            local wall_facedir = c.dir_to_facedir(click_dir)
             facedir = wall_facedir + 4
         else
             -- Parede Leste/Oeste (eixo X)
-            local wall_facedir = core.dir_to_facedir(click_dir)
+            local wall_facedir = c.dir_to_facedir(click_dir)
             facedir = wall_facedir + 12 -- Valor diferente para paredes X
         end
-        return core.item_place(itemstack, placer, pointed_thing, facedir)
+        return c.item_place(itemstack, placer, pointed_thing, facedir)
     end,
 })
 
 -- Tarugo
-core.register_node("nh_nodes:oakdowel", {
+c.register_node("nh_nodes:oakdowel", {
     description = S "Oak Dowel" .. "\n" .. S "Reach: +2",
     drawtype = "mesh",
     mesh = "oakdowel.obj",
@@ -3478,7 +3468,7 @@ core.register_node("nh_nodes:oakdowel", {
         wall_side = { -0.5, -0.0625, -0.0625, -0.5 + 0.28125, 0.5, 0.0625 },},
 })
 
-core.register_node("nh_nodes:torch", {
+c.register_node("nh_nodes:torch", {
     description = S "Torch",
     drawtype = "mesh",
     mesh = "torch.obj",
@@ -3493,15 +3483,13 @@ core.register_node("nh_nodes:torch", {
     collision_box = {type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, 0.37, 0.1 }},
     selection_box = {type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, 0.37, 0.1 }},
 
-    --selection_box = {
-    --    type = "wallmounted",
+    --selection_box = {type = "wallmounted",
     --    wall_top = {-0.1, 0.5-0.6, -0.1, 0.1, 0.5, 0.1},
     --    wall_bottom = {-0.1, -0.5, -0.1, 0.1, -0.5+0.6, 0.1},
     --     wall_side = {-0.5, -0.1, -0.1, -0.5+0.3, 0.5, 0.1},
     --},
 
-    --node_box = {
-    --    type = "wallmounted",
+    --node_box = { type = "wallmounted",
     --    wall_top = {-0.0625, 0.5-0.5625, -0.0625, 0.0625, 0.5, 0.0625},
     --    wall_bottom = {-0.0625, -0.5, -0.0625, 0.0625, -0.5+0.5625, 0.0625},
     --    wall_side = {-0.5, -0.0625, -0.0625, -0.5+0.28125, 0.5, 0.0625},
@@ -3509,24 +3497,20 @@ core.register_node("nh_nodes:torch", {
 
     -- Quando bater na tocha apagada com tocha acesa ou flame
     on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
-
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-
         -- Verifica se está batendo com tocha acesa ou flame
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Pega a orientação (facedir/wallmounted) da tocha apagada
             local param2 = node.param2
 
             -- Troca para tocha acesa mantendo a orientação
-            core.set_node(pos, { name = "nh_nodes:torch2", param2 = param2 })
+            c.set_node(pos, { name = "nh_nodes:torch2", param2 = param2 })
 
             -- Adiciona a chama como entidade (mesmo código do after_place_node)
             local flame_pos = { x = pos.x, y = pos.y + 1, z = pos.z }
-            local obj = core.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
+            local obj = c.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -3535,14 +3519,14 @@ core.register_node("nh_nodes:torch", {
             end
 
             -- Efeito sonoro de acender fogo
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
             }, true)
 
             -- Partículas de faísca (opcional)
-            core.add_particlespawner({
+            c.add_particlespawner({
                 amount = 5,
                 time = 0.1,
                 minpos = vector.subtract(pos, { x = 0.1, y = 0.1, z = 0.1 }),
@@ -3562,7 +3546,7 @@ core.register_node("nh_nodes:torch", {
     end,
 })
 
-core.register_node("nh_nodes:torch2", {
+c.register_node("nh_nodes:torch2", {
     description = S "Torch Lit",
     drawtype = "mesh",
     mesh = "torch.obj",
@@ -3593,7 +3577,7 @@ core.register_node("nh_nodes:torch2", {
         -- Posição da chama (1 bloco acima)
         local flame_pos = { x = pos.x, y = pos.y + 1, z = pos.z }
         -- Cria a ENTIDADE da chama
-        local obj = core.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
+        local obj = c.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
         if obj then
             local ent = obj:get_luaentity()
             if ent then
@@ -3604,7 +3588,7 @@ core.register_node("nh_nodes:torch2", {
     -- Quando a tocha é destruída, remove a entidade da chama
     after_destruct = function(pos)
         local flame_pos = { x = pos.x, y = pos.y + 1, z = pos.z }
-        local objs = core.get_objects_inside_radius(flame_pos, 0.5)
+        local objs = c.get_objects_inside_radius(flame_pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:torch_flame_entity" then
@@ -3614,7 +3598,7 @@ core.register_node("nh_nodes:torch2", {
     end,
 })
 -- Node invisível que emite luz
-core.register_node("nh_nodes:torch_light", {
+c.register_node("nh_nodes:torch_light", {
     drawtype = "airlike",
     paramtype = "light",
     sunlight_propagates = true,
@@ -3626,7 +3610,7 @@ core.register_node("nh_nodes:torch_light", {
 })
 
 -- Registra a entidade de luz
-core.register_node("nh_nodes:crystal_light", {
+c.register_node("nh_nodes:crystal_light", {
     drawtype = "airlike", -- invisível, não cria bolsão
     paramtype = "light",
     sunlight_propagates = true,
@@ -3637,7 +3621,7 @@ core.register_node("nh_nodes:crystal_light", {
     groups = { not_in_creative_inventory = 1 },
 })
 
-core.register_node("nh_nodes:torch_flame", {
+c.register_node("nh_nodes:torch_flame", {
     drawtype = "mesh",
     mesh = "torchflame.obj", -- Você precisará criar esse mesh
     tiles = {{name = "fire_basic_flame_animated.png",
@@ -3661,7 +3645,7 @@ core.register_node("nh_nodes:torch_flame", {
 
 ---------------------------
 -- ENTIDADE DA CHAMA DA TOCHA
-core.register_entity("nh_nodes:torch_flame_entity", {
+c.register_entity("nh_nodes:torch_flame_entity", {
     initial_properties = {
         physical = false,
         collide_with_objects = false,
@@ -3684,7 +3668,7 @@ core.register_entity("nh_nodes:torch_flame_entity", {
 
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data and data.torch_pos then
                 self._torch_pos = data.torch_pos
             end
@@ -3696,7 +3680,7 @@ core.register_entity("nh_nodes:torch_flame_entity", {
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
     get_staticdata = function(self)
-        return core.serialize({ torch_pos = self._torch_pos })
+        return c.serialize({ torch_pos = self._torch_pos })
     end,
     -- Detecta quando é golpeado com tocha apagada
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
@@ -3717,17 +3701,17 @@ core.register_entity("nh_nodes:torch_flame_entity", {
                 -- Se o inventário estiver cheio, dropa no chão
                 if not leftover:is_empty() then
                     local pos = puncher:get_pos()
-                    core.add_item(pos, leftover)
+                    c.add_item(pos, leftover)
                 end
             end
             -- Efeito sonoro
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = self.object:get_pos(),
                 gain = 0.5,
                 max_hear_distance = 8,
             }, true)
             -- Partículas de faísca
-            core.add_particlespawner({
+            c.add_particlespawner({
                 amount = 5,
                 time = 0.1,
                 minpos = vector.subtract(self.object:get_pos(), { x = 0.1, y = 0.1, z = 0.1 }),
@@ -3765,7 +3749,7 @@ core.register_entity("nh_nodes:torch_flame_entity", {
                 return
             end
 
-            local node = core.get_node(self._torch_pos)
+            local node = c.get_node(self._torch_pos)
 
             -- Se a tocha foi removida ou apagada, remove a chama
             if node.name ~= "nh_nodes:torch2" then
@@ -3776,10 +3760,10 @@ core.register_entity("nh_nodes:torch_flame_entity", {
     end,
 })
 
-local c = core
 local portal_particles = {}
 local linked_portals = {} -- Armazena os portais colocados
-local storage = core.get_mod_storage() -- PERSISTÊNCIA
+local storage = c.get_mod_storage() -- PERSISTÊNCIA
+local mob_portal_cooldown = {} -- cooldown por entidade (usando ID do objeto) - para mobs
 local function save_portals()
     local list = {}
     for _, p in ipairs(linked_portals) do
@@ -3800,13 +3784,13 @@ local function load_portals()
 end
 load_portals() -- Carrega ao iniciar o mod
 -- Recria partículas nos portais salvos ao iniciar
-core.register_on_joinplayer(function(player)
+c.register_on_joinplayer(function(player)
     -- Pequeno delay pra garantir que os chunks carregaram
-    core.after(3, function()
+    c.after(3, function()
         -- Filtra portais que sumiram enquanto o servidor estava offline
         local valid = {}
         for _, pos in ipairs(linked_portals) do
-            if core.get_node(pos).name == "nh_nodes:portal" then table.insert(valid, pos) end
+            if c.get_node(pos).name == "nh_nodes:portal" then table.insert(valid, pos) end
         end
         -- Se algum portal sumiu, atualiza a lista salva
         if #valid ~= #linked_portals then linked_portals = valid
@@ -3816,7 +3800,7 @@ core.register_on_joinplayer(function(player)
         for _, pos in ipairs(linked_portals) do
             local key = pos.x .. "," .. pos.y .. "," .. pos.z
             if not portal_particles[key] then
-                portal_particles[key] = core.add_particlespawner({
+                portal_particles[key] = c.add_particlespawner({
                     amount = 25,
                     time = 0,
                     minpos = vector.subtract(pos, 0.25),
@@ -3896,8 +3880,8 @@ c.register_node("nh_nodes:portal", {
         end
     end,
 })
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
+c.register_globalstep(function(dtime)
+    for _, player in ipairs(c.get_connected_players()) do
         local name = player:get_player_name()
         -- Cooldown
         if portal_cooldown[name] then
@@ -3933,8 +3917,41 @@ core.register_globalstep(function(dtime)
         ::continue::
     end
 end)
+-- TELEPORTE DE MOBS e drops NO PORTAL
+c.register_globalstep(function(dtime)
+    if #linked_portals < 2 then return end
+    for id, timer in pairs(mob_portal_cooldown) do
+        mob_portal_cooldown[id] = timer - dtime
+        if mob_portal_cooldown[id] <= 0 then mob_portal_cooldown[id] = nil end
+    end
+    for _, portal_pos in ipairs(linked_portals) do
+        if c.get_node(portal_pos).name ~= "nh_nodes:portal" then goto next_portal end
+        local objects = c.get_objects_inside_radius(portal_pos, 1.0)
+        for _, obj in ipairs(objects) do
+            if obj:is_player() then goto next_obj end
+            local lua = obj:get_luaentity()
+            if not lua then goto next_obj end
+            local is_mob = lua.type == "monster" or lua.type == "animal" or lua.type == "npc"
+            local is_item = lua.name == "__builtin:item"
+            if not is_mob and not is_item then goto next_obj end
+            local obj_id = tostring(obj)
+            if mob_portal_cooldown[obj_id] then goto next_obj end
+            local target_pos
+            if vector.equals(portal_pos, linked_portals[1]) then target_pos = linked_portals[2]
+            else target_pos = linked_portals[1] end
+            local target_node = c.get_node(target_pos)
+            local dir = facedir_to_dir[target_node.param2 % 4] or {x=0, y=0, z=1}
+            local spawn = vector.add(target_pos, vector.multiply(dir, 1))
+            obj:set_pos(spawn)
+            if is_mob then c.sound_play("vortex", {pos = portal_pos, gain = 0.1}) end
+            mob_portal_cooldown[obj_id] = 3.0
+            ::next_obj::
+        end
+        ::next_portal::
+    end
+end)
 
-core.register_node("nh_nodes:flame", {
+c.register_node("nh_nodes:flame", {
     drawtype = "mesh",
     mesh = "flame.obj", -- Você precisará criar esse mesh
     tiles = {{name = "fire_basic_flame_animated.png",
@@ -3954,7 +3971,7 @@ core.register_node("nh_nodes:flame", {
     --visual_scale = 1,
 })
 
-core.register_node("nh_nodes:torch3", {
+c.register_node("nh_nodes:torch3", {
     description = S "Torch Extinguished",
     drawtype = "mesh",
     mesh = "torch.obj",
@@ -3982,7 +3999,7 @@ core.register_node("nh_nodes:torch3", {
 })
 
 -- Folhas de carvalho
-core.register_node("nh_nodes:leaves", {
+c.register_node("nh_nodes:leaves", {
     description = S "Oak Leaves",
     drawtype = "liquid",
     waving = 3,
@@ -4008,7 +4025,7 @@ core.register_node("nh_nodes:leaves", {
 })
 
 -- Registra uma versão "dentro d'água" (da folha de carvalho)
-core.register_node("nh_nodes:leavesrelief", {
+c.register_node("nh_nodes:leavesrelief", {
     description = S "Leaves Relief",
     drawtype = "plantlike_rooted",
     waving = 3,
@@ -4052,7 +4069,7 @@ core.register_node("nh_nodes:leavesrelief", {
     end,
 })
 
-core.register_node("nh_nodes:leavesrelief", {
+c.register_node("nh_nodes:leavesrelief", {
     description = S "Leaves Relief",
     drawtype = "plantlike_rooted",
     waving = 3,
@@ -4096,7 +4113,7 @@ core.register_node("nh_nodes:leavesrelief", {
     end,
 })
 
-core.register_node("nh_nodes:kelp", {
+c.register_node("nh_nodes:kelp", {
     description = S "Kelp" .. "\n" .. S "[Algae]",
     drawtype = "plantlike_rooted",
     waving = 1,
@@ -4144,23 +4161,23 @@ core.register_node("nh_nodes:kelp", {
                     name = "nh_nodes:kelp",
                     param2 = height * 16
                 })
-                if not core.is_creative_enabled(player_name) then
+                if not c.is_creative_enabled(player_name) then
                     itemstack:take_item()
                 end
             else
-                core.chat_send_player(player_name, S "Node is protected")
-                core.record_protection_violation(pos, player_name)
+                c.chat_send_player(player_name, S "Node is protected")
+                c.record_protection_violation(pos, player_name)
             end
         end
         return itemstack
     end,
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        core.set_node(pos, { name = "nh_nodes:wet_sand" })
+        c.set_node(pos, { name = "nh_nodes:wet_sand" })
     end
 })
 
 -- Folhas de pinheiro
-core.register_node("nh_nodes:pineleaves", {
+c.register_node("nh_nodes:pineleaves", {
     description = S "Pine Leaves",
     drawtype = "mesh",
     mesh = "pineleaves.obj",
@@ -4185,7 +4202,7 @@ core.register_node("nh_nodes:pineleaves", {
 })
 
 -- Folhas de macieira
-core.register_node("nh_nodes:appleleaves", {
+c.register_node("nh_nodes:appleleaves", {
     description = S "Apple Tree Leaves",
     drawtype = "mesh",
     mesh = "appleleaves.obj",
@@ -4208,7 +4225,7 @@ core.register_node("nh_nodes:appleleaves", {
 })
 
 -- Folhas com 1 maça
-core.register_node("nh_nodes:leaves_apple", {
+c.register_node("nh_nodes:leaves_apple", {
     description = S "Leaves with Apple",
     drawtype = "mesh",
     mesh = "leavesapple1.obj",
@@ -4238,14 +4255,14 @@ core.register_node("nh_nodes:leaves_apple", {
             end
 
             -- Transforma o node em leaves_apple2
-            core.set_node(pos, { name = "nh_nodes:appleleaves" })
+            c.set_node(pos, { name = "nh_nodes:appleleaves" })
         end
         return itemstack
     end,
 })
 
 -- Folhas com 2 maças
-core.register_node("nh_nodes:leaves_apple2", {
+c.register_node("nh_nodes:leaves_apple2", {
     description = S "Leaves with 2 Apples",
     drawtype = "mesh",
     mesh = "leavesapple2.obj",
@@ -4275,14 +4292,14 @@ core.register_node("nh_nodes:leaves_apple2", {
             end
 
             -- Transforma o node em leaves_apple2
-            core.set_node(pos, { name = "nh_nodes:leaves_apple" })
+            c.set_node(pos, { name = "nh_nodes:leaves_apple" })
         end
         return itemstack
     end,
 })
 
 -- Folhas com 3 maças
-core.register_node("nh_nodes:leaves_apple3", {
+c.register_node("nh_nodes:leaves_apple3", {
     description = S "Leaves with 3 Apples",
     drawtype = "mesh",
     mesh = "leavesapple3.obj",
@@ -4327,14 +4344,14 @@ core.register_node("nh_nodes:leaves_apple3", {
             end
 
             -- Transforma o node em leaves_apple2
-            core.set_node(pos, { name = "nh_nodes:leaves_apple2" })
+            c.set_node(pos, { name = "nh_nodes:leaves_apple2" })
         end
         return itemstack
     end,
 })
 
 -- Folhas mirtilo
-core.register_node("nh_nodes:blueberryleaves", {
+c.register_node("nh_nodes:blueberryleaves", {
     description = S "Blueberry Leaves",
     drawtype = "liquid",
     waving = 1,
@@ -4354,7 +4371,7 @@ core.register_node("nh_nodes:blueberryleaves", {
 })
 
 -- Folhas com 4 blueberry
-core.register_node("nh_nodes:leaves_blueberry4", {
+c.register_node("nh_nodes:leaves_blueberry4", {
     description = S "Leaves with 4 Blueberries",
     drawtype = "allfaces_optional",
     waving = 1,
@@ -4382,13 +4399,13 @@ core.register_node("nh_nodes:leaves_blueberry4", {
             end
 
             -- Transforma o node em leaves_apple2
-            core.set_node(pos, { name = "nh_nodes:blueberryleaves" })
+            c.set_node(pos, { name = "nh_nodes:blueberryleaves" })
         end
         return itemstack
     end,
 })
 
-core.register_node("nh_nodes:giantcrabstatue", {
+c.register_node("nh_nodes:giantcrabstatue", {
     description = S "Giant Crab Statue" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "giantcrabstatue.obj",
@@ -4409,12 +4426,12 @@ core.register_node("nh_nodes:giantcrabstatue", {
 
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
-            core.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
+            c.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
             return
         end
 
         -- Efeito de partículas de destruição
-        core.add_particlespawner({
+        c.add_particlespawner({
             amount = 50,
             time = 2,
             minpos = { x = pos.x - 2.5, y = pos.y - 0.5, z = pos.z - 2.5 },
@@ -4434,18 +4451,18 @@ core.register_node("nh_nodes:giantcrabstatue", {
         })
 
         -- Som de destruição (usa o som de dano do caranguejo)
-        --core.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
+        --c.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
 
         -- Remove a estátua
-        core.remove_node(pos)
+        c.remove_node(pos)
 
         -- Coloca areia na posição da estátua imediatamente
-        core.set_node(pos, { name = "nh_nodes:wet_sand" })
+        c.set_node(pos, { name = "nh_nodes:wet_sand" })
 
         -- Spawna o Giant Crab na posição da estátua
         -- Spawna o mob após 2 segundos
-        core.after(0.25, function()
-            core.add_entity(pos, "nh_mob:giantcrab")
+        c.after(0.25, function()
+            c.add_entity(pos, "nh_mob:giantcrab")
         end)
 
         -- Consome a esfera da mão do jogador
@@ -4454,11 +4471,11 @@ core.register_node("nh_nodes:giantcrabstatue", {
         puncher:set_wielded_item(item)
 
         -- Avisa o jogador
-        core.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
+        c.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
     end,
 })
 
-core.register_node("nh_nodes:redcrystal", {
+c.register_node("nh_nodes:redcrystal", {
     description = S "Red Crystal" .. "\n" .. S "[Light/Air]" .. "\n" .. S "(Squat down to breathe)",
     drawtype = "mesh",
     mesh = "redcrystal.obj",
@@ -4472,7 +4489,7 @@ core.register_node("nh_nodes:redcrystal", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
     on_punch = function(pos, node, puncher, pointed_thing)
         -- Efeito de partículas de destruição
-        core.add_particlespawner({
+        c.add_particlespawner({
             amount = 50,
             time = 0.5,
             minpos = { x = pos.x - 2.5, y = pos.y - 0.5, z = pos.z - 2.5 },
@@ -4489,11 +4506,11 @@ core.register_node("nh_nodes:redcrystal", {
             texture = {name = "spark_particle.png^[colorize:#76008d:150"}, -- purpura
         })
         -- Som de destruição
-        core.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
+        c.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
     end,
 })
 
-core.register_node("nh_nodes:sentinelstatue", {
+c.register_node("nh_nodes:sentinelstatue", {
     description = S "Sentinel Statue" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "skydragon.obj",
@@ -4511,11 +4528,11 @@ core.register_node("nh_nodes:sentinelstatue", {
         local item_name = item:get_name()
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
-            core.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
+            c.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
             return
         end
         -- Efeito de partículas de destruição
-        core.add_particlespawner({
+        c.add_particlespawner({
             amount = 50,
             time = 2,
             minpos = { x = pos.x - 2.5, y = pos.y - 0.5, z = pos.z - 2.5 },
@@ -4534,23 +4551,23 @@ core.register_node("nh_nodes:sentinelstatue", {
             },
         })
         -- Som de destruição
-        core.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
+        c.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
         -- Remove a estátua
-        core.remove_node(pos)
+        c.remove_node(pos)
         -- Spawna o mob após 2 segundos
-        core.after(0.25, function()
-            core.add_entity(pos, "nh_mob:sentinel")
+        c.after(0.25, function()
+            c.add_entity(pos, "nh_mob:sentinel")
         end)
         -- Consome a esfera da mão do jogador
         local inv = puncher:get_inventory()
         item:take_item(1)
         puncher:set_wielded_item(item)
         -- Avisa o jogador
-        core.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
+        c.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
     end,
 })
 
-core.register_node("nh_nodes:sphere", {
+c.register_node("nh_nodes:sphere", {
     description = S "Sphere of Vertices" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "ball_crystal.obj",
@@ -4565,14 +4582,14 @@ core.register_node("nh_nodes:sphere", {
 
     -- Ao colocar: troca para a versão invisível e spawna entidades
     after_place_node = function(pos, placer, itemstack)
-        core.set_node(pos, { name = "nh_nodes:sphere_placed" })
-        core.add_entity(pos, "nh_nodes:sphere_anim")
-        core.add_entity(pos, "nh_nodes:crystal_anim")
+        c.set_node(pos, { name = "nh_nodes:sphere_placed" })
+        c.add_entity(pos, "nh_nodes:sphere_anim")
+        c.add_entity(pos, "nh_nodes:crystal_anim")
     end,
 })
 
 -- Nó invisível (versão que fica no mundo)
-core.register_node("nh_nodes:sphere_placed", {
+c.register_node("nh_nodes:sphere_placed", {
     description = S "Bubble of Vertices" .. "\n" .. S "[Unknown]",
     drawtype = "mesh",
     mesh = "ball2.obj",
@@ -4589,7 +4606,7 @@ core.register_node("nh_nodes:sphere_placed", {
     drop = "", -- Sem drop automático (já feito manualmente abaixo)
     -- Ao quebrar: remove entidades e dropa o item original
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        for _, obj in ipairs(core.get_objects_inside_radius(pos, 0.6)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 0.6)) do
             local ent = obj:get_luaentity()
             if ent and (ent.name == "nh_nodes:sphere_anim" or ent.name == "nh_nodes:crystal_anim") then
                 obj:remove()
@@ -4601,7 +4618,7 @@ core.register_node("nh_nodes:sphere_placed", {
 })
 
 -- Entidade só visual, com a animação do GLB
-core.register_entity("nh_nodes:sphere_anim", {
+c.register_entity("nh_nodes:sphere_anim", {
     initial_properties = {
         visual = "mesh",
         mesh = "ball.glb",
@@ -4638,7 +4655,7 @@ core.register_entity("nh_nodes:sphere_anim", {
 
 
 -- Entidade só visual, com a animação do GLB
-core.register_entity("nh_nodes:crystal_anim", {
+c.register_entity("nh_nodes:crystal_anim", {
     initial_properties = {
         visual = "mesh",
         mesh = "crystal.glb",
@@ -4674,7 +4691,7 @@ core.register_entity("nh_nodes:crystal_anim", {
 })
 
 
-core.register_node("nh_nodes:orb_empty", {
+c.register_node("nh_nodes:orb_empty", {
     description = S "Orb" .. S "(Empty)" .. "\n" .. S "[Mob Catcher]",
     drawtype = "mesh",
     mesh = "orb.obj",
@@ -4704,7 +4721,7 @@ function register_orb_egg(mob_name, description, texture)
     -- "nh_mob:octopus" → "octopus_orb"
     local short_name = mob_name:match(":(.+)") .. "" -- "_orb"
 
-    core.register_node("nh_mob:" .. short_name, {
+    c.register_node("nh_mob:" .. short_name, {
         description = description .. "\n" .. S "[Mob Spawner]",
         drawtype = "mesh",
         mesh = "orb.obj",
@@ -4738,7 +4755,7 @@ function register_orb_egg(mob_name, description, texture)
     })
 end
 
-core.register_node("nh_nodes:nut", {
+c.register_node("nh_nodes:nut", {
     description = S "Acorn" .. "\n" .. S "(Nut)" .. "\n" .. S "Nutrition: +1",
     drawtype = "mesh",
     mesh = "noz.obj",
@@ -4759,7 +4776,7 @@ core.register_node("nh_nodes:nut", {
 })
 
 -- Folhas com 1 noz
-core.register_node("nh_nodes:leaves_nut", {
+c.register_node("nh_nodes:leaves_nut", {
     description = S "Leaves with Nut",
     drawtype = "allfaces_optional",
     waving = 3,
@@ -4783,14 +4800,14 @@ core.register_node("nh_nodes:leaves_nut", {
             local inv = clicker:get_inventory()
             if inv then inv:add_item("main", "nh_nodes:nut") end
             -- Transforma o node em leaves_apple2
-            core.set_node(pos, { name = "nh_nodes:leaves" })
+            c.set_node(pos, { name = "nh_nodes:leaves" })
         end
         return itemstack
     end,
 })
 
 -- Folhas com 2 nozes
-core.register_node("nh_nodes:leaves_nut2", {
+c.register_node("nh_nodes:leaves_nut2", {
     description = S "Leaves with 2 Nuts",
     drawtype = "allfaces_optional",
     waving = 3,
@@ -4815,14 +4832,14 @@ core.register_node("nh_nodes:leaves_nut2", {
             local inv = clicker:get_inventory()
             if inv then inv:add_item("main", "nh_nodes:nut") end
             -- Transforma o node em leaves_apple2
-            core.set_node(pos, { name = "nh_nodes:leaves_nut" })
+            c.set_node(pos, { name = "nh_nodes:leaves_nut" })
         end
         return itemstack
     end,
 })
 
 -- Folhas com 3 nozes
-core.register_node("nh_nodes:leaves_nut3", {
+c.register_node("nh_nodes:leaves_nut3", {
     description = S "Leaves with 3 Nuts",
     drawtype = "allfaces_optional",
     waving = 3,
@@ -4846,12 +4863,12 @@ core.register_node("nh_nodes:leaves_nut3", {
             local inv = clicker:get_inventory()
             if inv then inv:add_item("main", "nh_nodes:nut") end
             -- Transforma o node em leaves_nut2
-            core.set_node(pos, { name = "nh_nodes:leaves_nut2" })
+            c.set_node(pos, { name = "nh_nodes:leaves_nut2" })
         end
         return itemstack
     end,
 })
-core.register_node("nh_nodes:apple", {
+c.register_node("nh_nodes:apple", {
     description = S "Apple" .. "\n" .. S "Nutrition: +2",
     drawtype = "mesh",
     mesh = "apple.obj",
@@ -4869,7 +4886,7 @@ core.register_node("nh_nodes:apple", {
         return itemstack
     end,
 })
-core.register_node("nh_nodes:blueberry", {
+c.register_node("nh_nodes:blueberry", {
     description = S "Blueberry" .. "\n" .. S "Nutrition: +1",
     --wield_scale = {x = 10, y = 10, z = 10},
     drawtype = "mesh",
@@ -4890,7 +4907,7 @@ core.register_node("nh_nodes:blueberry", {
     end,
 })
 
-core.register_node("nh_nodes:chickenegg", {
+c.register_node("nh_nodes:chickenegg", {
     description = S "Chicken Egg" .. "\n" .. S "Nutrition: +1",
     drawtype = "mesh",
     mesh = "chickenegg.obj",
@@ -4910,7 +4927,7 @@ core.register_node("nh_nodes:chickenegg", {
     end,
 })
 
-core.register_node("nh_nodes:friedchickenegg", {
+c.register_node("nh_nodes:friedchickenegg", {
     description = S "Fried Egg" .. "\n" .. S "(Chicken Egg)" .. "\n" .. S "Nutrition: +4",
     drawtype = "mesh",
     mesh = "friedegg.obj",
@@ -4930,7 +4947,7 @@ core.register_node("nh_nodes:friedchickenegg", {
         return itemstack
     end,
 })
-core.register_node("nh_nodes:worm", {
+c.register_node("nh_nodes:worm", {
     description = S "Worm" .. "\n" .. S "[Mob / Item]",
     drawtype = "mesh",
     mesh = "worm_node.obj",
@@ -4960,7 +4977,7 @@ core.register_node("nh_nodes:worm", {
         return itemstack
     end,
 })
-core.register_node("nh_nodes:chicken", {
+c.register_node("nh_nodes:chicken", {
     description = S "Chicken",
     drawtype = "mesh",
     mesh = "chicken_node.obj",
@@ -4975,7 +4992,7 @@ core.register_node("nh_nodes:chicken", {
 
 })
 
-core.register_node("nh_nodes:rawchicken", {
+c.register_node("nh_nodes:rawchicken", {
     description = S "Raw Chicken" .. "\n" .. S "Nutrition: +4",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
@@ -5006,7 +5023,7 @@ core.register_node("nh_nodes:rawchicken", {
     end,
 })
 
-core.register_node("nh_nodes:roastchicken", {
+c.register_node("nh_nodes:roastchicken", {
     description = S "Roast Chicken" .. "\n" .. S "Nutrition: +6",
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
@@ -5032,7 +5049,7 @@ core.register_node("nh_nodes:roastchicken", {
         end
     end,
 })
-core.register_node("nh_nodes:tuna", {
+c.register_node("nh_nodes:tuna", {
     description = S "Tuna",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
@@ -5065,7 +5082,7 @@ core.register_node("nh_nodes:tuna", {
     end,
 })
 
-core.register_node("nh_nodes:rawtuna", {
+c.register_node("nh_nodes:rawtuna", {
     description = S "Raw Tuna" .. "\n" .. "Nutrition: +4",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
@@ -5087,7 +5104,7 @@ core.register_node("nh_nodes:rawtuna", {
     end,
 })
 
-core.register_node("nh_nodes:roasttuna", {
+c.register_node("nh_nodes:roasttuna", {
     description = S "Roast Tuna" .. "\n" .. S "Nutrition: +6",
     drawtype = "mesh",
     mesh = "rawtuna.obj",
@@ -5109,7 +5126,7 @@ core.register_node("nh_nodes:roasttuna", {
     end,
 })
 
-core.register_node("nh_nodes:bull", {
+c.register_node("nh_nodes:bull", {
     description = S "Bull" .. "\n" .. S "[collectible]",
     drawtype = "mesh",
     mesh = "bull2.obj",
@@ -5121,7 +5138,7 @@ core.register_node("nh_nodes:bull", {
     selection_box = {type = "fixed", fixed = { -0.7, -0.7, -0.7, 0.7, -0.7, 0.7 }},
 })
 
-core.register_node("nh_nodes:rawbeef", {
+c.register_node("nh_nodes:rawbeef", {
     description = S "Raw Beef" .. "\n" .. S "Nutrition: +3",
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -5139,7 +5156,7 @@ core.register_node("nh_nodes:rawbeef", {
     end,
 })
 
-core.register_node("nh_nodes:roastbeef", {
+c.register_node("nh_nodes:roastbeef", {
     description = S "Roast Beef" .. "\n" .. S "Nutrition: +6",
     drawtype = "mesh",
     mesh = "cowmeat.obj",
@@ -5157,7 +5174,7 @@ core.register_node("nh_nodes:roastbeef", {
     end,
 })
 
-core.register_node("nh_nodes:cowfur", {
+c.register_node("nh_nodes:cowfur", {
     description = S "Bull Fur",
     drawtype = "mesh",
     mesh = "cowleather.obj",
@@ -5170,7 +5187,7 @@ core.register_node("nh_nodes:cowfur", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.3, 0.5 }},
 })
 
-core.register_node("nh_nodes:inksac", {
+c.register_node("nh_nodes:inksac", {
     description = S "Ink Sack" .. "\n" .. S "Portion: 1",
     drawtype = "mesh",
     mesh = "inksac.obj",
@@ -5184,7 +5201,7 @@ core.register_node("nh_nodes:inksac", {
 })
 
 -- VIDRO
-core.register_node("nh_nodes:glass", {
+c.register_node("nh_nodes:glass", {
     description = S "Glass",
     drawtype = "glasslike",
     tiles = { "ice2.png" },
@@ -5210,7 +5227,7 @@ end
 local function get_node_below(pos)
     for dy = 1, 16 do
         local candidate_pos = vector.new(pos.x, pos.y - dy, pos.z)
-        local node = core.get_node(candidate_pos)
+        local node = c.get_node(candidate_pos)
         if node.name ~= "air"
             and node.name ~= "ignore"
             and node.name ~= "nh_nodes:mirror"
@@ -5223,7 +5240,7 @@ end
 
 -- Retorna a textura do topo de um node
 local function get_top_texture(node_name)
-    local def = core.registered_nodes[node_name]
+    local def = c.registered_nodes[node_name]
     if not def or not def.tiles then return nil end
     local tile = def.tiles[1]
     if type(tile) == "string" then
@@ -5236,7 +5253,7 @@ end
 
 local function mirror_has_surface(mirror_pos, param2)
     local epos = get_surface_pos(mirror_pos, param2)
-    for _, obj in ipairs(core.get_objects_inside_radius(epos, 0.15)) do
+    for _, obj in ipairs(c.get_objects_inside_radius(epos, 0.15)) do
         local ent = obj:get_luaentity()
         if ent and ent.name == "nh_nodes:mirror_surface" then
             return true
@@ -5255,7 +5272,7 @@ local function spawn_surface(mirror_pos, param2)
     if not tex then return end
 
     local epos = get_surface_pos(mirror_pos, param2)
-    local ent = core.add_entity(epos, "nh_nodes:mirror_surface")
+    local ent = c.add_entity(epos, "nh_nodes:mirror_surface")
     if not ent then return end
 
     local luaent = ent:get_luaentity()
@@ -5269,7 +5286,7 @@ local function spawn_surface(mirror_pos, param2)
 end
 
 -- Entidade visual (sprite colado na frente do espelho)
-core.register_entity("nh_nodes:mirror_surface", {
+c.register_entity("nh_nodes:mirror_surface", {
     initial_properties = {
         visual               = "upright_sprite",
         visual_size          = { x = 1.0, y = 1.0 },
@@ -5283,10 +5300,10 @@ core.register_entity("nh_nodes:mirror_surface", {
     on_activate = function(self, staticdata, dtime_s)
         -- Ao recarregar do staticdata, verifica se o espelho ainda existe
         if staticdata and staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data and data.mirror_pos then
                 self._mirror_pos = data.mirror_pos
-                local node = core.get_node(data.mirror_pos)
+                local node = c.get_node(data.mirror_pos)
                 if node.name ~= "nh_nodes:mirror" then
                     -- Espelho foi quebrado enquanto chunk estava fora
                     self.object:remove()
@@ -5298,7 +5315,7 @@ core.register_entity("nh_nodes:mirror_surface", {
 
     get_staticdata = function(self)
         -- Salva a posição do espelho dono junto com a entidade
-        return core.serialize({ mirror_pos = self._mirror_pos })
+        return c.serialize({ mirror_pos = self._mirror_pos })
     end,
 
     on_step = function(self, dtime)
@@ -5310,7 +5327,7 @@ core.register_entity("nh_nodes:mirror_surface", {
             self.object:remove()
             return
         end
-        local node = core.get_node(self._mirror_pos)
+        local node = c.get_node(self._mirror_pos)
         if node.name ~= "nh_nodes:mirror" then
             self.object:remove()
         end
@@ -5318,7 +5335,7 @@ core.register_entity("nh_nodes:mirror_surface", {
 })
 
 -- Node do espelho
-core.register_node("nh_nodes:mirror", {
+c.register_node("nh_nodes:mirror", {
     description         = S "Mirror",
     drawtype            = "mesh",
     mesh                = "mirror.obj",
@@ -5331,15 +5348,15 @@ core.register_node("nh_nodes:mirror", {
     selection_box       = {type = "fixed", fixed = { -0.5, -0.5, 0.435, 0.5, 0.5, 0.5 }},
     groups              = { cracky = 2, oddly_breakable_by_hand = 1 },
     after_place_node    = function(pos, placer, itemstack, pointed_thing)
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
         -- Salva param2 nos metadados para poder recriar depois
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         meta:set_int("param2", node.param2)
         spawn_surface(pos, node.param2)
     end,
 
     on_destruct         = function(pos)
-        for _, obj in ipairs(core.get_objects_inside_radius(pos, 0.6)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 0.6)) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:mirror_surface" then
                 -- Calcula qual espelho "dono" desta entidade seria
@@ -5358,7 +5375,7 @@ core.register_node("nh_nodes:mirror", {
                         vector.new(pos.x, pos.y, pos.z - 1),
                     }
                     for _, npos in ipairs(neighbors) do
-                        local nnode = core.get_node(npos)
+                        local nnode = c.get_node(npos)
                         if nnode.name == "nh_nodes:mirror" then
                             local expected = get_surface_pos(npos, nnode.param2)
                             if vector.distance(epos, expected) < 0.1 then
@@ -5384,7 +5401,7 @@ core.register_node("nh_nodes:mirror", {
 
 -- ABM: recria entidades de espelhos que perderam a superfície
 -- (acontece ao recarregar chunks / reentrar no mundo)
-core.register_abm({
+c.register_abm({
     label     = "Mirror surface restore",
     nodenames = { "nh_nodes:mirror" },
     interval  = 1,
@@ -5396,7 +5413,7 @@ core.register_abm({
     end,
 })
 
-core.register_node("nh_nodes:bottle", {
+c.register_node("nh_nodes:bottle", {
     description = S "Bottle",
     inventory_image = "bottle.png",
     drawtype = "mesh",
@@ -5422,7 +5439,7 @@ local function is_water_near(pos)
 
     for _, off in ipairs(offsets) do
         local p = vector.add(pos, off)
-        local node = core.get_node(p)
+        local node = c.get_node(p)
 
         if node and node.name then
             if node.name == "nh_nodes:water"
@@ -5446,7 +5463,7 @@ end
 
 -- Retorna a textura do topo do node (tiles[1])
 local function ulexite_get_top_texture(node_name)
-    local def = core.registered_nodes[node_name]
+    local def = c.registered_nodes[node_name]
     if not def or not def.tiles then return nil end
     local tile = def.tiles[1]
     if type(tile) == "string" then
@@ -5465,7 +5482,7 @@ end
 -- Verifica se já existe uma entidade de superfície sobre esta ulexita
 local function ulexite_has_surface(ulexite_pos)
     local epos = ulexite_surface_pos(ulexite_pos)
-    for _, obj in ipairs(core.get_objects_inside_radius(epos, 0.15)) do
+    for _, obj in ipairs(c.get_objects_inside_radius(epos, 0.15)) do
         local ent = obj:get_luaentity()
         if ent and ent.name == "nh_nodes:ulexite_surface" then
             return true
@@ -5483,7 +5500,7 @@ local function ulexite_spawn_surface(ulexite_pos)
     if not tex then return end
 
     local epos = ulexite_surface_pos(ulexite_pos)
-    local ent  = core.add_entity(epos, "nh_nodes:ulexite_surface")
+    local ent  = c.add_entity(epos, "nh_nodes:ulexite_surface")
     if not ent then return end
 
     ent:set_properties({ textures = { tex } })
@@ -5496,7 +5513,7 @@ end
 
 -- ── Entidade visual ───────────────────────────────────────────────────────────
 
-core.register_entity("nh_nodes:ulexite_surface", {
+c.register_entity("nh_nodes:ulexite_surface", {
     initial_properties = {
         -- upright_sprite igual ao mirror; rotação 90° em X o deita horizontalmente
         visual               = "upright_sprite",
@@ -5513,10 +5530,10 @@ core.register_entity("nh_nodes:ulexite_surface", {
         self.object:set_rotation({ x = math.pi / 2, y = 0, z = 0 })
 
         if staticdata and staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data and data.ulexite_pos then
                 self._ulexite_pos = data.ulexite_pos
-                local node = core.get_node(data.ulexite_pos)
+                local node = c.get_node(data.ulexite_pos)
                 if node.name ~= "nh_nodes:ulexite" then
                     self.object:remove()
                     return
@@ -5534,7 +5551,7 @@ core.register_entity("nh_nodes:ulexite_surface", {
     end,
 
     get_staticdata = function(self)
-        return core.serialize({ ulexite_pos = self._ulexite_pos })
+        return c.serialize({ ulexite_pos = self._ulexite_pos })
     end,
 
     on_step = function(self, dtime)
@@ -5548,7 +5565,7 @@ core.register_entity("nh_nodes:ulexite_surface", {
         end
 
         -- Remove se a ulexita sumiu
-        local node = core.get_node(self._ulexite_pos)
+        local node = c.get_node(self._ulexite_pos)
         if node.name ~= "nh_nodes:ulexite" then
             self.object:remove()
             return
@@ -5573,8 +5590,8 @@ core.register_entity("nh_nodes:ulexite_surface", {
 -- ou adicione after_place_node / on_destruct manualmente se preferir não
 -- duplicar. O mais simples é substituir o bloco original pelo abaixo.
 
--- (apague o core.register_node("nh_nodes:ulexite", {...}) anterior e use este)
-core.register_node("nh_nodes:ulexite", {
+-- (apague o c.register_node("nh_nodes:ulexite", {...}) anterior e use este)
+c.register_node("nh_nodes:ulexite", {
     description = S "Ulexite",
     drawtype = "normal",
     tiles = { "ulexitetopdown.png", "ulexitetopdown.png", "ulexitesides.png" },
@@ -5589,7 +5606,7 @@ core.register_node("nh_nodes:ulexite", {
 
     on_destruct = function(pos)
         local epos = ulexite_surface_pos(pos)
-        for _, obj in ipairs(core.get_objects_inside_radius(epos, 0.15)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(epos, 0.15)) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:ulexite_surface" then
                 obj:remove()
@@ -5600,7 +5617,7 @@ core.register_node("nh_nodes:ulexite", {
 
 -- ── ABM: recria entidades que sumiram ao recarregar chunks ────────────────────
 
-core.register_abm({
+c.register_abm({
     label     = "Ulexite surface restore",
     nodenames = { "nh_nodes:ulexite" },
     interval  = 2,
@@ -5612,7 +5629,7 @@ core.register_abm({
     end,
 })
 
-core.register_node("nh_nodes:messagebottle", {
+c.register_node("nh_nodes:messagebottle", {
     description = S "Bottle with Message" .. "\n" .. S "[Floating Item]",
     inventory_image = "bottlepage.png",
     drawtype = "mesh",
@@ -5637,20 +5654,20 @@ core.register_node("nh_nodes:messagebottle", {
         end
         -- Sem agachar: vira entidade normalmente
         if is_water_near(pos) then
-            core.remove_node(pos)
-            core.add_entity(pos, "nh_mob:messagebottle")
+            c.remove_node(pos)
+            c.add_entity(pos, "nh_mob:messagebottle")
         end
     end,
 
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
-        core.remove_node(pos)
-        core.add_entity(pos, "nh_mob:messagebottle")
+        c.remove_node(pos)
+        c.add_entity(pos, "nh_mob:messagebottle")
         return false
     end,
 })
 
-core.register_node("nh_nodes:fireflybottle", {
+c.register_node("nh_nodes:fireflybottle", {
     description = S "Bottle with Firefly",
     inventory_image = "bottlefirefly.png",
     drawtype = "mesh",
@@ -5676,7 +5693,7 @@ core.register_node("nh_nodes:fireflybottle", {
     },
 })
 
-core.register_node("nh_nodes:inkbottle", {
+c.register_node("nh_nodes:inkbottle", {
     description = S "Bottle with Ink",
     inventory_image = "inkbottle.png",
     drawtype = "mesh",
@@ -5750,7 +5767,7 @@ function consume_ink(player)
     inv:add_item("main", "nh_nodes:bottle")
 end
 
-core.register_node("nh_nodes:coconutlinked", {
+c.register_node("nh_nodes:coconutlinked", {
     description = S "Fixed Coconut",
     drawtype = "mesh",
     mesh = "coconutlinked.obj",
@@ -5767,7 +5784,7 @@ core.register_node("nh_nodes:coconutlinked", {
 })
 
 
-core.register_node("nh_nodes:coconut", {
+c.register_node("nh_nodes:coconut", {
     description = S "Coconut" .. "\n" .. S "Nutrition: +3" .. "\n" .. S "Floating Item",
     drawtype = "mesh",
     mesh = "coconut.obj",
@@ -5796,20 +5813,20 @@ core.register_node("nh_nodes:coconut", {
         end
         -- Sem agachar: vira entidade normalmente
         if is_water_near(pos) then
-            core.remove_node(pos)
-            core.add_entity(pos, "nh_mob:coconut")
+            c.remove_node(pos)
+            c.add_entity(pos, "nh_mob:coconut")
         end
     end,
 
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
-        core.remove_node(pos)
-        core.add_entity(pos, "nh_mob:coconut")
+        c.remove_node(pos)
+        c.add_entity(pos, "nh_mob:coconut")
         return false
     end,
 })
 
-core.register_node("nh_nodes:palmtimber", {
+c.register_node("nh_nodes:palmtimber", {
     description = S "Palm Trunk",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
@@ -5828,17 +5845,17 @@ core.register_node("nh_nodes:palmtimber", {
 
     after_dig_node = function(pos)
         local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-        local below_node = core.get_node(below)
+        local below_node = c.get_node(below)
 
         if below_node.name == "air"
-            or core.get_item_group(below_node.name, "tree_trunk") > 0
-            or core.get_item_group(below_node.name, "tree_leaves") > 0 then
+            or c.get_item_group(below_node.name, "tree_trunk") > 0
+            or c.get_item_group(below_node.name, "tree_leaves") > 0 then
             make_leaves_fall(pos)
         end
     end,
 
     on_construct = function(pos)
-        core.get_node_timer(pos):start(0.5)
+        c.get_node_timer(pos):start(0.5)
     end,
 
     on_timer = function(pos)
@@ -5851,7 +5868,7 @@ core.register_node("nh_nodes:palmtimber", {
 })
 
 
-core.register_node("nh_nodes:palmstraws", {
+c.register_node("nh_nodes:palmstraws", {
     description = S "Palm Trunk with Straws",
     drawtype = "mesh",
     mesh = "coconutstraws.obj",
@@ -5870,7 +5887,7 @@ core.register_node("nh_nodes:palmstraws", {
         dig = { name = "punchtimber2", gain = 0.5 },},
 })
 
-core.register_node("nh_nodes:palmlog", {
+c.register_node("nh_nodes:palmlog", {
     description = S "Palm Log",
     drawtype = "mesh",
     mesh = "palm_trunk.obj",
@@ -5897,7 +5914,7 @@ core.register_node("nh_nodes:palmlog", {
         dig = { name = "punchtimber2", gain = 0.5 },},
 })
 
-core.register_node("nh_nodes:palmleafstalks", {
+c.register_node("nh_nodes:palmleafstalks", {
     description = S "Palm Leaves Stalks",
     drawtype = "mesh",
     mesh = "TaloCoqueiro.obj",
@@ -5917,7 +5934,7 @@ core.register_node("nh_nodes:palmleafstalks", {
 })
 
 -- Registrar o node da folha de coqueiro
-core.register_node("nh_nodes:palmleaf", {
+c.register_node("nh_nodes:palmleaf", {
     description = S "Palm Leaf",
     drawtype = "mesh",
     mesh = "palm_leaf.obj",
@@ -5936,11 +5953,11 @@ core.register_node("nh_nodes:palmleaf", {
     -- Quando o node é colocado, iniciar o timer
     on_place = function(itemstack, placer, pointed_thing)
         -- Primeiro, fazer o placement normal
-        local pos = core.item_place(itemstack, placer, pointed_thing)
+        local pos = c.item_place(itemstack, placer, pointed_thing)
 
         -- Se o placement foi bem-sucedido, iniciar o timer
         if pos then
-            local timer = core.get_node_timer(pointed_thing.above)
+            local timer = c.get_node_timer(pointed_thing.above)
             timer:start(60) -- 60 segundos = 1 minuto
         end
 
@@ -5950,11 +5967,11 @@ core.register_node("nh_nodes:palmleaf", {
     -- Quando o timer terminar
     on_timer = function(pos)
         -- Verificar se está sob luz do sol
-        local light_level = core.get_node_light(pos, 0.5)
+        local light_level = c.get_node_light(pos, 0.5)
 
         if light_level and light_level >= 12 then -- 12+ é luz solar direta
             -- Trocar para o node de palha
-            core.set_node(pos, { name = "nh_nodes:palmstraw" })
+            c.set_node(pos, { name = "nh_nodes:palmstraw" })
             return false -- Não reiniciar o timer
         else
             -- Se não estiver no sol, reiniciar o timer
@@ -5966,7 +5983,7 @@ core.register_node("nh_nodes:palmleaf", {
 ---------------------------
 -- NODE DE PALHA COM CHAMAS
 ---------------------------
-core.register_node("nh_nodes:palmstraw", {
+c.register_node("nh_nodes:palmstraw", {
     description = S "Palm Straw",
     drawtype = "mesh",
     mesh = "palmstraw.obj",
@@ -5984,12 +6001,12 @@ core.register_node("nh_nodes:palmstraw", {
 
     -- Quando a palha é colocada, verifica se deve criar chama
     on_construct = function(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tiver chama marcada, cria a entidade
         if meta:get_int("has_flame") == 1 then
-            core.after(0.1, function()
+            c.after(0.1, function()
                 -- Verifica se não existe chama já
-                local objs = core.get_objects_inside_radius(pos, 0.5)
+                local objs = c.get_objects_inside_radius(pos, 0.5)
                 local has_flame = false
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
@@ -6000,7 +6017,7 @@ core.register_node("nh_nodes:palmstraw", {
                 end
 
                 if not has_flame then
-                    local obj = core.add_entity(pos, "nh_nodes:palmstraw_flame_entity")
+                    local obj = c.add_entity(pos, "nh_nodes:palmstraw_flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
                         if ent then
@@ -6020,7 +6037,7 @@ core.register_node("nh_nodes:palmstraw", {
 
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
 
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
@@ -6033,7 +6050,7 @@ core.register_node("nh_nodes:palmstraw", {
             meta:set_int("has_flame", 1)
 
             -- Cria a entidade da chama
-            local obj = core.add_entity(pos, "nh_nodes:palmstraw_flame_entity")
+            local obj = c.add_entity(pos, "nh_nodes:palmstraw_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -6042,7 +6059,7 @@ core.register_node("nh_nodes:palmstraw", {
             end
 
             -- Efeito sonoro (opcional)
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -6052,7 +6069,7 @@ core.register_node("nh_nodes:palmstraw", {
 
     -- Quando a palha for removida, remove as chamas
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        local objs = core.get_objects_inside_radius(pos, 0.5)
+        local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then
@@ -6065,7 +6082,7 @@ core.register_node("nh_nodes:palmstraw", {
 ---------------------------
 -- ENTIDADE DA CHAMA DA PALHA
 ---------------------------
-core.register_entity("nh_nodes:palmstraw_flame_entity", {
+c.register_entity("nh_nodes:palmstraw_flame_entity", {
     initial_properties = {
         physical = false,
         collide_with_objects = false,
@@ -6087,7 +6104,7 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
 
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data and data.straw_pos then
                 self._straw_pos = data.straw_pos
             end
@@ -6105,7 +6122,7 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
     end,
 
     get_staticdata = function(self)
-        return core.serialize({ straw_pos = self._straw_pos })
+        return c.serialize({ straw_pos = self._straw_pos })
     end,
 
     -- Detecta quando é golpeado para acender tochas
@@ -6127,11 +6144,11 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
                 local leftover = inv:add_item("main", "nh_nodes:torch2")
                 if not leftover:is_empty() then
                     local pos = puncher:get_pos()
-                    core.add_item(pos, leftover)
+                    c.add_item(pos, leftover)
                 end
             end
 
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = self.object:get_pos(),
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -6159,7 +6176,7 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
                 return
             end
 
-            local node = core.get_node(self._straw_pos)
+            local node = c.get_node(self._straw_pos)
 
             -- Se a palha foi removida, remove a chama
             if node.name ~= "nh_nodes:palmstraw" then
@@ -6168,7 +6185,7 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
             end
 
             -- Verifica se ainda deve ter chama
-            local meta = core.get_meta(self._straw_pos)
+            local meta = c.get_meta(self._straw_pos)
             if meta:get_int("has_flame") ~= 1 then
                 self.object:remove()
                 return
@@ -6178,7 +6195,7 @@ core.register_entity("nh_nodes:palmstraw_flame_entity", {
 })
 
 
-core.register_node("nh_nodes:fireice", {
+c.register_node("nh_nodes:fireice", {
     description = S "Fire Ice",
     tiles = { "neve.png" },
     drawtype = "normal",
@@ -6186,7 +6203,7 @@ core.register_node("nh_nodes:fireice", {
     --sounds = default.node_sound_snow_defaults(),
 })
 
-core.register_node("nh_nodes:snow_ramp", {
+c.register_node("nh_nodes:snow_ramp", {
     description         = S "Snow Ramp",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
@@ -6213,7 +6230,7 @@ core.register_node("nh_nodes:snow_ramp", {
             { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
 })
 
-core.register_node("nh_nodes:snow_corner", {
+c.register_node("nh_nodes:snow_corner", {
     description         = S "Snow Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -6242,7 +6259,7 @@ core.register_node("nh_nodes:snow_corner", {
             { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
 })
 
-core.register_node("nh_nodes:snow_insidecorner", {
+c.register_node("nh_nodes:snow_insidecorner", {
     description         = S "Snow Inside Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -6270,7 +6287,7 @@ core.register_node("nh_nodes:snow_insidecorner", {
             { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},},
 })
 
-core.register_node("nh_nodes:snow", {
+c.register_node("nh_nodes:snow", {
     description = S "Snow",
     tiles = { "neve.png" },
     drawtype = "normal",
@@ -6282,7 +6299,7 @@ core.register_node("nh_nodes:snow", {
         place    = { name = "punchtimber3", gain = 0.5 },},
 })
 
-core.register_node("nh_nodes:avalanche", {
+c.register_node("nh_nodes:avalanche", {
     description = S "Avalanche",
     liquidtype = "source",
     drawtype = "liquid",
@@ -6302,7 +6319,7 @@ core.register_node("nh_nodes:avalanche", {
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
 })
 
-core.register_node("nh_nodes:avalanche_flowing", {
+c.register_node("nh_nodes:avalanche_flowing", {
     description = S "Flowing Avalanche",
     liquidtype = "flowing",
     drawtype = "flowingliquid",
@@ -6332,7 +6349,7 @@ core.register_node("nh_nodes:avalanche_flowing", {
     liquid_renewable = false,
 })
 
-core.register_node("nh_nodes:water", {
+c.register_node("nh_nodes:water", {
     description = S "Water",
     drawtype = "liquid",
     liquidtype = "source",
@@ -6363,14 +6380,14 @@ core.register_node("nh_nodes:water", {
         }
         for _, d in ipairs(neighbors) do
             local npos = vector.add(pos, d)
-            local node = core.get_node(npos)
+            local node = c.get_node(npos)
             -- força remesh do vizinho
-            core.swap_node(npos, node)
+            c.swap_node(npos, node)
         end
     end,
 })
 
-core.register_node("nh_nodes:water_flowing", {
+c.register_node("nh_nodes:water_flowing", {
     description = S "Flowing Water",
     drawtype = "flowingliquid",
     tiles = { "agua.png" },
@@ -6400,7 +6417,7 @@ core.register_node("nh_nodes:water_flowing", {
     groups = { water = 1, liquid = 1, not_in_creative_inventory = 1 },
 })
 
-core.register_node("nh_nodes:bucket", {
+c.register_node("nh_nodes:bucket", {
     description = S("Bucket"),
     drawtype = "mesh",
     mesh = "bucket.obj",
@@ -6417,21 +6434,21 @@ core.register_node("nh_nodes:bucket", {
     pointabilities = {nodes = WATER_FULLNODES},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then
-            return core.item_place(itemstack, placer, pointed_thing)
+            return c.item_place(itemstack, placer, pointed_thing)
         elseif pointed_thing.type ~= "node" then return itemstack end
-        local name = core.get_node(pointed_thing.under).name
+        local name = c.get_node(pointed_thing.under).name
         if name == "nh_nodes:water" then
-            core.remove_node(pointed_thing.under)
+            c.remove_node(pointed_thing.under)
             return ItemStack("nh_nodes:bucketwater")
         elseif name == "nh_nodes:water2" then
-            core.remove_node(pointed_thing.under)
+            c.remove_node(pointed_thing.under)
             return ItemStack("nh_nodes:bucketwater2")
         end
         return itemstack
     end,
 })
 
-core.register_node("nh_nodes:bucketwater", {
+c.register_node("nh_nodes:bucketwater", {
     description = S("Bucket with Water"),
     drawtype = "mesh",
     mesh = "bucket.obj",
@@ -6447,18 +6464,18 @@ core.register_node("nh_nodes:bucketwater", {
     offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then
-            return core.item_place(itemstack, placer, pointed_thing)
+            return c.item_place(itemstack, placer, pointed_thing)
         elseif pointed_thing.type ~= "node" then return itemstack end
         local pos = pointed_thing.above
-        if core.get_node(pos).name == "air" then
-            core.set_node(pos, { name = "nh_nodes:water" })
+        if c.get_node(pos).name == "air" then
+            c.set_node(pos, { name = "nh_nodes:water" })
             return ItemStack("nh_nodes:bucket")
         end
         return itemstack
     end,
 })
 
-core.register_node("nh_nodes:bucketwater2", {
+c.register_node("nh_nodes:bucketwater2", {
     description = S("Bucket with Fresh Water"),
     drawtype = "mesh",
     mesh = "bucket.obj",
@@ -6474,18 +6491,18 @@ core.register_node("nh_nodes:bucketwater2", {
     offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then
-            return core.item_place(itemstack, placer, pointed_thing)
+            return c.item_place(itemstack, placer, pointed_thing)
         elseif pointed_thing.type ~= "node" then return itemstack end
         local pos = pointed_thing.above
-        if core.get_node(pos).name == "air" then
-            core.set_node(pos, { name = "nh_nodes:water2" })
+        if c.get_node(pos).name == "air" then
+            c.set_node(pos, { name = "nh_nodes:water2" })
             return ItemStack("nh_nodes:bucket")
         end
         return itemstack
     end,
 })
 
-core.register_node("nh_nodes:barrier", {
+c.register_node("nh_nodes:barrier", {
     description = S "Barrier",
     drawtype = "glasslike",
     tiles = { "ice2.png" },
@@ -6530,7 +6547,7 @@ minetest.register_chatcommand("cleardome", {
 })
 
 -- Gelo
-core.register_node("nh_nodes:ice", {
+c.register_node("nh_nodes:ice", {
     description = S "Ice",
     drawtype = "glasslike",
     tiles = { "ice2.png" },
@@ -6546,7 +6563,7 @@ core.register_node("nh_nodes:ice", {
     drop = "nh_nodes:ice2",
 })
 
-core.register_node("nh_nodes:ice2", {
+c.register_node("nh_nodes:ice2", {
     description = S "Ice",
     drawtype = "glasslike",
     tiles = { "ice.png" },
@@ -6570,20 +6587,20 @@ core.register_node("nh_nodes:ice2", {
         end
         -- Sem agachar: vira entidade normalmente
         if is_water_near(pos) then
-            core.remove_node(pos)
-            core.add_entity(pos, "nh_mob:iceberg")
+            c.remove_node(pos)
+            c.add_entity(pos, "nh_mob:iceberg")
         end
     end,
 
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
-        core.remove_node(pos)
-        core.add_entity(pos, "nh_mob:iceberg")
+        c.remove_node(pos)
+        c.add_entity(pos, "nh_mob:iceberg")
         return false
     end,
 })
 
-core.register_node("nh_nodes:ice2ramp", {
+c.register_node("nh_nodes:ice2ramp", {
     description = S "Ice Ramp",
     drawtype = "mesh",
     mesh = "grass_slope.obj",
@@ -6611,20 +6628,20 @@ core.register_node("nh_nodes:ice2ramp", {
         end
         -- Sem agachar: vira entidade normalmente
         if is_water_near(pos) then
-            core.remove_node(pos)
-            core.add_entity(pos, "nh_mob:iceberg")
+            c.remove_node(pos)
+            c.add_entity(pos, "nh_mob:iceberg")
         end
     end,
 
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
-        core.remove_node(pos)
-        core.add_entity(pos, "nh_mob:iceberg")
+        c.remove_node(pos)
+        c.add_entity(pos, "nh_mob:iceberg")
         return false
     end,
 })
 
-core.register_node("nh_nodes:water2", {
+c.register_node("nh_nodes:water2", {
     description = S "Fresh Water",
     drawtype = "liquid",
     tiles = { "water2.png" },
@@ -6647,7 +6664,7 @@ core.register_node("nh_nodes:water2", {
     groups = { water = 1, liquid = 1 },
 })
 
-core.register_node("nh_nodes:water2_flowing", {
+c.register_node("nh_nodes:water2_flowing", {
     description = S "Flowing Fresh Water",
     drawtype = "flowingliquid",
     tiles = { "water2.png" },
@@ -6678,7 +6695,7 @@ core.register_node("nh_nodes:water2_flowing", {
 })
 
 
-core.register_node("nh_nodes:basalt", {
+c.register_node("nh_nodes:basalt", {
     description = S "Basalt",
     tiles = { "basalt.png" },
     groups = { cracky = 3 },
@@ -6693,7 +6710,7 @@ core.register_node("nh_nodes:basalt", {
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
-core.register_node("nh_nodes:basalt_ramp", {
+c.register_node("nh_nodes:basalt_ramp", {
     description = S "Basalt Ramp",
     paramtype   = "light",
     paramtype2  = "facedir",
@@ -6720,7 +6737,7 @@ core.register_node("nh_nodes:basalt_ramp", {
             { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
 })
 
-core.register_node("nh_nodes:basalt_corner", {
+c.register_node("nh_nodes:basalt_corner", {
     description         = S "Basalt Corner",
     -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
 
@@ -6751,7 +6768,7 @@ core.register_node("nh_nodes:basalt_corner", {
             { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
 })
 
-core.register_node("nh_nodes:basalt_insidecorner", {
+c.register_node("nh_nodes:basalt_insidecorner", {
     description         = S "Basalt Inside Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
@@ -6780,7 +6797,7 @@ core.register_node("nh_nodes:basalt_insidecorner", {
             { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},},
 })
 
-core.register_node("nh_nodes:magma", {
+c.register_node("nh_nodes:magma", {
     description = S "Magma",
     tiles = { "magma.png" },
     groups = { cracky = 3, hot = 1 },
@@ -6846,7 +6863,7 @@ minetest.register_abm({
     end,
 })
 
-core.register_node("nh_nodes:lava", {
+c.register_node("nh_nodes:lava", {
     description = S "Lava",
     drawtype = "liquid",
     tiles = { "lava.png" },
@@ -6868,7 +6885,7 @@ core.register_node("nh_nodes:lava", {
     groups = { lava = 1, liquid = 1, hot = 1 },
 })
 
-core.register_node("nh_nodes:lava_flowing", {
+c.register_node("nh_nodes:lava_flowing", {
     description = S "Flowing Lava",
     drawtype = "flowingliquid",
     tiles = { "lava.png" },
@@ -6898,7 +6915,7 @@ core.register_node("nh_nodes:lava_flowing", {
     groups = { lava = 1, liquid = 1, hot = 1, not_in_creative_inventory = 1 },
 })
 
-core.register_node("nh_nodes:bluelava", {
+c.register_node("nh_nodes:bluelava", {
     description = S "Blue Lava",
     drawtype = "liquid",
     tiles = { "bluelava.png" },
@@ -6922,7 +6939,7 @@ core.register_node("nh_nodes:bluelava", {
     groups = { lava = 1, liquid = 1, hot = 1 },
 })
 
-core.register_node("nh_nodes:bluelava_flowing", {
+c.register_node("nh_nodes:bluelava_flowing", {
     description = S "Flowing Blue Lava",
     drawtype = "flowingliquid",
     tiles = { "bluelava.png" },
@@ -6954,7 +6971,7 @@ core.register_node("nh_nodes:bluelava_flowing", {
 })
 
 -- ABM que verifica jogadores próximos ao nó de magma
-core.register_abm({
+c.register_abm({
     label = "Magma damage",
     nodenames = { "nh_nodes:magma" },
     interval = 1.0, -- checa a cada 1 segundo
@@ -6962,7 +6979,7 @@ core.register_abm({
 
     action = function(pos, node)
         -- Pega todos os objetos em raio de 1 bloco (toca as faces)
-        local objects = core.get_objects_inside_radius(pos, 1.1)
+        local objects = c.get_objects_inside_radius(pos, 1.1)
         for _, obj in ipairs(objects) do
             if obj:is_player() then
                 obj:set_hp(obj:get_hp() - 2) -- tira 1 coração por segundo
@@ -6972,24 +6989,24 @@ core.register_abm({
 })
 
 -- Limpa o timer quando jogador sai
-core.register_on_leaveplayer(function(player)
+c.register_on_leaveplayer(function(player)
     lava_damage_timer[player:get_player_name()] = nil
     portal_cooldown[player:get_player_name()] = nil
 end)
 
-core.register_abm({
+c.register_abm({
     label = "Lava damage",
     nodenames = { "nh_nodes:lava", "nh_nodes:lava_flowing" },
     interval = 1.0,
     chance = 1,
     action = function(pos, node)
-        local objects = core.get_objects_inside_radius(pos, 1.1)
+        local objects = c.get_objects_inside_radius(pos, 1.1)
         for _, obj in ipairs(objects) do
             if obj:is_player() then
                 -- Evita double damage se já está dentro (coberto pelo globalstep)
                 local ppos = obj:get_pos()
-                local feet = core.get_node({ x = ppos.x, y = ppos.y, z = ppos.z })
-                local head = core.get_node({ x = ppos.x, y = ppos.y + 1, z = ppos.z })
+                local feet = c.get_node({ x = ppos.x, y = ppos.y, z = ppos.z })
+                local head = c.get_node({ x = ppos.x, y = ppos.y + 1, z = ppos.z })
 
                 local inside = feet.name == "nh_nodes:lava" or
                     feet.name == "nh_nodes:lava_flowing" or
@@ -7008,7 +7025,7 @@ core.register_abm({
 -- Papeis
 
 -- Node para Página em branco
-core.register_node("nh_nodes:page_node", {
+c.register_node("nh_nodes:page_node", {
     description = S "Paper",
     drawtype = "mesh",
     mesh = "page.obj",
@@ -7047,11 +7064,11 @@ core.register_node("nh_nodes:page_node", {
             else
                 msg = msg .. S "an ink bottle in the inventory to write."
             end
-            core.chat_send_player(player_name, msg)
+            c.chat_send_player(player_name, msg)
             return
         end
 
-        core.show_formspec(player_name, "nh_nodes:page_writer:" .. core.pos_to_string(pos),
+        c.show_formspec(player_name, "nh_nodes:page_writer:" .. c.pos_to_string(pos),
             "size[8,6]" ..
             "label[0.3,0;" .. S "Write on the Page:" .. "]" ..
             "textarea[0.3,0.5;8,4.5;page_text;;]" ..
@@ -7067,14 +7084,14 @@ core.register_node("nh_nodes:page_node", {
             if inv:room_for_item("main", itemstack) then
                 inv:add_item("main", itemstack)
             else
-                core.add_item(pos, itemstack)
+                c.add_item(pos, itemstack)
             end
         end
     end,
 })
 
 -- Node para Página escrita
-core.register_node("nh_nodes:writedpage_node", {
+c.register_node("nh_nodes:writedpage_node", {
     description = S "Writed Paper",
     drawtype = "mesh",
     mesh = "page.obj",
@@ -7102,16 +7119,16 @@ core.register_node("nh_nodes:writedpage_node", {
         end
 
         local player_name = clicker:get_player_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local text = meta:get_string("text")
 
         if text == "" then
             text = S "Blank Paper"
         end
 
-        core.show_formspec(player_name, "nh_nodes:page_reader",
+        c.show_formspec(player_name, "nh_nodes:page_reader",
             "size[8,6]" ..
-            "textarea[0.3,0.3;8,5;page_text;;" .. core.formspec_escape(text) .. "]" ..
+            "textarea[0.3,0.3;8,5;page_text;;" .. c.formspec_escape(text) .. "]" ..
             "button_exit[3,5.3;2,1;close;" .. S "Close" .. "]"
         )
     end,
@@ -7126,14 +7143,14 @@ core.register_node("nh_nodes:writedpage_node", {
             if inv:room_for_item("main", itemstack) then
                 inv:add_item("main", itemstack)
             else
-                core.add_item(pos, itemstack)
+                c.add_item(pos, itemstack)
             end
         end
     end,
 })
 
 -- Modificar os craftitems originais para colocar os nodes
-core.override_item("nh_items:page", {
+c.override_item("nh_items:page", {
     on_place = function(itemstack, placer, pointed_thing)
         if pointed_thing.type ~= "node" then
             return itemstack
@@ -7142,23 +7159,23 @@ core.override_item("nh_items:page", {
         local under = pointed_thing.under
         local above = pointed_thing.above
 
-        if core.is_protected(above, placer:get_player_name()) then
+        if c.is_protected(above, placer:get_player_name()) then
             return itemstack
         end
 
-        local node = core.get_node(above)
+        local node = c.get_node(above)
         if node.name ~= "air" then
             return itemstack
         end
 
         -- Calcular wallmounted - MUITO MAIS SIMPLES
         local dir = vector.subtract(above, under)
-        local wallmounted = core.dir_to_wallmounted(dir)
+        local wallmounted = c.dir_to_wallmounted(dir)
 
-        core.set_node(above, { name = "nh_nodes:page_node", param2 = wallmounted })
-        core.sound_play("default_place_node", { pos = above, gain = 1.0 })
+        c.set_node(above, { name = "nh_nodes:page_node", param2 = wallmounted })
+        c.sound_play("default_place_node", { pos = above, gain = 1.0 })
 
-        if not core.is_creative_enabled(placer:get_player_name()) then
+        if not c.is_creative_enabled(placer:get_player_name()) then
             itemstack:take_item()
         end
 
@@ -7166,7 +7183,7 @@ core.override_item("nh_items:page", {
     end,
 })
 
-core.override_item("nh_items:writedpage", {
+c.override_item("nh_items:writedpage", {
     on_place = function(itemstack, placer, pointed_thing)
         if pointed_thing.type ~= "node" then
             return itemstack
@@ -7175,26 +7192,26 @@ core.override_item("nh_items:writedpage", {
         local under = pointed_thing.under
         local above = pointed_thing.above
 
-        if core.is_protected(above, placer:get_player_name()) then
+        if c.is_protected(above, placer:get_player_name()) then
             return itemstack
         end
 
-        local node = core.get_node(above)
+        local node = c.get_node(above)
         if node.name ~= "air" then
             return itemstack
         end
 
         local dir = vector.subtract(above, under)
-        local wallmounted = core.dir_to_wallmounted(dir)
+        local wallmounted = c.dir_to_wallmounted(dir)
 
-        core.set_node(above, { name = "nh_nodes:writedpage_node", param2 = wallmounted })
-        core.sound_play("default_place_node", { pos = above, gain = 1.0 })
+        c.set_node(above, { name = "nh_nodes:writedpage_node", param2 = wallmounted })
+        c.sound_play("default_place_node", { pos = above, gain = 1.0 })
 
         local item_meta = itemstack:get_meta()
-        local node_meta = core.get_meta(above)
+        local node_meta = c.get_meta(above)
         node_meta:set_string("text", item_meta:get_string("text"))
 
-        if not core.is_creative_enabled(placer:get_player_name()) then
+        if not c.is_creative_enabled(placer:get_player_name()) then
             itemstack:take_item()
         end
 
@@ -7205,28 +7222,28 @@ core.override_item("nh_items:writedpage", {
 if not nodes then nodes = {} end
 
 function nodes.place_written_page(pos, text, facedir)
-    core.set_node(pos, {
+    c.set_node(pos, {
         name = "nh_nodes:writedpage_node",
         param2 = facedir
     })
-    local meta = core.get_meta(pos)
+    local meta = c.get_meta(pos)
     meta:set_string("text", text)
 end
 
 -- Handler para salvar o texto
-core.register_on_player_receive_fields(function(player, formname, fields)
+c.register_on_player_receive_fields(function(player, formname, fields)
     local prefix = "nh_items:page_writer:"
     if formname:sub(1, #prefix) == "nh_items:page_writer:" then
         if fields.save and fields.page_text then
             local pos_str = formname:sub(#prefix + 1)
-            local pos = core.string_to_pos(pos_str)
+            local pos = c.string_to_pos(pos_str)
 
             if pos then
-                local node = core.get_node(pos)
+                local node = c.get_node(pos)
                 if node.name == "nh_nodes:page_node" then
                     -- Substituir por página escrita mantendo a rotação
-                    core.set_node(pos, { name = "nh_nodes:writedpage_node", param2 = node.param2 })
-                    local meta = core.get_meta(pos)
+                    c.set_node(pos, { name = "nh_nodes:writedpage_node", param2 = node.param2 })
+                    local meta = c.get_meta(pos)
                     meta:set_string("text", fields.page_text)
 
                     -- Consumir tinta (adapte conforme sua função)
@@ -7234,7 +7251,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                         writing_utils.consume_ink(player)
                     end
 
-                    core.chat_send_player(player:get_player_name(), S "Text saved on the page!")
+                    c.chat_send_player(player:get_player_name(), S "Text saved on the page!")
                 end
             end
         end
@@ -7273,17 +7290,17 @@ local CHEST_ENTITY_BY_NODE = {
 }
 
 function chest_update_items(pos)
-    local node = core.get_node(pos)
+    local node = c.get_node(pos)
     local entity_name = CHEST_ENTITY_BY_NODE[node.name]
     if not entity_name then
         return
     end
 
-    local meta    = core.get_meta(pos)
+    local meta    = c.get_meta(pos)
     local inv     = meta:get_inventory()
 
     -- Remover entidades de itens antigas
-    local objects = core.get_objects_inside_radius(pos, 1)
+    local objects = c.get_objects_inside_radius(pos, 1)
     for _, obj in ipairs(objects) do
         if obj:get_luaentity() and obj:get_luaentity().name == "nh_nodes:chest_item" then
             obj:remove()
@@ -7302,14 +7319,14 @@ function chest_update_items(pos)
 
     -- Se não houver entidade do baú, criar uma invisível para servir de base
     if not chest_entity then
-        chest_entity = core.add_entity(pos, entity_name)
+        chest_entity = c.add_entity(pos, entity_name)
         if chest_entity and chest_entity:get_luaentity() then
             local luaent        = chest_entity:get_luaentity()
             luaent.node_pos     = pos
             luaent.is_invisible = true
             -- Aplicar rotação
-            local yaw           = core.facedir_to_dir(node.param2)
-            chest_entity:set_yaw(core.dir_to_yaw(yaw))
+            local yaw           = c.facedir_to_dir(node.param2)
+            chest_entity:set_yaw(c.dir_to_yaw(yaw))
         end
     end
 
@@ -7321,7 +7338,7 @@ function chest_update_items(pos)
     for i = 1, math.min(16, inv:get_size("main")) do
         local stack = inv:get_stack("main", i)
         if not stack:is_empty() then
-            local entity = core.add_entity(pos, "nh_nodes:chest_item")
+            local entity = c.add_entity(pos, "nh_nodes:chest_item")
             if entity and entity:get_luaentity() then
                 local luaent      = entity:get_luaentity()
                 luaent.chest_pos  = pos
@@ -7339,7 +7356,7 @@ oak_chest_update_items  = chest_update_items
 back_chest_update_items = chest_update_items
 
 -- Entidade para representar itens no baú
-core.register_entity("nh_nodes:chest_item", {
+c.register_entity("nh_nodes:chest_item", {
     initial_properties = {
         visual = "wielditem",
         wield_item = "air",
@@ -7370,14 +7387,14 @@ core.register_entity("nh_nodes:chest_item", {
             return
         end
 
-        local node = core.get_node(self.chest_pos)
+        local node = c.get_node(self.chest_pos)
         if node.name ~= "nh_nodes:oak_chest_open" and node.name ~= "nh_nodes:back_chest_open" then
             self.object:remove()
         end
     end,
 })
 
-core.register_node("nh_nodes:oak_chest_open", {
+c.register_node("nh_nodes:oak_chest_open", {
     drawtype = "mesh",
     mesh = "chestopen.obj",         -- modelo sem tampa
     tiles = { "ChestTexture.png" }, -- mesma textura
@@ -7399,13 +7416,13 @@ core.register_node("nh_nodes:oak_chest_open", {
 
     -- Quando clicar no baú aberto, mostrar inventário
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local player_name = clicker:get_player_name()
 
         -- Marcar que o jogador está usando o baú
         meta:set_string("current_user", player_name)
 
-        core.show_formspec(player_name, "nh_nodes:oak_chest_" .. core.pos_to_string(pos),
+        c.show_formspec(player_name, "nh_nodes:oak_chest_" .. c.pos_to_string(pos),
             build_chest_formspec(clicker))
 
         return itemstack
@@ -7413,20 +7430,20 @@ core.register_node("nh_nodes:oak_chest_open", {
 
     -- Atualizar itens visuais quando o node é construído
     on_construct = function(pos)
-        core.after(0.1, function()
+        c.after(0.1, function()
             oak_chest_update_items(pos)
         end)
     end,
 
     -- Atualizar itens visuais após colocar
     after_place_node = function(pos, placer, itemstack, pointed_thing)
-        core.after(0.1, function()
+        c.after(0.1, function()
             oak_chest_update_items(pos)
         end)
     end,
 })
 
-core.register_node("nh_nodes:oakchest", {
+c.register_node("nh_nodes:oakchest", {
     description = S "Oak Chest",
     drawtype = "mesh",
     mesh = "chest.glb",
@@ -7450,7 +7467,7 @@ core.register_node("nh_nodes:oakchest", {
 
     -- Criar inventário quando o node é construído
     on_construct = function(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
 
         -- Criar inventário com 32 slots (8x4)
@@ -7471,7 +7488,7 @@ core.register_node("nh_nodes:oakchest", {
 
     -- Verificar se pode cavar (não permitir se tiver itens)
     can_dig = function(pos, player)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
         return inv:is_empty("main")
     end,
@@ -7479,18 +7496,18 @@ core.register_node("nh_nodes:oakchest", {
     -- Ao clicar com botão direito
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         -- Tocar som de abertura
-        --core.sound_play("default_chest_open", {
+        --c.sound_play("default_chest_open", {
         --    pos = pos,
         --    gain = 0.3,
         --    max_hear_distance = 10,
         --}, true)
 
         -- Substitui o node pelo baú aberto
-        local current_node = core.get_node(pos)
-        core.swap_node(pos, { name = "nh_nodes:oak_chest_open", param2 = current_node.param2 })
+        local current_node = c.get_node(pos)
+        c.swap_node(pos, { name = "nh_nodes:oak_chest_open", param2 = current_node.param2 })
 
         -- Retira a entidade baú depois da animação
-        local objects = core.get_objects_inside_radius(pos, 0.5)
+        local objects = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objects) do
             if obj:get_luaentity() and obj:get_luaentity().name == "nh_nodes:oak_chest_entity" then
                 obj:remove()
@@ -7498,19 +7515,19 @@ core.register_node("nh_nodes:oakchest", {
         end
 
         -- Criar entidade para animação
-        local entity = core.add_entity(pos, "nh_nodes:oak_chest_entity")
+        local entity = c.add_entity(pos, "nh_nodes:oak_chest_entity")
         if entity and entity:get_luaentity() then
             local luaentity = entity:get_luaentity()
             luaentity.node_pos = pos
             luaentity.original_param2 = current_node.param2
             -- Aplicar a rotação do baú à entidade
-            local yaw = core.facedir_to_dir(current_node.param2)
-            entity:set_yaw(core.dir_to_yaw(yaw))
+            local yaw = c.facedir_to_dir(current_node.param2)
+            entity:set_yaw(c.dir_to_yaw(yaw))
             entity:set_animation({ x = 0, y = 0.25 }, 1, 0, false) -- 0 a 0.25s a 30fps = frames 0-7.5
         end
 
         -- Abrir inventário
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local player_name = clicker:get_player_name()
 
         -- Marcar que o jogador está usando o baú
@@ -7519,7 +7536,7 @@ core.register_node("nh_nodes:oakchest", {
         -- Atualizar itens visuais
         oak_chest_update_items(pos)
 
-        core.show_formspec(player_name, "nh_nodes:oak_chest_" .. core.pos_to_string(pos),
+        c.show_formspec(player_name, "nh_nodes:oak_chest_" .. c.pos_to_string(pos),
             build_chest_formspec(clicker))
 
         return itemstack
@@ -7527,7 +7544,7 @@ core.register_node("nh_nodes:oakchest", {
 
     -- Preservar inventário ao cavar
     preserve_metadata = function(pos, oldnode, oldmeta, drops)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
         local items = {}
 
@@ -7539,18 +7556,18 @@ core.register_node("nh_nodes:oakchest", {
         end
 
         if #items > 0 then
-            drops[1]:get_meta():set_string("items", core.serialize(items))
+            drops[1]:get_meta():set_string("items", c.serialize(items))
         end
     end,
 
     -- Restaurar inventário ao colocar
     after_place_node = function(pos, placer, itemstack, pointed_thing)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local item_meta = itemstack:get_meta()
         local items = item_meta:get_string("items")
 
         if items ~= "" then
-            items = core.deserialize(items)
+            items = c.deserialize(items)
             local inv = meta:get_inventory()
 
             for i, item_str in ipairs(items) do
@@ -7560,7 +7577,7 @@ core.register_node("nh_nodes:oakchest", {
     end,
 })
 
-core.register_node("nh_nodes:oak_chest", {
+c.register_node("nh_nodes:oak_chest", {
     description = S "Oak Chest" .. "\n" .. S "[with items]",
     drawtype = "mesh",
     mesh = "chest.glb",
@@ -7584,7 +7601,7 @@ core.register_node("nh_nodes:oak_chest", {
 
     -- Criar inventário quando o node é construído
     on_construct = function(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
 
         -- Criar inventário com 32 slots (8x4)
@@ -7629,7 +7646,7 @@ core.register_node("nh_nodes:oak_chest", {
 
     -- Verificar se pode cavar (não permitir se tiver itens)
     can_dig = function(pos, player)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
         return inv:is_empty("main")
     end,
@@ -7637,18 +7654,18 @@ core.register_node("nh_nodes:oak_chest", {
     -- Ao clicar com botão direito
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         -- Tocar som de abertura
-        --core.sound_play("default_chest_open", {
+        --c.sound_play("default_chest_open", {
         --    pos = pos,
         --    gain = 0.3,
         --    max_hear_distance = 10,
         --}, true)
 
         -- Substitui o node pelo baú aberto
-        local current_node = core.get_node(pos)
-        core.swap_node(pos, { name = "nh_nodes:oak_chest_open", param2 = current_node.param2 })
+        local current_node = c.get_node(pos)
+        c.swap_node(pos, { name = "nh_nodes:oak_chest_open", param2 = current_node.param2 })
 
         -- Retira a entidade baú depois da animação
-        local objects = core.get_objects_inside_radius(pos, 0.5)
+        local objects = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objects) do
             if obj:get_luaentity() and obj:get_luaentity().name == "nh_nodes:oak_chest_entity" then
                 obj:remove()
@@ -7656,19 +7673,19 @@ core.register_node("nh_nodes:oak_chest", {
         end
 
         -- Criar entidade para animação
-        local entity = core.add_entity(pos, "nh_nodes:oak_chest_entity")
+        local entity = c.add_entity(pos, "nh_nodes:oak_chest_entity")
         if entity and entity:get_luaentity() then
             local luaentity = entity:get_luaentity()
             luaentity.node_pos = pos
             luaentity.original_param2 = current_node.param2
             -- Aplicar a rotação do baú à entidade
-            local yaw = core.facedir_to_dir(current_node.param2)
-            entity:set_yaw(core.dir_to_yaw(yaw))
+            local yaw = c.facedir_to_dir(current_node.param2)
+            entity:set_yaw(c.dir_to_yaw(yaw))
             entity:set_animation({ x = 0, y = 0.25 }, 1, 0, false) -- 0 a 0.25s a 30fps = frames 0-7.5
         end
 
         -- Abrir inventário
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local player_name = clicker:get_player_name()
 
         -- Marcar que o jogador está usando o baú
@@ -7677,7 +7694,7 @@ core.register_node("nh_nodes:oak_chest", {
         -- Atualizar itens visuais
         oak_chest_update_items(pos)
 
-        core.show_formspec(player_name, "nh_nodes:oak_chest_" .. core.pos_to_string(pos),
+        c.show_formspec(player_name, "nh_nodes:oak_chest_" .. c.pos_to_string(pos),
             build_chest_formspec(clicker))
 
         return itemstack
@@ -7685,7 +7702,7 @@ core.register_node("nh_nodes:oak_chest", {
 
     -- Preservar inventário ao cavar
     preserve_metadata = function(pos, oldnode, oldmeta, drops)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv = meta:get_inventory()
         local items = {}
 
@@ -7697,18 +7714,18 @@ core.register_node("nh_nodes:oak_chest", {
         end
 
         if #items > 0 then
-            drops[1]:get_meta():set_string("items", core.serialize(items))
+            drops[1]:get_meta():set_string("items", c.serialize(items))
         end
     end,
 
     -- Restaurar inventário ao colocar
     after_place_node = function(pos, placer, itemstack, pointed_thing)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local item_meta = itemstack:get_meta()
         local items = item_meta:get_string("items")
 
         if items ~= "" then
-            items = core.deserialize(items)
+            items = c.deserialize(items)
             local inv = meta:get_inventory()
 
             for i, item_str in ipairs(items) do
@@ -7719,7 +7736,7 @@ core.register_node("nh_nodes:oak_chest", {
 })
 
 -- Entidade invisível para animação
-core.register_entity("nh_nodes:oak_chest_entity", {
+c.register_entity("nh_nodes:oak_chest_entity", {
     initial_properties = {
         visual = "mesh",
         mesh = "chest.glb",
@@ -7761,7 +7778,7 @@ core.register_entity("nh_nodes:oak_chest_entity", {
 })
 
 -- Entidade para animação de fechamento
-core.register_entity("nh_nodes:oak_chest_close_entity", {
+c.register_entity("nh_nodes:oak_chest_close_entity", {
     initial_properties = {
         visual = "mesh",
         mesh = "chest.glb",
@@ -7790,7 +7807,7 @@ core.register_entity("nh_nodes:oak_chest_close_entity", {
         if self.timer > 0.3 then
             -- Remover todos os itens anexados
             if self.node_pos then
-                local objects = core.get_objects_inside_radius(self.node_pos, 1)
+                local objects = c.get_objects_inside_radius(self.node_pos, 1)
                 for _, obj in ipairs(objects) do
                     local luaent = obj:get_luaentity()
                     if luaent and luaent.name == "nh_nodes:chest_item" then
@@ -7803,9 +7820,9 @@ core.register_entity("nh_nodes:oak_chest_close_entity", {
 
             -- Trocar para node fechado
             if self.node_pos then
-                local node = core.get_node(self.node_pos)
+                local node = c.get_node(self.node_pos)
                 if node.name == "nh_nodes:oak_chest_open" then
-                    core.swap_node(self.node_pos, { name = "nh_nodes:oak_chest", param2 = self.original_param2 })
+                    c.swap_node(self.node_pos, { name = "nh_nodes:oak_chest", param2 = self.original_param2 })
                 end
             end
         end
@@ -7813,19 +7830,19 @@ core.register_entity("nh_nodes:oak_chest_close_entity", {
 })
 
 -- Detectar quando o jogador fecha o formspec
-core.register_on_player_receive_fields(function(player, formname, fields)
+c.register_on_player_receive_fields(function(player, formname, fields)
     local prefix = "nh_nodes:oak_chest_"
     -- Verificar se é um formspec de baú
     if formname:sub(1, #prefix) == "nh_nodes:oak_chest_" then
         local pos_string = formname:sub(#prefix + 1)
-        local pos = core.string_to_pos(pos_string)
+        local pos = c.string_to_pos(pos_string)
 
         if pos then
-            local node = core.get_node(pos)
+            local node = c.get_node(pos)
 
             -- Se o baú estiver aberto, fechá-lo
             if node.name == "nh_nodes:oak_chest_open" then
-                local meta = core.get_meta(pos)
+                local meta = c.get_meta(pos)
                 local current_user = meta:get_string("current_user")
                 local player_name = player:get_player_name()
 
@@ -7835,7 +7852,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                     meta:set_string("current_user", "")
 
                     -- Remover apenas a entidade da animação de abertura (mas manter os itens)
-                    local objects = core.get_objects_inside_radius(pos, 0.5)
+                    local objects = c.get_objects_inside_radius(pos, 0.5)
                     local chest_entity = nil
 
                     for _, obj in ipairs(objects) do
@@ -7847,7 +7864,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                     end
 
                     -- Criar entidade para animação de fechamento
-                    local close_entity = core.add_entity(pos, "nh_nodes:oak_chest_close_entity")
+                    local close_entity = c.add_entity(pos, "nh_nodes:oak_chest_close_entity")
                     if close_entity and close_entity:get_luaentity() then
                         local luaentity = close_entity:get_luaentity()
                         luaentity.node_pos = pos
@@ -7870,8 +7887,8 @@ core.register_on_player_receive_fields(function(player, formname, fields)
                         end
 
                         -- Aplicar a rotação do baú à entidade
-                        local yaw = core.facedir_to_dir(node.param2)
-                        close_entity:set_yaw(core.dir_to_yaw(yaw))
+                        local yaw = c.facedir_to_dir(node.param2)
+                        close_entity:set_yaw(c.dir_to_yaw(yaw))
                         -- Animação de fechamento (do frame aberto para fechado)
                         close_entity:set_animation({ x = 0.25, y = 0 }, 30, 0, false)
                     end
@@ -7882,7 +7899,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
 end)
 
 -- Detectar mudanças no inventário do baú
-core.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
+c.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
     if action ~= "move" and action ~= "put" and action ~= "take" then
         return
     end
@@ -7895,7 +7912,7 @@ core.register_on_player_inventory_action(function(player, action, inventory, inv
     local player_pos = player:get_pos()
     if not player_pos then return end
 
-    local objects = core.get_objects_inside_radius(player_pos, 10)
+    local objects = c.get_objects_inside_radius(player_pos, 10)
 
     for _, obj in ipairs(objects) do
         if obj:is_player() then
@@ -7907,13 +7924,13 @@ core.register_on_player_inventory_action(function(player, action, inventory, inv
             goto continue
         end
 
-        local node = core.get_node_or_nil(pos)
+        local node = c.get_node_or_nil(pos)
         if not node then
             goto continue
         end
 
         if node.name == "nh_nodes:oak_chest_open" then
-            local meta = core.get_meta(pos)
+            local meta = c.get_meta(pos)
             if meta:get_string("current_user") == player_name then
                 oak_chest_update_items(pos)
             end
@@ -7924,14 +7941,14 @@ core.register_on_player_inventory_action(function(player, action, inventory, inv
 end)
 
 -- Som de fechamento ao sair do formspec (opcional)
---core.register_on_player_receive_fields(function(player, formname, fields)
+--c.register_on_player_receive_fields(function(player, formname, fields)
 --    if formname:find("nh_nodes:oak_chest_") then
 --        if fields.quit then
 --            local pos_str = formname:gsub("nh_nodes:oak_chest_", "")
---            local pos = core.string_to_pos(pos_str)
+--            local pos = c.string_to_pos(pos_str)
 --
 --            if pos then
---                core.sound_play("default_chest_close", {
+--                c.sound_play("default_chest_close", {
 --                    pos = pos,
 --                    gain = 0.3,
 --                    max_hear_distance = 10,
@@ -7946,7 +7963,7 @@ end)
 -- Porta
 ------------
 
---core.register_node("nh_nodes:oak_door", {
+--c.register_node("nh_nodes:oak_door", {
 --    description = "Porta de Carvalho",
 --    initial_properties = {
 --        visual = "mesh",
@@ -7964,7 +7981,7 @@ local function throw_pebble(itemstack, user)
     local pos = user:get_pos()
     local dir = user:get_look_dir()
     pos.y = pos.y + 2.25 -- altura dos olhos
-    local obj = core.add_entity(pos, "nh_nodes:pebble_entity")
+    local obj = c.add_entity(pos, "nh_nodes:pebble_entity")
     if obj then
         obj:set_velocity(vector.multiply(dir, 13))
         obj:set_acceleration({ x = 0, y = -9.81, z = 0 })
@@ -7991,7 +8008,7 @@ local function throw_pebble(itemstack, placer)
     pos.y = pos.y + 1.5 -- altura dos olhos
 
     local dir = placer:get_look_dir()
-    local obj = core.add_entity(pos, "nh_nodes:pebble_entity")
+    local obj = c.add_entity(pos, "nh_nodes:pebble_entity")
 
     if obj then
         obj:set_velocity(vector.multiply(dir, 18))
@@ -8022,11 +8039,11 @@ local function update_neighbors(pos)
     for _, off in ipairs(offsets) do
         local npos = vector.add(pos, off)
         -- Dispara física de falling_node (areia, cascalho, neve, etc.)
-        core.check_for_falling(npos)
+        c.check_for_falling(npos)
     end
 end
 
-core.register_craftitem("nh_nodes:pebble_item", {
+c.register_craftitem("nh_nodes:pebble_item", {
     description = S "Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "seixoarremessavel.png",
     wield_image = "seixoarremessavel.png",
@@ -8068,7 +8085,7 @@ core.register_craftitem("nh_nodes:pebble_item", {
 ---------------------------
 -- ENTIDADE DO PROJÉTIL
 ---------------------------
-core.register_entity("nh_nodes:pebble_entity", {
+c.register_entity("nh_nodes:pebble_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -8112,10 +8129,10 @@ core.register_entity("nh_nodes:pebble_entity", {
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
-                local node = core.get_node(node_pos)
+                local node = c.get_node(node_pos)
 
-                if node.name == "air" or not core.registered_nodes[node.name].walkable then
-                    core.set_node(node_pos, { name = "nh_nodes:pebble" })
+                if node.name == "air" or not c.registered_nodes[node.name].walkable then
+                    c.set_node(node_pos, { name = "nh_nodes:pebble" })
                     update_neighbors(node_pos)
                 else
                     local offsets = {
@@ -8130,9 +8147,9 @@ core.register_entity("nh_nodes:pebble_entity", {
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
-                        local try_node = core.get_node(try_pos)
+                        local try_node = c.get_node(try_pos)
                         if try_node.name == "air" then
-                            core.set_node(try_pos, { name = "nh_nodes:pebble" })
+                            c.set_node(try_pos, { name = "nh_nodes:pebble" })
                             update_neighbors(try_pos)
                             placed = true
                             break
@@ -8140,7 +8157,7 @@ core.register_entity("nh_nodes:pebble_entity", {
                     end
 
                     if not placed then
-                        core.add_item(pos, "nh_nodes:pebble_item")
+                        c.add_item(pos, "nh_nodes:pebble_item")
                     end
                 end
 
@@ -8172,10 +8189,10 @@ core.register_entity("nh_nodes:pebble_entity", {
 
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
-            local node = core.get_node(check_pos)
+            local node = c.get_node(check_pos)
 
-            if node and node.name and core.registered_nodes[node.name] then
-                if core.registered_nodes[node.name].walkable then
+            if node and node.name and c.registered_nodes[node.name] then
+                if c.registered_nodes[node.name].walkable then
                     self._stuck = true
                     self.object:set_pos(check_pos)
                     self.object:set_velocity({ x = 0, y = 0, z = 0 })
@@ -8183,57 +8200,57 @@ core.register_entity("nh_nodes:pebble_entity", {
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:coconut" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:coconut" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut2" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut", count = 2 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut", count = 2 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut3" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut", count = 3 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut", count = 3 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple2" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple", count = 2 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple", count = 2 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple3" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple", count = 3 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple", count = 3 })
                     update_neighbors(check_pos)
                     return
                 end
             end
         end
 
-        local objs = core.get_objects_inside_radius(pos, 1.2) -- Raio aumentado de 0.6 para 1.2 para não passar pelo mob
+        local objs = c.get_objects_inside_radius(pos, 1.2) -- Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
@@ -8251,16 +8268,16 @@ core.register_entity("nh_nodes:pebble_entity", {
                 end
 
                 if is_target then
-                    core.log("action", "[Seixo] Acertou alvo em " .. core.pos_to_string(pos))
+                    c.log("action", "[Seixo] Acertou alvo em " .. c.pos_to_string(pos))
 
-                    core.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
+                    c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
 
                     obj:punch(self.object, 1.0, {
                         full_punch_interval = 1.0,
                         damage_groups = { fleshy = 2 },
                     }, vel)
 
-                    core.add_item(pos, "nh_nodes:pebble_item")
+                    c.add_item(pos, "nh_nodes:pebble_item")
                     self.object:remove()
                     return
                 end
@@ -8271,7 +8288,7 @@ core.register_entity("nh_nodes:pebble_entity", {
     end,
 })
 
-core.register_node("nh_nodes:limb", {
+c.register_node("nh_nodes:limb", {
     description = S "Limb" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
     mesh = "branch.obj",
@@ -8301,7 +8318,7 @@ core.register_node("nh_nodes:limb", {
     selection_box = {type = "fixed", fixed = { -0.06, -0.5, -0.12, 0.06, 1.05, 0.07 },},
 })
 
-core.register_node("nh_nodes:stick", {
+c.register_node("nh_nodes:stick", {
     description = S "Stick" .. "\n" .. S "Reach: +1" .. "\n" .. S "Uses: 5",
     drawtype = "mesh",
     mesh = "stick.obj",
@@ -8320,7 +8337,7 @@ core.register_node("nh_nodes:stick", {
     end,
 })
 
-core.register_node("nh_nodes:fallenstick", {
+c.register_node("nh_nodes:fallenstick", {
     description = S "Fallen stick",
     drawtype = "mesh",
     mesh = "stick2.obj",
@@ -8337,7 +8354,7 @@ core.register_node("nh_nodes:fallenstick", {
 ---------------------------
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
-core.register_node("nh_nodes:obsidianpebble", {
+c.register_node("nh_nodes:obsidianpebble", {
     description = S "Obsidian Pebble" .. "\n" .. S "Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",         --
@@ -8356,10 +8373,10 @@ core.register_node("nh_nodes:obsidianpebble", {
 
     -- FAZ O SEIXO CAIR SOZINHO
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     tool_capabilities = {
         full_punch_interval = 1.5,
@@ -8384,7 +8401,7 @@ local function throw_pebble(itemstack, placer)
     pos.y = pos.y + 1.5 -- altura dos olhos
 
     local dir = placer:get_look_dir()
-    local obj = core.add_entity(pos, "nh_nodes:obsidianpebble_entity")
+    local obj = c.add_entity(pos, "nh_nodes:obsidianpebble_entity")
 
     if obj then
         obj:set_velocity(vector.multiply(dir, 18))
@@ -8405,7 +8422,7 @@ end
 ---------------------------
 -- ITEM
 ---------------------------
-core.register_craftitem("nh_nodes:obsidianpebble_item", {
+c.register_craftitem("nh_nodes:obsidianpebble_item", {
     description = S "Obsidian Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "obsidiana_seixo_arremessavel.png",
     wield_image = "obsidiana_seixo_arremessavel.png",
@@ -8444,7 +8461,7 @@ core.register_craftitem("nh_nodes:obsidianpebble_item", {
 ---------------------------
 -- ENTIDADE DO PROJÉTIL
 ---------------------------
-core.register_entity("nh_nodes:obsidianpebble_entity", {
+c.register_entity("nh_nodes:obsidianpebble_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -8488,10 +8505,10 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
-                local node = core.get_node(node_pos)
+                local node = c.get_node(node_pos)
 
-                if node.name == "air" or not core.registered_nodes[node.name].walkable then
-                    core.set_node(node_pos, { name = "nh_nodes:obsidianpebble" })
+                if node.name == "air" or not c.registered_nodes[node.name].walkable then
+                    c.set_node(node_pos, { name = "nh_nodes:obsidianpebble" })
                 else
                     local offsets = {
                         { x = 0,  y = 1,  z = 0 },
@@ -8505,16 +8522,16 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
-                        local try_node = core.get_node(try_pos)
+                        local try_node = c.get_node(try_pos)
                         if try_node.name == "air" then
-                            core.set_node(try_pos, { name = "nh_nodes:obsidianpebble" })
+                            c.set_node(try_pos, { name = "nh_nodes:obsidianpebble" })
                             placed = true
                             break
                         end
                     end
 
                     if not placed then
-                        core.add_item(pos, "nh_nodes:obsidianpebble_item")
+                        c.add_item(pos, "nh_nodes:obsidianpebble_item")
                     end
                 end
 
@@ -8546,10 +8563,10 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
 
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
-            local node = core.get_node(check_pos)
+            local node = c.get_node(check_pos)
 
-            if node and node.name and core.registered_nodes[node.name] then
-                if core.registered_nodes[node.name].walkable then
+            if node and node.name and c.registered_nodes[node.name] then
+                if c.registered_nodes[node.name].walkable then
                     self._stuck = true
                     self.object:set_pos(check_pos)
                     self.object:set_velocity({ x = 0, y = 0, z = 0 })
@@ -8557,50 +8574,50 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:coconut" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:coconut" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut2" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut", count = 2 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut", count = 2 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut3" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut", count = 3 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut", count = 3 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple2" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple", count = 2 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple", count = 2 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple3" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple", count = 3 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple", count = 3 })
                     update_neighbors(check_pos)
                     return
                 end
@@ -8608,7 +8625,7 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
         end
 
         -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
-        local objs = core.get_objects_inside_radius(pos, 1.2)
+        local objs = c.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
@@ -8626,16 +8643,16 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
                 end
 
                 if is_target then
-                    core.log("action", "[Seixo de Obsidiana] Acertou alvo em " .. core.pos_to_string(pos))
+                    c.log("action", "[Seixo de Obsidiana] Acertou alvo em " .. c.pos_to_string(pos))
 
-                    core.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
+                    c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
 
                     obj:punch(self.object, 1.0, {
                         full_punch_interval = 1.0,
                         damage_groups = { fleshy = 2 },
                     }, vel)
 
-                    core.add_item(pos, "nh_nodes:obsidianpebble_item")
+                    c.add_item(pos, "nh_nodes:obsidianpebble_item")
                     self.object:remove()
                     return
                 end
@@ -8650,7 +8667,7 @@ core.register_entity("nh_nodes:obsidianpebble_entity", {
 ---------------------------
 -- NODE DO SEIXO DE OBSIDIANA
 ---------------------------
-core.register_node("nh_nodes:obsidianblade", {
+c.register_node("nh_nodes:obsidianblade", {
     description = S "Obsidian Blade",
     drawtype = "mesh",
     mesh = "obsidianblade.obj",  --
@@ -8670,18 +8687,18 @@ core.register_node("nh_nodes:obsidianblade", {
     -- FAZ O SEIXO CAIR SOZINHO
     -----------------------------
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 })
 
 ---------------------------
 -- NODE DA FERRAMENTA REMO
 ---------------------------
-core.register_node("nh_nodes:rowing", {
+c.register_node("nh_nodes:rowing", {
     description = S "Rowing" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "rowing.obj",       --
@@ -8736,7 +8753,7 @@ core.register_node("nh_nodes:rowing", {
 ---------------------------
 -- ENTIDADE DA JANGADA (versão navegável)
 ---------------------------
-core.register_entity("nh_nodes:pineraft_entity", {
+c.register_entity("nh_nodes:pineraft_entity", {
     initial_properties = {
         visual = "mesh",
         mesh = "pineraft_entity.obj",
@@ -8786,7 +8803,7 @@ core.register_entity("nh_nodes:pineraft_entity", {
         if hp <= 0 then
             -- Dropa o item da jangada
             local pos = self.object:get_pos()
-            core.add_item(pos, "nh_nodes:pineraft")
+            c.add_item(pos, "nh_nodes:pineraft")
             self.object:remove()
         else
             self.object:set_hp(hp)
@@ -8798,9 +8815,9 @@ core.register_entity("nh_nodes:pineraft_entity", {
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then return end
-        local node_at     = core.get_node({ x = pos.x, y = pos.y + 0.5, z = pos.z })
-        local node_below  = core.get_node({ x = pos.x, y = pos.y - 0.5, z = pos.z })
-        local node_below2 = core.get_node({ x = pos.x, y = pos.y + 0.35, z = pos.z }) -- logo abaixo do centro
+        local node_at     = c.get_node({ x = pos.x, y = pos.y + 0.5, z = pos.z })
+        local node_below  = c.get_node({ x = pos.x, y = pos.y - 0.5, z = pos.z })
+        local node_below2 = c.get_node({ x = pos.x, y = pos.y + 0.35, z = pos.z }) -- logo abaixo do centro
         local submerged   = water_nodes[node_at.name]                       -- entidade está dentro da água
         local on_surface  = water_nodes[node_below2.name] and not submerged -- entidade está na superfície
         local vel         = self.object:get_velocity()
@@ -8844,7 +8861,7 @@ core.register_entity("nh_nodes:pineraft_entity", {
                 -- Mensagem FORA do loop, e só envia uma vez usando um cooldown
                 if not has_oar then
                     if not self._oar_msg_timer or self._oar_msg_timer <= 0 then
-                        core.chat_send_player(self.driver:get_player_name(),
+                        c.chat_send_player(self.driver:get_player_name(),
                             "Acho que preciso de um remo pra mover a jangada...")
                         self._oar_msg_timer = 5 -- segundos antes de repetir
                     end
@@ -8900,7 +8917,7 @@ core.register_entity("nh_nodes:pineraft_entity", {
 
         local being_pushed = false
 
-        for _, obj in ipairs(core.get_objects_inside_radius(pos, search_radius)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, search_radius)) do
             if obj:is_player() and obj ~= self.driver then
                 local ppos = obj:get_pos()
 
@@ -8988,7 +9005,7 @@ core.register_entity("nh_nodes:pineraft_entity", {
         end
         local pos = self.object:get_pos()
         if pos then
-            core.add_item(pos, "nh_nodes:pineraft")
+            c.add_item(pos, "nh_nodes:pineraft")
         end
     end,
 })
@@ -8996,7 +9013,7 @@ core.register_entity("nh_nodes:pineraft_entity", {
 ---------------------------
 -- NODE DA JANGADA PRIMITIVA
 ---------------------------
-core.register_node("nh_nodes:pineraft", {
+c.register_node("nh_nodes:pineraft", {
     description = S "Pine Raft",
     drawtype = "mesh",
     mesh = "pineraft.obj",      --
@@ -9028,13 +9045,13 @@ core.register_node("nh_nodes:pineraft", {
             end
         end
         -- Sem agachar: vira entidade normalmente
-        core.remove_node(pos)
-        core.add_entity(pos, "nh_nodes:pineraft_entity")
+        c.remove_node(pos)
+        c.add_entity(pos, "nh_nodes:pineraft_entity")
     end,
 
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
-        core.add_entity(pos, "nh_nodes:pineraft_entity")
+        c.add_entity(pos, "nh_nodes:pineraft_entity")
         return false
     end,
 })
@@ -9042,7 +9059,7 @@ core.register_node("nh_nodes:pineraft", {
 ---------------------------
 -- NODE DA ESPADA DE OBSIDIANA
 ---------------------------
-core.register_node("nh_nodes:obsidiansword", {
+c.register_node("nh_nodes:obsidiansword", {
     description = S "Obsidian Sword" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +6" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "obsidiansword.obj",      --
@@ -9096,7 +9113,7 @@ core.register_node("nh_nodes:obsidiansword", {
 })
 
 -- NODE DO SEIXO NO CHÃO
-core.register_node("nh_nodes:pebble", {
+c.register_node("nh_nodes:pebble", {
     description = S "Pebble" .. "\n" .. S "Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",     --
@@ -9118,11 +9135,11 @@ core.register_node("nh_nodes:pebble", {
     -- FAZ O SEIXO CAIR SOZINHO
     -----------------------------
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     tool_capabilities = {
         full_punch_interval = 1.5,
@@ -9139,7 +9156,7 @@ core.register_node("nh_nodes:pebble", {
 ---------------------------
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:chippedstone", {
+c.register_node("nh_nodes:chippedstone", {
     description = S "Chipped Stone" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "pedralascada.obj",
@@ -9194,10 +9211,10 @@ core.register_node("nh_nodes:chippedstone", {
     -- FAZ O SEIXO CAIR SOZINHO
     -----------------------------
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 })
 
@@ -9205,7 +9222,7 @@ core.register_node("nh_nodes:chippedstone", {
 ---------------------------
 -- NODE DA CABEÇA DE MACHADO DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:stoneaxehead", {
+c.register_node("nh_nodes:stoneaxehead", {
     description = S "Stone Axe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneaxehead.obj",
@@ -9253,10 +9270,10 @@ core.register_node("nh_nodes:stoneaxehead", {
     -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 })
 
@@ -9264,7 +9281,7 @@ core.register_node("nh_nodes:stoneaxehead", {
 ---------------------------
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:stonepickaxehead", {
+c.register_node("nh_nodes:stonepickaxehead", {
     description = S "Stone Pickaxe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonepickaxehead.obj",
@@ -9309,10 +9326,10 @@ core.register_node("nh_nodes:stonepickaxehead", {
     -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 })
 
@@ -9320,7 +9337,7 @@ core.register_node("nh_nodes:stonepickaxehead", {
 ---------------------------
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:stonehoehead", {
+c.register_node("nh_nodes:stonehoehead", {
     description = S "Stone Pickaxe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonehoehead.obj",
@@ -9367,11 +9384,11 @@ core.register_node("nh_nodes:stonehoehead", {
     -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 })
 
@@ -9379,7 +9396,7 @@ core.register_node("nh_nodes:stonehoehead", {
 ---------------------------
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:stoneadzehead", {
+c.register_node("nh_nodes:stoneadzehead", {
     description = S "Stone Adze Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneadzehead.obj",
@@ -9425,10 +9442,10 @@ core.register_node("nh_nodes:stoneadzehead", {
     -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
     on_construct = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
     after_place_node = function(pos)
-        core.check_for_falling(pos)
+        c.check_for_falling(pos)
     end,
 })
 
@@ -9437,7 +9454,7 @@ core.register_node("nh_nodes:stoneadzehead", {
 ---------------------------
 -- NODE DA ESPADA ENFERRUJADA (FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:rustironsword", {
+c.register_node("nh_nodes:rustironsword", {
     description = S "Rusty Iron Sword" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +4" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
     mesh = "rustsword.obj",
@@ -9490,7 +9507,7 @@ core.register_node("nh_nodes:rustironsword", {
 })
 
 
-core.register_node("nh_nodes:stoneaxe", {
+c.register_node("nh_nodes:stoneaxe", {
     description = S "Stone Axe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +3" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneaxe.obj",
@@ -9541,7 +9558,7 @@ core.register_node("nh_nodes:stoneaxe", {
 })
 
 
-core.register_node("nh_nodes:stonepickaxe", {
+c.register_node("nh_nodes:stonepickaxe", {
     description = S "Stone Pickaxe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +3" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonepickaxe.obj",
@@ -9597,7 +9614,7 @@ core.register_node("nh_nodes:stonepickaxe", {
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
 })
 
-core.register_node("nh_nodes:stoneadze", {
+c.register_node("nh_nodes:stoneadze", {
     description = S "Stone Adze" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stoneadze.obj",
@@ -9630,7 +9647,7 @@ core.register_node("nh_nodes:stoneadze", {
         if controls.sneak then
             if pointed_thing.type == "node" then
                 local pos = pointed_thing.under
-                local node = core.get_node(pos)
+                local node = c.get_node(pos)
 
                 -- Mapeamento: tora -> madeira
                 local conversions = {
@@ -9640,14 +9657,14 @@ core.register_node("nh_nodes:stoneadze", {
 
                 local result = conversions[node.name]
                 if result then
-                    core.set_node(pos, { name = result })
+                    c.set_node(pos, { name = result })
                     local wear = itemstack:get_wear()
                     itemstack:set_wear(wear + 4369)
                 end
             end
             return itemstack
         else
-            return core.item_place(itemstack, puncher, pointed_thing)
+            return c.item_place(itemstack, puncher, pointed_thing)
         end
     end,
 
@@ -9675,7 +9692,7 @@ core.register_node("nh_nodes:stoneadze", {
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
 })
 
-core.register_node("nh_nodes:stonehoe", {
+c.register_node("nh_nodes:stonehoe", {
     description = S "Stone Hoe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "stonehoe.obj",
@@ -9708,14 +9725,14 @@ core.register_node("nh_nodes:stonehoe", {
         if controls.sneak then
             if pointed_thing.type == "node" then
                 local pos = pointed_thing.under
-                local node = core.get_node(pos)
+                local node = c.get_node(pos)
                 local convertible = {
                     ["nh_nodes:dirt"]      = true,
                     ["nh_nodes:grass"]     = true,
                     ["nh_nodes:top_grass"] = true,
                 }
                 if convertible[node.name] then
-                    core.set_node(pos, { name = "nh_nodes:tilleddirt" })
+                    c.set_node(pos, { name = "nh_nodes:tilleddirt" })
                     local wear = itemstack:get_wear()
                     wear = wear + 4369
                     itemstack:set_wear(wear)
@@ -9723,7 +9740,7 @@ core.register_node("nh_nodes:stonehoe", {
             end
             return itemstack -- Sempre cancela o place quando agachado
         else
-            return core.item_place(itemstack, puncher, pointed_thing)
+            return c.item_place(itemstack, puncher, pointed_thing)
         end
     end,
 
@@ -9755,7 +9772,7 @@ core.register_node("nh_nodes:stonehoe", {
 ---------------------------
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
 ---------------------------
-core.register_node("nh_nodes:chippedstoneknife", {
+c.register_node("nh_nodes:chippedstoneknife", {
     description = S "Chipped Stone Knife" .. "\n" .. S "Reach: +1" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
     mesh = "chippedstoneknife.obj",
@@ -9810,7 +9827,7 @@ core.register_node("nh_nodes:chippedstoneknife", {
 })
 
 
-core.register_node("nh_nodes:obsidianknife", {
+c.register_node("nh_nodes:obsidianknife", {
     description = S "Obsidian Knife" .. "\n" .. S "Reach: +1" .. "\n" .. S "Damage: +4" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
     mesh = "obsidianknife.obj",
@@ -9872,7 +9889,7 @@ local function throw_white_pebble(itemstack, user)
     local pos = user:get_pos()
     local dir = user:get_look_dir()
     pos.y = pos.y + 2.25
-    local obj = core.add_entity(pos, "nh_nodes:white_pebble_entity")
+    local obj = c.add_entity(pos, "nh_nodes:white_pebble_entity")
     if obj then
         obj:set_velocity(vector.multiply(dir, 13))
         obj:set_acceleration({ x = 0, y = -9.81, z = 0 })
@@ -9888,7 +9905,7 @@ end
 ---------------------------
 -- ITEM ARREMESSÁVEL (SEIXO branco)
 ---------------------------
-core.register_craftitem("nh_nodes:white_pebble_item", {
+c.register_craftitem("nh_nodes:white_pebble_item", {
     description = S "White Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
 
@@ -9915,7 +9932,7 @@ core.register_craftitem("nh_nodes:white_pebble_item", {
 ---------------------------
 -- ENTIDADE DO PROJÉTIL (SEIXO branco)
 ---------------------------
-core.register_entity("nh_nodes:white_pebble_entity", {
+c.register_entity("nh_nodes:white_pebble_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -9959,10 +9976,10 @@ core.register_entity("nh_nodes:white_pebble_entity", {
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
-                local node = core.get_node(node_pos)
+                local node = c.get_node(node_pos)
 
-                if node.name == "air" or not core.registered_nodes[node.name].walkable then
-                    core.set_node(node_pos, { name = "nh_nodes:white_pebble" })
+                if node.name == "air" or not c.registered_nodes[node.name].walkable then
+                    c.set_node(node_pos, { name = "nh_nodes:white_pebble" })
                 else
                     local offsets = {
                         { x = 0,  y = 1,  z = 0 },
@@ -9976,16 +9993,16 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
-                        local try_node = core.get_node(try_pos)
+                        local try_node = c.get_node(try_pos)
                         if try_node.name == "air" then
-                            core.set_node(try_pos, { name = "nh_nodes:white_pebble" })
+                            c.set_node(try_pos, { name = "nh_nodes:white_pebble" })
                             placed = true
                             break
                         end
                     end
 
                     if not placed then
-                        core.add_item(pos, "nh_nodes:white_pebble_item")
+                        c.add_item(pos, "nh_nodes:white_pebble_item")
                     end
                 end
 
@@ -10017,10 +10034,10 @@ core.register_entity("nh_nodes:white_pebble_entity", {
 
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
-            local node = core.get_node(check_pos)
+            local node = c.get_node(check_pos)
 
-            if node and node.name and core.registered_nodes[node.name] then
-                if core.registered_nodes[node.name].walkable then
+            if node and node.name and c.registered_nodes[node.name] then
+                if c.registered_nodes[node.name].walkable then
                     self._stuck = true
                     self.object:set_pos(check_pos)
                     self.object:set_velocity({ x = 0, y = 0, z = 0 })
@@ -10028,50 +10045,50 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:coconut" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:coconut" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut2" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut", count = 2 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut", count = 2 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut3" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:nut", count = 3 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:nut", count = 3 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple" })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple" })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple2" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple", count = 2 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple", count = 2 })
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_apple3" then
-                    core.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    core.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    core.add_item(check_pos, { name = "nh_nodes:apple", count = 3 })
+                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
+                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
+                    c.add_item(check_pos, { name = "nh_nodes:apple", count = 3 })
                     update_neighbors(check_pos)
                     return
                 end
@@ -10079,7 +10096,7 @@ core.register_entity("nh_nodes:white_pebble_entity", {
         end
 
         -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
-        local objs = core.get_objects_inside_radius(pos, 1.2)
+        local objs = c.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
@@ -10097,16 +10114,16 @@ core.register_entity("nh_nodes:white_pebble_entity", {
                 end
 
                 if is_target then
-                    core.log("action", "[Seixo Branco] Acertou alvo em " .. core.pos_to_string(pos))
+                    c.log("action", "[Seixo Branco] Acertou alvo em " .. c.pos_to_string(pos))
 
-                    core.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
+                    c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
 
                     obj:punch(self.object, 1.0, {
                         full_punch_interval = 1.0,
                         damage_groups = { fleshy = 2 },
                     }, vel)
 
-                    core.add_item(pos, "nh_nodes:white_pebble_item")
+                    c.add_item(pos, "nh_nodes:white_pebble_item")
                     self.object:remove()
                     return
                 end
@@ -10120,7 +10137,7 @@ core.register_entity("nh_nodes:white_pebble_entity", {
 ---------------------------
 -- ENTIDADE DA CHAMA
 ---------------------------
-core.register_entity("nh_nodes:flame_entity", {
+c.register_entity("nh_nodes:flame_entity", {
     initial_properties = {
         physical = false,
         collide_with_objects = false,
@@ -10142,7 +10159,7 @@ core.register_entity("nh_nodes:flame_entity", {
 
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
-            local data = core.deserialize(staticdata)
+            local data = c.deserialize(staticdata)
             if data and data.grass_pos then
                 self._grass_pos = data.grass_pos
             end
@@ -10162,7 +10179,7 @@ core.register_entity("nh_nodes:flame_entity", {
     end,
 
     get_staticdata = function(self)
-        return core.serialize({ grass_pos = self._grass_pos })
+        return c.serialize({ grass_pos = self._grass_pos })
     end,
 
     -- NOVO: Detecta quando é golpeado
@@ -10187,12 +10204,12 @@ core.register_entity("nh_nodes:flame_entity", {
                 -- Se o inventário estiver cheio, dropa no chão
                 if not leftover:is_empty() then
                     local pos = puncher:get_pos()
-                    core.add_item(pos, leftover)
+                    c.add_item(pos, leftover)
                 end
             end
 
             -- Efeito sonoro (opcional)
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = self.object:get_pos(),
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -10220,7 +10237,7 @@ core.register_entity("nh_nodes:flame_entity", {
                 return
             end
 
-            local node = core.get_node(self._grass_pos)
+            local node = c.get_node(self._grass_pos)
 
             -- Se a grama foi removida, remove a chama
             if node.name ~= "nh_nodes:grassleaves" then
@@ -10235,7 +10252,7 @@ core.register_entity("nh_nodes:flame_entity", {
 ---------------------------
 -- NODE DO SEIXO BRANCO NO CHÃO
 ---------------------------
-core.register_node("nh_nodes:white_pebble", {
+c.register_node("nh_nodes:white_pebble", {
     description = S "White Pebble",
     tiles = { "whitepebble.png" },
     inventory_image = "seixo_branco.png",
@@ -10265,8 +10282,8 @@ core.register_node("nh_nodes:white_pebble", {
         },
         damage_groups = { fleshy = 2 },
     },
-    on_construct = function(pos) core.check_for_falling(pos) end,
-    after_place_node = function(pos) core.check_for_falling(pos) end,
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 
     -- Quando bater em um seixo branco com outro seixo branco
     on_punch = function(pos, node, puncher, pointed_thing)
@@ -10279,13 +10296,13 @@ core.register_node("nh_nodes:white_pebble", {
         end
 
         -- Som de fricção/faísca
-        core.sound_play("default_dig_cracky", {
+        c.sound_play("default_dig_cracky", {
             pos = pos,
             gain = 0.7,
         })
 
         -- PARTÍCULAS AMARELAS LUMINOSAS (FAÍSCAS)
-        core.add_particlespawner({
+        c.add_particlespawner({
             amount = 10, -- Quantidade de partículas
             time = 0.3,  -- Duração do spawn
             minpos = vector.subtract(pos, { x = 0.2, y = 0.2, z = 0.2 }),
@@ -10326,12 +10343,12 @@ core.register_node("nh_nodes:white_pebble", {
 
         for _, dir in ipairs(directions) do
             local check_pos = vector.add(pos, dir)
-            local check_node = core.get_node(check_pos)
+            local check_node = c.get_node(check_pos)
 
             -- ACENDE GRAMA
             if check_node.name == "nh_nodes:grassleaves" then
                 local has_flame = false
-                local objs = core.get_objects_inside_radius(check_pos, 0.5)
+                local objs = c.get_objects_inside_radius(check_pos, 0.5)
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
                     if ent and ent.name == "nh_nodes:flame_entity" then
@@ -10347,7 +10364,7 @@ core.register_node("nh_nodes:white_pebble", {
                         z = check_pos.z
                     }
 
-                    local obj = core.add_entity(flame_pos, "nh_nodes:flame_entity")
+                    local obj = c.add_entity(flame_pos, "nh_nodes:flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
                         if ent then
@@ -10359,7 +10376,7 @@ core.register_node("nh_nodes:white_pebble", {
 
             -- ACENDE PALHA
             if check_node.name == "nh_nodes:palmstraw" then
-                local meta = core.get_meta(check_pos)
+                local meta = c.get_meta(check_pos)
 
                 -- Se a palha já tem chama, não faz nada
                 if meta:get_int("has_flame") == 1 then
@@ -10368,7 +10385,7 @@ core.register_node("nh_nodes:white_pebble", {
 
                 -- Verifica se já não tem uma chama nessa posição
                 local has_flame = false
-                local objs = core.get_objects_inside_radius(check_pos, 0.5)
+                local objs = c.get_objects_inside_radius(check_pos, 0.5)
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
                     if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then
@@ -10382,7 +10399,7 @@ core.register_node("nh_nodes:white_pebble", {
                     meta:set_int("has_flame", 1)
 
                     -- Cria a entidade da chama
-                    local obj = core.add_entity(check_pos, "nh_nodes:palmstraw_flame_entity")
+                    local obj = c.add_entity(check_pos, "nh_nodes:palmstraw_flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
                         if ent then
@@ -10391,7 +10408,7 @@ core.register_node("nh_nodes:white_pebble", {
                     end
 
                     -- Efeito sonoro (opcional)
-                    core.sound_play("fire_flint_and_steel", {
+                    c.sound_play("fire_flint_and_steel", {
                         pos = check_pos,
                         gain = 0.5,
                         max_hear_distance = 8,
@@ -10418,7 +10435,7 @@ local function throw_grenade(itemstack, placer, lit)
 
     local entity_name = lit and "nh_nodes:litgrenade_entity" or "nh_nodes:grenade_entity"
 
-    local obj = core.add_entity(pos, entity_name)
+    local obj = c.add_entity(pos, entity_name)
 
     if obj then
         obj:set_velocity(vector.multiply(dir, 14))
@@ -10433,7 +10450,7 @@ local function throw_grenade(itemstack, placer, lit)
     return itemstack
 end
 
-core.register_node("nh_nodes:grenade", {
+c.register_node("nh_nodes:grenade", {
     description = S "Grenade",
     drawtype = "mesh",
     mesh = "grenade.obj",
@@ -10456,7 +10473,7 @@ core.register_node("nh_nodes:grenade", {
                 itemstack:set_name("nh_nodes:litgrenade")
                 attach_glow(user)
                 -- toca tnt_ignite uma única vez ao acender
-                core.sound_play("tnt_ignite", {
+                c.sound_play("tnt_ignite", {
                     pos = user:get_pos(),
                     gain = 1.0,
                     max_hear_distance = 16,
@@ -10467,7 +10484,7 @@ core.register_node("nh_nodes:grenade", {
     end,
 })
 
-core.register_entity("nh_nodes:grenade_entity", {
+c.register_entity("nh_nodes:grenade_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -10507,11 +10524,11 @@ core.register_entity("nh_nodes:grenade_entity", {
                 z = pos.z
             })
 
-            local node = core.get_node(place_pos)
+            local node = c.get_node(place_pos)
 
             if DECORATIONS[node.name] or node.name == "air" then
                 -- substitui a decoração pela granada
-                core.set_node(place_pos, { name = "nh_nodes:grenade" })
+                c.set_node(place_pos, { name = "nh_nodes:grenade" })
             else
                 -- node sólido abaixo: coloca no air acima
                 local above_pos = vector.round({
@@ -10519,9 +10536,9 @@ core.register_entity("nh_nodes:grenade_entity", {
                     y = pos.y + 0.9,
                     z = pos.z
                 })
-                local above_node = core.get_node(above_pos)
+                local above_node = c.get_node(above_pos)
                 if above_node.name == "air" then
-                    core.set_node(above_pos, { name = "nh_nodes:grenade" })
+                    c.set_node(above_pos, { name = "nh_nodes:grenade" })
                 end
             end
 
@@ -10531,7 +10548,7 @@ core.register_entity("nh_nodes:grenade_entity", {
     end
 })
 
-core.register_node("nh_nodes:litgrenade", {
+c.register_node("nh_nodes:litgrenade", {
     description = S "Lit Grenade",
     drawtype = "mesh",
     mesh = "grenade.obj",
@@ -10549,7 +10566,7 @@ core.register_node("nh_nodes:litgrenade", {
     end,
 })
 
-core.register_entity("nh_nodes:litgrenade_entity", {
+c.register_entity("nh_nodes:litgrenade_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
@@ -10576,8 +10593,8 @@ core.register_entity("nh_nodes:litgrenade_entity", {
         })
         -- explode após 5 segundos
         if self._timer >= 5 then
-            core.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 32})
-            core.add_particlespawner({
+            c.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 32})
+            c.add_particlespawner({
                 amount = 50,
                 time = 0.3,
                 glow = 14,
@@ -10592,7 +10609,7 @@ core.register_entity("nh_nodes:litgrenade_entity", {
                 texture = "spark_particle.png^[colorize:#FF8800:150",
             })
             -- dano em área
-            for _, obj in ipairs(core.get_objects_inside_radius(pos, 4)) do
+            for _, obj in ipairs(c.get_objects_inside_radius(pos, 4)) do
                 if obj ~= self.object then
                     obj:punch(self.object, 1.0, {
                         damage_groups = { fleshy = 12 },
@@ -10610,11 +10627,11 @@ core.register_entity("nh_nodes:litgrenade_entity", {
                             z = pos.z + z
                         }
                         if vector.distance(pos, p) <= radius then
-                            local node = core.get_node(p)
+                            local node = c.get_node(p)
                             if node.name == "nh_nodes:snow_ramp"
                                 or node.name == "nh_nodes:snow_insidecorner"
                                 or node.name == "nh_nodes:snow_corner" then
-                                core.set_node(p, {
+                                c.set_node(p, {
                                     name = "nh_nodes:avalanche"
                                 })
                             end
@@ -10626,9 +10643,9 @@ core.register_entity("nh_nodes:litgrenade_entity", {
             return
         end
         -- colisão com parede/chão
-        local node = core.get_node(vector.round(pos))
-        if core.registered_nodes[node.name]
-            and core.registered_nodes[node.name].walkable then
+        local node = c.get_node(vector.round(pos))
+        if c.registered_nodes[node.name]
+            and c.registered_nodes[node.name].walkable then
             self.object:set_velocity({ x = 0, y = 0, z = 0 })
             self.object:set_acceleration({ x = 0, y = 0, z = 0 })
         end
@@ -10636,7 +10653,7 @@ core.register_entity("nh_nodes:litgrenade_entity", {
 })
 
 -- NODE DAS FOLHAS DE GRAMA
-core.register_node("nh_nodes:grassleaves", {
+c.register_node("nh_nodes:grassleaves", {
     --drawtype = "mesh",
     --mesh = "grassleaves.obj",
     --tiles = {"grassleaves.png"},
@@ -10656,7 +10673,7 @@ core.register_node("nh_nodes:grassleaves", {
         end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
@@ -10666,7 +10683,7 @@ core.register_node("nh_nodes:grassleaves", {
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
             -- Cria a entidade da chama
-            local obj = core.add_entity(pos, "nh_nodes:flame_entity")
+            local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -10674,7 +10691,7 @@ core.register_node("nh_nodes:grassleaves", {
                 end
             end
             -- Efeito sonoro (opcional)
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -10683,7 +10700,7 @@ core.register_node("nh_nodes:grassleaves", {
     end,
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        local objs = core.get_objects_inside_radius(pos, 0.5)
+        local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:flame_entity" then
@@ -10697,7 +10714,7 @@ core.register_node("nh_nodes:grassleaves", {
 ---------------------------
 -- NODE DAS FOLHAS DE GRAMA
 ---------------------------
-core.register_node("nh_nodes:grassleavesmedium", {
+c.register_node("nh_nodes:grassleavesmedium", {
     description = S "Grass Leaves" .. "\n" .. S "[Medium]",
     --drawtype = "mesh",
     --mesh = "grassleavesmedium.obj",
@@ -10717,7 +10734,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
         end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
@@ -10727,7 +10744,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
             -- Cria a entidade da chama
-            local obj = core.add_entity(pos, "nh_nodes:flame_entity")
+            local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -10735,7 +10752,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
                 end
             end
             -- Efeito sonoro (opcional)
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -10744,7 +10761,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
     end,
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        local objs = core.get_objects_inside_radius(pos, 0.5)
+        local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:flame_entity" then
@@ -10755,7 +10772,7 @@ core.register_node("nh_nodes:grassleavesmedium", {
 })
 
 -- NODE DAS FOLHAS DE GRAMA
-core.register_node("nh_nodes:smallgrass", {
+c.register_node("nh_nodes:smallgrass", {
     description = S "Short Grass",
     drawtype = "mesh",
     mesh = "smallgrass.obj",
@@ -10776,7 +10793,7 @@ core.register_node("nh_nodes:smallgrass", {
         end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
@@ -10786,7 +10803,7 @@ core.register_node("nh_nodes:smallgrass", {
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
             -- Cria a entidade da chama
-            local obj = core.add_entity(pos, "nh_nodes:flame_entity")
+            local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -10794,7 +10811,7 @@ core.register_node("nh_nodes:smallgrass", {
                 end
             end
             -- Efeito sonoro (opcional)
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -10803,7 +10820,7 @@ core.register_node("nh_nodes:smallgrass", {
     end,
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        local objs = core.get_objects_inside_radius(pos, 0.5)
+        local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:flame_entity" then
@@ -10813,7 +10830,7 @@ core.register_node("nh_nodes:smallgrass", {
     end,
 })
 
-core.register_node("nh_nodes:highgrass", {
+c.register_node("nh_nodes:highgrass", {
     description = S "Tall Grass",
     drawtype = "mesh",
     mesh = "highgrass.obj",
@@ -10834,7 +10851,7 @@ core.register_node("nh_nodes:highgrass", {
         end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
         if meta:get_int("has_flame") == 1 then
             return
@@ -10844,7 +10861,7 @@ core.register_node("nh_nodes:highgrass", {
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
             -- Cria a entidade da chama
-            local obj = core.add_entity(pos, "nh_nodes:flame_entity")
+            local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
                 if ent then
@@ -10852,7 +10869,7 @@ core.register_node("nh_nodes:highgrass", {
                 end
             end
             -- Efeito sonoro (opcional)
-            core.sound_play("fire_flint_and_steel", {
+            c.sound_play("fire_flint_and_steel", {
                 pos = pos,
                 gain = 0.5,
                 max_hear_distance = 8,
@@ -10861,7 +10878,7 @@ core.register_node("nh_nodes:highgrass", {
     end,
     -- Quando a grama for removida, remove as chamas nela
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
-        local objs = core.get_objects_inside_radius(pos, 0.5)
+        local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:flame_entity" then
@@ -10872,7 +10889,7 @@ core.register_node("nh_nodes:highgrass", {
 })
 
 -- NODE DAS FLORES DE DENTE DE LEAO
-core.register_node("nh_nodes:dandelion", {
+c.register_node("nh_nodes:dandelion", {
     description = S "Dandelion",
     drawtype = "mesh",
     mesh = "dandelion.obj",
@@ -10886,7 +10903,7 @@ core.register_node("nh_nodes:dandelion", {
 })
 
 -- NODE DE JUNCO
-core.register_node("nh_nodes:rush", {
+c.register_node("nh_nodes:rush", {
     description = S "Rush",
     drawtype = "plantlike",
     tiles = { "rushplant.png" },
@@ -10899,7 +10916,7 @@ core.register_node("nh_nodes:rush", {
 })
 
 -- NODE DO COGUMELO MICACEUS
-core.register_node("nh_nodes:micaceusfungus", {
+c.register_node("nh_nodes:micaceusfungus", {
     description = S "Micaceus Fungus",
     drawtype = "mesh",
     mesh = "micaceusfungus.obj",
@@ -10920,7 +10937,7 @@ core.register_node("nh_nodes:micaceusfungus", {
 })
 
 -- NODE DO COGUMELO AMANITA (VERMELHO)
-core.register_node("nh_nodes:flyamanitafungus", {
+c.register_node("nh_nodes:flyamanitafungus", {
     description = S "Fly Agaric Fungus",
     drawtype = "mesh",
     mesh = "flyagaricfungus.obj",
@@ -10941,7 +10958,7 @@ core.register_node("nh_nodes:flyamanitafungus", {
 })
 
 -- Cinto
-core.register_node("nh_nodes:belt", {
+c.register_node("nh_nodes:belt", {
     description = S "Basic Belt",
     inventory_image = "belt_icon.png",
     --wield_image = "belt_icon2.png",
@@ -10975,7 +10992,7 @@ local function backchest_new_id()
 end
 
 local function backchest_save_inv(pos)
-    local meta  = core.get_meta(pos)
+    local meta  = c.get_meta(pos)
     local inv   = meta:get_inventory()
     local slots = {}
     for i = 1, inv:get_size("main") do
@@ -10987,7 +11004,7 @@ local function backchest_save_inv(pos)
 end
 
 local function backchest_restore_inv(pos, slots)
-    local meta = core.get_meta(pos)
+    local meta = c.get_meta(pos)
     local inv  = meta:get_inventory()
     for i, item_str in ipairs(slots) do
         inv:set_stack("main", i, ItemStack(item_str))
@@ -10996,7 +11013,7 @@ end
 
 -- Função auxiliar: atualiza itens visuais no backchest aberto
 -- Node: backchest aberto (estado intermediário)
-core.register_node("nh_nodes:back_chest_open", {
+c.register_node("nh_nodes:back_chest_open", {
     drawtype         = "mesh",
     mesh             = "backchest_open.obj",
     tiles            = { "BackChest.png" },
@@ -11008,19 +11025,19 @@ core.register_node("nh_nodes:back_chest_open", {
     collision_box    = { type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },
     groups           = { not_in_creative_inventory = 1 },
     on_rightclick    = function(pos, node, clicker, itemstack, pointed_thing)
-        local meta        = core.get_meta(pos)
+        local meta        = c.get_meta(pos)
         local player_name = clicker:get_player_name()
         meta:set_string("current_user", player_name)
-        core.show_formspec(player_name,
-            "nh_nodes:back_chest_" .. core.pos_to_string(pos),
+        c.show_formspec(player_name,
+            "nh_nodes:back_chest_" .. c.pos_to_string(pos),
             build_chest_formspec(clicker))
         return itemstack
     end,
     on_construct     = function(pos)
-        core.after(0.1, function() back_chest_update_items(pos) end)
+        c.after(0.1, function() back_chest_update_items(pos) end)
     end,
     after_place_node = function(pos, placer, itemstack, pointed_thing)
-        core.after(0.1, function() back_chest_update_items(pos) end)
+        c.after(0.1, function() back_chest_update_items(pos) end)
     end,
     -- Permite quebrar o baú mesmo estando aberto
     can_dig          = function(pos, player)
@@ -11028,7 +11045,7 @@ core.register_node("nh_nodes:back_chest_open", {
     end,
     -- Mesma lógica de salvamento do node fechado
     on_dig           = function(pos, node, digger)
-        local meta      = core.get_meta(pos)
+        local meta      = c.get_meta(pos)
         local inv       = meta:get_inventory()
         local has_items = not inv:is_empty("main")
         local chest_id  = meta:get_string("chest_id")
@@ -11048,10 +11065,10 @@ core.register_node("nh_nodes:back_chest_open", {
             drop_meta:set_string("description",
                 S "Backpack Chest" .. "\n" .. S "(contains items)")
         end
-        core.remove_node(pos)
-        core.add_item(pos, drop)
+        c.remove_node(pos)
+        c.add_item(pos, drop)
         -- Remove todas as entidades visuais ligadas ao baú aberto
-        for _, obj in ipairs(core.get_objects_inside_radius(pos, 1)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 1)) do
             local ent = obj:get_luaentity()
             if ent and (
                     ent.name == "nh_nodes:chest_item" or
@@ -11065,7 +11082,7 @@ core.register_node("nh_nodes:back_chest_open", {
 })
 
 -- Entidade de animação de abertura do backchest
-core.register_entity("nh_nodes:back_chest_entity", {
+c.register_entity("nh_nodes:back_chest_entity", {
     initial_properties = {
         visual               = "mesh",
         mesh                 = "backchest.glb",
@@ -11097,7 +11114,7 @@ core.register_entity("nh_nodes:back_chest_entity", {
 })
 
 -- Entidade de animação de fechamento do backchest
-core.register_entity("nh_nodes:back_chest_close_entity", {
+c.register_entity("nh_nodes:back_chest_close_entity", {
     initial_properties = {
         visual               = "mesh",
         mesh                 = "backchest.glb",
@@ -11121,7 +11138,7 @@ core.register_entity("nh_nodes:back_chest_close_entity", {
         if self.timer > 0.3 then
             -- Remove itens visuais
             if self.node_pos then
-                local objects = core.get_objects_inside_radius(self.node_pos, 1)
+                local objects = c.get_objects_inside_radius(self.node_pos, 1)
                 for _, obj in ipairs(objects) do
                     local luaent = obj:get_luaentity()
                     if luaent and luaent.name == "nh_nodes:chest_item" then obj:remove() end
@@ -11130,9 +11147,9 @@ core.register_entity("nh_nodes:back_chest_close_entity", {
             self.object:remove()
             -- Troca de volta para node fechado
             if self.node_pos then
-                local node = core.get_node(self.node_pos)
+                local node = c.get_node(self.node_pos)
                 if node.name == "nh_nodes:back_chest_open" then
-                    core.swap_node(self.node_pos, { name = "nh_nodes:backchest", param2 = self.original_param2 })
+                    c.swap_node(self.node_pos, { name = "nh_nodes:backchest", param2 = self.original_param2 })
                 end
             end
         end
@@ -11140,20 +11157,20 @@ core.register_entity("nh_nodes:back_chest_close_entity", {
 })
 
 -- Detectar fechamento do formspec do backchest
-core.register_on_player_receive_fields(function(player, formname, fields)
+c.register_on_player_receive_fields(function(player, formname, fields)
     local prefix = "nh_nodes:back_chest_"
     if formname:sub(1, #prefix) ~= prefix then return end
     local pos_string = formname:sub(#prefix + 1)
-    local pos        = core.string_to_pos(pos_string)
+    local pos        = c.string_to_pos(pos_string)
     if not pos then return end
-    local node = core.get_node(pos)
+    local node = c.get_node(pos)
     if node.name ~= "nh_nodes:back_chest_open" then return end
-    local meta         = core.get_meta(pos)
+    local meta         = c.get_meta(pos)
     local current_user = meta:get_string("current_user")
     local player_name  = player:get_player_name()
     if current_user ~= player_name then return end
     meta:set_string("current_user", "")
-    local objects      = core.get_objects_inside_radius(pos, 0.5)
+    local objects      = c.get_objects_inside_radius(pos, 0.5)
     local chest_entity = nil
     for _, obj in ipairs(objects) do
         local luaent = obj:get_luaentity()
@@ -11162,7 +11179,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             break
         end
     end
-    local close_entity = core.add_entity(pos, "nh_nodes:back_chest_close_entity")
+    local close_entity = c.add_entity(pos, "nh_nodes:back_chest_close_entity")
     if close_entity and close_entity:get_luaentity() then
         local luaentity           = close_entity:get_luaentity()
         luaentity.node_pos        = pos
@@ -11177,27 +11194,27 @@ core.register_on_player_receive_fields(function(player, formname, fields)
             end
             chest_entity:remove()
         end
-        local yaw = core.facedir_to_dir(node.param2)
-        close_entity:set_yaw(core.dir_to_yaw(yaw) + math.pi)
+        local yaw = c.facedir_to_dir(node.param2)
+        close_entity:set_yaw(c.dir_to_yaw(yaw) + math.pi)
         close_entity:set_animation({ x = 0.25, y = 0 }, 30, 0, false)
     end
 end)
 
 -- Detectar mudanças no inventário do backchest (atualiza itens visuais)
-core.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
+c.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
     if action ~= "move" and action ~= "put" and action ~= "take" then return end
     if inventory_info.to_list ~= "main" and inventory_info.from_list ~= "main" then return end
     local player_name = player:get_player_name()
     local player_pos  = player:get_pos()
     if not player_pos then return end
-    for _, obj in ipairs(core.get_objects_inside_radius(player_pos, 10)) do
+    for _, obj in ipairs(c.get_objects_inside_radius(player_pos, 10)) do
         if obj:is_player() then goto backcontinue end
         local pos = obj:get_pos()
         if not pos then goto backcontinue end
-        local node = core.get_node_or_nil(pos)
+        local node = c.get_node_or_nil(pos)
         if not node then goto backcontinue end
         if node.name == "nh_nodes:back_chest_open" then
-            local meta = core.get_meta(pos)
+            local meta = c.get_meta(pos)
             if meta:get_string("current_user") == player_name then
                 back_chest_update_items(pos)
             end
@@ -11207,7 +11224,7 @@ core.register_on_player_inventory_action(function(player, action, inventory, inv
 end)
 
 -- Node principal: backchest (fechado)
-core.register_node("nh_nodes:backchest", {
+c.register_node("nh_nodes:backchest", {
     description           = S "Backpack Chest",
     drawtype              = "mesh",
     mesh                  = "backchest.obj",
@@ -11225,7 +11242,7 @@ core.register_node("nh_nodes:backchest", {
     selection_box         = { type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },
     -- Criar inventário ao construir
     on_construct          = function(pos)
-        local meta = core.get_meta(pos)
+        local meta = c.get_meta(pos)
         local inv  = meta:get_inventory()
         inv:set_size("main", 8 * 2)
         meta:set_string("formspec",
@@ -11244,7 +11261,7 @@ core.register_node("nh_nodes:backchest", {
     end,
     -- Ao quebrar: salva o conteúdo na tabela global e grava o ID no item dropado
     on_dig                = function(pos, node, digger)
-        local meta      = core.get_meta(pos)
+        local meta      = c.get_meta(pos)
         local inv       = meta:get_inventory()
         local has_items = not inv:is_empty("main")
         -- Gera ou reutiliza ID existente (caso o baú já tenha sido colocado antes)
@@ -11269,10 +11286,10 @@ core.register_node("nh_nodes:backchest", {
             drop_meta:set_string("description",
                 S "Backpack Chest" .. "\n" .. S "(contains items)")
         end
-        core.remove_node(pos)
-        core.add_item(pos, drop)
+        c.remove_node(pos)
+        c.add_item(pos, drop)
         -- Remove entidades visuais que possam ter sobrado
-        for _, obj in ipairs(core.get_objects_inside_radius(pos, 1)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 1)) do
             local ent = obj:get_luaentity()
             if ent and (
                     ent.name == "nh_nodes:chest_item" or
@@ -11285,34 +11302,34 @@ core.register_node("nh_nodes:backchest", {
     end,
     -- Abrir baú ao clicar
     on_rightclick         = function(pos, node, clicker, itemstack, pointed_thing)
-        local current_node = core.get_node(pos)
-        core.swap_node(pos, { name = "nh_nodes:back_chest_open", param2 = current_node.param2 })
+        local current_node = c.get_node(pos)
+        c.swap_node(pos, { name = "nh_nodes:back_chest_open", param2 = current_node.param2 })
 
         -- Remove entidades de animação antigas
-        local objects = core.get_objects_inside_radius(pos, 0.5)
+        local objects = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objects) do
             if obj:get_luaentity() and obj:get_luaentity().name == "nh_nodes:back_chest_entity" then
                 obj:remove()
             end
         end
         -- Cria entidade de animação de abertura
-        local entity = core.add_entity(pos, "nh_nodes:back_chest_entity")
+        local entity = c.add_entity(pos, "nh_nodes:back_chest_entity")
         if entity and entity:get_luaentity() then
             local luaentity           = entity:get_luaentity()
             luaentity.node_pos        = pos
             luaentity.original_param2 = current_node.param2
-            local yaw                 = core.facedir_to_dir(current_node.param2)
-            entity:set_yaw(core.dir_to_yaw(yaw) + math.pi)
+            local yaw                 = c.facedir_to_dir(current_node.param2)
+            entity:set_yaw(c.dir_to_yaw(yaw) + math.pi)
             entity:set_animation({ x = 0, y = 0.25 }, 1, 0, false)
         end
-        local meta        = core.get_meta(pos)
+        local meta        = c.get_meta(pos)
         local player_name = clicker:get_player_name()
         meta:set_string("current_user", player_name)
 
         back_chest_update_items(pos)
 
-        core.show_formspec(player_name,
-            "nh_nodes:back_chest_" .. core.pos_to_string(pos),
+        c.show_formspec(player_name,
+            "nh_nodes:back_chest_" .. c.pos_to_string(pos),
             build_chest_formspec(clicker))
         return itemstack
     end,
@@ -11321,7 +11338,7 @@ core.register_node("nh_nodes:backchest", {
         local item_meta = itemstack:get_meta()
         local chest_id  = item_meta:get_string("chest_id")
         if chest_id ~= "" and backchest_stored_items[chest_id] then
-            local meta = core.get_meta(pos)
+            local meta = c.get_meta(pos)
             -- Grava o mesmo ID no node para futuras quebras
             meta:set_string("chest_id", chest_id)
             backchest_restore_inv(pos, backchest_stored_items[chest_id])
@@ -11333,43 +11350,24 @@ core.register_node("nh_nodes:backchest", {
 
 
 -- Exemplo de luvas gestuais
-core.register_node("nh_nodes:likeglove", {
+c.register_node("nh_nodes:likeglove", {
     description = S "Like Glove",
     drawtype = "mesh",
     mesh = "likeglove.obj",
     tiles = { "likeglove.png" },
     stack_max = 1, -- limita a 1 por slot
-
     paramtype = "light",
     paramtype2 = "facedir",
-
-    groups = {
-        armor_hands = 1,
-        oddly_breakable_by_hand = 3,
-        snappy = 3,
-        fleshy = 5,
-    },
-
+    groups = {armor_hands = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
     walkable = false,
-
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
-    },
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }
-    },
-
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = 0.9, y = 0, z = 0 },  -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = -90 } -- Ajuste Y para girar (90° = direita)
-    },
+    armor_bone_position = {pos = { x = 0.9, y = 0, z = 0 }, rot = { x = 0, y = -90, z = -90 }},
 })
 
 -- Exemplo de luvas gestuais
-core.register_node("nh_nodes:pointglove", {
+c.register_node("nh_nodes:pointglove", {
     description = S "Point Glove",
     drawtype = "mesh",
     mesh = "pointglove.obj",
@@ -11382,14 +11380,100 @@ core.register_node("nh_nodes:pointglove", {
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = 0.9, y = 0, z = 0 },  -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = -90 } -- Ajuste Y para girar (90° = direita)
-    },
+    armor_bone_position = {pos = { x = 0.9, y = 0, z = 0 }, rot = { x = 0, y = -90, z = -90 }},
+})
+
+-- Arma garra de tiro de plasma
+c.register_node("nh_nodes:shrimpclaw", {
+    description = S "Shrimp Claw",
+    drawtype = "mesh",
+    mesh = "shrimpclaw.obj",
+    tiles = { "shrimp.png" },
+    stack_max = 1,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {dig_immediate = 1},
+    walkable = false,
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    wielded_bone_position = {pos = { x = 0.5, y = 0, z = 0 }, rot = {x = -90, y = -90, z = 0}},
+    offhand_bone_position = {pos = { x = 1.2, y = -1, z = 0.5 }, rot = {x = -90, y = 180, z = 0}},
+
+on_use = function(itemstack, user, pointed_thing)
+    if not user or not user:is_player() then return end
+    local name = user:get_player_name()
+    if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
+    restore_hunger(user, -4)
+    local pos = user:get_pos()
+    if not pos then return end
+    local eye_offset = user:get_eye_offset()
+    pos.y = pos.y + 1.5 + (eye_offset and eye_offset.y or 0)
+    local dir = user:get_look_dir()
+    local spawn_pos = vector.add(pos, vector.multiply(dir, 1.5))
+    -- Cria o projétil
+    local arrow = c.add_entity(spawn_pos, "nh_mob:plasma")
+    if arrow then
+        arrow:set_velocity(vector.multiply(dir, 25))
+        arrow:set_yaw(user:get_look_horizontal())
+        -- Acessa a entidade
+        local ent = arrow:get_luaentity()
+        if ent then
+            ent._owner_obj = user
+            ent._lifetime_timer = 0
+        end
+    end
+    itemstack:add_wear(0)
+    return itemstack
+end,
+})
+
+-- Arma garra de tiro de plasma
+c.register_node("nh_nodes:shrimpclaw2", {
+    description = S "Dimensional Shrimp Claw",
+    drawtype = "mesh",
+    mesh = "shrimpclaw.obj",
+    tiles = { "shrimp.png^[colorize:#6600FF:160" },
+    light_source = 5,
+    stack_max = 1,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {dig_immediate = 1},
+    walkable = false,
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    wielded_bone_position = {pos = { x = 0.5, y = 0, z = 0 }, rot = {x = -90, y = -90, z = 0}},
+    offhand_bone_position = {pos = { x = 1.2, y = -1, z = 0.5 }, rot = {x = -90, y = 180, z = 0}},
+
+on_use = function(itemstack, user, pointed_thing)
+    if not user or not user:is_player() then return end
+    local name = user:get_player_name()
+    if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
+    restore_hunger(user, -4)
+    local pos = user:get_pos()
+    if not pos then return end
+    local eye_offset = user:get_eye_offset()
+    pos.y = pos.y + 1.5 + (eye_offset and eye_offset.y or 0)
+    local dir = user:get_look_dir()
+    local spawn_pos = vector.add(pos, vector.multiply(dir, 1.5))
+    -- Cria o projétil
+    local arrow = c.add_entity(spawn_pos, "nh_mob:plasma2")
+    if arrow then
+        arrow:set_velocity(vector.multiply(dir, 25))
+        arrow:set_yaw(user:get_look_horizontal())
+        -- Acessa a entidade
+        local ent = arrow:get_luaentity()
+        if ent then
+            ent._owner_obj = user
+            ent._lifetime_timer = 0
+        end
+    end
+    itemstack:add_wear(0)
+    return itemstack
+end,
 })
 
 -- Capacete
-core.register_node("nh_nodes:copperhelmet", {
+c.register_node("nh_nodes:copperhelmet", {
     description = S "Copper Helmet",
     drawtype = "mesh",
     mesh = "helmet.obj",
@@ -11411,7 +11495,7 @@ core.register_node("nh_nodes:copperhelmet", {
 })
 
 -- Armadura peitoral
-core.register_node("nh_nodes:copperchestplate", {
+c.register_node("nh_nodes:copperchestplate", {
     description = S "Copper Chestplate",
     drawtype = "mesh",
     mesh = "chestplate.obj",
@@ -11430,7 +11514,7 @@ core.register_node("nh_nodes:copperchestplate", {
 })
 
 -- Armadura de cintura
-core.register_node("nh_nodes:fauld", {
+c.register_node("nh_nodes:fauld", {
     description = S "Copper Fauld",
     drawtype = "mesh",
     mesh = "leggings.obj",
@@ -11449,7 +11533,7 @@ core.register_node("nh_nodes:fauld", {
 })
 
 -- Exemplo de calças
-core.register_node("nh_nodes:leggings", {
+c.register_node("nh_nodes:leggings", {
     description = S "Copper Leggings",
     drawtype = "mesh",
     mesh = "leggings.obj",
@@ -11468,7 +11552,7 @@ core.register_node("nh_nodes:leggings", {
 })
 
 -- Exemplo de botas
---core.register_node("nh_nodes:boots", {
+--c.register_node("nh_nodes:boots", {
 --    description = "Botas Básicas",
 --    inventory_image = "boots_basic.png",
 --    groups = {armor_feet = 1},
@@ -11479,7 +11563,7 @@ core.register_node("nh_nodes:leggings", {
 --})
 
 -- Asas
-core.register_node("nh_nodes:closedwings", {
+c.register_node("nh_nodes:closedwings", {
     description = S "Wings",
     drawtype = "mesh",
     mesh = "closedwings.obj",
@@ -11501,7 +11585,7 @@ core.register_node("nh_nodes:closedwings", {
     drop = "nh_nodes:wings"
 })
 
-core.register_node("nh_nodes:wings", {
+c.register_node("nh_nodes:wings", {
     description = S "Wings",
     drawtype = "mesh",
     mesh = "wings.obj",
@@ -11522,8 +11606,8 @@ core.register_node("nh_nodes:wings", {
     offhand_bone_position = {pos = { x = -2, y = 0, z = -0.25 }},
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         -- Substitui o nó colocado pelo closedwings, mantendo o facedir
-        local node = core.get_node(pos)
-        core.set_node(pos, {name = "nh_nodes:closedwings", param2 = node.param2}) -- param2 preserva a rotação/direção
+        local node = c.get_node(pos)
+        c.set_node(pos, {name = "nh_nodes:closedwings", param2 = node.param2}) -- param2 preserva a rotação/direção
     end,
 })
 
@@ -11542,47 +11626,47 @@ local function has_wings_equipped(player)
     return false
 end
 
-core.register_globalstep(function(dtime)
-    for _, player in ipairs(core.get_connected_players()) do
+c.register_globalstep(function(dtime)
+    for _, player in ipairs(c.get_connected_players()) do
         local name = player:get_player_name()
         local wearing = has_wings_equipped(player)
 
         if wearing and not players_with_wings[name] then
             -- Equipou as asas: concede voo
             players_with_wings[name] = true
-            local privs = core.get_player_privs(name)
+            local privs = c.get_player_privs(name)
             privs.fly = true
-            core.set_player_privs(name, privs)
+            c.set_player_privs(name, privs)
             -- Aplica física de voo imediatamente
             player:set_physics_override({ gravity = 0.5 })
-            core.chat_send_player(name, S "The wings are active! Use [flight] (k or enable in the menu) to fly.")
+            c.chat_send_player(name, S "The wings are active! Use [flight] (k or enable in the menu) to fly.")
 
         elseif not wearing and players_with_wings[name] then
             -- Desequipou as asas: remove voo
             players_with_wings[name] = nil
-            local privs = core.get_player_privs(name)
+            local privs = c.get_player_privs(name)
             privs.fly = nil
-            core.set_player_privs(name, privs)
+            c.set_player_privs(name, privs)
             player:set_physics_override({ gravity = 1.0 })
-            core.chat_send_player(name, S "The wings were removed.")
+            c.chat_send_player(name, S "The wings were removed.")
         end
     end
 end)
 
 -- Garante que o voo é removido ao deslogar
-core.register_on_leaveplayer(function(player)
+c.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
     if players_with_wings[name] then
         players_with_wings[name] = nil
-        local privs = core.get_player_privs(name)
+        local privs = c.get_player_privs(name)
         privs.fly = nil
-        core.set_player_privs(name, privs)
+        c.set_player_privs(name, privs)
     end
 end)
 
 -- PORTA DE CARVALHO 3x1
 -- Porta fechada
-core.register_node("nh_nodes:oakdoor_closed", {
+c.register_node("nh_nodes:oakdoor_closed", {
     description = S "Oak Door",
     drawtype = "mesh",
     mesh = "oakdoor_closed.obj", -- Um único mesh 3x1
@@ -11602,13 +11686,13 @@ core.register_node("nh_nodes:oakdoor_closed", {
     offhand_bone_position = {pos = { x = 3, y = -1, z = 0.7 },
         rot = { x = 0, y = 0, z = 90 }},
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        core.set_node(pos, { name = "nh_nodes:oakdoor_open", param2 = node.param2 }) -- Abre a porta
-        core.sound_play("door_open", { pos = pos, gain = 0.3, max_hear_distance = 10 })
+        c.set_node(pos, { name = "nh_nodes:oakdoor_open", param2 = node.param2 }) -- Abre a porta
+        c.sound_play("door_open", { pos = pos, gain = 0.3, max_hear_distance = 10 })
     end,
 })
 
 -- Porta aberta
-core.register_node("nh_nodes:oakdoor_open", {
+c.register_node("nh_nodes:oakdoor_open", {
     description = S "Oak Door" .. "\n" .. S "(Open)",
     drawtype = "mesh",
     mesh = "oakdoor_open.obj", -- Mesmo mesh mas rotacionado/aberto
@@ -11631,8 +11715,8 @@ core.register_node("nh_nodes:oakdoor_open", {
         rot = { x = 0, y = 90, z = 90 }},
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        core.set_node(pos, { name = "nh_nodes:oakdoor_closed", param2 = node.param2 }) -- Fecha a porta
-        core.sound_play("door_close", { pos = pos, gain = 0.3, max_hear_distance = 10 })
+        c.set_node(pos, { name = "nh_nodes:oakdoor_closed", param2 = node.param2 }) -- Fecha a porta
+        c.sound_play("door_close", { pos = pos, gain = 0.3, max_hear_distance = 10 })
     end,
 })
 
@@ -11644,7 +11728,7 @@ local item_cache      = {}
 local item_desc_index = {} -- [lang_code][item_name] = {desc_traduzida, desc_original}
 local function build_item_cache()
     if next(item_cache) then return end
-    for name, def in pairs(core.registered_items) do
+    for name, def in pairs(c.registered_items) do
         if name ~= "" then
             table.insert(item_cache, name)
         end
@@ -11656,10 +11740,10 @@ local function ensure_desc_index(lang_code)
     if item_desc_index[lang_code] then return end
     item_desc_index[lang_code] = {}
     for _, name in ipairs(item_cache) do
-        local def        = core.registered_items[name]
+        local def        = c.registered_items[name]
         local raw_desc   = (def and def.description) or ""
         -- Traduz a description completa para o idioma do jogador
-        local translated = core.get_translated_string(lang_code, raw_desc)
+        local translated = c.get_translated_string(lang_code, raw_desc)
         local original   = raw_desc
         -- Indexa TODAS as linhas (nome principal + subtítulos como [Mob Spawner])
         local terms      = {}
@@ -11708,7 +11792,7 @@ end
 
 
 -- ─── Entidade Grimório ─────────────────────────────────
-core.register_entity("nh_nodes:grimoire_entity", {
+c.register_entity("nh_nodes:grimoire_entity", {
     initial_properties = {
         visual       = "mesh",
         mesh         = "grimorie.glb",
@@ -11738,7 +11822,7 @@ core.register_entity("nh_nodes:grimoire_entity", {
 
             -- Restaura o node original
             if self._node_pos then
-                core.set_node(self._node_pos, { name = "nh_nodes:archion", param2 = self._node_param2 or 0 })
+                c.set_node(self._node_pos, { name = "nh_nodes:archion", param2 = self._node_param2 or 0 })
             end
             self.object:remove()
         end
@@ -11751,19 +11835,19 @@ core.register_entity("nh_nodes:grimoire_entity", {
 local open_grimoires = {}
 local function spawn_grimoire_entity(pos, param2, player_name)
     -- Esconde o node substituindo por air
-    local node_param2 = core.get_node(pos).param2
-    core.set_node(pos, { name = "air" })
+    local node_param2 = c.get_node(pos).param2
+    c.set_node(pos, { name = "air" })
     -- Spawna a entidade no mesmo lugar
-    local obj = core.add_entity(pos, "nh_nodes:grimoire_entity")
+    local obj = c.add_entity(pos, "nh_nodes:grimoire_entity")
     if not obj then
         -- Fallback: restaura o node se falhar
-        core.set_node(pos, { name = "nh_nodes:archion", param2 = node_param2 })
+        c.set_node(pos, { name = "nh_nodes:archion", param2 = node_param2 })
         return nil
     end
     -- Aplica a mesma rotação do node (facedir → yaw)
     local function facedir_to_yaw(param2)
         -- Pega o vetor de direção frontal do facedir
-        local dir = core.facedir_to_dir(param2)
+        local dir = c.facedir_to_dir(param2)
         -- Converte o vetor XZ em yaw (atan2 com eixos do Minetest)
         return math.atan2(-dir.x, dir.z)
     end
@@ -11786,14 +11870,14 @@ local function close_grimoire_entity(player_name)
     local obj = data.entity
     if not obj or not obj:get_pos() then
         -- Entidade já sumiu; só restaura o node
-        core.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
+        c.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
         open_grimoires[player_name] = nil
         return
     end
     local ent = obj:get_luaentity()
     if not ent then
         obj:remove()
-        core.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
+        c.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
         open_grimoires[player_name] = nil
         return
     end
@@ -11815,7 +11899,7 @@ function show_grimoire(player, page, search)
     search          = search or ""
     local name      = player:get_player_name()
     -- Pega o lang_code do jogador (ex: "pt", "en", "de")
-    local info      = core.get_player_information(name)
+    local info      = c.get_player_information(name)
     local lang_code = (info and info.lang_code) or "en"
     local items     = filter_items(search, lang_code) -- <-- passa lang_code
     local max_page  = math.max(1, math.ceil(#items / ITEMS_PER_PAGE))
@@ -11828,7 +11912,7 @@ function show_grimoire(player, page, search)
         "formspec_version[4]",
         "size[14," .. form_height .. "]",
         "label[0.3,0.3;" .. S "Complete Materialization Grimoire" .. "]",
-        "field[0.3,0.9;6,0.8;search;;" .. core.formspec_escape(search) .. "]",
+        "field[0.3,0.9;6,0.8;search;;" .. c.formspec_escape(search) .. "]",
         "field_close_on_enter[search;false]",
         "button[6.4,0.9;1.2,0.8;do_search;" .. S "Search" .. "]",
         "button[8,0.9;1,0.8;prev;<]",
@@ -11858,10 +11942,10 @@ function show_grimoire(player, page, search)
         table.insert(fs, "list[current_player;main;1,9;8,1;]")
     end
     table.insert(fs, "listring[current_player;main]")
-    core.show_formspec(name, "nh_nodes:materialization", table.concat(fs))
+    c.show_formspec(name, "nh_nodes:materialization", table.concat(fs))
 end
 -- Node
-core.register_node("nh_nodes:archion", {
+c.register_node("nh_nodes:archion", {
     description           = S "Archion" .. "\n" .. S "Grimoire of Materialization" .. "\n" .. S "(completed)" .. "\n" .. S "[only active in creative mode]",
     drawtype              = "mesh",
     mesh                  = "grimorie.obj",
@@ -11885,8 +11969,8 @@ core.register_node("nh_nodes:archion", {
     on_rightclick         = function(pos, node, player, itemstack, pointed_thing)
         local controls = player:get_player_control()
         if controls.aux1 then
-            if not core.is_creative_enabled(player:get_player_name()) then
-                core.chat_send_player(player:get_player_name(), "[O Archion só funciona no modo criativo]")
+            if not c.is_creative_enabled(player:get_player_name()) then
+                c.chat_send_player(player:get_player_name(), "[O Archion só funciona no modo criativo]")
                 return itemstack
             end
             -- Spawna a entidade e abre o formspec
@@ -11895,9 +11979,9 @@ core.register_node("nh_nodes:archion", {
             return itemstack
         end
         if itemstack and not itemstack:is_empty() then
-            local item_def = core.registered_items[itemstack:get_name()]
+            local item_def = c.registered_items[itemstack:get_name()]
             if item_def and item_def.type == "node" then
-                return core.item_place_node(itemstack, player, pointed_thing)
+                return c.item_place_node(itemstack, player, pointed_thing)
             end
             if item_def and item_def.on_place then
                 local safe_pointed = {
@@ -11909,7 +11993,7 @@ core.register_node("nh_nodes:archion", {
             end
         end
         if itemstack:is_empty() then
-            core.chat_send_player(
+            c.chat_send_player(
                 player:get_player_name(),
                 S(
                     "I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to open...")
@@ -11921,7 +12005,7 @@ core.register_node("nh_nodes:archion", {
 -- Recebimento de campos 
 local player_state = {}
 
-core.register_on_player_receive_fields(function(player, formname, fields)
+c.register_on_player_receive_fields(function(player, formname, fields)
     if formname ~= "nh_nodes:materialization" then return end
 
     local name = player:get_player_name()
@@ -11956,7 +12040,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
     for field, _ in pairs(fields) do
         if field:sub(1, 5) == "item_" then
             local index     = tonumber(field:sub(6))
-            local info      = core.get_player_information(name)
+            local info      = c.get_player_information(name)
             local lang_code = (info and info.lang_code) or "en"
             local items     = filter_items(state.search, lang_code)
             local item      = items[index]
@@ -11968,7 +12052,7 @@ core.register_on_player_receive_fields(function(player, formname, fields)
     end
 end)
 -- Limpeza ao deslogar 
-core.register_on_leaveplayer(function(player)
+c.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
     -- Fecha "na força" sem animação para não deixar entidade órfã
     local data = open_grimoires[name]
@@ -11976,12 +12060,12 @@ core.register_on_leaveplayer(function(player)
         if data.entity and data.entity:get_pos() then
             data.entity:remove()
         end
-        core.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
+        c.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
         open_grimoires[name] = nil
     end
     player_state[name] = nil
 end)
-core.register_on_newplayer(function(player)
+c.register_on_newplayer(function(player)
     local inv = player:get_inventory()
     local page = ItemStack("nh_items:writedpage")
     local meta = page:get_meta()

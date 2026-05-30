@@ -233,6 +233,13 @@ function restore_hunger(player, amount)
         update_hunger_hud(player, hunger_data[name].level)
     end
 end
+function get_hunger(player)
+    local name = player:get_player_name()
+    if hunger_data[name] then
+        return hunger_data[name].level
+    end
+    return 0
+end
 
 -- Adiciona item apenas nos slots visíveis do inventário (1-8)
 function add_item_to_visible_slots(player, itemstack)
