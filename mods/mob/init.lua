@@ -112,10 +112,7 @@ local SPAWN_PRESETS = {
     },
 }
 local function register_mob_spawn(def)
-    if not def or not def.name then
-        error("[MOD MOB] register_mob_spawn: 'name' is required.")
-    end
-
+    if not def or not def.name then error("[MOD MOB] register_mob_spawn: 'name' is required.") end
     local d = {
         nodes = def.nodes or {"air"},
         neighbors = def.neighbors or {"nh_nodes:top_grass"},
@@ -140,19 +137,10 @@ local function register_mob_spawn(def)
 end
 local function spawn_with_preset(name, preset, extra)
     local def = { name = name }
-
     -- aplica preset
-    for k, v in pairs(SPAWN_PRESETS[preset]) do
-        def[k] = v
-    end
-
+    for k, v in pairs(SPAWN_PRESETS[preset]) do def[k] = v end
     -- sobrescreve com extras
-    if extra then
-        for k, v in pairs(extra) do
-            def[k] = v
-        end
-    end
-
+    if extra then for k, v in pairs(extra) do def[k] = v end end
     register_mob_spawn(def)
 end
 -- MOB: RAT/RATAZANA (Agressivo)
@@ -1776,7 +1764,7 @@ mobs:register_mob("nh_mob:spider", {
     -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
     -- O seguimento real será feito pelo do_custom abaixo
     follow = {"nh_nodes:torch2"},
-    sounds = { footstep = "GrassFootstep", random = "trantula", damage = "GrassDig", fuse = "tnt_ignite"},
+    sounds = { footstep = "GrassFootstep", random = "nh_tarantula", damage = "GrassDig", fuse = "tnt_ignite"},
     do_custom = function(self, dtime)
         -- SOM DE PASSOS
         self._step_timer = (self._step_timer or 0) + dtime
@@ -1798,7 +1786,6 @@ mobs:register_mob("nh_mob:spider", {
 
         -- Direção que a aranha está "olhando" (frente)
         local raw_yaw = obj:get_yaw()
-
         local function dir_from_yaw(y)
             return -math.sin(y), -math.cos(y)
         end
@@ -1818,20 +1805,16 @@ mobs:register_mob("nh_mob:spider", {
         end
 
     local dir_x, dir_z
-    if check_wall(dx1, dz1) then
-        dir_x, dir_z = dx1, dz1
-    elseif check_wall(dx2, dz2) then
-        dir_x, dir_z = dx2, dz2
-    else
-        dir_x, dir_z = dx1, dz1 -- fallback
+    if check_wall(dx1, dz1) then dir_x, dir_z = dx1, dz1
+    elseif check_wall(dx2, dz2) then dir_x, dir_z = dx2, dz2
+    else dir_x, dir_z = dx1, dz1 -- fallback
     end
 
     -- Posição à frente da aranha (detecta parede)
     local front_pos = {
         x = pos.x + dir_x * 0.55,
         y = pos.y + 0.5,  -- meio do corpo
-        z = pos.z + dir_z * 0.55
-    }
+        z = pos.z + dir_z * 0.55}
 
     local front_node = core.get_node(front_pos)
     local front_def = core.registered_nodes[front_node.name]
@@ -1850,7 +1833,6 @@ mobs:register_mob("nh_mob:spider", {
         local top_node = core.get_node(top_pos)
         local top_def = core.registered_nodes[top_node.name]
         local wall_top_clear = not top_def or top_def.walkable == false
-
         -- Verifica se ainda há parede à frente/abaixo-frente
         local wall_check = {x = pos.x + dir_x * 0.6, y = pos.y - 0.3, z = pos.z + dir_z * 0.6}
         local wc_node = core.get_node(wall_check)
@@ -1880,9 +1862,7 @@ mobs:register_mob("nh_mob:spider", {
             self._climb_dir = nil
             obj:set_rotation({ x = 0, y = yaw, z = 0 })
         end
-
         return  -- Não executa lógica normal de movimento durante escalada
-
     elseif wall_ahead and has_floor and
            (self.state == "walk" or self.state == "run" or self.state == "attack") then
         -- ── INICIA ESCALADA ──
@@ -1890,21 +1870,6 @@ mobs:register_mob("nh_mob:spider", {
         self._climb_dir = { x = dir_x, z = dir_z }
     end
 end,
-    -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
-    --[[
-    on_rightclick = function(self, clicker)
-        if clicker:is_player() then
-            local item = clicker:get_wielded_item()
-            local name = item:get_name()
-            if name == "" then
-                core.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))
-            end
-        end
-    end,
-    after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ static_save = true }) end,
-    ]]--
 })
 -- Spawn do dopel (casas, blocos de madeiras)
 register_mob_spawn({
@@ -3873,10 +3838,20 @@ local function slime_def(extra)
         air_damage    = 0,
         animation     = { speed_normal = 1, stand_start = 0, stand_end = 0, walk_start = 0, walk_end = 0.63 },
         follow        = { "nh_nodes:rawchicken" },
-        sounds        = { random = "slime_som", damage = "slime_hurt" },
+        sounds        = {footstep = "nh_slime", random = "slime_som", damage = "nh_slimehurt"},
         on_die        = extra.on_die,
         after_activate = function(self, staticdata, def, dtime)
             slime_after_activate(self, extra.punch_delay)
+        end,
+        do_custom = function(self, dtime)
+            -- SOM DE PASSOS
+            self._step_timer = (self._step_timer or 0) + dtime
+            if self._step_timer >= 1 then
+                self._step_timer = 0
+                if self.state == "walk" or self.state == "run" or self.state == "attack" then
+                    self:mob_sound(self.sounds.footstep)
+                end
+            end
         end,
         on_rightclick = function(self, clicker)
             if not clicker:is_player() then return end
@@ -3885,8 +3860,7 @@ local function slime_def(extra)
                 core.chat_send_player(clicker:get_player_name(), "O slime quer comida!")
                 item:take_item(1)
                 clicker:set_wielded_item(item)
-            else
-                core.chat_send_player(clicker:get_player_name(), "O.O")
+            else core.chat_send_player(clicker:get_player_name(), "O.O")
             end
         end,
     }
@@ -3996,7 +3970,7 @@ mobs:register_mob("nh_mob:visage", {
     textures = { "vulto3.png" }, --vulto.png^[opacity:200
     rotate = 180,
     visual_size = { x = 2, y = 2 },
-    -- IMPORTANTE: Propriedades para manter na água
+    -- Propriedades para manter na água
     fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
@@ -4013,20 +3987,18 @@ mobs:register_mob("nh_mob:visage", {
         walk_start = 21,
         walk_end = 40,
     },
-    follow = { "nh_nodes:torch2" },
+    follow = {"nh_nodes:torch2"},
     on_die = function(self, pos) core.after(0.1, function() local obj = core.add_entity(pos, "nh_mob:visage2") end) end,
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), "...")
+            if name == "nh_nodes:torch2" then core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
+            else core.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
-    sounds = { random = "vulto_som", damage = "vulto_hurt", },
+    --sounds = {random = "nh_whisper", damage = "nh_whisperhurt"},
 })
 -- Spawn do vulto (fundo de cavernas escuras)
 register_mob_spawn({
@@ -4084,17 +4056,14 @@ mobs:register_mob("nh_mob:visage2", {
             end
         end
         if nearest_player then -- Pequeno delay para o mob terminar de spawnar antes do punch
-            core.after(0.2,
-                function()
-                    if self.object:is_valid() then
-                        self.object:punch(nearest_player, 1.0,
-                            { full_punch_interval = 1.0, damage_groups = { fleshy = 1 }, -- 1 de dano simbólico
-                            }, nil)
-                    end
-                end)
+            core.after(0.2, function()
+                if self.object:is_valid() then
+                    self.object:punch(nearest_player, 1.0, {full_punch_interval = 1.0, damage_groups = {fleshy = 1},}, nil) -- 1 de dano simbólico  
+                end
+            end)
         end
     end,
-    -- IMPORTANTE: Propriedades para manter na água
+    -- Propriedades para manter na água
     fly = true,  -- Permite "voar" na água
     fly_in = "air", -- Voa no ar
     walk_velocity = 1,
@@ -4110,14 +4079,12 @@ mobs:register_mob("nh_mob:visage2", {
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), "...")
+            if name == "nh_nodes:torch2" then core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
+            else core.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
-    sounds = { random = "vulto_som", damage = "vulto_hurt", },
+    sounds = {random = "nh_whisper", damage = "nh_whisperhurt"},
 })
 
 -- MOB x: Giant Crab (Agressivo)
@@ -4247,21 +4214,6 @@ mobs:register_mob("nh_mob:giantcrab", {
     end,
     on_die = function(self, pos, killer) remove_all_boss_hud(self) end,
 })
--- Spawn do crab (casas, blocos de madeiras)
---[[
-register_mob_spawn({
-    name = "nh_mob:giantcrab",
-    nodes = { "nh_nodes:water" },
-    neighbors = { "nh_nodes:kelp" },
-    max_light = 15,
-    interval = 30,
-    chance = 20,
-    active_object_count = 1,
-    min_height = -19,
-    max_height = -16
-})
-]] --
---mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
 register_orb_egg("nh_mob:giantcrab", S("Orb with Giant Crab"))
 
 

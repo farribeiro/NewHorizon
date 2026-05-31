@@ -14,10 +14,11 @@ local lava_damage_timer  = {}
 local players_with_torch = {}
 local portal_cooldown = {} -- evita teleporte no portal em loop
 -- FLUTUAÇÃO E CORRENTEZA NAS ÁGUAS
-local WATER_FULLNODES = populate_true({"water", "water2"})
+local WATER_FULLNODES = populate_true({"water", "water2", "avalanche"})
 local WATER_MIDNODES = populate_true({"water_flowing", "water2_flowing"})
 local water_nodes = populate_true({"water", "water_flowing", "water2", "water2_flowing"})
 local LAVA_NODES = populate_true({"lava", "lava_flowing", "bluelava", "bluelava_flowing"})
+local BUCKET_FLOWING = populate_true({"water_flowing", "water2_flowing", "avalanche_flowing"})
 local FLAME_ENTITIES = populate_true({"campfire_flame_entity", "torch_flame_entity", "palmstraw_flame_entity", "flame_entity"})
 local LEAF_TYPES = populate_true({"leaves", "leaves_nut", "leaves_nut2", "leaves_nut3", "leaves_apple", "leaves_apple2", "leaves_apple3"})
 local FLOATING_STUFF = populate_true({"oaktimber", "oaklog", "oakwood", "stick", "palmtimber", "palmlog", "coconut", "pinetimber", "pinelog", "pinewood", "pineraft", "ice", "ice2", "orb_empty"})
@@ -25,10 +26,10 @@ local DECORATIONS = populate_true({"smallgrass", "highgrass", "rush", "dandelion
 nodes = {}
 -- Vetores de direção por facedir (face frontal do node) para portal e espelho
 local facedir_to_dir = {
-    [0] = {x=0, y=0, z=-1},  -- sul
-    [1] = {x=-1, y=0, z=0},  -- leste
-    [2] = {x=0, y=0, z=1},   -- norte
-    [3] = {x=1, y=0, z=0},}  -- oeste
+    [0] = xyz(0, 0, -1),  -- sul
+    [1] = xyz(-1, 0, 0),  -- leste
+    [2] = xyz(0, 0, 1),   -- norte
+    [3] = xyz(1, 0, 0)}  -- oeste
 local function detach_glow(player)
     -- busca e remove o entity de glow anterior
     for _, obj in ipairs(c.get_objects_inside_radius(player:get_pos(), 2)) do
@@ -41,7 +42,7 @@ local function attach_glow(player)
     -- remove glow anterior se existir
     detach_glow(player)
     local glow_obj = c.add_entity(player:get_pos(), "nh_nodes:glow_entity")
-    if glow_obj then glow_obj:set_attach(player, "bone_RHand", { x = 1.25, y = 0, z = 0 }, { x = 0, y = 0, z = 0 }) end
+    if glow_obj then glow_obj:set_attach(player, "bone_RHand", xyz(1.25, 0, 0), xyz(0, 0, 0)) end
 end
 c.register_entity("nh_nodes:glow_entity", {
     initial_properties = {
@@ -50,7 +51,7 @@ c.register_entity("nh_nodes:glow_entity", {
         physical = false, static_save = false, glow = 14},
     on_step = function(self, dtime)
         local rot = self.object:get_rotation()
-        self.object:set_rotation({ x = rot.x, y = rot.y + 0.15, z = rot.z + 0.07, })
+        self.object:set_rotation(xyz(rot.x, rot.y + 0.15, rot.z + 0.07))
     end,
 })
 c.register_globalstep(function(dtime)
@@ -78,8 +79,7 @@ c.register_globalstep(function(dtime)
                 local node_def    = c.registered_nodes[node.name]
                 if node_def and node_def.sounds and node_def.sounds.footstep then
                     local snd = node_def.sounds.footstep
-                    c.sound_play(snd.name,
-                        { pos = pos, gain = snd.gain or 0.5, max_hear_distance = 10, })
+                    c.sound_play(snd.name, {pos = pos, gain = snd.gain or 0.5, max_hear_distance = 10})
                 end
             end
         end
@@ -87,12 +87,12 @@ c.register_globalstep(function(dtime)
         lava_damage_timer[name] = (lava_damage_timer[name] or 0) + dtime
         if lava_damage_timer[name] >= 1.0 then
             lava_damage_timer[name] = 0
-            local feet_node = c.get_node({ x = pos.x, y = pos.y, z = pos.z })
-            local head_node = c.get_node({ x = pos.x, y = pos.y + 1, z = pos.z })
+            local feet_node = c.get_node(xyz(pos.x, pos.y, pos.z))
+            local head_node = c.get_node(xyz(pos.x, pos.y + 1, pos.z))
             if LAVA_NODES[feet_node.name] or LAVA_NODES[head_node.name] then player:set_hp(player:get_hp() - 22) end
         end
         -- DANO DAS FOLHAS CAINDO
-        local above_pos = { x = pos.x, y = pos.y + 2, z = pos.z }
+        local above_pos = xyz(pos.x, pos.y + 2, pos.z)
         for _, obj in pairs(c.get_objects_inside_radius(above_pos, 1.5)) do
             local entity = obj:get_luaentity()
             if entity and entity.name == "__builtin:falling_node" then
@@ -104,7 +104,7 @@ c.register_globalstep(function(dtime)
             end
         end
         -- TOCHA NA AGUA (troca torch2 por torch3)
-        local head_pos  = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local head_pos  = xyz(pos.x, pos.y + 1, pos.z)
         local head_node = c.get_node(head_pos)
         if c.get_item_group(head_node.name, "water") > 0 then
             local inv = player:get_inventory()
@@ -118,7 +118,7 @@ c.register_globalstep(function(dtime)
         end
         -- LUZ DA TOCHA / CRISTAL
         local wielded        = player:get_wielded_item()
-        local light_pos_base = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local light_pos_base = xyz(pos.x, pos.y + 1, pos.z)
         if wielded:get_name() == "nh_nodes:torch2" or wielded:get_name() == "nh_nodes:redcrystal" or wielded:get_name() == "nh_nodes:litgrenade" then
             if not players_with_torch[name] then players_with_torch[name] = {} end
             -- Remove luz antiga
@@ -164,14 +164,14 @@ local function spawn_lava_burn_particles(pos)
         amount             = 24,  -- quantidade de partículas por emissão
         time               = 0.4, -- duração total do spawner (segundos)
         -- Origem: espalhada na face superior do node de lava
-        minpos             = { x = pos.x - 0.4, y = base_y, z = pos.z - 0.4 },
-        maxpos             = { x = pos.x + 0.4, y = base_y + 0.1, z = pos.z + 0.4 },
+        minpos             = xyz(pos.x - 0.4, base_y, pos.z - 0.4),
+        maxpos             = xyz(pos.x + 0.4, base_y + 0.1, pos.z + 0.4),
         -- Velocidade: sobem do fundo ao topo do node (1 node = 1 unidade)
-        minvel             = { x = -0.15, y = 1.5, z = -0.15 },
-        maxvel             = { x = 0.15, y = 3.0, z = 0.15 },
+        minvel             = xyz(-0.15, 1.5, -0.15),
+        maxvel             = xyz(0.15, 3.0, 0.15),
         -- Sem aceleração (fogo sobe naturalmente)
-        minacc             = { x = 0, y = 0, z = 0 },
-        maxacc             = { x = 0, y = 0, z = 0 },
+        minacc             = xyz(0, 0, 0),
+        maxacc             = xyz(0, 0, 0),
         -- Vida das partículas: tempo suficiente para cruzar 1 node
         minexptime         = 0.2,
         maxexptime         = 0.5,
@@ -189,7 +189,7 @@ c.register_globalstep(function(dtime)
     lava_drop_timer = lava_drop_timer + dtime
     if lava_drop_timer < 0.5 then return end
     lava_drop_timer = 0
-    for _, obj in ipairs(c.get_objects_in_area({ x = -30000, y = -30000, z = -30000 }, { x = 30000, y = 30000, z = 30000 })) do
+    for _, obj in ipairs(c.get_objects_in_area(xyz(-30000, -30000, -30000), xyz(30000, 30000, 30000))) do
         if not obj:is_player() then
             local entity = obj:get_luaentity()
             if entity and entity.name == "__builtin:item" then
@@ -1005,7 +1005,7 @@ function register_craft_station(node_name, config)
     local original_on_construct = node_def.on_construct
     node_def.on_construct = function(pos)
         ensure_inventory(pos)
-        -- ✅ EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
+        --       EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
         if custom_on_construct then custom_on_construct(pos) end
         -- Depois executa o padrão do crafting
         c.after(0.5, function()
@@ -1015,7 +1015,7 @@ function register_craft_station(node_name, config)
     end
     -- MODIFICA on_timer para executar AMBOS
     node_def.on_timer = function(pos, elapsed)
-        -- ✅ EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
+        --       EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
         if custom_on_timer then
             local result = custom_on_timer(pos, elapsed)
             -- Se retornou false, para aqui
@@ -1249,10 +1249,10 @@ c.register_node("nh_nodes:dirt_corner", {
     drop                = "nh_nodes:dirt",
     sunlight_propagates = true,
     sounds              = {
-    	footstep = { name = "punchtimber3", gain = 0.5 },
-    	dug = { name = "punchtimber3", gain = 0.5 },
-    	dig = { name = "punchtimber3", gain = 0.5 },
-    	place = { name = "punchtimber3", gain = 0.5 },},
+        footstep = { name = "punchtimber3", gain = 0.5 },
+        dug = { name = "punchtimber3", gain = 0.5 },
+        dig = { name = "punchtimber3", gain = 0.5 },
+        place = { name = "punchtimber3", gain = 0.5 },},
     collision_box       = {type = "fixed",
         fixed = {{ -0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, -- Topo
                 { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base principal
@@ -1268,7 +1268,6 @@ c.register_node("nh_nodes:dirt_corner", {
 
 c.register_node("nh_nodes:dirt_insidecorner", {
     description         = S "Dirt Inside Corner",
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1281,15 +1280,14 @@ c.register_node("nh_nodes:dirt_insidecorner", {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug = { name = "punchtimber3", gain = 0.5 },
         dig = { name = "punchtimber3", gain = 0.5 },
-        place = { name = "punchtimber3", gain = 0.5 }, },
-    collision_box       = {type = "fixed",
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
+        place = { name = "punchtimber3", gain = 0.5 },},
+    collision_box = {type = "fixed", fixed = 
+                {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
                 { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },       -- Topo braço 1: faixa traseira (Z-)
                 { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },       -- Topo braço 1: faixa traseira (Z-)
                 { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},},   -- Topo braço 2: faixa lateral (X-)
-        
-    selection_box       = {type = "fixed",
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
+    selection_box = {type = "fixed", fixed =
+                {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
                 { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },
                 { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },
                 { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},},
@@ -1299,21 +1297,15 @@ register_craft_station("nh_nodes:dirt", {
     tiles = { "terra.png" },
     groups = { crumbly = 2 },
     sounds = {
-    	footstep = { name = "punchtimber3", gain = 0.5 },
-    	dug = { name = "punchtimber3", gain = 0.5 },
-    	dig = { name = "punchtimber3", gain = 0.5 },
-    	place = { name = "punchtimber3", gain = 0.5 },},
+        footstep = { name = "punchtimber3", gain = 0.5 },
+        dug = { name = "punchtimber3", gain = 0.5 },
+        dig = { name = "punchtimber3", gain = 0.5 },
+        place = { name = "punchtimber3", gain = 0.5 },},
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    offhand_bone_position = {
-        pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     on_construct = function(pos)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = c.get_node(above).name
@@ -1322,7 +1314,7 @@ register_craft_station("nh_nodes:dirt", {
         -- c.chat_send_all("   Bloco acima: " .. node_above)
         if light and light > 4 then
             c.get_node_timer(pos):start(math.random(30, 60))
-            -- c.chat_send_all("   ✅ Timer iniciado!")
+            -- c.chat_send_all("         Timer iniciado!")
         else
             --c.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
         end
@@ -1377,16 +1369,8 @@ c.register_node("nh_nodes:wetdirt", {
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    offhand_bone_position = {
-        pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)},
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     on_construct = function(pos)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = c.get_node(above).name
@@ -1395,7 +1379,7 @@ c.register_node("nh_nodes:wetdirt", {
         -- c.chat_send_all("   Bloco acima: " .. node_above)
         if light and light > 4 then
             c.get_node_timer(pos):start(math.random(30, 60))
-            -- c.chat_send_all("   ✅ Timer iniciado!")
+            -- c.chat_send_all("         Timer iniciado!")
         else
             --c.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
         end
@@ -1470,7 +1454,6 @@ c.register_node("nh_nodes:tilleddirt", {
         local above = xyz(pos.x, pos.y + 1, pos.z)
         local node_above = c.get_node(above).name
         if node_above ~= "air" then return true end
-
         local laterals = { xyz(pos.x + 1, pos.y, pos.z), xyz(pos.x - 1, pos.y, pos.z), xyz(pos.x, pos.y, pos.z + 1),
             xyz(pos.x, pos.y, pos.z - 1),
             -- diagonais
@@ -1485,10 +1468,8 @@ c.register_node("nh_nodes:tilleddirt", {
                 break
             end
         end
-        if has_water then
-            c.set_node(pos, { name = "nh_nodes:wettilleddirt" })
-        else
-            c.set_node(pos, { name = "nh_nodes:dirt" })
+        if has_water then c.set_node(pos, { name = "nh_nodes:wettilleddirt" })
+        else c.set_node(pos, { name = "nh_nodes:dirt" })
         end
         return false
     end,
@@ -1507,13 +1488,8 @@ c.register_node("nh_nodes:wettilleddirt", {
     -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     on_construct = function(pos) c.get_node_timer(pos):start(math.random(60, 120)) end,
     on_timer = function(pos, elapsed)
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
@@ -1555,15 +1531,15 @@ c.register_node("nh_nodes:top_grass_corner", {
     drop                = "nh_nodes:dirt",
     sounds              = { footstep = { name = "GrassFootstep", gain = 0.5 }, dug = { name = "GrassDig", gain = 0.5 }, dig = { name = "GrassDig", gain = 0.5 }, place = { name = "GrassDig", gain = 0.5 }, },
     sunlight_propagates = true,
-    collision_box       = {type = "fixed",
-        fixed = {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, -- Topo
+    collision_box       = {type = "fixed", fixed = 
+                {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5 }, -- Topo
                 { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base principal
                 { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 },     -- Base braço 1
                 { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
 
         
-    selection_box       = {type = "fixed",
-        fixed = {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- topo
+    selection_box       = {type = "fixed", fixed = 
+                {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- topo
                 {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5 },     -- Base principal
                 {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0 },     -- Base braço 1
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
@@ -1664,17 +1640,10 @@ register_craft_station("nh_nodes:top_grass2", {
         place = { name = "GrassDig", gain = 0.5 },},
     title = S "2x2 Craft on the Grass",
     groups = { crumbly = 3, soil = 1 },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
     -- Quando a grama é bloqueada da luz, vira terra
     drop = "nh_nodes:dirt",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_timer = function(pos, elapsed)
         local above = xyz(pos.x, pos.y + 1, pos.z)
         local node_above = c.get_node(above).name
@@ -1720,13 +1689,8 @@ register_craft_station("nh_nodes:grass", {
         dug = { name = "GrassDig", gain = 0.5 },
         dig = { name = "GrassDig", gain = 0.5 },
         place = { name = "GrassDig", gain = 0.5 }, },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_timer = function(pos, elapsed)
         --c.chat_send_all("⏰ TIMER de morte da grama disparou em " .. c.pos_to_string(pos))
@@ -1748,14 +1712,14 @@ register_craft_station("nh_nodes:grass", {
                 --c.chat_send_all("   ☀️ Ainda tem luz suficiente")
             end
         else
-            --c.chat_send_all("   ✅ Ar acima, cancelando timer")
+            --c.chat_send_all("         Ar acima, cancelando timer")
             return false -- Para o timer se o bloco foi removido
         end
         -- Continua verificando
         --c.chat_send_all("   Não se torna terra, terminada a verificação")
         return false
     end,
-    title = S "2x2 Craft on the Lawn", -- ✅ Campo obrigatório!
+    title = S "2x2 Craft on the Lawn", --       Campo obrigatório!
     grid_size = 4,
     positions = {
         xyz(-0.2, 0.9, -0.2),
@@ -1803,7 +1767,6 @@ c.register_on_dignode(function(pos, oldnode, digger)
 end)
 c.register_node("nh_nodes:sand_ramp", {
     description         = S "Sand Ramp",
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1816,20 +1779,13 @@ c.register_node("nh_nodes:sand_ramp", {
         dug = { name = "punchtimber3", gain = 0.5 },
         dig = { name = "punchtimber3", gain = 0.5 },
         place = { name = "punchtimber3", gain = 0.5 },},
-    -- E adicione essa propriedade:
     sunlight_propagates = true,
-    --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-    selection_box       = {type = "fixed",
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5},
-                {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5},},},
-    collision_box       = {type = "fixed",
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5},
-                {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5 },},},
+    selection_box       = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5},},},
+    collision_box       = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5 },},},
 })
 
 c.register_node("nh_nodes:sand_corner", {
     description         = S "Sand Corner",
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1842,23 +1798,20 @@ c.register_node("nh_nodes:sand_corner", {
         dug = { name = "punchtimber3", gain = 0.5 },
         dig = { name = "punchtimber3", gain = 0.5 },
         place = { name = "punchtimber3", gain = 0.5 },},
-    -- E adicione essa propriedade:
     sunlight_propagates = true,
-    --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-    collision_box       = {type = "fixed",
-        fixed = {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- Topo
+    collision_box       = {type = "fixed", fixed = 
+                {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- Topo
                 {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5},     -- Base principal
                 {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0},     -- Base braço 1
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5},},},     -- Base braço 2
-    selection_box       = {type = "fixed",
-        fixed = {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- topo
+    selection_box       = {type = "fixed", fixed =  
+                {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- topo
                 {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5},     -- Base principal
                 {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0},     -- Base braço 1
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5},},},     -- Base braço 2
 })
 c.register_node("nh_nodes:sand_insidecorner", {
     description         = S "Sand Inside Corner",
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1866,18 +1819,20 @@ c.register_node("nh_nodes:sand_insidecorner", {
     tiles               = { "sand_slope.png" },
     groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
-    sounds              = { footstep = { name = "punchtimber3", gain = 0.5 }, dug = { name = "punchtimber3", gain = 0.5 }, dig = { name = "punchtimber3", gain = 0.5 }, place = { name = "punchtimber3", gain = 0.5 }, },
-    -- E adicione essa propriedade:
+    sounds = {
+        footstep = { name = "punchtimber3", gain = 0.5 },
+        dug = { name = "punchtimber3", gain = 0.5 },
+        dig = { name = "punchtimber3", gain = 0.5 },
+        place = { name = "punchtimber3", gain = 0.5 }, },
     sunlight_propagates = true,
-    --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-    collision_box       = {type = "fixed",
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, -- Base completa (metade inferior)
+    collision_box = {type = "fixed", fixed = 
+                {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, -- Base completa (metade inferior)
                 {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5},       -- Topo braço 1: faixa traseira (Z-)
                 {-0.5, 0.0,  -0.5, 0.0, 0.5, 0.0},       -- Topo braço 1: faixa traseira (Z-)
                 {0.5,  0.0,  0.0,  0.0, 0.5, 0.5},},},   -- Topo braço 2: faixa lateral (X-)
         
-    selection_box       = { type = "fixed", 
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5},
+    selection_box = { type = "fixed", fixed = 
+                {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5},
                 {-0.5, 0.0, 0.0, 0.0, 0.5, 0.5},
                 {-0.5, 0.0, -0.5, 0.0, 0.5, 0.0},
                 {0.5, 0.0, 0.0, 0.0, 0.5, 0.5},},},
@@ -1895,15 +1850,8 @@ register_craft_station("nh_nodes:sand", {
         dug = { name = "punchtimber3", gain = 0.5 },
         dig = { name = "punchtimber3", gain = 0.5 },
         place = { name = "punchtimber3", gain = 0.5 },},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = { x = 0, y = 1.4, z = 0 },
@@ -1914,17 +1862,10 @@ register_craft_station("nh_nodes:sand", {
 register_craft_station("nh_nodes:wet_sand", {
     description = S "Wet Sand",
     tiles = { "areia_molhada.png" },
-    title = S "2x2 Craft on the Wet Sand", -- ✅ Campo obrigatório!
+    title = S "2x2 Craft on the Wet Sand", --       Campo obrigatório!
     groups = { crumbly = 2 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
     grid_size = 4,
     positions = {
         {x = -0.2, y = 0.9, z = -0.2 },
@@ -1940,33 +1881,17 @@ c.register_node("nh_nodes:saprolite", {
     description = S "Saprolite",
     tiles = { "saprolite.png" },
     groups = { cracky = 3 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 register_craft_station("nh_nodes:gneiss", {
     description = S "Gneiss",
     tiles = { "pedra.png" },
     groups = { cracky = 3 },
     drop = "nh_nodes:pebble_item 8",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    title = S "2x2 Craft on the Gneiss", -- ✅ Campo obrigatório!
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    title = S "2x2 Craft on the Gneiss", --       Campo obrigatório!
     grid_size = 4,
     positions = {
         {x = -0.2, y = 0.9, z = -0.2 },
@@ -1984,16 +1909,9 @@ register_craft_station("nh_nodes:cobblestone", {
     tiles = { "cobblestone.png" },
     groups = { cracky = 3 },
     drop = "nh_nodes:pebble_item 8",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    title = "Produção 2x2 no Pedregulho", -- ✅ Campo obrigatório!
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    title = "Produção 2x2 no Pedregulho", --       Campo obrigatório!
     grid_size = 4,
     positions = {
         { x = -0.2, y = 0.9, z = -0.2 },
@@ -2007,11 +1925,7 @@ register_craft_station("nh_nodes:cobblestone", {
 })
 c.register_node("nh_nodes:charcoal", {
     description = S "Charcoal",
-    tiles = {
-        "topdowncharcoal.png", -- topo
-        "topdowncharcoal.png", -- base
-        "charcoal.png",        -- lados (direita, esquerda, frente, trás)
-    },
+    tiles = {"topdowncharcoal.png", "topdowncharcoal.png", "charcoal.png"}, -- topo / base / lados (direita, esquerda, frente, trás)
     groups = { choppy = 3, armor_head = 1 },
     stack_max = 1,
     drop = "nh_nodes:charcoalnugget 8",
@@ -2025,16 +1939,9 @@ c.register_node("nh_nodes:charcoal", {
         wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
         wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
         wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    -- Som tocado ao bater no tronco
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    -- Som tocado ao bater
     sounds = { dug = { name = "punchtimber", gain = 0.5 }, dig = { name = "punchtimber", gain = 0.5 }, },
 })
 c.register_node("nh_nodes:charcoal2", {
@@ -2069,15 +1976,8 @@ c.register_node("nh_nodes:coal", {
     mesh = "copperore.obj",
     tiles = { "coalore.png" },
     groups = { cracky = 3 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
     drop = { items = { { items = { "nh_nodes:coalnugget 8" } }, }},
 })
 
@@ -2112,15 +2012,8 @@ c.register_node("nh_nodes:copper", {
     tiles = { "gneiss_copperore.png" },
     groups = { cracky = 3 },
     drop = {items = { { items = { "nh_nodes:coppernugget" } }, { items = { "nh_nodes:pebble 3" } }, }},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:coppernugget", {
@@ -2152,15 +2045,8 @@ c.register_node("nh_nodes:tin", {
     tiles = { "gneiss_tinore.png" },
     groups = { cracky = 3 },
     drop = {items = {{ items = {"nh_nodes:tinnugget"}}, { items = {"nh_nodes:pebble 3"}}, }},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:tinnugget", {
@@ -2192,15 +2078,8 @@ c.register_node("nh_nodes:iron", {
     tiles = { "gneiss_ironore.png" },
     groups = { cracky = 3 },
     drop = {items = { { items = { "nh_nodes:ironnugget" } }, { items = { "nh_nodes:pebble 3" } }, }},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:ironnugget", {
@@ -2231,15 +2110,8 @@ c.register_node("nh_nodes:nickel", {
     mesh = "copperore.obj",
     tiles = { "gneiss_nickelore.png" },
     groups = { cracky = 3 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},  -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:manganese", {
@@ -2248,15 +2120,8 @@ c.register_node("nh_nodes:manganese", {
     mesh = "copperore.obj",
     tiles = { "gneiss_manganeseore.png" },
     groups = { cracky = 3 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:chromium", {
@@ -2265,15 +2130,8 @@ c.register_node("nh_nodes:chromium", {
     mesh = "copperore.obj",
     tiles = { "gneiss_chromeore.png" },
     groups = { cracky = 3 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},  -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:chromiumnugget", {
@@ -2303,30 +2161,17 @@ c.register_node("nh_nodes:peridotite", {
     tiles = { "peridotite.png" },
     groups = { cracky = 3 },
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:redrock", {
     description = S "Ruborita",
     tiles = { "lava.png" },
-    groups = { unbreakable = 1, not_in_creative_inventory = 1 }, --{unbreakable = 1, not_in_creative_inventory = 1},
+    groups = { unbreakable = 1, not_in_creative_inventory = 1 },
     drop = "",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:bedrock", {
@@ -2336,32 +2181,18 @@ c.register_node("nh_nodes:bedrock", {
     paramtype = "light",
     sunlight_propagates = true,
     use_texture_alpha = "blend",
-    groups = { cracky = 3 }, --{cracky = 1, oddly_breakable_by_hand = 1},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    groups = { cracky = 3 },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},  -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:obsidian", {
     description = S "Obsidian",
     tiles = { "obsidiana.png" },
-    groups = { cracky = 3 }, --{cracky = 1, oddly_breakable_by_hand = 1},
+    groups = { cracky = 3 }, 
     drop = "nh_nodes:obsidianpebble 8",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
 })
 
 
@@ -2558,7 +2389,6 @@ c.register_node("nh_nodes:appletimber", {
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         local below = { x = pos.x, y = pos.y - 1, z = pos.z }
         local below_node = c.get_node(below)
-
         -- CORRIGIDO: Verifica TODAS as folhas de macieira
         if below_node.name == "air"
             or below_node.name == "nh_nodes:appletimber"
@@ -2577,10 +2407,7 @@ c.register_node("nh_nodes:appletimber", {
     on_timer = function(pos)
         local node = c.get_node(pos)
         if node.name == "nh_nodes:appletimber" then
-            if not has_solid_support(pos) then
-                make_leaves_fall(pos)
-                return false
-            end
+            if not has_solid_support(pos) then make_leaves_fall(pos) return false end
             return true
         end
         return false
@@ -2603,23 +2430,16 @@ c.register_node("nh_nodes:pinetimber", {
         -- Se não tinha, significa que vai cair
         local below = { x = pos.x, y = pos.y - 1, z = pos.z }
         local below_node = c.get_node(below)
-
         -- Se abaixo é ar ou outro tronco/folha, faz folhas caírem
         if below_node.name == "air" or below_node.name == "nh_nodes:pinetimber" or below_node.name:find("nh_nodes:leaves") then
             make_leaves_fall(pos)
         end
     end,
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
--- Detecta quando o tronco começa a se mover
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    -- Detecta quando o tronco começa a se mover
     on_construct = function(pos)
         c.get_node_timer(pos):start(0.5)
     end,
@@ -2627,10 +2447,7 @@ c.register_node("nh_nodes:pinetimber", {
         local node = c.get_node(pos)
         if node.name == "nh_nodes:pinetimber" then
             -- Se não tem suporte, vai começar a cair
-            if not has_solid_support(pos) then
-                make_leaves_fall(pos)
-                return false -- Para o timer
-            end
+            if not has_solid_support(pos) then make_leaves_fall(pos) return false end -- Para o timer
             return true      -- Continua verificando
         end
         return false
@@ -2639,38 +2456,23 @@ c.register_node("nh_nodes:pinetimber", {
 
 c.register_node("nh_nodes:pinelog", {
     description = S "Pine Log",
-    tiles = {
-        "topdownpinetimber.png", -- topo
-        "topdownpinetimber.png", -- base
-        "pinetimber.png",        -- lados (direita, esquerda, frente, trás)
-    },
+    tiles = {"topdownpinetimber.png", "topdownpinetimber.png", "pinetimber.png"}, -- topo / base / lados (direita, esquerda, frente, trás)
     groups = { choppy = 3, armor_head = 1 },
     stack_max = 1,
-
     paramtype = "light",
     paramtype2 = "wallmounted",
     selection_box = {type = "wallmounted",
         wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
         wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
         wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },},
-
     node_box = {type = "wallmounted",
         wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
         wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
         wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },},
-
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
+    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
+    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}},
     -- Som tocado ao bater no tronco
     sounds = {
         dug = { name = "punchtimber", gain = 0.5 },
@@ -2686,14 +2488,9 @@ c.register_node("nh_nodes:oakwood", {
         dug = { name = "punchtimber", gain = 0.5 },
         dig = { name = "punchtimber", gain = 0.5 },},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
 })
 
 -- Madeira
@@ -2747,14 +2544,9 @@ c.register_node("nh_nodes:slime", {
     glow = 5, -- Intensidade de 0 a 14 (14 = mais brilhante)
     use_texture_alpha = "blend",
     -- Configuração mão direita
-    wielded_bone_position = {
-        --pos = {x = 0, y = 0, z = 1.5},
-        rot = { x = 0, y = 90, z = -90 }},
+    wielded_bone_position = {rot = { x = 0, y = 90, z = -90 }},
     -- Configuração mão esquerda
-    offhand_bone_position = {
-        pos = { x = 1.5, y = 0, z = 0 },
-        rot = { x = 0, y = 90, z = -90 }},
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }, rot = { x = 0, y = 90, z = -90 }},
 })
 
 -- grilo
@@ -2767,14 +2559,9 @@ c.register_node("nh_nodes:cricket", {
     paramtype = "light",
     use_texture_alpha = "clip",
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
 })
 
 -- Madeira
@@ -2790,7 +2577,6 @@ c.register_node("nh_nodes:campfiretinder", {
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
 })
 
-
 -- Tronco de carvalho fatiado
 c.register_node("nh_nodes:oaktimberslice", {
     description = S "Oak Firewood",
@@ -2805,12 +2591,10 @@ c.register_node("nh_nodes:oaktimberslice", {
             -- Comportamento normal de colocação (com shift)
             return c.item_place(itemstack, placer, pointed_thing)
         end
-
         -- Se está clicando em um node (sem agachar)
         if pointed_thing.type == "node" then
             local pos = pointed_thing.under
             local node = c.get_node(pos)
-
             -- Verifica qual estágio está e evolui (apenas se mirar em campfiretinder)
             if node.name == "nh_nodes:campfiretinder" then
                 c.set_node(pos, { name = "nh_nodes:oaktimberslice1" })
@@ -2830,7 +2614,6 @@ c.register_node("nh_nodes:oaktimberslice", {
                 return itemstack
             end
         end
-
         -- Comportamento normal de colocação para outros casos
         return c.item_place(itemstack, placer, pointed_thing)
     end,
@@ -2851,13 +2634,9 @@ c.register_node("nh_nodes:oaktimberslice1", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
 
     on_place = function(itemstack, placer, pointed_thing)
-        if not pointed_thing.type == "node" then
-            return itemstack
-        end
-
+        if not pointed_thing.type == "node" then return itemstack end
         local pos = pointed_thing.under
         local node = c.get_node(pos)
-
         if placer and placer:is_player() and placer:get_player_control().sneak then
             if node.name == "nh_nodes:oaktimberslice1" and itemstack:get_name() == "nh_nodes:oaktimberslice" then
                 c.set_node(pos, { name = "nh_nodes:oaktimberslice2" })
@@ -2865,7 +2644,6 @@ c.register_node("nh_nodes:oaktimberslice1", {
                 return itemstack
             end
         end
-
         return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
@@ -2884,13 +2662,9 @@ c.register_node("nh_nodes:oaktimberslice2", {
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     on_place = function(itemstack, placer, pointed_thing)
-        if not pointed_thing.type == "node" then
-            return itemstack
-        end
-
+        if not pointed_thing.type == "node" then return itemstack end
         local pos = pointed_thing.under
         local node = c.get_node(pos)
-
         if placer and placer:is_player() and placer:get_player_control().sneak then
             if node.name == "nh_nodes:oaktimberslice2" and itemstack:get_name() == "nh_nodes:oaktimberslice" then
                 c.set_node(pos, { name = "nh_nodes:oaktimberslice3" })
@@ -2898,7 +2672,6 @@ c.register_node("nh_nodes:oaktimberslice2", {
                 return itemstack
             end
         end
-
         return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
@@ -2917,13 +2690,9 @@ c.register_node("nh_nodes:oaktimberslice3", {
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     on_place = function(itemstack, placer, pointed_thing)
-        if not pointed_thing.type == "node" then
-            return itemstack
-        end
-
+        if not pointed_thing.type == "node" then return itemstack end
         local pos = pointed_thing.under
         local node = c.get_node(pos)
-
         if placer and placer:is_player() and placer:get_player_control().sneak then
             if node.name == "nh_nodes:oaktimberslice3" and itemstack:get_name() == "nh_nodes:oaktimberslice" then
                 c.set_node(pos, { name = "nh_nodes:campfire" })
@@ -2931,7 +2700,6 @@ c.register_node("nh_nodes:oaktimberslice3", {
                 return itemstack
             end
         end
-
         return c.item_place(itemstack, placer, pointed_thing)
     end,
 })
@@ -2946,10 +2714,7 @@ register_craft_station("nh_nodes:campfire", {
     paramtype = "light",
     groups = {choppy = 3, oddly_breakable_by_hand = 1},
     stack_max = 1,
-    drop = {items = {
-            { items = { "nh_nodes:oaktimberslice 4"} },
-            { items = { "nh_nodes:campfiretinder" } },
-    }},
+    drop = {items = {{items = {"nh_nodes:oaktimberslice 4"}}, {items = {"nh_nodes:campfiretinder"}},}},
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0, 0.5 }},
     title = "Produção 2x2 na Fogueira", -- Campo obrigatório!
@@ -2972,36 +2737,26 @@ register_craft_station("nh_nodes:campfire", {
                 local has_flame = false
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
-                    if ent and ent.name == "nh_nodes:campfire_flame_entity" then
-                        has_flame = true
-                        break
-                    end
+                    if ent and ent.name == "nh_nodes:campfire_flame_entity" then has_flame = true break end
                 end
-
                 if not has_flame then
                     local obj = c.add_entity(pos, "nh_nodes:campfire_flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
-                        if ent then
-                            ent._straw_pos = pos
-                        end
+                        if ent then ent._straw_pos = pos end
                     end
                 end
             end)
         end
     end,
     -- Quando a fogueira é atingida com tocha
-    on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
+    on_punch = function(pos, node, puncher, pointed_thing) 
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
-        if meta:get_int("has_flame") == 1 then
-            return
-        end
+        if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
@@ -3010,23 +2765,15 @@ register_craft_station("nh_nodes:campfire", {
             local obj = c.add_entity(pos, "nh_nodes:campfire_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._straw_pos = pos
-                end
+                if ent then ent._straw_pos = pos end
             end
             -- Efeito sonoro
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
     can_craft = function(pos)
         local meta = c.get_meta(pos)
-        if meta:get_int("has_flame") ~= 1 then
-            return false, S "I forgot that a bonfire needs to be lit to prepare..."
-        end
+        if meta:get_int("has_flame") ~= 1 then return false, S "I forgot that a bonfire needs to be lit to prepare..." end
         return true
     end,
     -- Quando a fogueira for removida, remove as chamas
@@ -3034,9 +2781,7 @@ register_craft_station("nh_nodes:campfire", {
         local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:campfire_flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:campfire_flame_entity" then obj:remove() end
         end
     end,
 })
@@ -3058,49 +2803,29 @@ c.register_entity("nh_nodes:campfire_flame_entity", {
         pointable = true,
         glow = 14,
     },
-
     _straw_pos = nil,
     _timer = 0,
     _anim_timer = 0,
     _current_frame = 0,
-
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
             local data = c.deserialize(staticdata)
-            if data and data.straw_pos then
-                self._straw_pos = data.straw_pos
-            end
+            if data and data.straw_pos then self._straw_pos = data.straw_pos end
         end
         self._timer = 0
-
-        self.object:set_sprite(
-            { x = 0, y = 0 },
-            1,
-            1.0,
-            false
-        )
-
+        self.object:set_sprite({ x = 0, y = 0 }, 1, 1, false)
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
-
-    get_staticdata = function(self)
-        return c.serialize({ straw_pos = self._straw_pos })
-    end,
-
+    get_staticdata = function(self) return c.serialize({ straw_pos = self._straw_pos }) end,
     -- Detecta quando é golpeado para acender tochas
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-        if not puncher or not puncher:is_player() then
-            return
-        end
-
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-
         -- Verifica se está segurando uma tocha apagada
         if wielded_name == "nh_nodes:torch" then
             wielded:take_item()
             puncher:set_wielded_item(wielded)
-
             local inv = puncher:get_inventory()
             if inv then
                 local leftover = inv:add_item("main", "nh_nodes:torch2")
@@ -3109,49 +2834,29 @@ c.register_entity("nh_nodes:campfire_flame_entity", {
                     c.add_item(pos, leftover)
                 end
             end
-
-            c.sound_play("fire_flint_and_steel", {
-                pos = self.object:get_pos(),
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", {pos = self.object:get_pos(), gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
 
     on_step = function(self, dtime)
         self._timer = self._timer + dtime
         self._anim_timer = self._anim_timer + dtime
-
         -- Anima a textura
         if self._anim_timer > (1.0 / 8) then
             self._anim_timer = 0
             self._current_frame = (self._current_frame + 1) % 8
             self.object:set_texture_mod("^[verticalframe:8:" .. self._current_frame)
         end
-
         -- Verifica se a palha ainda existe
         if self._timer > 0.5 then
             self._timer = 0
-
-            if not self._straw_pos then
-                self.object:remove()
-                return
-            end
-
+            if not self._straw_pos then self.object:remove() return end
             local node = c.get_node(self._straw_pos)
-
             -- Se a palha foi removida, remove a chama
-            if node.name ~= "nh_nodes:campfire" then
-                self.object:remove()
-                return
-            end
-
+            if node.name ~= "nh_nodes:campfire" then self.object:remove() return end
             -- Verifica se ainda deve ter chama
             local meta = c.get_meta(self._straw_pos)
-            if meta:get_int("has_flame") ~= 1 then
-                self.object:remove()
-                return
-            end
+            if meta:get_int("has_flame") ~= 1 then self.object:remove() return end
         end
     end,
 })
@@ -3176,13 +2881,10 @@ c.register_node("nh_nodes:spinningtop", {
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
     -- Spawna o mob ao colocar o node no chão
     on_place = function(itemstack, placer, pointed_thing)
-        if pointed_thing.type ~= "node" then
-            return itemstack
-        end
+        if pointed_thing.type ~= "node" then return itemstack end
         local pos = pointed_thing.above -- posição onde vai spawnar
         -- Spawna o mob
         local mob = minetest.add_entity(pos, "nh_mob:spinningtop")
-
         if mob then
             -- Aplica a rotação do jogador ao mob
             if placer then
@@ -3209,10 +2911,7 @@ c.register_node("nh_nodes:spinningtop2", {
     collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = -0.25, y = 0.5, z = 0 },
-        rot = { x = 0, y = 0, z = 45 },
-    },
+    wielded_bone_position = {pos = { x = -0.25, y = 0.5, z = 0 }, rot = { x = 0, y = 0, z = 45 },},
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
     -- Spawna o mob ao colocar o node no chão
     on_place = function(itemstack, placer, pointed_thing)
@@ -3248,16 +2947,11 @@ c.register_node("nh_nodes:spinningtop3", {
     collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = -0.25, y = 0.5, z = 0 },
-        rot = { x = 0, y = 0, z = 45 },
-    },
+    wielded_bone_position = {pos = { x = -0.25, y = 0.5, z = 0 }, rot = { x = 0, y = 0, z = 45 },},
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
     -- Spawna o mob ao colocar o node no chão
     on_place = function(itemstack, placer, pointed_thing)
-        if pointed_thing.type ~= "node" then
-            return itemstack
-        end
+        if pointed_thing.type ~= "node" then return itemstack end
         local pos = pointed_thing.above -- posição onde vai spawnar
         -- Spawna o mob
         local mob = minetest.add_entity(pos, "nh_mob:spinningtop3")
@@ -3288,16 +2982,9 @@ register_craft_station("nh_nodes:craft_table", {
     title = "Bancada de Produção 2x2x2",
     grid_size = 8,
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     positions = {
         { x = -0.2, y = 0.7, z = -0.2 }, { x = 0.2, y = 0.7, z = -0.2 },
         { x = -0.2, y = 0.7, z = 0.2 }, { x = 0.2, y = 0.7, z = 0.2 },
@@ -3322,19 +3009,13 @@ register_craft_station("nh_nodes:furnace", {
     tiles = { "stonefurnace.png" }, --cobblestone.png
     paramtype = "light",            -- Necessário para iluminação correta
     paramtype2 = "facedir",         -- IMPORTANTE: paramtype2, não paramtype
-
     -- Caixas de colisão e seleção
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, 0.5 }},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -2.5, y = -1, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = { x = -2.5, y = -1, z = 0 }},
     -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = -1.5, y = -1, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    offhand_bone_position = {pos = { x = -1.5, y = -1, z = 0 }},
     grid_size = 9,
     positions = {
         { x = -0.3, y = 0.9, z = -0.3 }, { x = 0, y = 0.9, z = -0.3 }, { x = 0.3, y = 0.9, z = -0.3 },
@@ -3513,18 +3194,10 @@ c.register_node("nh_nodes:torch", {
             local obj = c.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._torch_pos = pos
-                end
+                if ent then ent._torch_pos = pos end
             end
-
             -- Efeito sonoro de acender fogo
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
-
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
             -- Partículas de faísca (opcional)
             c.add_particlespawner({
                 amount = 5,
@@ -3565,13 +3238,11 @@ c.register_node("nh_nodes:torch2", {
     --selection_box = {type = "wallmounted",
     --    wall_top = {-0.1, 0.5-0.6, -0.1, 0.1, 0.5, 0.1},
     --    wall_bottom = {-0.1, -0.5, -0.1, 0.1, -0.5+0.6, 0.1},
-    --    wall_side = {-0.5, -0.1, -0.1, -0.5+0.3, 0.5, 0.1},
-    --},
+    --    wall_side = {-0.5, -0.1, -0.1, -0.5+0.3, 0.5, 0.1},},
     --node_box = {type = "wallmounted",
     --    wall_top = {-0.0625, 0.5-0.5625, -0.0625, 0.0625, 0.5, 0.0625},
     --    wall_bottom = {-0.0625, -0.5, -0.0625, 0.0625, -0.5+0.5625, 0.0625},
-    --    wall_side = {-0.5, -0.0625, -0.0625, -0.5+0.28125, 0.5, 0.0625},
-    --},
+    --    wall_side = {-0.5, -0.0625, -0.0625, -0.5+0.28125, 0.5, 0.0625},},
     -- Quando colocada, adiciona a chama no mesmo lugar
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         -- Posição da chama (1 bloco acima)
@@ -3580,9 +3251,7 @@ c.register_node("nh_nodes:torch2", {
         local obj = c.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
         if obj then
             local ent = obj:get_luaentity()
-            if ent then
-                ent._torch_pos = pos
-            end
+            if ent then ent._torch_pos = pos end
         end
     end,
     -- Quando a tocha é destruída, remove a entidade da chama
@@ -3591,9 +3260,7 @@ c.register_node("nh_nodes:torch2", {
         local objs = c.get_objects_inside_radius(flame_pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:torch_flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:torch_flame_entity" then obj:remove() end
         end
     end,
 })
@@ -3624,9 +3291,7 @@ c.register_node("nh_nodes:crystal_light", {
 c.register_node("nh_nodes:torch_flame", {
     drawtype = "mesh",
     mesh = "torchflame.obj", -- Você precisará criar esse mesh
-    tiles = {{name = "fire_basic_flame_animated.png",
-            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.0},
-    }},
+    tiles = {{name = "fire_basic_flame_animated.png", animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.0},}},
     stack_max = 1,               -- limita a 1 tocha acesa por slot
     paramtype = "light",
     paramtype2 = "facedir",     
@@ -3639,7 +3304,6 @@ c.register_node("nh_nodes:torch_flame", {
     damage_per_second = 4,
     groups = { not_in_creative_inventory = 1 },
     drop = "",
-    --visual_scale = 1,
 })
 
 
@@ -3669,12 +3333,9 @@ c.register_entity("nh_nodes:torch_flame_entity", {
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
             local data = c.deserialize(staticdata)
-            if data and data.torch_pos then
-                self._torch_pos = data.torch_pos
-            end
+            if data and data.torch_pos then self._torch_pos = data.torch_pos end
         end
         self._timer = 0
-
         -- Configura a animação da textura
         self.object:set_sprite({ x = 0, y = 0 }, 1, 1.0, false)
         self.object:set_texture_mod("^[verticalframe:8:0")
@@ -3744,18 +3405,10 @@ c.register_entity("nh_nodes:torch_flame_entity", {
         if self._timer > 0.5 then
             self._timer = 0
 
-            if not self._torch_pos then
-                self.object:remove()
-                return
-            end
-
+            if not self._torch_pos then self.object:remove() return end
             local node = c.get_node(self._torch_pos)
-
             -- Se a tocha foi removida ou apagada, remove a chama
-            if node.name ~= "nh_nodes:torch2" then
-                self.object:remove()
-                return
-            end
+            if node.name ~= "nh_nodes:torch2" then self.object:remove() return end
         end
     end,
 })
@@ -3848,24 +3501,24 @@ c.register_node("nh_nodes:portal", {
     pointable = true,
     groups = { cracky = 1, oddly_breakable_by_hand = 1 },
     on_construct = function(pos)
-	-- Adiciona o portal à lista
-	table.insert(linked_portals, pos)
-	save_portals()  -- salva portais
-	if #linked_portals == 2 then c.chat_send_all(S"[Connected Portals]") end -- Se houver dois portais, conectá-los
-	local key = pos.x .. "," .. pos.y .. "," .. pos.z
-	-- Efeito de partículas
-	local spawner_id = c.add_particlespawner({
-		amount = 25,
-		time = 0,
-		minpos = vector.subtract(pos, 0.25),
-		maxpos = vector.add(pos, 0.25),
-		minvel = xyz(-0.5, -0.5, -0.5),
-		maxvel = xyz(0.5, 0.5, 0.5),
-		minsize = 0.1,
-        	maxsize = 0.2,
-		texture = "spark_particle.png^[colorize:#028dde:200^[opacity:120", -- opacidade completa de pintura sobre textura: 255 - hexa pra azul: #028dde
-		glow = 7
-	})
+        -- Adiciona o portal à lista
+        table.insert(linked_portals, pos)
+        save_portals()  -- salva portais
+        if #linked_portals == 2 then c.chat_send_all(S"[Connected Portals]") end -- Se houver dois portais, conectá-los
+        local key = pos.x .. "," .. pos.y .. "," .. pos.z
+        -- Efeito de partículas
+        local spawner_id = c.add_particlespawner({
+            amount = 25,
+            time = 0,
+            minpos = vector.subtract(pos, 0.25),
+            maxpos = vector.add(pos, 0.25),
+            minvel = xyz(-0.5, -0.5, -0.5),
+            maxvel = xyz(0.5, 0.5, 0.5),
+            minsize = 0.1,
+            maxsize = 0.2,
+            texture = "spark_particle.png^[colorize:#028dde:200^[opacity:120", -- opacidade completa de pintura sobre textura: 255 - hexa pra azul: #028dde
+            glow = 7
+        })
         portal_particles[key] = spawner_id
     end,
     on_destruct = function(pos)
@@ -3968,7 +3621,6 @@ c.register_node("nh_nodes:flame", {
     damage_per_second = 4,
     groups = { not_in_creative_inventory = 1 },
     drop = "",
-    --visual_scale = 1,
 })
 
 c.register_node("nh_nodes:torch3", {
@@ -3978,7 +3630,6 @@ c.register_node("nh_nodes:torch3", {
     tiles = { "torch3.png" },
     --inventory_image = "tocha_inventario.png",
     --wield_image = "tocha_inventario.png",
-
     --paramtype = "light",
     --paramtype2 = "wallmounted",
     --sunlight_propagates = true,
@@ -3986,12 +3637,10 @@ c.register_node("nh_nodes:torch3", {
     groups = { choppy = 2, oddly_breakable_by_hand = 3, flammable = 1 }, -- dig_immediate = 3, attached_node = 1
     collision_box = {type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, 0.37, 0.1 }},
     selection_box = {type = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, 0.37, 0.1 }},
-
     --selection_box = {type = "wallmounted",
     --    wall_top = {-0.1, 0.5-0.6, -0.1, 0.1, 0.5, 0.1},
     --    wall_bottom = {-0.1, -0.5, -0.1, 0.1, -0.5+0.6, 0.1},
     --     wall_side = {-0.5, -0.1, -0.1, -0.5+0.3, 0.5, 0.1},},
-
     --node_box = {type = "wallmounted",
     --    wall_top = {-0.0625, 0.5-0.5625, -0.0625, 0.0625, 0.5, 0.0625},
     --    wall_bottom = {-0.0625, -0.5, -0.0625, 0.0625, -0.5+0.5625, 0.0625},
@@ -4007,10 +3656,7 @@ c.register_node("nh_nodes:leaves", {
     -- mesh = "oakleaves.obj",
     tiles = { "oakleaves3.png" },
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {items = {
-            { items = { "nh_nodes:limb" } },
-            { items = { "nh_nodes:oakresin" } },
-    }},
+    drop = {items = {{ items = { "nh_nodes:limb" } },{ items = { "nh_nodes:oakresin" } },}},
     walkable = false,
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -4021,7 +3667,6 @@ c.register_node("nh_nodes:leaves", {
     liquid_renewable = false,
     liquid_range = 0,
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
-
 })
 
 -- Registra uma versão "dentro d'água" (da folha de carvalho)
@@ -4041,30 +3686,22 @@ c.register_node("nh_nodes:leavesrelief", {
     drop = "", -- não dropa nada
     node_dig_prediction = "",
     node_placement_prediction = "",
-
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         minetest.set_node(pos, { name = "nh_nodes:leaves" })
     end,
-
     on_construct = function(pos)
         minetest.get_node_timer(pos):start(1.0)
     end,
-
     on_timer = function(pos)
         local node = minetest.get_node(pos)
-        if node.name ~= "nh_nodes:leavesrelief" then
-            return false
-        end
-
+        if node.name ~= "nh_nodes:leavesrelief" then return false end
         -- O node "pai" do plantlike_rooted é o de BAIXO
         local below = { x = pos.x, y = pos.y + 2, z = pos.z }
         local below_name = minetest.get_node(below).name
-
         if below_name ~= "nh_nodes:leaves" and below_name ~= "nh_nodes:leavesrelief" then
             minetest.remove_node(pos)
             return false
         end
-
         return true
     end,
 })
@@ -4085,30 +3722,22 @@ c.register_node("nh_nodes:leavesrelief", {
     drop = "", -- não dropa nada
     node_dig_prediction = "",
     node_placement_prediction = "",
-
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         minetest.set_node(pos, { name = "nh_nodes:leaves" })
     end,
-
     on_construct = function(pos)
         minetest.get_node_timer(pos):start(1.0)
     end,
-
     on_timer = function(pos)
         local node = minetest.get_node(pos)
-        if node.name ~= "nh_nodes:leavesrelief" then
-            return false
-        end
-
+        if node.name ~= "nh_nodes:leavesrelief" then return false end
         -- O node "pai" do plantlike_rooted é o de BAIXO
         local below = { x = pos.x, y = pos.y + 2, z = pos.z }
         local below_name = minetest.get_node(below).name
-
         if below_name ~= "nh_nodes:leaves" and below_name ~= "nh_nodes:leavesrelief" then
             minetest.remove_node(pos)
             return false
         end
-
         return true
     end,
 })
@@ -4124,9 +3753,7 @@ c.register_node("nh_nodes:kelp", {
     paramtype = "light",
     paramtype2 = "leveled",
     groups = { snappy = 3 },
-    selection_box = {type = "fixed",
-        fixed = {{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-                { -2 / 16, 0.5,  -2 / 16, 2 / 16, 3.5, 2 / 16 },},},
+    selection_box = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}, {-0.125, 0.5, -0.125, 0.125, 3.5, 0.125},},},
     node_dig_prediction = "nh_nodes:wet_sand",
     node_placement_prediction = "nh_nodes:wet_sand",
     --sounds = default.node_sound_sand_defaults({
@@ -4157,13 +3784,8 @@ c.register_node("nh_nodes:kelp", {
             minetest.get_item_group(node_top.name, "water") > 0 then
             if not minetest.is_protected(pos, player_name) and
                 not minetest.is_protected(pos_top, player_name) then
-                minetest.set_node(pos, {
-                    name = "nh_nodes:kelp",
-                    param2 = height * 16
-                })
-                if not c.is_creative_enabled(player_name) then
-                    itemstack:take_item()
-                end
+                minetest.set_node(pos, {name = "nh_nodes:kelp", param2 = height * 16})
+                if not c.is_creative_enabled(player_name) then itemstack:take_item() end
             else
                 c.chat_send_player(player_name, S "Node is protected")
                 c.record_protection_violation(pos, player_name)
@@ -4184,10 +3806,7 @@ c.register_node("nh_nodes:pineleaves", {
     tiles = { "pineleaves.png" },
     waving = 1,
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {items = {
-            { items = { "nh_nodes:limb" } },
-            { items = { "nh_nodes:oakresin" } },
-    }},
+    drop = {items = {{items = {"nh_nodes:limb"}}, {items = {"nh_nodes:oakresin"}},}},
     walkable = false,
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -4198,7 +3817,6 @@ c.register_node("nh_nodes:pineleaves", {
     liquid_renewable = false,
     liquid_range = 0,
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
-
 })
 
 -- Folhas de macieira
@@ -4209,9 +3827,7 @@ c.register_node("nh_nodes:appleleaves", {
     tiles = { "appleleaves.png" },
     waving = 1,
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {items = {
-            { items = { "nh_nodes:stick" } },
-    }},
+    drop = {items = {{items = {"nh_nodes:stick"}},}},
     walkable = false,
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -4232,8 +3848,7 @@ c.register_node("nh_nodes:leaves_apple", {
     tiles = { "appleleaves.png" },
     waving = 2,
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {items = { { items = { "nh_nodes:apple" } }, { items = { "nh_nodes:stick" } },
-    }},
+    drop = {items = {{items = {"nh_nodes:apple"}}, {items = {"nh_nodes:stick"}},}},
     walkable = false,
     use_texture_alpha = "clip",
     paramtype = "light",
@@ -4250,10 +3865,7 @@ c.register_node("nh_nodes:leaves_apple", {
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:apple")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:apple") end
             -- Transforma o node em leaves_apple2
             c.set_node(pos, { name = "nh_nodes:appleleaves" })
         end
@@ -4269,8 +3881,7 @@ c.register_node("nh_nodes:leaves_apple2", {
     tiles = { "appleleaves.png" },
     waving = 2,
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {items = {{ items = { "nh_nodes:apple 2" } }, { items = { "nh_nodes:stick" } },
-    }},
+    drop = {items = {{items = {"nh_nodes:apple 2"}}, {items = {"nh_nodes:stick"}},}},
     walkable = false,
     use_texture_alpha = "clip",
     paramtype = "light",
@@ -4287,10 +3898,7 @@ c.register_node("nh_nodes:leaves_apple2", {
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:apple")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:apple") end
             -- Transforma o node em leaves_apple2
             c.set_node(pos, { name = "nh_nodes:leaves_apple" })
         end
@@ -4306,12 +3914,7 @@ c.register_node("nh_nodes:leaves_apple3", {
     tiles = { "appleleaves.png" },
     waving = 2,
     groups = { snappy = 3, tree_leaves = 1 },
-    drop = {
-        items = {
-            { items = { "nh_nodes:apple 3" } },
-            { items = { "nh_nodes:stick" } },
-        }
-    },
+    drop = {items = {{items = {"nh_nodes:apple 3"}}, {items = {"nh_nodes:stick"}},}},
     walkable = false,
     use_texture_alpha = "clip",
     paramtype = "light",
@@ -4322,27 +3925,14 @@ c.register_node("nh_nodes:leaves_apple3", {
     liquid_renewable = false,
     liquid_range = 0,
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
-
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.7 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-
-
+    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.7 }},  -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 1, y = 0, z = 0 }}, -- Configuração mão esquerda
     -- Callback ao clicar com botão direito (pegar maçã)
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:apple")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:apple") end
             -- Transforma o node em leaves_apple2
             c.set_node(pos, { name = "nh_nodes:leaves_apple2" })
         end
@@ -4394,10 +3984,7 @@ c.register_node("nh_nodes:leaves_blueberry4", {
         if clicker and clicker:is_player() then
             -- Adiciona a maçã ao inventário do jogador
             local inv = clicker:get_inventory()
-            if inv then
-                inv:add_item("main", "nh_nodes:blueberry 4")
-            end
-
+            if inv then inv:add_item("main", "nh_nodes:blueberry 4") end
             -- Transforma o node em leaves_apple2
             c.set_node(pos, { name = "nh_nodes:blueberryleaves" })
         end
@@ -4420,16 +4007,13 @@ c.register_node("nh_nodes:giantcrabstatue", {
 
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
-
         local item = puncher:get_wielded_item()
         local item_name = item:get_name()
-
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
             c.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
             return
         end
-
         -- Efeito de partículas de destruição
         c.add_particlespawner({
             amount = 50,
@@ -4445,31 +4029,19 @@ c.register_node("nh_nodes:giantcrabstatue", {
             minsize = 0.5,
             maxsize = 2,
             glow = 14,
-            texture = {
-                name = "spark_particle.png^[colorize:#76008d:150", -- purpura
-            },
+            texture = {name = "spark_particle.png^[colorize:#76008d:150"}, -- purpura
         })
-
         -- Som de destruição (usa o som de dano do caranguejo)
         --c.sound_play("vulto_hurt", {pos = pos, gain = 1.0, max_hear_distance = 16})
-
-        -- Remove a estátua
-        c.remove_node(pos)
-
+        c.remove_node(pos) -- Remove a estátua
         -- Coloca areia na posição da estátua imediatamente
         c.set_node(pos, { name = "nh_nodes:wet_sand" })
-
-        -- Spawna o Giant Crab na posição da estátua
-        -- Spawna o mob após 2 segundos
-        c.after(0.25, function()
-            c.add_entity(pos, "nh_mob:giantcrab")
-        end)
-
+        -- Spawna o Giant Crab na posição da estátua após 2.5 segundos
+        c.after(0.25, function() c.add_entity(pos, "nh_mob:giantcrab") end)
         -- Consome a esfera da mão do jogador
         local inv = puncher:get_inventory()
         item:take_item(1)
         puncher:set_wielded_item(item)
-
         -- Avisa o jogador
         c.chat_send_player(puncher:get_player_name(), S "The statue shatters... something awakens!")
     end,
@@ -4555,9 +4127,7 @@ c.register_node("nh_nodes:sentinelstatue", {
         -- Remove a estátua
         c.remove_node(pos)
         -- Spawna o mob após 2 segundos
-        c.after(0.25, function()
-            c.add_entity(pos, "nh_mob:sentinel")
-        end)
+        c.after(0.25, function() c.add_entity(pos, "nh_mob:sentinel") end)
         -- Consome a esfera da mão do jogador
         local inv = puncher:get_inventory()
         item:take_item(1)
@@ -4579,7 +4149,6 @@ c.register_node("nh_nodes:sphere", {
     groups = { oddly_breakable_by_hand = 1, not_in_creative_inventory = 0 },
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
-
     -- Ao colocar: troca para a versão invisível e spawna entidades
     after_place_node = function(pos, placer, itemstack)
         c.set_node(pos, { name = "nh_nodes:sphere_placed" })
@@ -4608,9 +4177,7 @@ c.register_node("nh_nodes:sphere_placed", {
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         for _, obj in ipairs(c.get_objects_inside_radius(pos, 0.6)) do
             local ent = obj:get_luaentity()
-            if ent and (ent.name == "nh_nodes:sphere_anim" or ent.name == "nh_nodes:crystal_anim") then
-                obj:remove()
-            end
+            if ent and (ent.name == "nh_nodes:sphere_anim" or ent.name == "nh_nodes:crystal_anim") then obj:remove() end
         end
         -- Dropa o item visível (com textura) em vez do invisível
         digger:get_inventory():add_item("main", "nh_nodes:sphere")
@@ -4630,29 +4197,11 @@ c.register_entity("nh_nodes:sphere_anim", {
         glow = 4,
     },
     on_activate = function(self, staticdata)
-        self.object:set_animation(
-            { x = 0, y = 150 },
-            15,
-            0,
-            true
-        )
-        --   self.object:set_properties({
-        --       use_texture_alpha = true,
-        --       textures = {
-        --           "ball.png",
-        --           "ball.png",
-        --       },
-        --   })
+        self.object:set_animation({ x = 0, y = 150 }, 15, 0, true)
     end,
-
-    on_step = function(self, dtime)
-    end,
-
-    get_staticdata = function(self)
-        return "saved"
-    end,
+    on_step = function(self, dtime) end,
+    get_staticdata = function(self) return "saved" end,
 })
-
 
 -- Entidade só visual, com a animação do GLB
 c.register_entity("nh_nodes:crystal_anim", {
@@ -4667,27 +4216,11 @@ c.register_entity("nh_nodes:crystal_anim", {
         --glow = 10,
     },
     on_activate = function(self, staticdata)
-        self.object:set_animation(
-            { x = 0, y = 150 },
-            0.05,
-            0,
-            true
-        )
-        self.object:set_properties({
-            use_texture_alpha = true,
-            --       textures = {
-            --           "ball.png",
-            --           "ball.png",
-            --       },
-        })
+        self.object:set_animation({ x = 0, y = 150 }, 0.05, 0, true)
+        self.object:set_properties({use_texture_alpha = true,})
     end,
-
-    on_step = function(self, dtime)
-    end,
-
-    get_staticdata = function(self)
-        return "saved"
-    end,
+    on_step = function(self, dtime) end,
+    get_staticdata = function(self) return "saved" end,
 })
 
 
@@ -4697,21 +4230,15 @@ c.register_node("nh_nodes:orb_empty", {
     mesh = "orb.obj",
     tiles = { "orb_node.png" },
     inventory_image = "orbspawner.png",
-
     sunlight_propagates = true,
     use_texture_alpha = "blend",
-
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
     groups = { oddly_breakable_by_hand = 1 },
     --sounds = default.node_sound_wood_defaults(),
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.8, y = 0, z = 0 },
-        --rot = {x = 90, y = 0, z = 90}
-    },
+    wielded_bone_position = {pos = { x = 1.8, y = 0, z = 0 },}, -- Configuração mão direita
     wielded_visual_size = { x = 0.2, y = 0.2, z = 0.2 },
-
     collision_box = {type = "fixed", fixed = { -0.14, -0.5, -0.14, 0.14, 0, 0.14 }},
     selection_box = {type = "fixed", fixed = { -0.14, -0.5, -0.14, 0.14, -0.15, 0.14 }},
 })
@@ -4727,7 +4254,6 @@ function register_orb_egg(mob_name, description, texture)
         mesh = "orb.obj",
         tiles = { texture or "orb_node.png" },
         inventory_image = "orbspawner.png",
-
         sunlight_propagates = true,
         use_texture_alpha = "blend",
         walkable = false,
@@ -4824,7 +4350,6 @@ c.register_node("nh_nodes:leaves_nut2", {
     liquid_renewable = false,
     liquid_range = 0,
     post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
-
     -- Callback ao clicar com botão direito (pegar maçã)
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if clicker and clicker:is_player() then
@@ -4932,7 +4457,6 @@ c.register_node("nh_nodes:friedchickenegg", {
     drawtype = "mesh",
     mesh = "friedegg.obj",
     tiles = { "friedegg.png" },
-
     paramtype = "light",
     walkable = false,
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
@@ -5011,11 +4535,8 @@ c.register_node("nh_nodes:rawchicken", {
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 4)
         itemstack:take_item()
-
         local bone = ItemStack("nh_nodes:bone 2")
-
-        if itemstack:is_empty() then
-            return bone
+        if itemstack:is_empty() then return bone
         else
             add_item_to_visible_slots(user, bone)
             return itemstack
@@ -5040,9 +4561,7 @@ c.register_node("nh_nodes:roastchicken", {
         restore_hunger(user, 6)
         itemstack:take_item()
         local bone = ItemStack("nh_nodes:bone 2")
-
-        if itemstack:is_empty() then
-            return bone
+        if itemstack:is_empty() then return bone
         else
             add_item_to_visible_slots(user, bone)
             return itemstack
@@ -5267,19 +4786,13 @@ end
 local function spawn_surface(mirror_pos, param2)
     local below = get_node_below(mirror_pos)
     if not below then return end
-
     local tex = get_top_texture(below.name)
     if not tex then return end
-
     local epos = get_surface_pos(mirror_pos, param2)
     local ent = c.add_entity(epos, "nh_nodes:mirror_surface")
     if not ent then return end
-
     local luaent = ent:get_luaentity()
-    if luaent then
-        luaent._mirror_pos = mirror_pos -- salva referência ao dono
-    end
-
+    if luaent then luaent._mirror_pos = mirror_pos end -- mirror_pos salva referência ao dono
     local dir = facedir_to_dir[param2 % 4] or facedir_to_dir[0]
     ent:set_yaw(math.atan2(-dir.x, -dir.z))
     ent:set_properties({ textures = { tex } })
@@ -5294,7 +4807,7 @@ c.register_entity("nh_nodes:mirror_surface", {
         physical             = false,
         collide_with_objects = false,
         pointable            = false,
-        static_save          = false, -- precisa ser true para salvar
+        static_save          = false, 
     },
 
     on_activate = function(self, staticdata, dtime_s)
@@ -5312,25 +4825,14 @@ c.register_entity("nh_nodes:mirror_surface", {
             end
         end
     end,
-
-    get_staticdata = function(self)
-        -- Salva a posição do espelho dono junto com a entidade
-        return c.serialize({ mirror_pos = self._mirror_pos })
-    end,
-
+    get_staticdata = function(self) return c.serialize({ mirror_pos = self._mirror_pos }) end, -- Salva a posição do espelho dono junto com a entidade
     on_step = function(self, dtime)
         self._timer = (self._timer or 0) + dtime
         if self._timer < 1.0 then return end
         self._timer = 0
-
-        if not self._mirror_pos then
-            self.object:remove()
-            return
-        end
+        if not self._mirror_pos then self.object:remove() return end
         local node = c.get_node(self._mirror_pos)
-        if node.name ~= "nh_nodes:mirror" then
-            self.object:remove()
-        end
+        if node.name ~= "nh_nodes:mirror" then self.object:remove() end
     end,
 })
 
@@ -5354,8 +4856,7 @@ c.register_node("nh_nodes:mirror", {
         meta:set_int("param2", node.param2)
         spawn_surface(pos, node.param2)
     end,
-
-    on_destruct         = function(pos)
+    on_destruct = function(pos)
         for _, obj in ipairs(c.get_objects_inside_radius(pos, 0.6)) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_nodes:mirror_surface" then
@@ -5378,13 +4879,9 @@ c.register_node("nh_nodes:mirror", {
                         local nnode = c.get_node(npos)
                         if nnode.name == "nh_nodes:mirror" then
                             local expected = get_surface_pos(npos, nnode.param2)
-                            if vector.distance(epos, expected) < 0.1 then
-                                claimed_by_neighbor = true
-                                break
-                            end
+                            if vector.distance(epos, expected) < 0.1 then claimed_by_neighbor = true break end
                         end
                     end
-
                     if not claimed_by_neighbor then
                         obj:remove()
                     end
@@ -5407,9 +4904,7 @@ c.register_abm({
     interval  = 1,
     chance    = 1,
     action    = function(pos, node)
-        if not mirror_has_surface(pos, node.param2) then
-            spawn_surface(pos, node.param2)
-        end
+        if not mirror_has_surface(pos, node.param2) then spawn_surface(pos, node.param2) end
     end,
 })
 
@@ -5434,13 +4929,10 @@ local function is_water_near(pos)
         { x = 0, y = 0, z = 0 },
         { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 },
         { x = 0, y = 1, z = 0 }, { x = 0, y = -1, z = 0 },
-        { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 },
-    }
-
+        { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 },}
     for _, off in ipairs(offsets) do
         local p = vector.add(pos, off)
         local node = c.get_node(p)
-
         if node and node.name then
             if node.name == "nh_nodes:water"
                 or node.name == "nh_nodes:water_flowing"
@@ -5450,14 +4942,11 @@ local function is_water_near(pos)
             end
         end
     end
-
     return false
 end
 
 -- ============================================================
 --  ULEXITE – entidade de superfície (topo do bloco abaixo)
---  Adicionar logo APÓS o registro de "nh_nodes:ulexite"
--- ============================================================
 
 -- ── Helpers (reutilizados do espelho, mas isolados para ulexita) ──────────────
 
@@ -5466,10 +4955,8 @@ local function ulexite_get_top_texture(node_name)
     local def = c.registered_nodes[node_name]
     if not def or not def.tiles then return nil end
     local tile = def.tiles[1]
-    if type(tile) == "string" then
-        return tile
-    elseif type(tile) == "table" then
-        return tile.name
+    if type(tile) == "string" then return tile
+    elseif type(tile) == "table" then return tile.name
     end
     return nil
 end
@@ -5484,9 +4971,7 @@ local function ulexite_has_surface(ulexite_pos)
     local epos = ulexite_surface_pos(ulexite_pos)
     for _, obj in ipairs(c.get_objects_inside_radius(epos, 0.15)) do
         local ent = obj:get_luaentity()
-        if ent and ent.name == "nh_nodes:ulexite_surface" then
-            return true
-        end
+        if ent and ent.name == "nh_nodes:ulexite_surface" then return true end
     end
     return false
 end
@@ -5495,20 +4980,14 @@ end
 local function ulexite_spawn_surface(ulexite_pos)
     local below = get_node_below(ulexite_pos)
     if not below then return end
-
     local tex = ulexite_get_top_texture(below.name)
     if not tex then return end
-
     local epos = ulexite_surface_pos(ulexite_pos)
     local ent  = c.add_entity(epos, "nh_nodes:ulexite_surface")
     if not ent then return end
-
     ent:set_properties({ textures = { tex } })
-
     local luaent = ent:get_luaentity()
-    if luaent then
-        luaent._ulexite_pos = ulexite_pos
-    end
+    if luaent then luaent._ulexite_pos = ulexite_pos end
 end
 
 -- ── Entidade visual ───────────────────────────────────────────────────────────
@@ -5528,69 +5007,44 @@ c.register_entity("nh_nodes:ulexite_surface", {
     on_activate = function(self, staticdata, dtime_s)
         -- Inclina o sprite 90° para ficar "deitado" (horizontal)
         self.object:set_rotation({ x = math.pi / 2, y = 0, z = 0 })
-
         if staticdata and staticdata ~= "" then
             local data = c.deserialize(staticdata)
             if data and data.ulexite_pos then
                 self._ulexite_pos = data.ulexite_pos
                 local node = c.get_node(data.ulexite_pos)
-                if node.name ~= "nh_nodes:ulexite" then
-                    self.object:remove()
-                    return
-                end
+                if node.name ~= "nh_nodes:ulexite" then self.object:remove() return end
                 -- Restaura textura
                 local below = get_node_below(data.ulexite_pos)
                 if below then
                     local tex = ulexite_get_top_texture(below.name)
-                    if tex then
-                        self.object:set_properties({ textures = { tex } })
-                    end
+                    if tex then self.object:set_properties({textures = {tex}}) end
                 end
             end
         end
     end,
 
-    get_staticdata = function(self)
-        return c.serialize({ ulexite_pos = self._ulexite_pos })
-    end,
-
+    get_staticdata = function(self) return c.serialize({ulexite_pos = self._ulexite_pos}) end,
     on_step = function(self, dtime)
         self._timer = (self._timer or 0) + dtime
         if self._timer < 1.0 then return end
         self._timer = 0
-
-        if not self._ulexite_pos then
-            self.object:remove()
-            return
-        end
-
+        if not self._ulexite_pos then self.object:remove() return end
         -- Remove se a ulexita sumiu
         local node = c.get_node(self._ulexite_pos)
-        if node.name ~= "nh_nodes:ulexite" then
-            self.object:remove()
-            return
-        end
-
+        if node.name ~= "nh_nodes:ulexite" then self.object:remove() return end
         -- Atualiza textura caso o bloco abaixo tenha mudado
         local below = get_node_below(self._ulexite_pos)
         if below then
             local tex = ulexite_get_top_texture(below.name)
             if tex then
                 local cur = self.object:get_properties().textures
-                if not cur or cur[1] ~= tex then
-                    self.object:set_properties({ textures = { tex } })
-                end
+                if not cur or cur[1] ~= tex then self.object:set_properties({textures = {tex}}) end
             end
         end
     end,
 })
 
--- ── Hooks no node ulexite ─────────────────────────────────────────────────────
--- ATENÇÃO: substitua o registro original de "nh_nodes:ulexite" por este,
--- ou adicione after_place_node / on_destruct manualmente se preferir não
--- duplicar. O mais simples é substituir o bloco original pelo abaixo.
-
--- (apague o c.register_node("nh_nodes:ulexite", {...}) anterior e use este)
+-- Node da ulexite
 c.register_node("nh_nodes:ulexite", {
     description = S "Ulexite",
     drawtype = "normal",
@@ -5599,18 +5053,12 @@ c.register_node("nh_nodes:ulexite", {
     use_texture_alpha = "blend",
     paramtype = "light",
     sunlight_propagates = true,
-
-    after_place_node = function(pos, placer, itemstack, pointed_thing)
-        ulexite_spawn_surface(pos)
-    end,
-
+    after_place_node = function(pos, placer, itemstack, pointed_thing) ulexite_spawn_surface(pos) end,
     on_destruct = function(pos)
         local epos = ulexite_surface_pos(pos)
         for _, obj in ipairs(c.get_objects_inside_radius(epos, 0.15)) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:ulexite_surface" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:ulexite_surface" then obj:remove() end
         end
     end,
 })
@@ -5623,9 +5071,7 @@ c.register_abm({
     interval  = 2,
     chance    = 1,
     action    = function(pos, node)
-        if not ulexite_has_surface(pos) then
-            ulexite_spawn_surface(pos)
-        end
+        if not ulexite_has_surface(pos) then ulexite_spawn_surface(pos) end
     end,
 })
 
@@ -6205,29 +5651,21 @@ c.register_node("nh_nodes:fireice", {
 
 c.register_node("nh_nodes:snow_ramp", {
     description         = S "Snow Ramp",
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_slope.obj",
     tiles               = { "snow_slope.png" },
-    -- Dentro do register_node:
     groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
-
     sounds              = {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug      = { name = "punchtimber3", gain = 0.5 },
         dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 }, },
+        place    = { name = "punchtimber3", gain = 0.5 },},
     sunlight_propagates = true,
-    selection_box       = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
-    collision_box       = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    selection_box       = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    collision_box       = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
 })
 
 c.register_node("nh_nodes:snow_corner", {
@@ -6289,7 +5727,7 @@ c.register_node("nh_nodes:snow_insidecorner", {
 
 c.register_node("nh_nodes:snow", {
     description = S "Snow",
-    tiles = { "neve.png" },
+    tiles = {"neve.png"},
     drawtype = "normal",
     groups = { crumbly = 3, falling_node = 1 }, -- como areia, mas sem fluir
     sounds = {
@@ -6303,20 +5741,22 @@ c.register_node("nh_nodes:avalanche", {
     description = S "Avalanche",
     liquidtype = "source",
     drawtype = "liquid",
-    tiles = { "neve.png" },
-    groups = { liquid = 3, crumbly = 3, falling_node = 1 }, -- como areia e flui
+    tiles = {"neve.png"},
+    groups = {liquid = 3, crumbly = 3, falling_node = 1}, -- como areia e flui
     sounds = {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug      = { name = "punchtimber3", gain = 0.5 },
         dig      = { name = "punchtimber3", gain = 0.5 },
         place    = { name = "punchtimber3", gain = 0.5 },},
-
     walkable = false,
+    pointable = false,
+    buildable_to = true,
     liquid_alternative_flowing = "nh_nodes:avalanche_flowing",
     liquid_alternative_source = "nh_nodes:avalanche",
     liquid_viscosity = 0,
     liquid_renewable = false,
-    post_effect_color = { a = 15, r = 15, g = 15, b = 15 },
+    post_effect_color = {a = 15, r = 15, g = 15, b = 15},
+    drop = "nh_nodes:snow",
 })
 
 c.register_node("nh_nodes:avalanche_flowing", {
@@ -6325,18 +5765,10 @@ c.register_node("nh_nodes:avalanche_flowing", {
     drawtype = "flowingliquid",
     tiles = { "neve.png" },
     groups = { liquid = 3, not_in_creative_inventory = 1 },
-    special_tiles = {
-        {
-            name = "neve_flowing_animated.png",
-            backface_culling = false,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 },
-        },
-        {
-            name = "neve_flowing_animated.png",
-            backface_culling = true,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 },
-        },
-    },
+    special_tiles = {{name = "neve_flowing_animated.png", backface_culling = false,
+            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 }},
+        {name = "neve_flowing_animated.png", backface_culling = true,
+            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 }},},
     --use_texture_alpha = "blend",
     paramtype = "light",
     walkable = false,
@@ -6344,7 +5776,6 @@ c.register_node("nh_nodes:avalanche_flowing", {
     buildable_to = true,
     liquid_alternative_flowing = "nh_nodes:avalanche_flowing",
     liquid_alternative_source = "nh_nodes:avalanche",
-
     liquid_viscosity = 0,
     liquid_renewable = false,
 })
@@ -6371,13 +5802,11 @@ c.register_node("nh_nodes:water", {
     post_effect_color = { a = 64, r = 0, g = 0, b = 255 },
     drowning = 1, -- ADICIONE ESTA LINHA (dano por segundo quando sem ar)
     groups = { water = 1, liquid = 1 },
-
     after_place_node = function(pos)
         local neighbors = {
             { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 },
             { x = 0, y = 1, z = 0 }, { x = 0, y = -1, z = 0 },
-            { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 },
-        }
+            { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 },}
         for _, d in ipairs(neighbors) do
             local npos = vector.add(pos, d)
             local node = c.get_node(npos)
@@ -6428,21 +5857,19 @@ c.register_node("nh_nodes:bucket", {
     groups = { dig_immediate = 1, falling_node = 1 },
     collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
     selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
+    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }}, -- Configuração mão direita
     offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
     pointabilities = {nodes = WATER_FULLNODES},
     on_place = function(itemstack, placer, pointed_thing)
-        if placer:get_player_control().sneak then
-            return c.item_place(itemstack, placer, pointed_thing)
-        elseif pointed_thing.type ~= "node" then return itemstack end
+        if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack
+        end
         local name = c.get_node(pointed_thing.under).name
-        if name == "nh_nodes:water" then
-            c.remove_node(pointed_thing.under)
-            return ItemStack("nh_nodes:bucketwater")
-        elseif name == "nh_nodes:water2" then
-            c.remove_node(pointed_thing.under)
-            return ItemStack("nh_nodes:bucketwater2")
+        if name == "nh_nodes:water" then c.remove_node(pointed_thing.under) return ItemStack("nh_nodes:bucketwater")
+        elseif name == "nh_nodes:water2" then c.remove_node(pointed_thing.under) return ItemStack("nh_nodes:bucketwater2")
+        elseif name == "nh_nodes:avalanche" or name == "nh_nodes:snow" or name == "nh_nodes:snow_ramp"
+            or name == "nh_nodes:snow_corner" or name == "nh_nodes:snow_insidecorner"
+            then c.remove_node(pointed_thing.under) return ItemStack("nh_nodes:bucketsnow")
         end
         return itemstack
     end,
@@ -6462,14 +5889,24 @@ c.register_node("nh_nodes:bucketwater", {
     -- Configuração mão direita
     wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
     offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    pointabilities = {nodes = BUCKET_FLOWING},
     on_place = function(itemstack, placer, pointed_thing)
-        if placer:get_player_control().sneak then
-            return c.item_place(itemstack, placer, pointed_thing)
-        elseif pointed_thing.type ~= "node" then return itemstack end
-        local pos = pointed_thing.above
-        if c.get_node(pos).name == "air" then
-            c.set_node(pos, { name = "nh_nodes:water" })
-            return ItemStack("nh_nodes:bucket")
+        if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack
+        end
+        local under = pointed_thing.under
+        local under_name = c.get_node(under).name
+        -- Se apontou num flowing, substitui ele diretamente
+        local pos, name
+        if under_name == "nh_nodes:water_flowing" or under_name == "nh_nodes:water2_flowing" or under_name == "nh_nodes:avalanche_flowing" then
+            pos  = under
+            name = under_name
+        else
+            pos  = pointed_thing.above
+            name = c.get_node(pos).name
+        end
+        if name == "air" or name == "nh_nodes:water_flowing" or name == "nh_nodes:water2_flowing" or name == "nh_nodes:avalanche_flowing"
+            then c.set_node(pos, {name = "nh_nodes:water"}) return ItemStack("nh_nodes:bucket")
         end
         return itemstack
     end,
@@ -6489,14 +5926,60 @@ c.register_node("nh_nodes:bucketwater2", {
     -- Configuração mão direita
     wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
     offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    pointabilities = {nodes = BUCKET_FLOWING},
     on_place = function(itemstack, placer, pointed_thing)
-        if placer:get_player_control().sneak then
-            return c.item_place(itemstack, placer, pointed_thing)
-        elseif pointed_thing.type ~= "node" then return itemstack end
-        local pos = pointed_thing.above
-        if c.get_node(pos).name == "air" then
-            c.set_node(pos, { name = "nh_nodes:water2" })
-            return ItemStack("nh_nodes:bucket")
+        if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack
+        end
+        local under = pointed_thing.under
+        local under_name = c.get_node(under).name
+        -- Se apontou num flowing, substitui ele diretamente
+        local pos, name
+        if under_name == "nh_nodes:water_flowing" or under_name == "nh_nodes:water2_flowing" or under_name == "nh_nodes:avalanche_flowing" then
+            pos  = under
+            name = under_name
+        else
+            pos  = pointed_thing.above
+            name = c.get_node(pos).name
+        end
+        if name == "air" or name == "nh_nodes:water_flowing" or name == "nh_nodes:water2_flowing" or name == "nh_nodes:avalanche_flowing"
+            then c.set_node(pos, {name = "nh_nodes:water2"}) return ItemStack("nh_nodes:bucket")
+        end
+        return itemstack
+    end,
+})
+
+c.register_node("nh_nodes:bucketsnow", {
+    description = S("Bucket with Snow"),
+    drawtype = "mesh",
+    mesh = "bucket.obj",
+    tiles = { "bucketsnow.png" },
+    use_texture_alpha = "blend",
+    paramtype = "light",
+    stack_max = 1,
+    groups = { dig_immediate = 1, falling_node = 1 },
+    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
+    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
+    wielded_bone_position = {pos = {x = 0.5, y = -1.2, z = 0}}, -- Configuração mão direita
+    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}},
+    pointabilities = {nodes = BUCKET_FLOWING},
+    on_place = function(itemstack, placer, pointed_thing)
+        if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
+        elseif pointed_thing.type ~= "node" then return itemstack
+        end
+        local under = pointed_thing.under
+        local under_name = c.get_node(under).name
+        -- Se apontou num flowing, substitui ele diretamente
+        local pos, name
+        if under_name == "nh_nodes:water_flowing" or under_name == "nh_nodes:water2_flowing" or under_name == "nh_nodes:avalanche_flowing" then
+            pos  = under
+            name = under_name
+        else
+            pos  = pointed_thing.above
+            name = c.get_node(pos).name
+        end
+        if name == "air" or name == "nh_nodes:water_flowing" or name == "nh_nodes:water2_flowing" or name == "nh_nodes:avalanche_flowing"
+            then c.set_node(pos, {name = "nh_nodes:snow"}) return ItemStack("nh_nodes:bucket")
         end
         return itemstack
     end,
@@ -8014,7 +7497,7 @@ local function throw_pebble(itemstack, placer)
         obj:set_velocity(vector.multiply(dir, 18))
         obj:set_acceleration({ x = 0, y = -10, z = 0 })
 
-        -- ✅ Define o atirador para não se machucar
+        --       Define o atirador para não se machucar
         local ent = obj:get_luaentity()
         if ent then
             ent._shooter = placer
@@ -8099,7 +7582,7 @@ c.register_entity("nh_nodes:pebble_entity", {
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
-    _shooter = nil, -- ✅ Declarado aqui para ficar visível
+    _shooter = nil, --       Declarado aqui para ficar visível
 
     on_activate = function(self, staticdata)
         self._timer = 0
@@ -8407,7 +7890,7 @@ local function throw_pebble(itemstack, placer)
         obj:set_velocity(vector.multiply(dir, 18))
         obj:set_acceleration({ x = 0, y = -10, z = 0 })
 
-        -- ✅ Define o atirador para não se machucar
+        --       Define o atirador para não se machucar
         local ent = obj:get_luaentity()
         if ent then
             ent._shooter = placer
@@ -8475,7 +7958,7 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
-    _shooter = nil, -- ✅ Declarado aqui para ficar visível
+    _shooter = nil, --       Declarado aqui para ficar visível
 
     on_activate = function(self, staticdata)
         self._timer = 0
@@ -8624,7 +8107,7 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
             end
         end
 
-        -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
+        --       Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         local objs = c.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
@@ -8633,7 +8116,7 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
 
                 if not is_target then
                     local ent = obj:get_luaentity()
-                    -- ✅ Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    --       Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
                     if ent and ent.name ~= "nh_nodes:obsidianpebble_entity" then
                         local hp = obj:get_hp()
                         if hp and hp > 0 then
@@ -8925,7 +8408,7 @@ c.register_entity("nh_nodes:pineraft_entity", {
                 local dy = ppos.y - pos.y
                 local dz = ppos.z - pos.z
 
-                -- ✅ filtro retangular (caixa)
+                --       filtro retangular (caixa)
                 if math.abs(dx) <= half_width and
                     math.abs(dy) <= half_height and
                     math.abs(dz) <= half_length then
@@ -9123,24 +8606,21 @@ c.register_node("nh_nodes:pebble", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1, },
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1}, -- falling_node faz ele cair, attached_node previne ficar flutuando encostado
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
     drop = "nh_nodes:pebble_item",
-
-    -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
-    -----------------------------
     on_construct = function(pos)
         c.check_for_falling(pos)
     end,
-
     after_place_node = function(pos)
         c.check_for_falling(pos)
     end,
+    sounds = {
+        dug = { name = "punchtimber", gain = 0.5 },
+        dig = { name = "punchtimber", gain = 0.5 },
+        place = { name = "punchtimber", gain = 0.5 },},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
@@ -9167,7 +8647,6 @@ c.register_node("nh_nodes:chippedstone", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
     groups = {dig_immediate = 1, falling_node = 1,},
@@ -9894,9 +9373,7 @@ local function throw_white_pebble(itemstack, user)
         obj:set_velocity(vector.multiply(dir, 13))
         obj:set_acceleration({ x = 0, y = -9.81, z = 0 })
         local ent = obj:get_luaentity()
-        if ent then
-            ent._shooter = user
-        end
+        if ent then ent._shooter = user end
     end
     itemstack:take_item()
     return itemstack
@@ -9908,11 +9385,7 @@ end
 c.register_craftitem("nh_nodes:white_pebble_item", {
     description = S "White Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
-
-    -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0.5, y = -0.25, z = 0 },
-        rot = { x = 0, y = 0, z = 0 },},
+    wielded_bone_position = {pos = { x = 0.5, y = -0.25, z = 0 }, rot = { x = 0, y = 0, z = 0 },}, -- Configuração mão direita
     wielded_visual_size = { x = 0.15, y = 0.15, z = 0.15 },
     tool_capabilities = {
         full_punch_interval = 1.5,
@@ -9929,9 +9402,7 @@ c.register_craftitem("nh_nodes:white_pebble_item", {
     on_drop = function(itemstack, dropper, pos) return throw_white_pebble(itemstack, dropper) end,
 })
 
----------------------------
 -- ENTIDADE DO PROJÉTIL (SEIXO branco)
----------------------------
 c.register_entity("nh_nodes:white_pebble_entity", {
     initial_properties = {
         physical = true,
@@ -9946,7 +9417,7 @@ c.register_entity("nh_nodes:white_pebble_entity", {
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
-    _shooter = nil, -- ✅ Declarado aqui para ficar visível
+    _shooter = nil, --       Declarado aqui para ficar visível
 
     on_activate = function(self, staticdata)
         self._timer = 0
@@ -9957,21 +9428,13 @@ c.register_entity("nh_nodes:white_pebble_entity", {
 
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
-        if not pos then
-            self.object:remove()
-            return
-        end
-
+        if not pos then self.object:remove() return end
         -- Timer geral para remover após muito tempo
         self._timer = self._timer + dtime
-        if self._timer > 60 then
-            self.object:remove()
-            return
-        end
+        if self._timer > 60 then self.object:remove() return end
 
         -- Se já está grudado
-        if self._stuck then
-            self._stuck_timer = self._stuck_timer + dtime
+        if self._stuck then self._stuck_timer = self._stuck_timer + dtime
 
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
@@ -9989,7 +9452,6 @@ c.register_entity("nh_nodes:white_pebble_entity", {
                         { x = 0,  y = 0,  z = 1 },
                         { x = 0,  y = 0,  z = -1 },
                     }
-
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
@@ -10000,25 +9462,16 @@ c.register_entity("nh_nodes:white_pebble_entity", {
                             break
                         end
                     end
-
-                    if not placed then
-                        c.add_item(pos, "nh_nodes:white_pebble_item")
-                    end
+                    if not placed then c.add_item(pos, "nh_nodes:white_pebble_item") end
                 end
-
                 self.object:remove()
             end
             return
         end
 
         local vel = self.object:get_velocity()
-        if not vel then
-            self.object:remove()
-            return
-        end
-
+        if not vel then self.object:remove() return end
         local speed = vector.length(vel)
-
         -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
@@ -10095,7 +9548,7 @@ c.register_entity("nh_nodes:white_pebble_entity", {
             end
         end
 
-        -- ✅ Raio aumentado de 0.6 para 1.2 para não passar pelo mob
+        --       Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         local objs = c.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
@@ -10104,39 +9557,29 @@ c.register_entity("nh_nodes:white_pebble_entity", {
 
                 if not is_target then
                     local ent = obj:get_luaentity()
-                    -- ✅ Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    -- Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
                     if ent and ent.name ~= "nh_nodes:white_pebble_entity" then
                         local hp = obj:get_hp()
-                        if hp and hp > 0 then
-                            is_target = true
-                        end
+                        if hp and hp > 0 then is_target = true end
                     end
                 end
 
                 if is_target then
                     c.log("action", "[Seixo Branco] Acertou alvo em " .. c.pos_to_string(pos))
-
                     c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
-
-                    obj:punch(self.object, 1.0, {
-                        full_punch_interval = 1.0,
-                        damage_groups = { fleshy = 2 },
-                    }, vel)
-
+                    obj:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 2 }, }, vel)
                     c.add_item(pos, "nh_nodes:white_pebble_item")
                     self.object:remove()
                     return
                 end
             end
         end
-
         self._last_pos = pos
     end,
 })
 
 ---------------------------
 -- ENTIDADE DA CHAMA
----------------------------
 c.register_entity("nh_nodes:flame_entity", {
     initial_properties = {
         physical = false,
@@ -10151,52 +9594,34 @@ c.register_entity("nh_nodes:flame_entity", {
         pointable = true,
         glow = 14, -- Emite luz
     },
-
     _grass_pos = nil,
     _timer = 0,
     _anim_timer = 0,
     _current_frame = 0,
-
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
             local data = c.deserialize(staticdata)
-            if data and data.grass_pos then
-                self._grass_pos = data.grass_pos
-            end
+            if data and data.grass_pos then self._grass_pos = data.grass_pos end
         end
         self._timer = 0
-
         -- Configura a animação da textura
-        self.object:set_sprite(
-            { x = 0, y = 0 }, -- Posição inicial
-            1,                -- Número de frames (colunas)
-            1.0,              -- Duração do frame
-            false             -- Não usar alpha
-        )
-
+        self.object:set_sprite({ x = 0, y = 0 }, 1, 1.0, false) -- Posição inicial / Número de frames (colunas) / Duração do frame / Não usar alpha
         -- Define a animação de textura
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
 
-    get_staticdata = function(self)
-        return c.serialize({ grass_pos = self._grass_pos })
-    end,
+    get_staticdata = function(self) return c.serialize({ grass_pos = self._grass_pos }) end,
 
-    -- NOVO: Detecta quando é golpeado
+    -- Detecta quando é golpeado
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-        if not puncher or not puncher:is_player() then
-            return
-        end
-
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-
         -- Verifica se está segurando uma tocha apagada
         if wielded_name == "nh_nodes:torch" then
             -- Remove a tocha apagada do inventário
             wielded:take_item()
             puncher:set_wielded_item(wielded)
-
             -- Adiciona a tocha acesa ao inventário
             local inv = puncher:get_inventory()
             if inv then
@@ -10207,51 +9632,31 @@ c.register_entity("nh_nodes:flame_entity", {
                     c.add_item(pos, leftover)
                 end
             end
-
-            -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", {
-                pos = self.object:get_pos(),
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            -- Efeito sonoro
+            c.sound_play("fire_flint_and_steel", {pos = self.object:get_pos(), gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
-
     on_step = function(self, dtime)
         self._timer = self._timer + dtime
         self._anim_timer = self._anim_timer + dtime
-
         -- Anima a textura (16 frames, 1 segundo de duração total)
         if self._anim_timer > (1.0 / 8) then
             self._anim_timer = 0
             self._current_frame = (self._current_frame + 1) % 8
             self.object:set_texture_mod("^[verticalframe:8:" .. self._current_frame)
         end
-
         -- Verifica a cada 0.5 segundo se a grama ainda existe
         if self._timer > 0.5 then
             self._timer = 0
-
-            if not self._grass_pos then
-                self.object:remove()
-                return
-            end
-
+            if not self._grass_pos then self.object:remove() return end
             local node = c.get_node(self._grass_pos)
-
             -- Se a grama foi removida, remove a chama
-            if node.name ~= "nh_nodes:grassleaves" then
-                self.object:remove()
-                return
-            end
+            if node.name ~= "nh_nodes:grassleaves" then self.object:remove() return end
         end
     end,
 })
 
-
----------------------------
 -- NODE DO SEIXO BRANCO NO CHÃO
----------------------------
 c.register_node("nh_nodes:white_pebble", {
     description = S "White Pebble",
     tiles = { "whitepebble.png" },
@@ -10261,16 +9666,10 @@ c.register_node("nh_nodes:white_pebble", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-    groups = {
-        snappy = 3,
-        oddly_breakable_by_hand = 3,
-        falling_node = 1,
-        attached_node = 1,
-    },
+    groups = {snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1},
     node_box = {type = "fixed", fixed = {{ -0.15, -0.5, -0.2, 0.15, -0.4, 0.15 },},},
     selection_box = {type = "fixed", fixed = { -0.15, -0.5, -0.2, 0.15, -0.4, 0.15 },},
     drop = "nh_nodes:white_pebble_item",
-
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
@@ -10282,140 +9681,98 @@ c.register_node("nh_nodes:white_pebble", {
         },
         damage_groups = { fleshy = 2 },
     },
+    sounds = {
+        dug = { name = "punchtimber", gain = 0.5 },
+        dig = { name = "punchtimber", gain = 0.5 },
+        place = { name = "punchtimber", gain = 0.5 },},
     on_construct = function(pos) c.check_for_falling(pos) end,
     after_place_node = function(pos) c.check_for_falling(pos) end,
-
     -- Quando bater em um seixo branco com outro seixo branco
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher then return end
-
         -- Verifica se está batendo com outro seixo branco
         local wielded = puncher:get_wielded_item()
-        if wielded:get_name() ~= "nh_nodes:white_pebble_item" then
-            return
-        end
-
-        -- Som de fricção/faísca
-        c.sound_play("default_dig_cracky", {
-            pos = pos,
-            gain = 0.7,
-        })
-
+        if wielded:get_name() ~= "nh_nodes:white_pebble_item" then return end
+        -- Som de impacto
+        c.sound_play("GrassFootstep", {pos = pos, gain = 0.2})
         -- PARTÍCULAS AMARELAS LUMINOSAS (FAÍSCAS)
         c.add_particlespawner({
             amount = 10, -- Quantidade de partículas
             time = 0.3,  -- Duração do spawn
-            minpos = vector.subtract(pos, { x = 0.2, y = 0.2, z = 0.2 }),
-            maxpos = vector.add(pos, { x = 0.2, y = 0.2, z = 0.2 }),
-            minvel = { x = -2, y = 1, z = -2 }, -- Velocidade mínima
-            maxvel = { x = 2, y = 4, z = 2 },   -- Velocidade máxima (para cima)
-            minacc = { x = 0, y = -3, z = 0 },  -- Aceleração (gravidade)
-            maxacc = { x = 0, y = -2, z = 0 },
+            minpos = vector.subtract(pos, xyz(0.2, 0.2, 0.2)),
+            maxpos = vector.add(pos, xyz(0.2, 0.2, 0.2)),
+            minvel = xyz(-2, 1, -2), -- Velocidade mínima
+            maxvel = xyz(2, 4, 2),   -- Velocidade máxima (para cima)
+            minacc = xyz(0, -3, 0),  -- Aceleração (gravidade)
+            maxacc = xyz(0, -2, 0),
             minexptime = 0.1,                   -- Tempo mínimo de vida
             maxexptime = 0.3,                   -- Tempo máximo de vida
             minsize = 0.1,                      -- Tamanho mínimo
             maxsize = 0.3,                      -- Tamanho máximo
             collisiondetection = true,
             collision_removal = false,
-            glow = 14,                                             -- Brilho máximo (importante para o efeito luminoso)
-            texture = {
-                name = "spark_particle.png^[colorize:#FFAA00:150", -- Dourado
-                -- Se não tiver a textura spark_particle.png, use:
-                -- name = "default_item_smoke.png^[colorize:#FFFF00:200",
-            },
+            glow = 14,                          -- Brilho máximo (importante para o efeito luminoso)
+            texture = {name = "spark_particle.png^[colorize:#FFAA00:150"}, -- Dourado
         })
-
         -- Verifica todas as direções adjacentes para acender grama
         local directions = {
-            { x = 1,  y = 0,  z = 0 },  -- Leste
-            { x = -1, y = 0,  z = 0 },  -- Oeste
-            { x = 0,  y = 1,  z = 0 },  -- Cima
-            { x = 0,  y = -1, z = 0 },  -- Baixo
-            { x = 0,  y = 0,  z = 1 },  -- Sul
-            { x = 0,  y = 0,  z = -1 }, -- Norte
-            { x = 0,  y = 1,  z = 1 },
-            { x = 0,  y = -1, z = -1 },
-            { x = 1,  y = 0,  z = 1 },
-            { x = -1, y = 0,  z = -1 },
-            { x = -1, y = 0,  z = 1 },
-            { x = 1,  y = 0,  z = -1 },
-        }
-
+            xyz(1, 0,  0),  -- Leste
+            xyz(-1, 0,  0),  -- Oeste
+            xyz(0,  1,  0),  -- Cima
+            xyz(0,  -1, 0),  -- Baixo
+            xyz(0,  0,  1),  -- Sul
+            xyz(0,  0,  -1), -- Norte
+            xyz(0,  1,  1),
+            xyz(0,  -1, -1),
+            xyz(1,  0,  1),
+            xyz(-1, 0,  -1),
+            xyz(-1, 0,  1),
+            xyz(1,  0,  -1)}
         for _, dir in ipairs(directions) do
             local check_pos = vector.add(pos, dir)
             local check_node = c.get_node(check_pos)
-
             -- ACENDE GRAMA
             if check_node.name == "nh_nodes:grassleaves" then
                 local has_flame = false
                 local objs = c.get_objects_inside_radius(check_pos, 0.5)
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
-                    if ent and ent.name == "nh_nodes:flame_entity" then
-                        has_flame = true
-                        break
-                    end
+                    if ent and ent.name == "nh_nodes:flame_entity" then has_flame = true break end
                 end
-
                 if not has_flame then
-                    local flame_pos = {
-                        x = check_pos.x,
-                        y = check_pos.y,
-                        z = check_pos.z
-                    }
-
+                    local flame_pos = xyz(check_pos.x, check_pos.y, check_pos.z)
                     local obj = c.add_entity(flame_pos, "nh_nodes:flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
-                        if ent then
-                            ent._grass_pos = check_pos
-                        end
+                        if ent then ent._grass_pos = check_pos end
                     end
                 end
             end
-
             -- ACENDE PALHA
             if check_node.name == "nh_nodes:palmstraw" then
                 local meta = c.get_meta(check_pos)
-
                 -- Se a palha já tem chama, não faz nada
-                if meta:get_int("has_flame") == 1 then
-                    goto continue
-                end
-
+                if meta:get_int("has_flame") == 1 then goto continue end
                 -- Verifica se já não tem uma chama nessa posição
                 local has_flame = false
                 local objs = c.get_objects_inside_radius(check_pos, 0.5)
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
-                    if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then
-                        has_flame = true
-                        break
-                    end
+                    if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then has_flame = true break end
                 end
-
                 if not has_flame then
                     -- Marca que tem chama
                     meta:set_int("has_flame", 1)
-
                     -- Cria a entidade da chama
                     local obj = c.add_entity(check_pos, "nh_nodes:palmstraw_flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
-                        if ent then
-                            ent._straw_pos = check_pos
-                        end
+                        if ent then ent._straw_pos = check_pos end
                     end
-
                     -- Efeito sonoro (opcional)
-                    c.sound_play("fire_flint_and_steel", {
-                        pos = check_pos,
-                        gain = 0.5,
-                        max_hear_distance = 8,
-                    }, true)
+                    c.sound_play("fire_flint_and_steel", {pos = check_pos, gain = 0.5, max_hear_distance = 8}, true)
                 end
             end
-
             ::continue::
         end
     end,
@@ -10423,29 +9780,19 @@ c.register_node("nh_nodes:white_pebble", {
 
 -- FUNÇÃO DE ARREMESSO
 local function throw_grenade(itemstack, placer, lit)
-    if not placer or not placer:is_player() then
-        return itemstack
-    end
+    if not placer or not placer:is_player() then return itemstack end
     detach_glow(placer)
-
     local pos = placer:get_pos()
     pos.y = pos.y + 1.5
-
     local dir = placer:get_look_dir()
-
     local entity_name = lit and "nh_nodes:litgrenade_entity" or "nh_nodes:grenade_entity"
-
     local obj = c.add_entity(pos, entity_name)
-
     if obj then
         obj:set_velocity(vector.multiply(dir, 14))
-        obj:set_acceleration({ x = 0, y = -10, z = 0 })
+        obj:set_acceleration(xyz(0, -10, 0))
         local ent = obj:get_luaentity()
-        if ent then
-            ent._shooter = placer
-        end
+        if ent then ent._shooter = placer end
     end
-
     itemstack:take_item(1)
     return itemstack
 end
@@ -10473,11 +9820,7 @@ c.register_node("nh_nodes:grenade", {
                 itemstack:set_name("nh_nodes:litgrenade")
                 attach_glow(user)
                 -- toca tnt_ignite uma única vez ao acender
-                c.sound_play("tnt_ignite", {
-                    pos = user:get_pos(),
-                    gain = 1.0,
-                    max_hear_distance = 16,
-                }, true)
+                c.sound_play("tnt_ignite", {pos = user:get_pos(), gain = 1, max_hear_distance = 16}, true)
                 return itemstack
             end
         end
@@ -10492,56 +9835,33 @@ c.register_entity("nh_nodes:grenade_entity", {
         static_save = false,
         visual = "mesh",
         mesh = "grenade.obj",
-        textures = { "fusegrenade.png" },
-        visual_size = { x = 10, y = 10 },
-        collisionbox = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 },
+        textures = {"fusegrenade.png"},
+        visual_size = {x = 10, y = 10},
+        collisionbox = {-0.125, -0.5, -0.125, 0.125, -0.25, 0.125},
     },
-
     _timer = 0,
     _shooter = nil,
-
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then return end
-
         self._timer = self._timer + dtime
-
         -- rotação
         local rot = self.object:get_rotation()
-        self.object:set_rotation({
-            x = rot.x + 0.003,
-            y = rot.y + 0.2,
-            z = rot.z,
-        })
-
+        self.object:set_rotation(xyz(rot.x + 0.003, rot.y + 0.2, rot.z))
         local vel = self.object:get_velocity()
-
         -- se praticamente parou OU timer expirou, vira node
         if vector.length(vel) < 0.2 or self._timer >= 5 then
-            local place_pos = vector.round({
-                x = pos.x,
-                y = pos.y - 0.1,
-                z = pos.z
-            })
-
+            local place_pos = vector.round(xyz(pos.x, pos.y - 0.1, pos.z))
             local node = c.get_node(place_pos)
-
             if DECORATIONS[node.name] or node.name == "air" then
                 -- substitui a decoração pela granada
                 c.set_node(place_pos, { name = "nh_nodes:grenade" })
             else
                 -- node sólido abaixo: coloca no air acima
-                local above_pos = vector.round({
-                    x = pos.x,
-                    y = pos.y + 0.9,
-                    z = pos.z
-                })
+                local above_pos = vector.round(xyz(pos.x, pos.y + 0.9, pos.z))
                 local above_node = c.get_node(above_pos)
-                if above_node.name == "air" then
-                    c.set_node(above_pos, { name = "nh_nodes:grenade" })
-                end
+                if above_node.name == "air" then c.set_node(above_pos, {name = "nh_nodes:grenade"}) end
             end
-
             self.object:remove()
             return
         end
@@ -10586,11 +9906,7 @@ c.register_entity("nh_nodes:litgrenade_entity", {
         if not pos then return end
         self._timer = self._timer + dtime
         local rot = self.object:get_rotation()
-        self.object:set_rotation({
-            x = rot.x + 0.003,
-            y = rot.y + 0.2,
-            z = rot.z,
-        })
+        self.object:set_rotation(xyz(rot.x + 0.003, rot.y + 0.2, rot.z))
         -- explode após 5 segundos
         if self._timer >= 5 then
             c.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 32})
@@ -10600,8 +9916,8 @@ c.register_entity("nh_nodes:litgrenade_entity", {
                 glow = 14,
                 minpos = vector.subtract(pos, 0.5),
                 maxpos = vector.add(pos, 0.5),
-                minvel = { x = -4, y = -4, z = -4 },
-                maxvel = { x = 4, y = 4, z = 4 },
+                minvel = xyz(-4, -4, -4),
+                maxvel = xyz(4, 4, 4),
                 minexptime = 0.5,
                 maxexptime = 1.5,
                 minsize = 0.5,
@@ -10610,30 +9926,20 @@ c.register_entity("nh_nodes:litgrenade_entity", {
             })
             -- dano em área
             for _, obj in ipairs(c.get_objects_inside_radius(pos, 4)) do
-                if obj ~= self.object then
-                    obj:punch(self.object, 1.0, {
-                        damage_groups = { fleshy = 12 },
-                    })
-                end
+                if obj ~= self.object then obj:punch(self.object, 1.0, {damage_groups = {fleshy = 12}}) end
             end
             -- transforma neve em avalanche
             local radius = 4
             for x = -radius, radius do
                 for y = -radius, radius do
                     for z = -radius, radius do
-                        local p = {
-                            x = pos.x + x,
-                            y = pos.y + y,
-                            z = pos.z + z
-                        }
+                        local p = xyz(pos.x + x, pos.y + y, pos.z + z)
                         if vector.distance(pos, p) <= radius then
                             local node = c.get_node(p)
                             if node.name == "nh_nodes:snow_ramp"
                                 or node.name == "nh_nodes:snow_insidecorner"
                                 or node.name == "nh_nodes:snow_corner" then
-                                c.set_node(p, {
-                                    name = "nh_nodes:avalanche"
-                                })
+                                c.set_node(p, {name = "nh_nodes:avalanche"})
                             end
                         end
                     end
@@ -10646,8 +9952,8 @@ c.register_entity("nh_nodes:litgrenade_entity", {
         local node = c.get_node(vector.round(pos))
         if c.registered_nodes[node.name]
             and c.registered_nodes[node.name].walkable then
-            self.object:set_velocity({ x = 0, y = 0, z = 0 })
-            self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+            self.object:set_velocity(xyz(0, 0, 0))
+            self.object:set_acceleration(xyz(0, 0, 0))
         end
     end,
 })
@@ -10686,9 +9992,7 @@ c.register_node("nh_nodes:grassleaves", {
             local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._grass_pos = pos
-                end
+                if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
             c.sound_play("fire_flint_and_steel", {
@@ -10710,10 +10014,7 @@ c.register_node("nh_nodes:grassleaves", {
     end,
 })
 
-
----------------------------
--- NODE DAS FOLHAS DE GRAMA
----------------------------
+-- FOLHAS DE GRAMA - ALTURA MEDIA
 c.register_node("nh_nodes:grassleavesmedium", {
     description = S "Grass Leaves" .. "\n" .. S "[Medium]",
     --drawtype = "mesh",
@@ -10771,7 +10072,7 @@ c.register_node("nh_nodes:grassleavesmedium", {
     end,
 })
 
--- NODE DAS FOLHAS DE GRAMA
+-- FOLHAS DE GRAMA - BAIXA
 c.register_node("nh_nodes:smallgrass", {
     description = S "Short Grass",
     drawtype = "mesh",
@@ -10971,14 +10272,9 @@ c.register_node("nh_nodes:belt", {
     paramtype2 = "facedir",
     node_box = {type = "fixed", fixed = {{ -0.28, -0.5, -0.18, 0.28, -0.32, 0.18 },},},
     selection_box = {type = "fixed", fixed = { -0.28, -0.5, -0.18, 0.28, -0.32, 0.18 },},
-    -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0, y = 1, z = 0.6 },
-        rot = { x = 0, y = 180, z = 0 },},
+    wielded_bone_position = {pos = { x = 0, y = 1, z = 0.6 }, rot = { x = 0, y = 180, z = 0 },}, -- Configuração mão direita
     wielded_visual_size = { x = 0.2, y = 0.2, z = 0.2 },
-    offhand_bone_position = {
-        pos = { x = 0, y = -0.8, z = -1.6 },
-        rot = { x = -90, y = 0, z = 90 },},
+    offhand_bone_position = {pos = { x = 0, y = -0.8, z = -1.6 }, rot = { x = -90, y = 0, z = 90 },},
 })
 
 -- Mochila: BACKCHEST – funciona exatamente como o oakchest
@@ -11348,7 +10644,6 @@ c.register_node("nh_nodes:backchest", {
     end,
 })
 
-
 -- Exemplo de luvas gestuais
 c.register_node("nh_nodes:likeglove", {
     description = S "Like Glove",
@@ -11363,7 +10658,7 @@ c.register_node("nh_nodes:likeglove", {
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {pos = { x = 0.9, y = 0, z = 0 }, rot = { x = 0, y = -90, z = -90 }},
+    armor_bone_position = {pos = xyz(0.9, 0, 0), rot = xyz(0, -90, -90)},
 })
 
 -- Exemplo de luvas gestuais
@@ -11380,7 +10675,7 @@ c.register_node("nh_nodes:pointglove", {
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {pos = { x = 0.9, y = 0, z = 0 }, rot = { x = 0, y = -90, z = -90 }},
+    armor_bone_position = {pos = xyz(0.9, 0, 0), rot = xyz(0, -90, -90)},
 })
 
 -- Arma garra de tiro de plasma
@@ -11396,8 +10691,8 @@ c.register_node("nh_nodes:shrimpclaw", {
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    wielded_bone_position = {pos = { x = 0.5, y = 0, z = 0 }, rot = {x = -90, y = -90, z = 0}},
-    offhand_bone_position = {pos = { x = 1.2, y = -1, z = 0.5 }, rot = {x = -90, y = 180, z = 0}},
+    wielded_bone_position = {pos = xyz(0.5, 0, 0), rot = xyz(-90, -90, 0)},
+    offhand_bone_position = {pos = xyz(1.2, -1, 0.5), rot = xyz(-90, 180, 0)},
 
 on_use = function(itemstack, user, pointed_thing)
     if not user or not user:is_player() then return end
@@ -11441,8 +10736,8 @@ c.register_node("nh_nodes:shrimpclaw2", {
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    wielded_bone_position = {pos = { x = 0.5, y = 0, z = 0 }, rot = {x = -90, y = -90, z = 0}},
-    offhand_bone_position = {pos = { x = 1.2, y = -1, z = 0.5 }, rot = {x = -90, y = 180, z = 0}},
+    wielded_bone_position = {pos = xyz(0.5, 0, 0), rot = xyz(-90, -90, 0)},
+    offhand_bone_position = {pos = xyz(1.2, -1, 0.5), rot = xyz(-90, 180, 0)},
 
 on_use = function(itemstack, user, pointed_thing)
     if not user or not user:is_player() then return end
@@ -11486,11 +10781,7 @@ c.register_node("nh_nodes:copperhelmet", {
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = 0, y = 2.7, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }  -- Ajuste Y para girar (90° = direita)
-    },
-    --armor_texture = "copperhelmet.png",
+    armor_bone_position = {pos = { x = 0, y = 2.7, z = 0 }, rot = { x = 0, y = -90, z = 0 }},
     --armor_groups = {fleshy = 5},  -- Proteção
 })
 
