@@ -1910,7 +1910,7 @@ mobs:register_mob("nh_mob:dopel", {
     despawn_by_day = false,
     remove_far = false,
     visual = "mesh",
-    mesh = "character9.glb",
+    mesh = "character11.glb",
     textures = { "skin.png" },
     -- rotate = 180,
     visual_size = { x = 1, y = 1 },

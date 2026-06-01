@@ -10867,12 +10867,10 @@ c.register_node("nh_nodes:closedwings", {
     selection_box = {type = "fixed", fixed = { -0.55, -0.5, -0.02, 0.55, 1.7, 0.11 }},
     collision_box = {type = "fixed", fixed = { -0.55, -0.5, -0.02, 0.55, 1.7, 0.11 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = -0.25, y = -0.5, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},  -- Ajuste Y para girar (90° = direita)
+    armor_bone_position = {pos = xyz(-0.25, -0.5, 0), rot = xyz(0, -90, 0)},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -2, y = 0, z = 0 }},
-    offhand_bone_position = {pos = { x = -2, y = 0, z = -0.25 }},
+    wielded_bone_position = {pos = xyz(-2, 0, 0)},
+    offhand_bone_position = {pos = xyz(-2, 0, -0.25)},
     drop = "nh_nodes:wings"
 })
 
@@ -10889,9 +10887,7 @@ c.register_node("nh_nodes:wings", {
     selection_box = {type = "fixed", fixed = { -1.5, -0.5, 0, 1.5, 1.5, 0.1 }},
     collision_box = {type = "fixed", fixed = { -1.5, -0.5, 0, 1.5, 1.5, 0.1 }},
     -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = -0.25, y = -0.5, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},  -- Ajuste Y para girar (90° = direita)
+    armor_bone_position = {pos = xyz(-0.25, -0.5, 0), rot = xyz(0, -90, 0)},
     -- Configuração mão direita
     wielded_bone_position = {pos = { x = -2, y = 0, z = 0 }},
     offhand_bone_position = {pos = { x = -2, y = 0, z = -0.25 }},
@@ -10904,42 +10900,46 @@ c.register_node("nh_nodes:wings", {
 
 -- ASAS: concede voo enquanto equipado nas costas
 local players_with_wings = {}
-
+local players_flying_active = {}
 local function has_wings_equipped(player)
     local inv = player:get_inventory()
     local back_list = inv:get_list("armor_back")
     if not back_list then return false end
     for _, stack in ipairs(back_list) do
-        if stack:get_name() == "nh_nodes:wings" then
-            return true
-        end
+        if stack:get_name() == "nh_nodes:wings" then return true end
     end
     return false
 end
-
 c.register_globalstep(function(dtime)
     for _, player in ipairs(c.get_connected_players()) do
         local name = player:get_player_name()
         local wearing = has_wings_equipped(player)
+        local privs = c.get_player_privs(name)
 
         if wearing and not players_with_wings[name] then
-            -- Equipou as asas: concede voo
             players_with_wings[name] = true
-            local privs = c.get_player_privs(name)
             privs.fly = true
             c.set_player_privs(name, privs)
-            -- Aplica física de voo imediatamente
             player:set_physics_override({ gravity = 0.5 })
             c.chat_send_player(name, S "The wings are active! Use [flight] (k or enable in the menu) to fly.")
-
         elseif not wearing and players_with_wings[name] then
-            -- Desequipou as asas: remove voo
             players_with_wings[name] = nil
-            local privs = c.get_player_privs(name)
+            players_flying_active[name] = nil  -- limpa estado de voo
             privs.fly = nil
             c.set_player_privs(name, privs)
             player:set_physics_override({ gravity = 1.0 })
             c.chat_send_player(name, S "The wings were removed.")
+        end
+        -- Detecta se o voo está ativo: asas equipadas + velocidade vertical (não caindo normalmente)
+        if players_with_wings[name] then
+            local vel = player:get_velocity()
+            -- O player está voando se tiver velocidade vertical positiva ou estiver
+            -- suspendo no ar sem queda livre normal (gravity reduzida já indica isso)
+            -- A forma mais confiável: checar se o priv fly está ativo E o player está no ar
+            local on_ground = player:get_physics_override().gravity == 0  -- placeholder
+            -- Detecção real: velocidade Y próxima de zero mas longe do chão = flutuando
+            local abs_vy = math.abs(vel.y)
+            players_flying_active[name] = (abs_vy < 5 and abs_vy > 0.05) or (vel.y > 0.1)  -- subindo
         end
     end
 end)

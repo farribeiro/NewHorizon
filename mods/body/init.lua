@@ -135,7 +135,7 @@ local rotate_head_to_look
 core.register_entity("nh_body:player_body", {
     initial_properties = {
         visual = "mesh",
-        mesh = "character9.glb",
+        mesh = "character11.glb",
         textures = { "skin.png" },
         visual_size = { x = 1, y = 1, z = 1 },
         physical = false,
@@ -539,7 +539,7 @@ local function get_armor_formspec(player_name)
             "label[0.5,1.6;Tronco]", "list[current_player;armor_torso;0.5,1.6;1,1;]",
             "label[0.5,2.7;Pernas]", "list[current_player;armor_legs;0.5,2.7;1,1;]",
             "label[0.5,3.8;Pés]", "list[current_player;armor_feet;0.5,3.8;1,1;]",
-            "model[1.25,0.5;3,6;player_model;character9.glb;skin.png;0,180;false;true]",
+            "model[1.25,0.5;3,6;player_model;character11.glb;skin.png;0,180;false;true]",
             "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
             "label[3.5,0.5;Costas]", "list[current_player;armor_back;3.5,0.5;1,1;]",
             "label[3.5,1.6;Braços]", "list[current_player;armor_arms;3.5,1.6;1,1;]",
@@ -786,12 +786,12 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
     if not player_states[player_name] then player_states[player_name] = { body_yaw = 0, current_anim = nil } end
     player:set_properties({ -- Aplica modelo INVISÍVEL (nametag_color com alpha 0)
         visual = "mesh",
-        mesh = "character9.glb",
+        mesh = "character11.glb",
         textures = { "blank.png" }, -- textura vazia, invisivel
         visual_size = { x = 1, y = 1, z = 1 },
         collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 },
         stepheight = 0.6,
-        eye_height = 2.6,
+        eye_height = 2.3,
         -- shaded = true,
         makes_footstep_sound = false,                                               -- Torna o modelo do player invisível
     })
@@ -902,9 +902,9 @@ set_player_animation = function(player, anim)
     elseif anim == "holding" then
         anim_data = { { x = 9.54, y = 10.5 }, 7, 0, false }
     elseif anim == "holding_punch" then
-        anim_data = { { x = 10.5, y = 11 }, 7, 0, false }
+        anim_data = { { x = 10.5, y = 11 }, 5, 0, false }
     elseif anim == "punch" then
-        anim_data = { { x = 11.54, y = 12 }, 7, 0, false }
+        anim_data = { { x = 11.54, y = 12 }, 5, 0, false }
     elseif anim == "sit_down" then
         -- Faixa 12~12.5s do GLB: animação de sentar (não loop, não repete)
         anim_data = { { x = 12, y = 12.5 }, 1, 0, false }
@@ -917,6 +917,10 @@ set_player_animation = function(player, anim)
     elseif anim == "lie_idle" then
         -- Congela no frame 13s (pose deitado)
         anim_data = { { x = 13, y = 13 }, 1, 0, false }
+    elseif anim == "fly_idle" then
+        anim_data = { { x = 0, y = 0 }, 1, 0, false }
+    elseif anim == "fly_move" then
+        anim_data = { { x = 5.375, y = 5.375 }, 4, 0, true }
     end
     if anim_data then
         player:set_animation(anim_data[1], anim_data[2], anim_data[3], anim_data[4]) -- Aplica animação no player invisível
@@ -1163,7 +1167,7 @@ core.register_globalstep(function(dtime)
                     set_player_animation(player, "sit_idle")
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
-                    player:set_properties({eye_height = 1.2})
+                    player:set_properties({eye_height = 1})
                     player:set_eye_offset(eye_sit, eye_sit3)
                     goto continue
                 else
@@ -1171,7 +1175,7 @@ core.register_globalstep(function(dtime)
                     set_player_animation(player, "sit_idle")
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
-                    player:set_properties({eye_height = 1.2})
+                    player:set_properties({eye_height = 1})
                     player:set_eye_offset(eye_sit,eye_sit3)
                     --core.log(player_name, "Applying sitting camera (sitting and no movement_key or ctrl.jump or sneak_press)")
                     goto continue
@@ -1185,7 +1189,7 @@ core.register_globalstep(function(dtime)
                 else
                     sit_anim_timer[player_name] = sit_anim_timer[player_name] + dtime
                     -- Animação de deitar dura 0.5s (12.5~13s no GLB)
-                    if sit_anim_timer[player_name] >= 0.5 then
+                    if sit_anim_timer[player_name] >= 0.7 then
                         sit_state[player_name] = "lying"
                     end
                     set_player_animation(player, "lie_down")
@@ -1213,7 +1217,7 @@ core.register_globalstep(function(dtime)
                         set_player_animation(player, "sit_idle")
                         sit_last_sneak[player_name]          = sneak_now
                         sit_state[player_name .. "_last_aux1"] = aux1_now
-                        player:set_properties({eye_height = 1.2})
+                        player:set_properties({eye_height = 1})
                         player:set_eye_offset(eye_sit, eye_sit3)
                         goto continue
                     end
@@ -1290,7 +1294,6 @@ core.register_globalstep(function(dtime)
                         player:set_eye_offset(eye_offset_first, eye_offset_third)
                         sit_last_sneak[player_name]          = sneak_now
                         sit_state[player_name .. "_last_aux1"] = aux1_now
-                        --core.log(player_name, "Applying sitting camera (counting and no movement_key or ctrl.jump or sneak_press)")
                         goto continue
                     end
                 end
@@ -1302,38 +1305,52 @@ core.register_globalstep(function(dtime)
             -- END OF SITTING SYSTEM — normal animation logic below
             -- ══════════════════════════════════════════════════════════════
             
-local vel = player:get_velocity()
-local is_moving_vertically = math.abs(vel.y) > 0.1
--- Lê o estado de climb do mod moves (tabela global separada, não mexe em player_states deste mod)
-local is_wall_climbing = moves_player_states and moves_player_states[name] == "climb"
-
-if is_wall_climbing then
-    -- Animação de wall climb enquanto o jogador estiver subindo na parede
-    set_player_animation(player, "climb")
-    -- Reseta quando soltar o pulo
-    if not ctrl.jump then
-        moves_player_states[name] = nil
-    end
-elseif is_climbable and (ctrl.up or ctrl.down or ctrl.jump or ctrl.sneak) then
-    set_player_animation(player, "climb")
-    
-    -- Opcional: Forçar movimento vertical se o motor não estiver fazendo sozinho
-    -- Isso garante que a animação de climb rode enquanto ele sobe/desce
-    if ctrl.jump then
-        player:set_velocity({x=vel.x, y=3, z=vel.z}) -- Velocidade de subida
-    elseif ctrl.sneak and is_climbable then
-        player:set_velocity({x=vel.x, y=-3, z=vel.z}) -- Velocidade de descida
-    end
-elseif ctrl.jump and vel.y >= 0.1 and not is_climbable then
-    set_player_animation(player, "jump")
-else
+            local vel = player:get_velocity()
+            local is_moving_vertically = math.abs(vel.y) > 0.1
+            -- Lê o estado de climb do mod moves (tabela global separada, não mexe em player_states deste mod)
+            local is_wall_climbing = moves_player_states and moves_player_states[name] == "climb"
+            -- ANIMAÇÃO DE VOO COM ASAS
+            local inv = player:get_inventory()
+            local back_stack = inv:get_stack("armor_back", 1)
+            local has_wings = not back_stack:is_empty() and back_stack:get_name() == "nh_nodes:wings"
+            local fly_privs = core.get_player_privs(name)
+            if has_wings and fly_privs and fly_privs.fly then
+                -- Dobra a velocidade de movimento com asas
+                player:set_physics_override({ speed = 6, jump = 3 })
+                local horizontal_speed = math.sqrt(vel.x * vel.x + vel.z * vel.z)
+                local vertical_speed = math.abs(vel.y)
+                local fly_eye_offset_third = {x=0, y=6, z=-7}
+                if horizontal_speed > 0.1 or vertical_speed > 0.1 then
+                    set_player_animation(player, "fly_move")
+                    player:set_properties({eye_height = 1})
+                    player:set_eye_offset({x=0, y=-1, z=5}, fly_eye_offset_third)
+                else
+                    set_player_animation(player, "idle") --fly_idle
+                    player:set_properties({eye_height = 2.3})
+                    player:set_eye_offset({x=0, y=-0.2, z=3.5}, fly_eye_offset_third)
+                end
+                goto continue
+            end
+            -- Animação de wall climb enquanto o jogador estiver subindo na parede
+            if is_wall_climbing then set_player_animation(player, "climb")
+                -- Reseta quando soltar o pulo
+                if not ctrl.jump then moves_player_states[name] = nil end
+            elseif is_climbable and (ctrl.up or ctrl.down or ctrl.jump or ctrl.sneak) then
+                set_player_animation(player, "climb")
+                -- Opcional: Forçar movimento vertical se o motor não estiver fazendo sozinho
+                -- Isso garante que a animação de climb rode enquanto ele sobe/desce
+                if ctrl.jump then player:set_velocity({x=vel.x, y=3, z=vel.z}) -- Velocidade de subida
+                elseif ctrl.sneak and is_climbable then player:set_velocity({x=vel.x, y=-3, z=vel.z}) -- Velocidade de descida
+                end
+            elseif ctrl.jump and vel.y >= 0.1 and not is_climbable then
+                set_player_animation(player, "jump")
+            else
                 local props = player:get_properties()
                 local is_crawling = props.eye_height <= 0.7
                 local horizontal = {x = vel.x, y = 0, z = vel.z}
                 local speed = vector.length(horizontal)
                 local is_moving_back = ctrl.down
                 local is_moving = ctrl.up or ctrl.left or ctrl.right
-
                 -- ANIMAÇÕES
                 if is_crawling then
                     if speed > 0.1 then setplayeranimation("crawling_walk") else setplayeranimation("crawling") end
@@ -1367,11 +1384,11 @@ else
                 local eye_offset_first
                 local eye_offset_third = {x=0, y=6, z=-7}
                 if is_crawling then
-                    eye_offset_first = {x=0, y =-0.5, z=7.5}
+                    eye_offset_first = {x=0, y =-0.7, z=7.5}
                 elseif ctrl.sneak then 
-                    eye_offset_first = {x=0, y=9, z=9}
+                    eye_offset_first = {x=0, y=6, z=9}
                 else
-                    player:set_properties({eye_height = 2.6})
+                    player:set_properties({eye_height = 2.3})
                     eye_offset_first = {x=0, y=-0.2, z=3.5}
                 end
                 player:set_eye_offset(eye_offset_first, eye_offset_third)
