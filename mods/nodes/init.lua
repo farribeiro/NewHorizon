@@ -2,8 +2,8 @@
 local c = core
 c.log("action", "[NODES] init.lua loaded")
 local S = c.get_translator("nh_nodes")
--- table_xyz
-local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
+ -- table_xyz and table x=y=z
+local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return {x = x, y = y, z = z} end
 local function populate_true(names)
     local father = {}
     for _, name in ipairs(names) do father["nh_nodes:" .. name] = true end
@@ -223,7 +223,7 @@ local function get_liquid_flow_dir(pos)
     -- Nesse caso a direção é para baixo, sem componente horizontal.
     local falling = (p2_here >= 8)
     local p2_level = p2_here % 8
-    local flow = { x = 0, y = 0, z = 0 }
+    local flow = xyz(0)
     if falling then flow.y = -1 end
     local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
     for _, d in ipairs(dirs) do
@@ -284,7 +284,7 @@ c.register_globalstep(function(dtime)
         -- ── Dentro da água
         -- Zera aceleração para que set_velocity abaixo seja o movimento final
         if not drop_was_in_water[uid] then drop_was_in_water[uid] = true end
-        obj:set_acceleration({ x = 0, y = 0, z = 0 })
+        obj:set_acceleration(xyz(0))
         local item_name = entity.itemstring or (entity.item and ItemStack(entity.item):get_name()) or ""
         local is_floating = FLOATING_STUFF[item_name]
 
@@ -330,7 +330,7 @@ c.after(0, function()
         original_set_item(self, item)
         -- Sobrescreve DEPOIS que o builtin definiu as propriedades
         self.object:set_properties({ automatic_rotate = 0 })
-        self.object:set_rotation({ x = 0, y = 0, z = 0 })
+        self.object:set_rotation(xyz(0))
     end
     local original_on_step = item_ent.on_step
     item_ent.on_step = function(self, dtime, moveresult)
@@ -763,8 +763,8 @@ c.register_entity("nh_nodes:display_item", {
         return c.serialize({ itemstring = self.itemstring, station_pos = self.station_pos })
     end,
     on_step = function(self, dtime)
-        self.object:set_velocity({ x = 0, y = 0, z = 0 })
-        self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+        self.object:set_velocity(xyz(0))
+        self.object:set_acceleration(xyz(0))
         local props = self.object:get_properties()
         if props.glow and props.glow > 0 then
             local rot = self.object:get_rotation()
@@ -4925,8 +4925,7 @@ c.register_node("nh_nodes:bottle", {
 })
 
 local function is_water_near(pos)
-    local offsets = {
-        { x = 0, y = 0, z = 0 },
+    local offsets = {xyz(0),
         { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 },
         { x = 0, y = 1, z = 0 }, { x = 0, y = -1, z = 0 },
         { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 },}
@@ -6828,7 +6827,7 @@ function chest_update_items(pos)
                 luaent.slot_index = i
                 luaent:update_item(stack:get_name())
                 -- Anexar ao bone correspondente do baú
-                entity:set_attach(chest_entity, "bone" .. i, { x = 0, y = 0, z = 0 }, { x = 0, y = 0, z = 0 })
+                entity:set_attach(chest_entity, "bone" .. i, xyz(0), xyz(0))
             end
         end
     end
@@ -7224,7 +7223,6 @@ c.register_entity("nh_nodes:oak_chest_entity", {
         visual = "mesh",
         mesh = "chest.glb",
         textures = { "ChestTexture.png" },
-        visual_size = { x = 1, y = 1, z = 1 },
         physical = false,
         collide_with_objects = false,
         pointable = false,
@@ -7232,25 +7230,17 @@ c.register_entity("nh_nodes:oak_chest_entity", {
         paramtype = "light",
         paramtype2 = "facedir",
     },
-
     node_pos = nil,
     original_param2 = 0,
     timer = 0,
     animation_finished = false,
     is_invisible = false,
-
     on_activate = function(self, staticdata)
         self.object:set_armor_groups({ immortal = 1 })
     end,
-
     on_step = function(self, dtime)
-        -- Se for invisível (só para anexar itens), não fazer nada
-        if self.is_invisible then
-            return
-        end
-
+        if self.is_invisible then return end -- Se for invisível (só para anexar itens), não fazer nada
         self.timer = self.timer + dtime
-
         -- Após a animação, congelar no último frame
         if self.timer > 0.3 and not self.animation_finished then
             self.animation_finished = true
@@ -7266,7 +7256,6 @@ c.register_entity("nh_nodes:oak_chest_close_entity", {
         visual = "mesh",
         mesh = "chest.glb",
         textures = { "ChestTexture.png" },
-        visual_size = { x = 1, y = 1, z = 1 },
         physical = false,
         collide_with_objects = false,
         pointable = false,
@@ -7360,11 +7349,9 @@ c.register_on_player_receive_fields(function(player, formname, fields)
                                 if luaent and luaent.name == "nh_nodes:chest_item" then
                                     -- Re-anexar ao novo baú (fechamento)
                                     local slot = luaent.slot_index
-                                    obj:set_attach(close_entity, "bone" .. slot, { x = 0, y = 0, z = 0 },
-                                        { x = 0, y = 0, z = 0 })
+                                    obj:set_attach(close_entity, "bone" .. slot, xyz(0), xyz(0))
                                 end
                             end
-
                             -- Remover a entidade antiga do baú
                             chest_entity:remove()
                         end
@@ -7531,38 +7518,23 @@ c.register_craftitem("nh_nodes:pebble_item", {
     inventory_image = "seixoarremessavel.png",
     wield_image = "seixoarremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
-
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0.5, y = -0.25, z = 0 },
-        rot = { x = 0, y = 0, z = 0 },
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = -0.25, z = 0 }},
     wielded_visual_size = { x = 0.15, y = 0.15, z = 0.15 },
-
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
-
         groupcaps = {
             choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
             fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
             snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
-
+            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
         damage_groups = { fleshy = 2 },
     },
-
     -- Botão direito = arremessa
-    on_place = function(itemstack, placer, pointed_thing)
-        return throw_pebble(itemstack, placer)
-    end,
-
+    on_place = function(itemstack, placer, pointed_thing) return throw_pebble(itemstack, placer) end,
     -- Ao soltar = arremessa
-    on_drop = function(itemstack, dropper, pos)
-        return throw_pebble(itemstack, dropper)
-    end
-
+    on_drop = function(itemstack, dropper, pos) return throw_pebble(itemstack, dropper) end
 })
 
 ---------------------------
@@ -7660,8 +7632,8 @@ c.register_entity("nh_nodes:pebble_entity", {
         -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
-            self.object:set_velocity({ x = 0, y = 0, z = 0 })
-            self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+            self.object:set_velocity((xyz(0)))
+            self.object:set_acceleration((xyz(0)))
             return
         end
 
@@ -7678,8 +7650,8 @@ c.register_entity("nh_nodes:pebble_entity", {
                 if c.registered_nodes[node.name].walkable then
                     self._stuck = true
                     self.object:set_pos(check_pos)
-                    self.object:set_velocity({ x = 0, y = 0, z = 0 })
-                    self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+                    self.object:set_velocity((xyz(0)))
+                    self.object:set_acceleration((xyz(0)))
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
@@ -7876,27 +7848,18 @@ c.register_node("nh_nodes:obsidianpebble", {
 -- FUNÇÃO DE ARREMESSO
 ---------------------------
 local function throw_pebble(itemstack, placer)
-    if not placer or not placer:is_player() then
-        return itemstack
-    end
-
+    if not placer or not placer:is_player() then return itemstack end
     local pos = placer:get_pos()
     pos.y = pos.y + 1.5 -- altura dos olhos
-
     local dir = placer:get_look_dir()
     local obj = c.add_entity(pos, "nh_nodes:obsidianpebble_entity")
-
     if obj then
         obj:set_velocity(vector.multiply(dir, 18))
         obj:set_acceleration({ x = 0, y = -10, z = 0 })
-
-        --       Define o atirador para não se machucar
+        -- Define o atirador para não se machucar
         local ent = obj:get_luaentity()
-        if ent then
-            ent._shooter = placer
-        end
+        if ent then ent._shooter = placer end
     end
-
     -- Remove 1 item do stack
     itemstack:take_item(1)
     return itemstack
@@ -7911,10 +7874,7 @@ c.register_craftitem("nh_nodes:obsidianpebble_item", {
     wield_image = "obsidiana_seixo_arremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0.5, y = -0.25, z = 0 },
-        rot = { x = 0, y = 0, z = 0 },
-    },
+    wielded_bone_position = {pos = { x = 0.5, y = -0.25, z = 0 }},
     wielded_visual_size = { x = 0.15, y = 0.15, z = 0.15 },
     tool_capabilities = {
         full_punch_interval = 1.5,
@@ -7923,21 +7883,13 @@ c.register_craftitem("nh_nodes:obsidianpebble_item", {
             choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
             fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
             snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
-
+            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
         damage_groups = { fleshy = 2 },
     },
-
     -- Botão direito = arremessa
-    on_place = function(itemstack, placer, pointed_thing)
-        return throw_pebble(itemstack, placer)
-    end,
-
+    on_place = function(itemstack, placer, pointed_thing) return throw_pebble(itemstack, placer) end,
     -- Ao soltar = arremessa
-    on_drop = function(itemstack, dropper, pos)
-        return throw_pebble(itemstack, dropper)
-    end,
+    on_drop = function(itemstack, dropper, pos) return throw_pebble(itemstack, dropper) end,
 })
 
 
@@ -7953,43 +7905,30 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
         visual_size = { x = 0.5, y = 0.5 },
         textures = { "nh_nodes:obsidianpebble" },
     },
-
     _stuck = false,
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
     _shooter = nil, --       Declarado aqui para ficar visível
-
     on_activate = function(self, staticdata)
         self._timer = 0
         self._stuck = false
         self._stuck_timer = 0
         self._shooter = nil
     end,
-
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
-        if not pos then
-            self.object:remove()
-            return
-        end
-
+        if not pos then self.object:remove() return end
         -- Timer geral para remover após muito tempo
         self._timer = self._timer + dtime
-        if self._timer > 60 then
-            self.object:remove()
-            return
-        end
-
+        if self._timer > 60 then self.object:remove() return end
         -- Se já está grudado
         if self._stuck then
             self._stuck_timer = self._stuck_timer + dtime
-
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
                 local node = c.get_node(node_pos)
-
                 if node.name == "air" or not c.registered_nodes[node.name].walkable then
                     c.set_node(node_pos, { name = "nh_nodes:obsidianpebble" })
                 else
@@ -7999,9 +7938,7 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
                         { x = 1,  y = 0,  z = 0 },
                         { x = -1, y = 0,  z = 0 },
                         { x = 0,  y = 0,  z = 1 },
-                        { x = 0,  y = 0,  z = -1 },
-                    }
-
+                        { x = 0,  y = 0,  z = -1 },}
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
@@ -8012,48 +7949,36 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
                             break
                         end
                     end
-
-                    if not placed then
-                        c.add_item(pos, "nh_nodes:obsidianpebble_item")
-                    end
+                    if not placed then c.add_item(pos, "nh_nodes:obsidianpebble_item") end
                 end
-
                 self.object:remove()
             end
             return
         end
 
         local vel = self.object:get_velocity()
-        if not vel then
-            self.object:remove()
-            return
-        end
-
+        if not vel then self.object:remove() return end
         local speed = vector.length(vel)
-
         -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
-            self.object:set_velocity({ x = 0, y = 0, z = 0 })
-            self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+            self.object:set_velocity((xyz(0)))
+            self.object:set_acceleration((xyz(0)))
             return
         end
-
         -- Verifica colisão com blocos sólidos via raycast manual
         local step_dir = vector.normalize(vel)
         local check_distance = math.min(speed * dtime * 2, 1)
         local steps = math.ceil(check_distance / 0.2)
-
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
             local node = c.get_node(check_pos)
-
             if node and node.name and c.registered_nodes[node.name] then
                 if c.registered_nodes[node.name].walkable then
                     self._stuck = true
                     self.object:set_pos(check_pos)
-                    self.object:set_velocity({ x = 0, y = 0, z = 0 })
-                    self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+                    self.object:set_velocity((xyz(0)))
+                    self.object:set_acceleration((xyz(0)))
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
@@ -8106,42 +8031,31 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
                 end
             end
         end
-
         --       Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         local objs = c.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
             -- Ignora o próprio projétil e o atirador
             if obj ~= self.object and obj ~= self._shooter then
                 local is_target = obj:is_player()
-
                 if not is_target then
                     local ent = obj:get_luaentity()
                     --       Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
                     if ent and ent.name ~= "nh_nodes:obsidianpebble_entity" then
                         local hp = obj:get_hp()
-                        if hp and hp > 0 then
-                            is_target = true
-                        end
+                        if hp and hp > 0 then is_target = true end
                     end
                 end
 
                 if is_target then
                     c.log("action", "[Seixo de Obsidiana] Acertou alvo em " .. c.pos_to_string(pos))
-
                     c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
-
-                    obj:punch(self.object, 1.0, {
-                        full_punch_interval = 1.0,
-                        damage_groups = { fleshy = 2 },
-                    }, vel)
-
+                    obj:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = {fleshy = 2},}, vel)
                     c.add_item(pos, "nh_nodes:obsidianpebble_item")
                     self.object:remove()
                     return
                 end
             end
         end
-
         self._last_pos = pos
     end,
 })
@@ -8165,17 +8079,9 @@ c.register_node("nh_nodes:obsidianblade", {
     groups = {snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1,},
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
-
-    -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
-    -----------------------------
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 })
 
 ---------------------------
@@ -8204,7 +8110,6 @@ c.register_node("nh_nodes:rowing", {
         },
         damage_groups = { fleshy = 2 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8212,7 +8117,6 @@ c.register_node("nh_nodes:rowing", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -8220,15 +8124,10 @@ c.register_node("nh_nodes:rowing", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.5, 0.125, -0.435, 1.35 },},},
-
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.5, 0.125, -0.435, 1.35 },},
-
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 3, y = 0, z = 1.8 },
-        rot = { x = 90, y = 0, z = -90 },},
+    wielded_bone_position = {pos = { x = 3, y = 0, z = 1.8 }, rot = { x = 90, y = 0, z = -90 },},
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
 })
 
@@ -8251,16 +8150,13 @@ c.register_entity("nh_nodes:pineraft_entity", {
         stepheight = 0.5,
         gravity = { x = 0, y = -9.81, z = 0 },
     },
-
     driver = nil,
-
     on_activate = function(self, staticdata)
         self.object:set_armor_groups({ immortal = 0, fleshy = 100 })
         self.object:set_hp(8)
-        self.object:set_velocity({ x = 0, y = 0, z = 0 })
+        self.object:set_velocity((xyz(0)))
         self.object:set_acceleration({ x = 0, y = -9.81, z = 0 })
     end,
-
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
         -- Desmonta se for o motorista
         if self.driver and puncher == self.driver then
@@ -8275,14 +8171,9 @@ c.register_entity("nh_nodes:pineraft_entity", {
 
         -- Só permite quebrar com a mão (sem ferramenta)
         local item = puncher:get_wielded_item()
-        if item:get_name() ~= "" then
-            -- tem ferramenta na mão, não quebra (opcional, remova se quiser)
-            return
-        end
-
+        if item:get_name() ~= "" then return end
         local hp = self.object:get_hp()
         hp = hp - 1
-
         if hp <= 0 then
             -- Dropa o item da jangada
             local pos = self.object:get_pos()
@@ -8305,10 +8196,10 @@ c.register_entity("nh_nodes:pineraft_entity", {
         local on_surface  = water_nodes[node_below2.name] and not submerged -- entidade está na superfície
         local vel         = self.object:get_velocity()
         if submerged then
-            self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+            self.object:set_acceleration((xyz(0)))
             self.object:set_velocity({ x = vel.x, y = 2, z = vel.z })
         elseif on_surface then
-            self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+            self.object:set_acceleration((xyz(0)))
             self.object:set_velocity({ x = vel.x, y = 0, z = vel.z })
         else
             -- No ar: gravidade age normalmente
@@ -8397,35 +8288,28 @@ c.register_entity("nh_nodes:pineraft_entity", {
         local half_height = 1.5 --/ 2
 
         local search_radius = 4 -- só para busca inicial (ligeiramente maior)
-
         local being_pushed = false
-
         for _, obj in ipairs(c.get_objects_inside_radius(pos, search_radius)) do
             if obj:is_player() and obj ~= self.driver then
                 local ppos = obj:get_pos()
-
                 local dx = ppos.x - pos.x
                 local dy = ppos.y - pos.y
                 local dz = ppos.z - pos.z
-
-                --       filtro retangular (caixa)
+                -- filtro retangular (caixa)
                 if math.abs(dx) <= half_width and
                     math.abs(dy) <= half_height and
                     math.abs(dz) <= half_length then
                     local pvel = obj:get_velocity()
                     local speed_sq = pvel.x * pvel.x + pvel.z * pvel.z
-
                     if speed_sq > 0.1 then
                         local spd = math.sqrt(speed_sq)
                         local force = 1.75
                         local cur_vel = self.object:get_velocity()
-
                         self.object:set_velocity({
                             x = cur_vel.x + (pvel.x / spd) * force * dtime,
                             y = cur_vel.y,
                             z = cur_vel.z + (pvel.z / spd) * force * dtime,
                         })
-
                         being_pushed = true
                     end
                 end
@@ -8445,33 +8329,25 @@ c.register_entity("nh_nodes:pineraft_entity", {
 
     on_rightclick = function(self, clicker)
         if not clicker or not clicker:is_player() then return end
-
         if self.driver == nil then
             self.driver = clicker
-
             -- Salva as propriedades originais do player
             self._driver_visual_size = clicker:get_properties().visual_size
-
             -- Contra-escala: 1 / 2.5 = 0.4
             -- Assim o player aparece no tamanho normal mesmo dentro da entidade escalonada
             clicker:set_properties({
                 visual_size = {
                     x = 1 / 2.5,
                     y = 1 / 2.5,
-                    z = 1 / 2.5,
-                }
+                    z = 1 / 2.5}
             })
-
-            clicker:set_attach(self.object, "", { x = 0, y = 3, z = 0 }, { x = 0, y = 0, z = 0 })
+            clicker:set_attach(self.object, "", { x = 0, y = 3, z = 0 }, (xyz(0)))
         elseif self.driver == clicker then
             clicker:set_detach()
             self.driver = nil
-
             -- Restaura as propriedades originais
             if self._driver_visual_size then
-                clicker:set_properties({
-                    visual_size = self._driver_visual_size
-                })
+                clicker:set_properties({visual_size = self._driver_visual_size})
                 self._driver_visual_size = nil
             end
         end
@@ -8502,36 +8378,25 @@ c.register_node("nh_nodes:pineraft", {
     mesh = "pineraft.obj",      --
     tiles = { "pineraft.png" }, -- tiles = {"pedra.png"},
     inventory_image = "pineraft_inv.png",
-
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
-    groups = {oddly_breakable_by_hand = 1, --falling_node = 1,
-    },
+    groups = {oddly_breakable_by_hand = 1}, --falling_node = 1,
     collision_box = {type = "fixed", fixed = { -1, -0.5, -1.5, 1, 0.5, 1.5 },},
     selection_box = {type = "fixed", fixed = { -1, -0.5, -1.5, 1, 0.5, 1.5 },},
-    -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = -2, y = -2, z = 1.8 },
-        rot = { x = 90, y = 0, z = -90 },},
-    -- Configuração mão esquerda
-    offhand_bone_position = {
-        pos = { x = 0, y = -1, z = -0.5 },
-        rot = { x = 90, y = 0, z = 90 },},
+    wielded_bone_position = {pos = { x = -2, y = -2, z = 1.8 }, rot = { x = 90, y = 0, z = -90 },}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 0, y = -1, z = -0.5 }, rot = { x = 90, y = 0, z = 90 },},  -- Configuração mão esquerda
     pointabilities = {nodes = water_nodes},
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         -- Se segurou agachar, deixa como nó estático (não vira entidade)
         if placer and placer:is_player() then
             local ctrl = placer:get_player_control()
-            if ctrl.sneak then
-                return -- coloca normalmente como nó, não faz nada
-            end
+            if ctrl.sneak then return end -- coloca normalmente como nó, não faz nada
         end
         -- Sem agachar: vira entidade normalmente
         c.remove_node(pos)
         c.add_entity(pos, "nh_nodes:pineraft_entity")
     end,
-
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
         c.add_entity(pos, "nh_nodes:pineraft_entity")
@@ -8588,10 +8453,7 @@ c.register_node("nh_nodes:obsidiansword", {
     collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.5, 0.125, -0.435, 1.35 },},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.5, 0.125, -0.435, 1.35 },},
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 3, y = 0, z = 1.8 },
-        rot = { x = 90, y = 0, z = -90 },
-    },
+    wielded_bone_position = {pos = { x = 3, y = 0, z = 1.8 }, rot = { x = 90, y = 0, z = -90 }},
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
 })
 
@@ -8635,7 +8497,6 @@ c.register_node("nh_nodes:pebble", {
 
 ---------------------------
 -- NODE DA PEDRA LASCADA (FERRAMENTA E ITEM DE FERRAMENTA)
----------------------------
 c.register_node("nh_nodes:chippedstone", {
     description = S "Chipped Stone" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
@@ -8647,9 +8508,7 @@ c.register_node("nh_nodes:chippedstone", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1, falling_node = 1,},
+    groups = {dig_immediate = 1, falling_node = 1,}, -- falling_node faz ele cair,
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
@@ -8668,7 +8527,6 @@ c.register_node("nh_nodes:chippedstone", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -8676,31 +8534,14 @@ c.register_node("nh_nodes:chippedstone", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
-    collision_box = {
-        type = "fixed",
-        fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },
-    },
-    selection_box = {
-        type = "fixed",
-        fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },
-    },
-
-    -----------------------------
-    -- FAZ O SEIXO CAIR SOZINHO
-    -----------------------------
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    collision_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095}},
+    selection_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095}},
+    -- FAZ CAIR SOZINHO
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 })
 
-
----------------------------
 -- NODE DA CABEÇA DE MACHADO DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
----------------------------
 c.register_node("nh_nodes:stoneaxehead", {
     description = S "Stone Axe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
@@ -8712,21 +8553,16 @@ c.register_node("nh_nodes:stoneaxehead", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1, falling_node = 1,},
+    groups = {dig_immediate = 1, falling_node = 1}, -- falling_node faz ele cair,
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
             snappy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
             fleshy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-        },
+            crumbly = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },},
         damage_groups = { fleshy = 3 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8734,7 +8570,6 @@ c.register_node("nh_nodes:stoneaxehead", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -8742,24 +8577,14 @@ c.register_node("nh_nodes:stoneaxehead", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
-    collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
+    collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
-
-    -----------------------------
-    -- FAZ O SEIXO CAIR SOZINHO
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    -- FAZ CAIR SOZINHO
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 })
 
-
----------------------------
 -- NODE DA CABEÇA DE PICARETA DE PEDRA (FERRAMENTA E ITEM DE FERRAMENTA)
----------------------------
 c.register_node("nh_nodes:stonepickaxehead", {
     description = S "Stone Pickaxe Head" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 15",
     drawtype = "mesh",
@@ -8801,15 +8626,9 @@ c.register_node("nh_nodes:stonepickaxehead", {
     end,
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
-
-    -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 })
 
 
@@ -8841,7 +8660,6 @@ c.register_node("nh_nodes:stonehoehead", {
         },
         damage_groups = { fleshy = 3 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8849,7 +8667,6 @@ c.register_node("nh_nodes:stonehoehead", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -8857,18 +8674,11 @@ c.register_node("nh_nodes:stonehoehead", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
-    collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
-    selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
-    -----------------------------
+    collision_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},},
+    selection_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095},},
     -- FAZ O SEIXO CAIR SOZINHO
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 })
 
 
@@ -8899,7 +8709,6 @@ c.register_node("nh_nodes:stoneadzehead", {
         },
         damage_groups = { fleshy = 3 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8907,7 +8716,6 @@ c.register_node("nh_nodes:stoneadzehead", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -8915,24 +8723,15 @@ c.register_node("nh_nodes:stoneadzehead", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
-    -----------------------------
     -- FAZ O SEIXO CAIR SOZINHO
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
 })
 
 
-
----------------------------
 -- NODE DA ESPADA ENFERRUJADA (FERRAMENTA)
----------------------------
 c.register_node("nh_nodes:rustironsword", {
     description = S "Rusty Iron Sword" .. "\n" .. S "Reach: +3" .. "\n" .. S "Damage: +4" .. "\n" .. S "Uses: 10",
     drawtype = "mesh",
@@ -8957,7 +8756,6 @@ c.register_node("nh_nodes:rustironsword", {
         },
         damage_groups = { fleshy = 5 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8965,7 +8763,6 @@ c.register_node("nh_nodes:rustironsword", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -8973,15 +8770,10 @@ c.register_node("nh_nodes:rustironsword", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
-    collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.05, 0.035 },},},
-    selection_box = {type = "fixed", fixed = { -0.03, -0.5, -0.115, 0.03, 0.5, 0.115 },},
-
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.035, 0.08, 0.05, 0.035},},
+    selection_box = {type = "fixed", fixed = {-0.03, -0.5, -0.115, 0.03, 0.5, 0.115},},
     -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 1.3, y = 0, z = 0 },
-        rot = { x = 270, y = -90, z = 0 },
-    },
+    wielded_bone_position = {pos = { x = 1.3, y = 0, z = 0 }, rot = { x = 270, y = -90, z = 0 },},
     wielded_visual_size = { x = 0.325, y = 0.325, z = 0.325 },
 })
 
@@ -8995,10 +8787,7 @@ c.register_node("nh_nodes:stoneaxe", {
     sunlight_propagates = true,
     walkable = false,
     range = 5,
-
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1, falling_node = 1,},
+    groups = {dig_immediate = 1, falling_node = 1}, -- falling_node faz ele cair,
     tool_capabilities = {
         full_punch_interval = 2,
         max_drop_level = 1,
@@ -9010,7 +8799,6 @@ c.register_node("nh_nodes:stoneaxe", {
         },
         damage_groups = { fleshy = 4 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -9018,7 +8806,6 @@ c.register_node("nh_nodes:stoneaxe", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -9028,14 +8815,10 @@ c.register_node("nh_nodes:stoneaxe", {
     end,
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.25, 0.035 },},},
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.25, 0.03 },},
-
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}},
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
 })
-
 
 c.register_node("nh_nodes:stonepickaxe", {
     description = S "Stone Pickaxe" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +3" .. "\n" .. S "Uses: 15",
@@ -9046,16 +8829,7 @@ c.register_node("nh_nodes:stonepickaxe", {
     sunlight_propagates = true,
     walkable = false,
     range = 5,
-
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1,falling_node = 1,
-        --fleshy = 1, -- mobs, carne
-        --snappy  = 2, -- folhas, plantas
-        --crumbly = 3, -- terra, areia, argila
-        --oddly_breakable_by_hand = 3,
-    },
-
+    groups = {dig_immediate = 1, falling_node = 1}, -- falling_node faz ele cair
     tool_capabilities = {
         full_punch_interval = 2,
         max_drop_level = 1,
@@ -9068,7 +8842,6 @@ c.register_node("nh_nodes:stonepickaxe", {
         },
         damage_groups = { fleshy = 4 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -9087,10 +8860,8 @@ c.register_node("nh_nodes:stonepickaxe", {
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.25, 0.035 },},},
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.25, 0.03 },},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
+    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}},
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
 c.register_node("nh_nodes:stoneadze", {
@@ -9102,9 +8873,7 @@ c.register_node("nh_nodes:stoneadze", {
     sunlight_propagates = true,
     walkable = false,
     range = 5,
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1, falling_node = 1,},
+    groups = {dig_immediate = 1, falling_node = 1}, -- falling_node faz ele cair,
     tool_capabilities = {
         full_punch_interval = 2,
         max_drop_level = 1,
@@ -9116,13 +8885,10 @@ c.register_node("nh_nodes:stoneadze", {
         },
         damage_groups = { fleshy = 3 },
     },
-
     -- bater em node / transformar em terra arada
     node_placement_prediction = "",
-
     on_place = function(itemstack, puncher, pointed_thing)
         local controls = puncher:get_player_control()
-
         if controls.sneak then
             if pointed_thing.type == "node" then
                 local pos = pointed_thing.under
@@ -9146,7 +8912,6 @@ c.register_node("nh_nodes:stoneadze", {
             return c.item_place(itemstack, puncher, pointed_thing)
         end
     end,
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -9154,7 +8919,6 @@ c.register_node("nh_nodes:stoneadze", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -9165,10 +8929,8 @@ c.register_node("nh_nodes:stoneadze", {
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.25, 0.035 },},},
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.25, 0.03 },},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
+    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}},
+    wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
 })
 
 c.register_node("nh_nodes:stonehoe", {
@@ -9180,9 +8942,7 @@ c.register_node("nh_nodes:stonehoe", {
     sunlight_propagates = true,
     walkable = false,
     range = 5,
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1, falling_node = 1,},
+    groups = {dig_immediate = 1, falling_node = 1},
     tool_capabilities = {
         full_punch_interval = 2,
         max_drop_level = 1,
@@ -9194,13 +8954,10 @@ c.register_node("nh_nodes:stonehoe", {
         },
         damage_groups = { fleshy = 3 },
     },
-
     -- bater em node / transformar em terra arada
     node_placement_prediction = "",
-
     on_place = function(itemstack, puncher, pointed_thing)
         local controls = puncher:get_player_control()
-
         if controls.sneak then
             if pointed_thing.type == "node" then
                 local pos = pointed_thing.under
@@ -9218,11 +8975,8 @@ c.register_node("nh_nodes:stonehoe", {
                 end
             end
             return itemstack -- Sempre cancela o place quando agachado
-        else
-            return c.item_place(itemstack, puncher, pointed_thing)
-        end
+        else return c.item_place(itemstack, puncher, pointed_thing) end
     end,
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -9230,7 +8984,6 @@ c.register_node("nh_nodes:stonehoe", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     --after_punch = function(itemstack, user, target)
     --    local wear = itemstack:get_wear()
@@ -9241,9 +8994,7 @@ c.register_node("nh_nodes:stonehoe", {
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.25, 0.035 },},},
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.25, 0.03 },},
     -- Configuração mão direita
-    wielded_bone_position = { pos = { x = 1.1, y = 0, z = 0.1 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = { pos = { x = 1.1, y = 0, z = 0.1 }},
     wielded_visual_size = { x = 0.25, y = 0.25, z = 0.25 },
 })
 
@@ -9260,15 +9011,7 @@ c.register_node("nh_nodes:chippedstoneknife", {
     sunlight_propagates = true,
     walkable = false,
     range = 4,
-
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {oddly_breakable_by_hand = 3, falling_node = 1,
-        --fleshy = 1, -- mobs, carne
-        --snappy  = 2, -- folhas, plantas
-        --crumbly = 3, -- terra, areia, argila
-    },
-
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
@@ -9279,7 +9022,6 @@ c.register_node("nh_nodes:chippedstoneknife", {
         },
         damage_groups = { fleshy = 3 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -9287,7 +9029,6 @@ c.register_node("nh_nodes:chippedstoneknife", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -9295,14 +9036,10 @@ c.register_node("nh_nodes:chippedstoneknife", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.05, 0.035 },},},
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.05, 0.03 },},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}},
 })
 
 
@@ -9315,25 +9052,16 @@ c.register_node("nh_nodes:obsidianknife", {
     sunlight_propagates = true,
     walkable = false,
     range = 4,
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {oddly_breakable_by_hand = 3, falling_node = 1,
-        --fleshy = 1, -- mobs, carne
-        --snappy  = 2, -- folhas, plantas
-        --crumbly = 3, -- terra, areia, argila
-    },
-
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
             snappy = { times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1 },
             fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
+            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
         damage_groups = { fleshy = 5 },
     },
-
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -9341,7 +9069,6 @@ c.register_node("nh_nodes:obsidianknife", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     -- bater em mob
     after_punch = function(itemstack, user, target)
         local wear = itemstack:get_wear()
@@ -9349,21 +9076,13 @@ c.register_node("nh_nodes:obsidianknife", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.05, 0.035 },},},
-
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.05, 0.03 },},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
+    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }},
 })
 
-
----------------------------
 -- FUNÇÃO DE ARREMESSO (SEIXO branco)
----------------------------
 local function throw_white_pebble(itemstack, user)
     local pos = user:get_pos()
     local dir = user:get_look_dir()
@@ -9385,8 +9104,8 @@ end
 c.register_craftitem("nh_nodes:white_pebble_item", {
     description = S "White Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
-    wielded_bone_position = {pos = { x = 0.5, y = -0.25, z = 0 }, rot = { x = 0, y = 0, z = 0 },}, -- Configuração mão direita
-    wielded_visual_size = { x = 0.15, y = 0.15, z = 0.15 },
+    wielded_bone_position = {pos = {x = 0.5, y = -0.25, z = 0}}, -- Configuração mão direita
+    wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
@@ -9394,8 +9113,7 @@ c.register_craftitem("nh_nodes:white_pebble_item", {
             choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
             fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
             snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
+            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
         damage_groups = { fleshy = 2 },
     },
     on_place = function(itemstack, placer, pointed_thing) return throw_white_pebble(itemstack, placer) end,
@@ -9412,30 +9130,25 @@ c.register_entity("nh_nodes:white_pebble_entity", {
         visual_size = { x = 0.2, y = 0.2 },
         textures = { "nh_nodes:white_pebble" },
     },
-
     _stuck = false,
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
     _shooter = nil, --       Declarado aqui para ficar visível
-
     on_activate = function(self, staticdata)
         self._timer = 0
         self._stuck = false
         self._stuck_timer = 0
         self._shooter = nil
     end,
-
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then self.object:remove() return end
         -- Timer geral para remover após muito tempo
         self._timer = self._timer + dtime
         if self._timer > 60 then self.object:remove() return end
-
         -- Se já está grudado
         if self._stuck then self._stuck_timer = self._stuck_timer + dtime
-
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
@@ -9450,8 +9163,7 @@ c.register_entity("nh_nodes:white_pebble_entity", {
                         { x = 1,  y = 0,  z = 0 },
                         { x = -1, y = 0,  z = 0 },
                         { x = 0,  y = 0,  z = 1 },
-                        { x = 0,  y = 0,  z = -1 },
-                    }
+                        { x = 0,  y = 0,  z = -1 },}
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
@@ -9468,33 +9180,29 @@ c.register_entity("nh_nodes:white_pebble_entity", {
             end
             return
         end
-
         local vel = self.object:get_velocity()
         if not vel then self.object:remove() return end
         local speed = vector.length(vel)
         -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
-            self.object:set_velocity({ x = 0, y = 0, z = 0 })
-            self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+            self.object:set_velocity((xyz(0)))
+            self.object:set_acceleration((xyz(0)))
             return
         end
-
         -- Verifica colisão com blocos sólidos via raycast manual
         local step_dir = vector.normalize(vel)
         local check_distance = math.min(speed * dtime * 2, 1)
         local steps = math.ceil(check_distance / 0.2)
-
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
             local node = c.get_node(check_pos)
-
             if node and node.name and c.registered_nodes[node.name] then
                 if c.registered_nodes[node.name].walkable then
                     self._stuck = true
                     self.object:set_pos(check_pos)
-                    self.object:set_velocity({ x = 0, y = 0, z = 0 })
-                    self.object:set_acceleration({ x = 0, y = 0, z = 0 })
+                    self.object:set_velocity((xyz(0)))
+                    self.object:set_acceleration((xyz(0)))
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
@@ -9547,7 +9255,6 @@ c.register_entity("nh_nodes:white_pebble_entity", {
                 end
             end
         end
-
         --       Raio aumentado de 0.6 para 1.2 para não passar pelo mob
         local objs = c.get_objects_inside_radius(pos, 1.2)
         for _, obj in ipairs(objs) do
@@ -9563,7 +9270,6 @@ c.register_entity("nh_nodes:white_pebble_entity", {
                         if hp and hp > 0 then is_target = true end
                     end
                 end
-
                 if is_target then
                     c.log("action", "[Seixo Branco] Acertou alvo em " .. c.pos_to_string(pos))
                     c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
@@ -9716,18 +9422,18 @@ c.register_node("nh_nodes:white_pebble", {
         })
         -- Verifica todas as direções adjacentes para acender grama
         local directions = {
-            xyz(1, 0,  0),  -- Leste
+            xyz(1,  0,  0),  -- Leste
             xyz(-1, 0,  0),  -- Oeste
             xyz(0,  1,  0),  -- Cima
-            xyz(0,  -1, 0),  -- Baixo
+            xyz(0, -1,  0),  -- Baixo
             xyz(0,  0,  1),  -- Sul
-            xyz(0,  0,  -1), -- Norte
+            xyz(0,  0, -1), -- Norte
             xyz(0,  1,  1),
-            xyz(0,  -1, -1),
+            xyz(0, -1, -1),
             xyz(1,  0,  1),
-            xyz(-1, 0,  -1),
+            xyz(-1, 0, -1),
             xyz(-1, 0,  1),
-            xyz(1,  0,  -1)}
+            xyz(1,  0, -1)}
         for _, dir in ipairs(directions) do
             local check_pos = vector.add(pos, dir)
             local check_node = c.get_node(check_pos)
@@ -9807,12 +9513,8 @@ c.register_node("nh_nodes:grenade", {
     groups = { snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1 },
     collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
-    on_place = function(itemstack, placer, pointed_thing)
-        return throw_grenade(itemstack, placer, false)
-    end,
-    on_drop = function(itemstack, dropper, pos)
-        return throw_grenade(itemstack, dropper, false)
-    end,
+    on_place = function(itemstack, placer, pointed_thing) return throw_grenade(itemstack, placer, false) end,
+    on_drop = function(itemstack, dropper, pos) return throw_grenade(itemstack, dropper, false) end,
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "object" then
             local ent = pointed_thing.ref:get_luaentity()
@@ -9878,12 +9580,8 @@ c.register_node("nh_nodes:litgrenade", {
     groups = { snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1 },
     collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
-    on_place = function(itemstack, placer, pointed_thing)
-        return throw_grenade(itemstack, placer, true)
-    end,
-    on_drop = function(itemstack, dropper, pos)
-        return throw_grenade(itemstack, dropper, true)
-    end,
+    on_place = function(itemstack, placer, pointed_thing) return throw_grenade(itemstack, placer, true) end,
+    on_drop = function(itemstack, dropper, pos) return throw_grenade(itemstack, dropper, true) end,
 })
 
 c.register_entity("nh_nodes:litgrenade_entity", {
@@ -9974,16 +9672,12 @@ c.register_node("nh_nodes:grassleaves", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
-        if meta:get_int("has_flame") == 1 then
-            return
-        end
+        if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
@@ -9995,11 +9689,7 @@ c.register_node("nh_nodes:grassleaves", {
                 if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", { pos = pos, gain = 0.5, max_hear_distance = 8, }, true)
         end
     end,
     -- Quando a grama for removida, remove as chamas nela
@@ -10007,9 +9697,7 @@ c.register_node("nh_nodes:grassleaves", {
         local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:flame_entity" then obj:remove() end
         end
     end,
 })
@@ -10030,16 +9718,12 @@ c.register_node("nh_nodes:grassleavesmedium", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
-        if meta:get_int("has_flame") == 1 then
-            return
-        end
+        if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
@@ -10048,16 +9732,10 @@ c.register_node("nh_nodes:grassleavesmedium", {
             local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._grass_pos = pos
-                end
+                if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", { pos = pos, gain = 0.5, max_hear_distance = 8, }, true)
         end
     end,
     -- Quando a grama for removida, remove as chamas nela
@@ -10065,9 +9743,7 @@ c.register_node("nh_nodes:grassleavesmedium", {
         local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:flame_entity" then obj:remove() end
         end
     end,
 })
@@ -10089,16 +9765,12 @@ c.register_node("nh_nodes:smallgrass", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
-        if meta:get_int("has_flame") == 1 then
-            return
-        end
+        if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
@@ -10107,16 +9779,10 @@ c.register_node("nh_nodes:smallgrass", {
             local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._grass_pos = pos
-                end
+                if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", { pos = pos, gain = 0.5, max_hear_distance = 8, }, true)
         end
     end,
     -- Quando a grama for removida, remove as chamas nela
@@ -10124,9 +9790,7 @@ c.register_node("nh_nodes:smallgrass", {
         local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:flame_entity" then obj:remove() end
         end
     end,
 })
@@ -10147,16 +9811,12 @@ c.register_node("nh_nodes:highgrass", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 1.5, 0.5 }},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = c.get_meta(pos)
         -- Se já tem chama, não faz nada
-        if meta:get_int("has_flame") == 1 then
-            return
-        end
+        if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
@@ -10165,16 +9825,10 @@ c.register_node("nh_nodes:highgrass", {
             local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._grass_pos = pos
-                end
+                if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
     -- Quando a grama for removida, remove as chamas nela
@@ -10182,9 +9836,7 @@ c.register_node("nh_nodes:highgrass", {
         local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:flame_entity" then obj:remove() end
         end
     end,
 })
@@ -10336,20 +9988,15 @@ c.register_node("nh_nodes:back_chest_open", {
         c.after(0.1, function() back_chest_update_items(pos) end)
     end,
     -- Permite quebrar o baú mesmo estando aberto
-    can_dig          = function(pos, player)
-        return true
-    end,
+    can_dig          = function(pos, player) return true end,
     -- Mesma lógica de salvamento do node fechado
     on_dig           = function(pos, node, digger)
         local meta      = c.get_meta(pos)
         local inv       = meta:get_inventory()
         local has_items = not inv:is_empty("main")
         local chest_id  = meta:get_string("chest_id")
-        if chest_id == "" then
-            chest_id = backchest_new_id()
-        end
-        if has_items then
-            backchest_stored_items[chest_id] = backchest_save_inv(pos)
+        if chest_id == "" then chest_id = backchest_new_id() end
+        if has_items then backchest_stored_items[chest_id] = backchest_save_inv(pos)
         else
             backchest_stored_items[chest_id] = nil
             chest_id = ""
@@ -10366,12 +10013,10 @@ c.register_node("nh_nodes:back_chest_open", {
         -- Remove todas as entidades visuais ligadas ao baú aberto
         for _, obj in ipairs(c.get_objects_inside_radius(pos, 1)) do
             local ent = obj:get_luaentity()
-            if ent and (
-                    ent.name == "nh_nodes:chest_item" or
+            if ent and (ent.name == "nh_nodes:chest_item" or
                     ent.name == "nh_nodes:back_chest_entity" or
-                    ent.name == "nh_nodes:back_chest_close_entity"
-                ) then
-                obj:remove()
+                    ent.name == "nh_nodes:back_chest_close_entity")
+                    then obj:remove()
             end
         end
     end,
@@ -10383,7 +10028,6 @@ c.register_entity("nh_nodes:back_chest_entity", {
         visual               = "mesh",
         mesh                 = "backchest.glb",
         textures             = { "BackChest.png" },
-        visual_size          = { x = 1, y = 1, z = 1 },
         physical             = false,
         collide_with_objects = false,
         pointable            = false,
@@ -10415,7 +10059,6 @@ c.register_entity("nh_nodes:back_chest_close_entity", {
         visual               = "mesh",
         mesh                 = "backchest.glb",
         textures             = { "BackChest.png" },
-        visual_size          = { x = 1, y = 1, z = 1 },
         physical             = false,
         collide_with_objects = false,
         pointable            = false,
@@ -10470,10 +10113,7 @@ c.register_on_player_receive_fields(function(player, formname, fields)
     local chest_entity = nil
     for _, obj in ipairs(objects) do
         local luaent = obj:get_luaentity()
-        if luaent and luaent.name == "nh_nodes:back_chest_entity" then
-            chest_entity = obj
-            break
-        end
+        if luaent and luaent.name == "nh_nodes:back_chest_entity" then chest_entity = obj break end
     end
     local close_entity = c.add_entity(pos, "nh_nodes:back_chest_close_entity")
     if close_entity and close_entity:get_luaentity() then
@@ -10485,7 +10125,7 @@ c.register_on_player_receive_fields(function(player, formname, fields)
                 local luaent = obj:get_luaentity()
                 if luaent and luaent.name == "nh_nodes:chest_item" then
                     local slot = luaent.slot_index
-                    obj:set_attach(close_entity, "bone" .. slot, { x = 0, y = 0, z = 0 }, { x = 0, y = 0, z = 0 })
+                    obj:set_attach(close_entity, "bone" .. slot, (xyz(0)), (xyz(0)))
                 end
             end
             chest_entity:remove()
@@ -10511,9 +10151,7 @@ c.register_on_player_inventory_action(function(player, action, inventory, invent
         if not node then goto backcontinue end
         if node.name == "nh_nodes:back_chest_open" then
             local meta = c.get_meta(pos)
-            if meta:get_string("current_user") == player_name then
-                back_chest_update_items(pos)
-            end
+            if meta:get_string("current_user") == player_name then back_chest_update_items(pos) end
         end
         ::backcontinue::
     end
@@ -10621,12 +10259,8 @@ c.register_node("nh_nodes:backchest", {
         local meta        = c.get_meta(pos)
         local player_name = clicker:get_player_name()
         meta:set_string("current_user", player_name)
-
         back_chest_update_items(pos)
-
-        c.show_formspec(player_name,
-            "nh_nodes:back_chest_" .. c.pos_to_string(pos),
-            build_chest_formspec(clicker))
+        c.show_formspec(player_name, "nh_nodes:back_chest_" .. c.pos_to_string(pos), build_chest_formspec(clicker))
         return itemstack
     end,
     -- Ao colocar: restaura inventário a partir da tabela global via ID do item
@@ -10644,7 +10278,7 @@ c.register_node("nh_nodes:backchest", {
     end,
 })
 
--- Exemplo de luvas gestuais
+-- Luva legal
 c.register_node("nh_nodes:likeglove", {
     description = S "Like Glove",
     drawtype = "mesh",
@@ -10657,11 +10291,10 @@ c.register_node("nh_nodes:likeglove", {
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {pos = xyz(0.9, 0, 0), rot = xyz(0, -90, -90)},
+    armor_bone_position = {pos = xyz(0.85, 0, 0), rot = xyz(0, -90, -90)}, -- Posição customizada quando equipado
 })
 
--- Exemplo de luvas gestuais
+-- Luva apontar
 c.register_node("nh_nodes:pointglove", {
     description = S "Point Glove",
     drawtype = "mesh",
@@ -10674,8 +10307,23 @@ c.register_node("nh_nodes:pointglove", {
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {pos = xyz(0.9, 0, 0), rot = xyz(0, -90, -90)},
+    armor_bone_position = {pos = xyz(0.85, 0, 0), rot = xyz(0, -90, -90)}, -- Posição customizada quando equipado
+})
+
+-- Luvas de cobre
+c.register_node("nh_nodes:gauntlets", {
+    description = S "Lether Gauntlets",
+    drawtype = "mesh",
+    mesh = "glove.obj",
+    tiles = { "likeglove.png" },
+    stack_max = 1,  -- limita a 1 por slot
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    groups = {armor_hands = 2, oddly_breakable_by_hand = 3},
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    armor_bone_position = {pos = xyz(0.85, 0, 0), rot = xyz(90, -90, -180)}, -- Posição customizada quando equipado
 })
 
 -- Arma garra de tiro de plasma
@@ -10693,38 +10341,37 @@ c.register_node("nh_nodes:shrimpclaw", {
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     wielded_bone_position = {pos = xyz(0.5, 0, 0), rot = xyz(-90, -90, 0)},
     offhand_bone_position = {pos = xyz(1.2, -1, 0.5), rot = xyz(-90, 180, 0)},
-
-on_use = function(itemstack, user, pointed_thing)
-    if not user or not user:is_player() then return end
-    local name = user:get_player_name()
-    if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
-    restore_hunger(user, -4)
-    local pos = user:get_pos()
-    if not pos then return end
-    local eye_offset = user:get_eye_offset()
-    pos.y = pos.y + 1.5 + (eye_offset and eye_offset.y or 0)
-    local dir = user:get_look_dir()
-    local spawn_pos = vector.add(pos, vector.multiply(dir, 1.5))
-    -- Cria o projétil
-    local arrow = c.add_entity(spawn_pos, "nh_mob:plasma")
-    if arrow then
-        arrow:set_velocity(vector.multiply(dir, 25))
-        arrow:set_yaw(user:get_look_horizontal())
-        -- Acessa a entidade
-        local ent = arrow:get_luaentity()
-        if ent then
-            ent._owner_obj = user
-            ent._lifetime_timer = 0
+    on_use = function(itemstack, user, pointed_thing)
+        if not user or not user:is_player() then return end
+        local name = user:get_player_name()
+        if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
+        restore_hunger(user, -4)
+        local pos = user:get_pos()
+        if not pos then return end
+        local eye_offset = user:get_eye_offset()
+        pos.y = pos.y + 1.5 + (eye_offset and eye_offset.y or 0)
+        local dir = user:get_look_dir()
+        local spawn_pos = vector.add(pos, vector.multiply(dir, 1.5))
+        -- Cria o projétil
+        local arrow = c.add_entity(spawn_pos, "nh_mob:plasma")
+        if arrow then
+            arrow:set_velocity(vector.multiply(dir, 25))
+            arrow:set_yaw(user:get_look_horizontal())
+            -- Acessa a entidade
+            local ent = arrow:get_luaentity()
+            if ent then
+                ent._owner_obj = user
+                ent._lifetime_timer = 0
+            end
         end
-    end
-    itemstack:add_wear(0)
-    return itemstack
-end,
+        itemstack:add_wear(0)
+        return itemstack
+    end,
 })
 
 -- Arma garra de tiro de plasma
 c.register_node("nh_nodes:shrimpclaw2", {
-    description = S "Dimensional Shrimp Claw",
+    description = S "Dimensional Claw",
     drawtype = "mesh",
     mesh = "shrimpclaw.obj",
     tiles = { "shrimp.png^[colorize:#6600FF:160" },
@@ -10738,36 +10385,35 @@ c.register_node("nh_nodes:shrimpclaw2", {
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     wielded_bone_position = {pos = xyz(0.5, 0, 0), rot = xyz(-90, -90, 0)},
     offhand_bone_position = {pos = xyz(1.2, -1, 0.5), rot = xyz(-90, 180, 0)},
-
-on_use = function(itemstack, user, pointed_thing)
-    if not user or not user:is_player() then return end
-    local name = user:get_player_name()
-    if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
-    restore_hunger(user, -4)
-    local pos = user:get_pos()
-    if not pos then return end
-    local eye_offset = user:get_eye_offset()
-    pos.y = pos.y + 1.5 + (eye_offset and eye_offset.y or 0)
-    local dir = user:get_look_dir()
-    local spawn_pos = vector.add(pos, vector.multiply(dir, 1.5))
-    -- Cria o projétil
-    local arrow = c.add_entity(spawn_pos, "nh_mob:plasma2")
-    if arrow then
-        arrow:set_velocity(vector.multiply(dir, 25))
-        arrow:set_yaw(user:get_look_horizontal())
-        -- Acessa a entidade
-        local ent = arrow:get_luaentity()
-        if ent then
-            ent._owner_obj = user
-            ent._lifetime_timer = 0
+    on_use = function(itemstack, user, pointed_thing)
+        if not user or not user:is_player() then return end
+        local name = user:get_player_name()
+        if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
+        restore_hunger(user, -4)
+        local pos = user:get_pos()
+        if not pos then return end
+        local eye_offset = user:get_eye_offset()
+        pos.y = pos.y + 1.5 + (eye_offset and eye_offset.y or 0)
+        local dir = user:get_look_dir()
+        local spawn_pos = vector.add(pos, vector.multiply(dir, 1.5))
+        -- Cria o projétil
+        local arrow = c.add_entity(spawn_pos, "nh_mob:plasma2")
+        if arrow then
+            arrow:set_velocity(vector.multiply(dir, 25))
+            arrow:set_yaw(user:get_look_horizontal())
+            -- Acessa a entidade
+            local ent = arrow:get_luaentity()
+            if ent then
+                ent._owner_obj = user
+                ent._lifetime_timer = 0
+            end
         end
-    end
-    itemstack:add_wear(0)
-    return itemstack
-end,
+        itemstack:add_wear(0)
+        return itemstack
+    end,
 })
 
--- Capacete
+-- Capacete de cobre
 c.register_node("nh_nodes:copperhelmet", {
     description = S "Copper Helmet",
     drawtype = "mesh",
@@ -10785,7 +10431,7 @@ c.register_node("nh_nodes:copperhelmet", {
     --armor_groups = {fleshy = 5},  -- Proteção
 })
 
--- Armadura peitoral
+-- Armadura peitoral de cobre
 c.register_node("nh_nodes:copperchestplate", {
     description = S "Copper Chestplate",
     drawtype = "mesh",
@@ -10798,13 +10444,10 @@ c.register_node("nh_nodes:copperchestplate", {
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = 0.6, y = 4.1, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},    -- Ajuste Y para girar (90° = direita)
+    armor_bone_position = {pos = xyz(0.6, 4.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
 })
 
--- Armadura de cintura
+-- Armadura de cintura de cobre
 c.register_node("nh_nodes:fauld", {
     description = S "Copper Fauld",
     drawtype = "mesh",
@@ -10817,41 +10460,51 @@ c.register_node("nh_nodes:fauld", {
     groups = {armor_waist = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = 0.6, y = 2.1, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},    -- Ajuste Y para girar (90° = direita)
+    armor_bone_position = {pos = xyz(0.6, 2.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
 })
 
--- Exemplo de calças
+-- Calça de cobre
 c.register_node("nh_nodes:leggings", {
     description = S "Copper Leggings",
     drawtype = "mesh",
-    mesh = "leggings.obj",
+    mesh = "leggings.obj",       -- parte da cintura (já funciona)
     tiles = { "copperlegging.png" },
-    stack_max = 1, -- limita a 1 por slot
+    stack_max = 1,
     paramtype = "light",
     paramtype2 = "facedir",
     walkable = false,
-    groups = {armor_legs = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5,},
-    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {
-        pos = { x = 0.6, y = 2.1, z = 0 }, -- Ajuste Y para descer
-        rot = { x = 0, y = -90, z = 0 }},    -- Ajuste Y para girar (90° = direita)
+    groups = { armor_legs = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5 },
+    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 } },
+    collision_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 } },
+    armor_bone_position = {pos = xyz(0.6, 2.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
+    -- As 4 peças nas pernas
+    armor_extra_pieces = {
+        {bone = "bone_LLeg", mesh = "leggingsLRup.obj", -- coxa esquerda
+            pos  = xyz(0, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4.5)},
+        {bone = "bone_RLeg", mesh = "leggingsLRup.obj", -- coxa direita
+            pos  = xyz(0, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4.5)},
+        {bone = "bone_LLeg_down", mesh = "leggingsLRup.obj", -- canela esquerda
+            pos  = xyz(-0.5, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4)},
+        {bone = "bone_RLeg_down", mesh = "leggingsLRup.obj", -- canela direita
+            pos  = xyz(-0.5, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4)},
+    },
 })
 
--- Exemplo de botas
---c.register_node("nh_nodes:boots", {
---    description = "Botas Básicas",
---    inventory_image = "boots_basic.png",
---    groups = {armor_feet = 1},
---    stack_max = 1,  -- limita a 1 por slot
-
---    paramtype = "light",
---    paramtype2 = "facedir",
---})
+-- Botas de cobre
+c.register_node("nh_nodes:boots", {
+    description = S "Copper Sabaton" .. " " .. S "[Boots]",
+    drawtype = "mesh",
+    mesh = "boots.obj",
+    tiles = { "copperlegging.png" },
+    stack_max = 1,  -- limita a 1 por slot
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    groups = {armor_feet = 1, oddly_breakable_by_hand = 3},
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    armor_bone_position = {pos = xyz(0.6, 1.2, 0), rot = xyz(0, -90, 0)} -- Posição customizada quando equipado
+})
 
 -- Asas
 c.register_node("nh_nodes:closedwings", {
@@ -10915,7 +10568,6 @@ c.register_globalstep(function(dtime)
         local name = player:get_player_name()
         local wearing = has_wings_equipped(player)
         local privs = c.get_player_privs(name)
-
         if wearing and not players_with_wings[name] then
             players_with_wings[name] = true
             privs.fly = true
@@ -10968,17 +10620,11 @@ c.register_node("nh_nodes:oakdoor_closed", {
     --sounds = default.node_sound_wood_defaults(),
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, -0.375 }}, -- 3 blocos de altura, fina
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.3, 0.5, 2.5, 0.05 }},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -2, y = -0.9, z = 1.35 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 3, y = -1, z = 0.7 },
-        rot = { x = 0, y = 0, z = 90 }},
+    wielded_bone_position = {pos = { x = -2, y = -0.9, z = 1.35 }}, -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 3, y = -1, z = 0.7 }, rot = { x = 0, y = 0, z = 90 }}, -- Configuração mão esquerda
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        c.set_node(pos, { name = "nh_nodes:oakdoor_open", param2 = node.param2 }) -- Abre a porta
-        c.sound_play("door_open", { pos = pos, gain = 0.3, max_hear_distance = 10 })
+        c.set_node(pos, {name = "nh_nodes:oakdoor_open", param2 = node.param2}) -- Abre a porta
+        c.sound_play("door_open", {pos = pos, gain = 0.3, max_hear_distance = 10})
     end,
 })
 
@@ -10996,14 +10642,8 @@ c.register_node("nh_nodes:oakdoor_open", {
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.38, -0.375, 2.5, 0.63 }}, -- Porta na lateral quando aberta
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.38, -0.375, 2.5, 0.63 }}, -- Colisão fina na lateral
-    -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = -2, y = -1, z = 1.35 },
-        rot = { x = 0, y = -90, z = -90 }},
-    -- Configuração mão esquerda
-    offhand_bone_position = {
-        pos = { x = 3, y = -1, z = -1.4 },
-        rot = { x = 0, y = 90, z = 90 }},
+    wielded_bone_position = {pos = { x = -2, y = -1, z = 1.35 }, rot = { x = 0, y = -90, z = -90 }},  -- Configuração mão direita
+    offhand_bone_position = {pos = { x = 3, y = -1, z = -1.4 }, rot = { x = 0, y = 90, z = 90 }},  -- Configuração mão esquerda
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         c.set_node(pos, { name = "nh_nodes:oakdoor_closed", param2 = node.param2 }) -- Fecha a porta
@@ -11020,9 +10660,7 @@ local item_desc_index = {} -- [lang_code][item_name] = {desc_traduzida, desc_ori
 local function build_item_cache()
     if next(item_cache) then return end
     for name, def in pairs(c.registered_items) do
-        if name ~= "" then
-            table.insert(item_cache, name)
-        end
+        if name ~= "" then table.insert(item_cache, name) end
     end
     table.sort(item_cache)
 end
@@ -11040,16 +10678,12 @@ local function ensure_desc_index(lang_code)
         local terms      = {}
         for line in (translated .. "\n"):gmatch("([^\n]*)\n") do
             local trimmed = line:match("^%s*(.-)%s*$") -- remove espaços
-            if trimmed ~= "" then
-                table.insert(terms, trimmed:lower())
-            end
+            if trimmed ~= "" then table.insert(terms, trimmed:lower()) end
         end
         -- Adiciona também as linhas originais em inglês como fallback
         for line in (original .. "\n"):gmatch("([^\n]*)\n") do
             local trimmed = line:match("^%s*(.-)%s*$")
-            if trimmed ~= "" then
-                table.insert(terms, trimmed:lower())
-            end
+            if trimmed ~= "" then table.insert(terms, trimmed:lower()) end
         end
         item_desc_index[lang_code][name] = terms
     end
@@ -11068,15 +10702,10 @@ local function filter_items(search, lang_code)
 
         if not matched and index[name] then
             for _, desc in ipairs(index[name]) do
-                if desc:find(term, 1, true) then
-                    matched = true
-                    break
-                end
+                if desc:find(term, 1, true) then matched = true break end
             end
         end
-        if matched then
-            table.insert(result, name) -- corrigido: era `matched` por engano
-        end
+        if matched then table.insert(result, name) end -- corrigido: era `matched` por engano
     end
     return result
 end
@@ -11094,23 +10723,16 @@ c.register_entity("nh_nodes:grimoire_entity", {
         static_save  = false,                -- não persiste ao reiniciar
     },
     on_activate = function(self, staticdata)
-        -- Animação de abertura: frames 0 → 0.5 s  (ex.: 30 fps → frame 0 a 15)
-        self.object:set_animation(
-            { x = 0, y = 0.5 }, -- intervalo de frames
-            30,                 -- fps
-            0,                  -- frame_blend
-            false               -- loop
-        )
+        -- Animação de abertura
+        self.object:set_animation({ x = 0, y = 0.5 }, 30, 0, false) -- intervalo de frames, fps, frame_blend,loop
         self._closing = false
     end,
     on_step = function(self, dtime)
         if not self._closing then return end
-
         self._close_timer = (self._close_timer or 0) + dtime
         -- Espera a animação de fechamento terminar (~0.5 s) e então limpa tudo
         if self._close_timer >= 0.6 then
             local pos = self.object:get_pos()
-
             -- Restaura o node original
             if self._node_pos then
                 c.set_node(self._node_pos, { name = "nh_nodes:archion", param2 = self._node_param2 or 0 })
@@ -11121,7 +10743,7 @@ c.register_entity("nh_nodes:grimoire_entity", {
 })
 
 
--- ─── Helpers de swap ────────────────────────────────────────
+-- Helpers de swap
 -- Guarda: player_name → {entity, node_pos, node_param2}
 local open_grimoires = {}
 local function spawn_grimoire_entity(pos, param2, player_name)
@@ -11130,11 +10752,7 @@ local function spawn_grimoire_entity(pos, param2, player_name)
     c.set_node(pos, { name = "air" })
     -- Spawna a entidade no mesmo lugar
     local obj = c.add_entity(pos, "nh_nodes:grimoire_entity")
-    if not obj then
-        -- Fallback: restaura o node se falhar
-        c.set_node(pos, { name = "nh_nodes:archion", param2 = node_param2 })
-        return nil
-    end
+    if not obj then c.set_node(pos, {name = "nh_nodes:archion", param2 = node_param2}) return nil end -- Fallback: restaura o node se falhar
     -- Aplica a mesma rotação do node (facedir → yaw)
     local function facedir_to_yaw(param2)
         -- Pega o vetor de direção frontal do facedir
@@ -11150,8 +10768,7 @@ local function spawn_grimoire_entity(pos, param2, player_name)
     open_grimoires[player_name] = {
         entity      = obj,
         node_pos    = vector.copy(pos),
-        node_param2 = node_param2,
-    }
+        node_param2 = node_param2}
     return obj
 end
 
@@ -11173,12 +10790,7 @@ local function close_grimoire_entity(player_name)
         return
     end
     -- Animação de fechamento: frames 0.5 → 1 s  (ex.: 30 fps → frame 15 a 30)
-    obj:set_animation(
-        { x = 0.5, y = 1 },
-        30,
-        0,
-        false
-    )
+    obj:set_animation({ x = 0.5, y = 1 }, 30, 0, false)
     ent._closing                = true
     ent._close_timer            = 0
     -- on_step cuidará de remover a entidade e restaurar o node
@@ -11219,8 +10831,7 @@ function show_grimoire(player, page, search)
                 "item_image_button[" ..
                 (x0 + x * 1.1) .. "," ..
                 (y0 + y * 1.1) .. ";1,1;" ..
-                items[i] .. ";item_" .. i .. ";]"
-            )
+                items[i] .. ";item_" .. i .. ";]")
             i = i + 1
         end
     end
@@ -11228,9 +10839,7 @@ function show_grimoire(player, page, search)
         -- Com backchest: mostra slots extras (8x2) + hotbar (8x1)
         table.insert(fs, "list[current_player;main;1,8.6;8,2;8]")
         table.insert(fs, "list[current_player;main;1,11.3;8,1;]")
-    else
-        -- Sem backchest: mostra apenas a hotbar (8x1)
-        table.insert(fs, "list[current_player;main;1,9;8,1;]")
+    else table.insert(fs, "list[current_player;main;1,9;8,1;]") -- Sem backchest: mostra apenas a hotbar (8x1)
     end
     table.insert(fs, "listring[current_player;main]")
     c.show_formspec(name, "nh_nodes:materialization", table.concat(fs))
@@ -11245,18 +10854,13 @@ c.register_node("nh_nodes:archion", {
     max_stake             = 1,
     paramtype             = "light",
     paramtype2            = "facedir",
-    groups                = { snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1 },
-    -- Configuração mão direita
-    wielded_bone_position = {
-        pos = { x = 0.5, y = -1, z = 1.15 },
-        rot = { x = 90, y = 0, z = 90 }},
-    wielded_visual_size   = { x = 0.2, y = 0.2, z = 0.2 },
-    offhand_bone_position = {
-        pos = { x = 0.5, y = -1, z = -1.15 },
-        rot = { x = -90, y = 0, z = 270 }},
+    groups                = {oddly_breakable_by_hand = 3, falling_node = 1},
+    wielded_bone_position = {pos = xyz(0.5, -1, 1.15), rot = xyz(90, 0, 90)},  -- Configuração mão direita
+    wielded_visual_size   = xyz(0.2),
+    offhand_bone_position = {pos = xyz(0.5, -1, -1.15), rot = xyz(-90, 0, 270)},
     -- wielded_visual_size = {x = 0.25, y = 0.25, z = 0.25},
-    collision_box         = {type  = "fixed", fixed = { -0.1, -0.5, -0.1, 0.1, -0.45, 0.1 }},
-    selection_box         = {type  = "fixed", fixed = { -0.375, -0.5, -0.5, 0.375, -0.25, 0.5 }},
+    collision_box         = {type  = "fixed", fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}},
+    selection_box         = {type  = "fixed", fixed = {-0.375, -0.5, -0.5, 0.375, -0.25, 0.5}},
     on_rightclick         = function(pos, node, player, itemstack, pointed_thing)
         local controls = player:get_player_control()
         if controls.aux1 then
@@ -11271,63 +10875,48 @@ c.register_node("nh_nodes:archion", {
         end
         if itemstack and not itemstack:is_empty() then
             local item_def = c.registered_items[itemstack:get_name()]
-            if item_def and item_def.type == "node" then
-                return c.item_place_node(itemstack, player, pointed_thing)
-            end
+            if item_def and item_def.type == "node" then return c.item_place_node(itemstack, player, pointed_thing) end
             if item_def and item_def.on_place then
-                local safe_pointed = {
-                    type  = pointed_thing.type,
+                local safe_pointed = {type  = pointed_thing.type,
                     under = pointed_thing.above,
-                    above = pointed_thing.above,
-                }
+                    above = pointed_thing.above}
                 return item_def.on_place(itemstack, player, safe_pointed)
             end
         end
         if itemstack:is_empty() then
-            c.chat_send_player(
-                player:get_player_name(),
-                S(
-                    "I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to open...")
-            )
+            c.chat_send_player(player:get_player_name(), S("I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to open..."))
         end
         return itemstack
     end,
 })
 -- Recebimento de campos 
 local player_state = {}
-
 c.register_on_player_receive_fields(function(player, formname, fields)
     if formname ~= "nh_nodes:materialization" then return end
-
     local name = player:get_player_name()
     player_state[name] = player_state[name] or { page = 1, search = "" }
     local state = player_state[name]
-
     -- Fechamento do formspec (clique em X ou pressiona Esc)
     if fields.quit then
         close_grimoire_entity(name)
         return
     end
-
     if fields.do_search or fields.key_enter_field == "search" then
         state.search = fields.search or ""
         state.page   = 1
         show_grimoire(player, state.page, state.search)
         return
     end
-
     if fields.next then
         state.page = state.page + 1
         show_grimoire(player, state.page, state.search)
         return
     end
-
     if fields.prev then
         state.page = math.max(1, state.page - 1)
         show_grimoire(player, state.page, state.search)
         return
     end
-
     for field, _ in pairs(fields) do
         if field:sub(1, 5) == "item_" then
             local index     = tonumber(field:sub(6))
@@ -11335,9 +10924,7 @@ c.register_on_player_receive_fields(function(player, formname, fields)
             local lang_code = (info and info.lang_code) or "en"
             local items     = filter_items(state.search, lang_code)
             local item      = items[index]
-            if item then
-                player:get_inventory():add_item("main", item)
-            end
+            if item then player:get_inventory():add_item("main", item) end
             return
         end
     end
@@ -11348,9 +10935,7 @@ c.register_on_leaveplayer(function(player)
     -- Fecha "na força" sem animação para não deixar entidade órfã
     local data = open_grimoires[name]
     if data then
-        if data.entity and data.entity:get_pos() then
-            data.entity:remove()
-        end
+        if data.entity and data.entity:get_pos() then data.entity:remove() end
         c.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
         open_grimoires[name] = nil
     end

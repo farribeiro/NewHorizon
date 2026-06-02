@@ -3,10 +3,7 @@ local S = core.get_translator("nh_body")
 local function sit_log(player_name, msg)   minetest.log("action", "[SIT DEBUG] [" .. player_name .. "] " .. msg) end --aqui
 -- TABELAS GLOBAIS
 --local shadow_objects = {}
-local function table_xyz(fx, fy, fz)
-    return {x = fx, y = fy, z = fz}
-end
-local zeroaxys = table_xyz(0,0,0)
+local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return {x = x, y = y, z = z} end
 local last_wielded = {}
 local last_wield_index = {}
 local player_states = {}
@@ -20,14 +17,7 @@ local last_sneak = {}
 local last_backpack_state = {}
 local body_entities = {}
 
--- ═══════════════════════════════════════════════════════════════════
 -- BACKCHEST ↔ SLOTS main[9..24]
---   A fonte da verdade são os slots main[9..24] enquanto equipada.
---   Ao desequipar, copiamos para backchest_stored_items e ZERAMOS
---   os slots imediatamente e de forma síncrona no globalstep,
---   garantindo que qualquer formspec externo (baús, etc.) já veja
---   os slots vazios sem precisar de core.after.
--- ═══════════════════════════════════════════════════════════════════
 local BC_OFFSET = 8   -- main[9] .. main[24]
 local BC_COUNT  = 16
 local bc_sync_lock = {}   -- evita loops recursivos por player
@@ -43,22 +33,18 @@ local function bc_save(player)
     local inv   = player:get_inventory()
     local stack = inv:get_stack("armor_back", 1)
     local meta  = stack:get_meta()
-
     local chest_id = meta:get_string("chest_id")
     if chest_id == "" then
         chest_id = tostring(os.time()) .. "_" .. tostring(math.random(1, 999999))
         meta:set_string("chest_id", chest_id)
     end
-
     if not backchest_stored_items then backchest_stored_items = {} end
-
     local slots, has = {}, false
     for i = 1, BC_COUNT do
         local s = inv:get_stack("main", BC_OFFSET + i)
         slots[i] = s:to_string()
         if not s:is_empty() then has = true end
     end
-
     if has then
         backchest_stored_items[chest_id] = slots
         meta:set_string("description", "Backpack Chest\n(contains items)")
@@ -78,9 +64,7 @@ local function bc_load(player)
     local stack = inv:get_stack("armor_back", 1)
     local chest_id = stack:get_meta():get_string("chest_id")
     local stored = (chest_id ~= "" and backchest_stored_items and backchest_stored_items[chest_id]) or {}
-    for i = 1, BC_COUNT do
-        inv:set_stack("main", BC_OFFSET + i, ItemStack(stored[i] or ""))
-    end
+    for i = 1, BC_COUNT do inv:set_stack("main", BC_OFFSET + i, ItemStack(stored[i] or "")) end
     bc_sync_lock[player:get_player_name()] = false
 end
 
@@ -90,9 +74,7 @@ local function bc_unload(player)
     bc_sync_lock[player:get_player_name()] = true
     bc_save(player)   -- persiste antes de apagar
     local inv = player:get_inventory()
-    for i = 1, BC_COUNT do
-        inv:set_stack("main", BC_OFFSET + i, ItemStack(""))
-    end
+    for i = 1, BC_COUNT do inv:set_stack("main", BC_OFFSET + i, ItemStack("")) end
     bc_sync_lock[player:get_player_name()] = false
 end
 local armor_slots = {
@@ -111,15 +93,7 @@ local punch_loop_timers = {}
 local is_punching = {}
 local is_placing = {}
 local last_place_time = {}
--- TABELA PARA CONTROLAR ANIMAÇÃO DE SENTAR
--- Máquina de estados:
---   "idle"        -> aguardando agachadas
---   "counting"    -> contando agachadas (sneak pressionado/solto)
---   "holding"     -> 3ª agachada sendo segurada (aguarda tempo mínimo)
---   "sit_anim"    -> reproduzindo a animação de transição (12~12.5s do GLB)
---   "sitting"     -> parado na pose final (frame 12.5s) até tecla de movimento
---   "lie_anim"    -> reproduzindo a animação de deitar (12.5~13s do GLB)
---   "lying"       -> parado na pose deitado (frame 13s) até tecla de saída
+-- TABELAS PARA ANIMAÇÃO DE SENTAR
 local sit_state = {}          -- estado da máquina por player
 local sit_sneak_count = {}    -- quantas vezes agachou nesta sequência
 local sit_sneak_held = {}     -- tempo (em segundos) que a 3ª agachada está sendo segurada
@@ -150,32 +124,32 @@ core.register_entity("nh_body:player_body", {
         self.last_bone_head = nil
         self.last_bone_torso = nil
         self.last_bone_legs = nil
+        self.last_bone_feet = nil
     end,
     on_step = function(self, dtime)
-        if not self.player_name then
-            self.object:remove()
-            return
-        end
+        if not self.player_name then self.object:remove() return end
         local player = core.get_player_by_name(self.player_name)
-        if not player then
-            self.object:remove()
-            return
-        end
+        if not player then self.object:remove() return end
         -- Sincroniza rotações dos bones apenas se mudaram
         local head_rot  = player:get_bone_override("bone_All_Head").rotation.vec
         local torso_rot = player:get_bone_override("bone_TorsoArms").rotation.vec
         local legs_rot  = player:get_bone_override("bone_Legs").rotation.vec
+        local feet_rot  = player:get_bone_override("bone_Feet").rotation.vec
         if not self.last_bone_head or not vector.equals(head_rot, self.last_bone_head.rot) then -- Verifica se a rotação da cabeça mudou
-            self.object:set_bone_override("bone_All_Head", { rotation = { vec = head_rot } })
-            self.last_bone_head = { rot = head_rot }
+            self.object:set_bone_override("bone_All_Head", {rotation = {vec = head_rot}})
+            self.last_bone_head = {rot = head_rot}
         end
         if not self.last_bone_torso or not vector.equals(torso_rot, self.last_bone_torso.rot) then -- Verifica se a rotação do torso mudou
-            self.object:set_bone_override("bone_TorsoArms", { rotation = { vec = torso_rot } })
-            self.last_bone_torso = { rot = torso_rot }
+            self.object:set_bone_override("bone_TorsoArms", {rotation = {vec = torso_rot}})
+            self.last_bone_torso = {rot = torso_rot}
         end
         if not self.last_bone_legs or not vector.equals(legs_rot, self.last_bone_legs.rot) then -- Verifica se a rotação das pernas mudou
-            self.object:set_bone_override("bone_Legs", { rotation = { vec = legs_rot } })
-            self.last_bone_legs = { rot = legs_rot }
+            self.object:set_bone_override("bone_Legs", {rotation = {vec = legs_rot}})
+            self.last_bone_legs = {rot = legs_rot}
+        end
+        if not self.last_bone_feet or not vector.equals(legs_rot, self.last_bone_feet.rot) then -- Verifica se a rotação das pernas mudou
+            self.object:set_bone_override("bone_Feet", {rotation = {vec = feet_rot}})
+            self.last_bone_feet = {rot = feet_rot}
         end
     end,
 })
@@ -194,8 +168,7 @@ local function create_player_body(player)
         local luaentity = body:get_luaentity()
         luaentity.player_name = player_name
         -- Anexa ao player na mesma posição
-        body:set_attach(player, "", -- Bone principal (corpo todo)
-            zeroaxys, zeroaxys, true)
+        body:set_attach(player, "", xyz(0), xyz(0), true) -- "" Bone principal (corpo todo)
         -- ★ SINCRONIZA OS BONES IMEDIATAMENTE ★
         core.after(0.1, function()
             if not body or not body:get_luaentity() then return end
@@ -240,6 +213,24 @@ local function update_body_textures(player)
     end
     body:set_properties({ textures = textures }) -- Atualiza textura do corpo visível
 end
+core.register_entity("nh_body:armor_mesh_piece", {
+    initial_properties = {
+        visual = "mesh",
+        mesh = "leggingsLRup.obj",        -- placeholder; sobrescrito no attach
+        textures = { "copperlegging.png" }, -- placeholder; sobrescrito no attach
+        --visual_size = { x = 1, y = 1, z = 1 },
+        physical = false,
+        collide_with_objects = false,
+        pointable = false,
+        static_save = false,
+        shaded = true,
+    },
+    on_step = function(self, dtime)
+        if not self.player_name then self.object:remove() return end
+        local player = core.get_player_by_name(self.player_name)
+        if not player then self.object:remove() return end
+    end,
+})
 -- REGISTRA A ENTIDADE DO ITEM NA CINTURA
 core.register_entity("nh_body:belt_item", {
     initial_properties = {
@@ -328,7 +319,7 @@ local hand_capabilities = {
 --     {
 --         type = "none",
 --         wield_image = "",
---         wield_scale = zeroaxys,
+--         wield_scale = xyz(0),
 --         range = 4,
 --         inventory_image = "",
 --         tool_capabilities = hand_capabilities,
@@ -337,7 +328,7 @@ local hand_capabilities = {
 --     })
 core.override_item("", { -- "" é o itemstring da mão sem itens
     wield_image = "",
-    wield_scale = zeroaxys,
+    wield_scale = xyz(0),
     range = 3,
     tool_capabilities = hand_capabilities,
 })
@@ -535,16 +526,16 @@ local function get_armor_formspec(player_name)
     local has_backpack = not backpack_stack:is_empty() and backpack_stack:get_name() == "nh_nodes:backchest"
     return table.concat(
         { "size[9,9.5]", "bgcolor[#00000000;true]", "background[0,0;9,9.5;gui_formbg.png]",
-            "label[0.5,0.5;Cabeça]", "list[current_player;armor_head;0.5,0.5;1,1;]",
-            "label[0.5,1.6;Tronco]", "list[current_player;armor_torso;0.5,1.6;1,1;]",
-            "label[0.5,2.7;Pernas]", "list[current_player;armor_legs;0.5,2.7;1,1;]",
-            "label[0.5,3.8;Pés]", "list[current_player;armor_feet;0.5,3.8;1,1;]",
-            "model[1.25,0.5;3,6;player_model;character11.glb;skin.png;0,180;false;true]",
-            "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
-            "label[3.5,0.5;Costas]", "list[current_player;armor_back;3.5,0.5;1,1;]",
-            "label[3.5,1.6;Braços]", "list[current_player;armor_arms;3.5,1.6;1,1;]",
-            "label[3.5,2.7;Mãos]", "list[current_player;armor_hands;3.5,2.7;1,1;]",
-            "label[3.5,3.8;Cintura]",
+           "label[0.5,0.5;" .. S("Head") .. "]", "list[current_player;armor_head;0.5,0.5;1,1;]",
+           "label[0.5,1.6;" .. S("Torso") .. "]", "list[current_player;armor_torso;0.5,1.6;1,1;]",
+           "label[0.5,2.7;" .. S("Legs") .. "]", "list[current_player;armor_legs;0.5,2.7;1,1;]",
+           "label[0.5,3.8;" .. S("Feet") .. "]", "list[current_player;armor_feet;0.5,3.8;1,1;]",
+           "model[1.25,0.5;3,6;player_model;character11.glb;skin.png;0,180;false;true]",
+           "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
+           "label[3.5,0.5;" .. S("Back")  .. "]", "list[current_player;armor_back;3.5,0.5;1,1;]",
+           "label[3.5,1.6;" .. S("Arms")  .. "]", "list[current_player;armor_arms;3.5,1.6;1,1;]",
+           "label[3.5,2.7;" .. S("Hands") .. "]", "list[current_player;armor_hands;3.5,2.7;1,1;]",
+           "label[3.5,3.8;" .. S("Waist") .. "]",
             "list[current_player;armor_waist;3.5,3.8;1,1;]",
             has_backpack and "list[current_player;main;0.5,5.7;8,2;8] list[current_player;main;0.5,7.9;8,1;]" or
             "list[current_player;main;0.5,7.9;8,1;]",
@@ -630,91 +621,132 @@ local function update_armor_visuals(player)
     end
     armor_entities[player_name] = {}
     local armor_bones = {
-        head = {
-            bone = "bone_All_Head",
+        head = {bone = "bone_All_Head",
             pos = { x = 0, y = 4.75, z = 0 },
-            rot = zeroaxys,
-            size = { x = 0.3, y = 0.3, z = 0.3 },
-        },
-        torso = {
-            bone = "bone_TorsoArms",
-            pos = zeroaxys,
-            rot = zeroaxys,
-            size = { x = 0.35, y = 0.35, z = 0.35 }
-        },
-        waist = {
-            bone = "bone_TorsoArms",
+            rot = xyz(0),
+            size = { x = 0.3, y = 0.3, z = 0.3 }},
+        torso = {bone = "bone_TorsoArms",
+            pos = xyz(0),
+            rot = xyz(0),
+            size = { x = 0.35, y = 0.35, z = 0.35 }},
+        waist = {bone = "bone_TorsoArms",
             pos = { x = 0.5, y = 2.5, z = 0 },
             rot = { x = 0, y = -90, z = 0 },
-            size = { x = 0.3, y = 0.3, z = 0.3 }
-        },
-        legs = {
-            bone = "bone_Legs",
-            pos = zeroaxys,
-            rot = zeroaxys,
-            size = { x = 0.3, y = 0.3, z = 0.3 }
-        },
-        back = {
-            bone = "bone_TorsoArms",
+            size = { x = 0.3, y = 0.3, z = 0.3 }},
+        legs = {bone = "bone_TorsoArms", -- "bone_Legs",
+            pos = xyz(0),
+            rot = xyz(0),
+            size = { x = 0.3, y = 0.3, z = 0.3 }},
+        back = {bone = "bone_TorsoArms",
             pos = { x = -2.5, y = 2.5, z = 0 },
             rot = { x = 0, y = -90, z = 0 },
-            size = { x = 0.3, y = 0.3, z = 0.3 }
-        },
-        arms = {
-            bone = "bone_TorsoArms",
+            size = { x = 0.3, y = 0.3, z = 0.3 }},
+        arms = {bone = "bone_TorsoArms",
             pos = { x = 0, y = -2, z = 0 },
-            rot = zeroaxys,
-            size = { x = 0.25, y = 0.25, z = 0.25 }
-        },
-        hands = {
-            bone = "bone_RHand",
-            pos = zeroaxys,
-            rot = zeroaxys,
-            size = { x = 0.2, y = 0.2, z = 0.2 }
-        },
-        feet = {
-            bone = "bone_Legs",
-            pos = { x = 0, y = -4, z = 0 },
-            rot = zeroaxys,
-            size = { x = 0.25, y = 0.25, z = 0.25 }
-        }
+            rot = xyz(0),
+            size = { x = 0.25, y = 0.25, z = 0.25 } },
+        hands = {bone = "bone_RHand", bone_l = "bone_LHand",
+            pos = xyz(0),
+            rot = xyz(0),
+            size = { x = 0.2, y = 0.2, z = 0.2 }},
+        feet = {bone = "bone_LLeg_foot", bone_r = "bone_RLeg_foot", -- bone do pé ESQUERDO / bone do pé DIREITO
+            pos = xyz(0),
+            rot = xyz(0),
+            size = { x = 0.25, y = 0.25, z = 0.25 }}
     }
     for slot, config in pairs(armor_bones) do
         local stack = inv:get_stack("armor_" .. slot, 1)
         if not stack:is_empty() then
             local item_name = stack:get_name()
             local item_def = core.registered_items[item_name]
-            -- COPIA OS VALORES PADRÃO
-            local final_pos = config.pos
-            local final_rot = config.rot
+            local final_pos  = config.pos
+            local final_rot  = config.rot
             local final_size = config.size
-            -- SOBRESCREVE COM VALORES CUSTOMIZADOS SE EXISTIREM
+            -- Permite que o item sobrescreva posição/rotação
             if item_def then
-                -- Suporte para armor_bone_position
                 if item_def.armor_bone_position then
                     final_pos = item_def.armor_bone_position.pos or final_pos
                     final_rot = item_def.armor_bone_position.rot or final_rot
                 end
-                final_size = item_def.armor_visual_size or final_size -- Suporte para armor_visual_size
+                final_size = item_def.armor_visual_size or final_size
             end
             local visual_item = item_name
             if item_def and item_def.armor_model then visual_item = item_def.armor_model end
-            local pos = player:get_pos()
-            local entity = core.add_entity(pos, "nh_body:armor_piece")
-            if entity then
-                local luaentity = entity:get_luaentity()
-                luaentity.player_name = player_name
-                luaentity.slot = slot
-                entity:set_attach(player, config.bone, final_pos, -- USA POSIÇÃO CUSTOMIZADA
-                    final_rot,                                    -- USA ROTAÇÃO CUSTOMIZADA
-                    true)
-                entity:set_properties({
-                    wield_item = visual_item,
-                    visual = "wielditem",
-                    visual_size = final_size -- USA TAMANHO CUSTOMIZADO
-                })
-                armor_entities[player_name][slot] = entity
+            -- Lista de bones para este slot (pés têm dois; outros têm um)
+            local bones_to_attach = { config.bone }
+            if config.bone_r then bones_to_attach[2] = config.bone_r end
+            -- dual hands: gauntlets e itens com armor_dual_hands = true aparecem nas duas mãos
+            if config.bone_l and item_def and (item_def.groups and item_def.groups.armor_hands == 2) then
+                local left_bone = config.bone_l
+                local left_pos  = (item_def.armor_bone_position_l and item_def.armor_bone_position_l.pos) or final_pos
+                local left_rot  = (item_def.armor_bone_position_l and item_def.armor_bone_position_l.rot) or final_rot
+                -- Espelha no eixo X invertendo visual_size.x
+                local left_size = {
+                    x = -final_size.x,  -- negativo = espelho
+                    y =  final_size.y,
+                    z =  final_size.z,
+                }
+                local left_entity = core.add_entity(player:get_pos(), "nh_body:armor_piece")
+                if left_entity then
+                    local elu = left_entity:get_luaentity()
+                    elu.player_name = player_name
+                    elu.slot = slot .. "_left"
+                    left_entity:set_attach(player, left_bone, left_pos, left_rot, true)
+                    left_entity:set_properties({
+                        wield_item = visual_item,
+                        visual = "wielditem",
+                        visual_size = left_size
+                    })
+                    armor_entities[player_name][elu.slot] = left_entity
+                end
             end
+            for bi, bone_name in ipairs(bones_to_attach) do
+                -- Permite que o item sobrescreva o bone também (opcional)
+                local use_bone = (item_def and item_def.armor_bone) or bone_name
+                local pos = player:get_pos()
+                local entity = core.add_entity(pos, "nh_body:armor_piece")
+                if entity then
+                    local luaentity = entity:get_luaentity()
+                    luaentity.player_name = player_name
+                    luaentity.slot = slot .. (bi > 1 and ("_" .. bi) or "")
+                    entity:set_attach(player, use_bone, final_pos, final_rot, true)
+                    entity:set_properties({
+                        wield_item = visual_item,
+                        visual = "wielditem",
+                        visual_size = final_size
+                    })
+                    armor_entities[player_name][luaentity.slot] = entity
+                end
+            end
+            -- PEÇAS EXTRAS (partes adicionais da mesma armadura em outros bones)
+if item_def and item_def.armor_extra_pieces then
+    for ei, extra in ipairs(item_def.armor_extra_pieces) do
+        local epos  = extra.pos  or xyz(0)
+        local erot  = extra.rot  or xyz(0)
+        local esize = extra.size or final_size
+        local ebone = extra.bone
+        -- pega textura: do extra, ou do item principal
+        local etex  = extra.texture or (item_def.tiles and item_def.tiles[1]) or "copperlegging.png"
+        local emesh = extra.mesh   -- OBRIGATÓRIO: nome do .obj
+
+        if emesh and ebone then
+            local eentity = core.add_entity(player:get_pos(), "nh_body:armor_mesh_piece")
+            if eentity then
+                local elu = eentity:get_luaentity()
+                elu.player_name = player_name
+                elu.slot = slot .. "_extra_" .. ei
+                eentity:set_attach(player, ebone, epos, erot, true)
+                eentity:set_properties({
+                    visual      = "mesh",
+                    mesh        = emesh,
+                    textures    = { etex },
+                    visual_size = esize,
+                })
+                armor_entities[player_name][elu.slot] = eentity
+            end
+        end
+    end
+end
         end
     end
 end
@@ -861,8 +893,8 @@ local function rotate_head_to_look(player)
     head_pitch = math.max(-60, math.min(60, head_pitch))
     player:set_bone_override("bone_All_Head",
         { rotation = { vec = { x = 0, y = head_yaw * 0.01, z = head_pitch * 0.02 } } })
-    player:set_bone_override("bone_TorsoArms", { rotation = { vec = zeroaxys } })
-    player:set_bone_override("bone_Legs", { rotation = { vec = zeroaxys } })
+    player:set_bone_override("bone_TorsoArms", { rotation = { vec = xyz(0) } })
+    player:set_bone_override("bone_Legs", { rotation = { vec = xyz(0) } })
 end
 -- FUNÇÃO PARA DEFINIR ANIMAÇÃO DO PLAYER
 set_player_animation = function(player, anim)
