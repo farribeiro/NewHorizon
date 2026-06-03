@@ -221,22 +221,28 @@ Damage: +6=Dano: +6
 
 Basic Belt=Cinto Básico
 Backpack Chest=Mochila Baú
+
+Like Glove=Luva Legal
+Point Glove=Luva Apontar
+Leather Gloves=Luvas de Couro
+Leather Boots=Botas de Couro
+Leather Chestplate=Peitoral de Couro
+
+Shrimp Claw=Garra de Camarão
+Dimensional Claw=Garra Dimensional
+
 Copper Helmet=Elmo de Cobre
 Copper Chestplate=Peitoral de Cobre
+Copper Vambraces=Braçais de Cobre
 Copper Fauld=Escarcelas de Cobre
 Copper Leggings=Calça de Cobre
-Copper Sabaton=Escarpe de Cobre
-[Boots]=[Sapatos]
+Copper Gauntlets=Manoplas de Cobre
+Copper Sabatons=Escarpes de Cobre
+[Footwear]=[Calçado]
 
 Wings=Asas
 The wings are active! Use [flight] (k or enable in the menu) to fly.=As asas estão ativas! Use [voo] (k ou habilitar no menu) para voar.
 The wings were removed.=As asas foram removidas.
-
-Like Glove=Luva Legal
-Point Glove=Luva Apontar
-Lether Gauntlets=Manoplas de Couro
-Shrimp Claw=Garra de Camarão
-Dimensional Claw=Garra Dimensional
 
 Pebble=Seixo
 White Pebble=Seixo Branco

@@ -700,22 +700,26 @@ local function update_armor_visuals(player)
                     armor_entities[player_name][elu.slot] = left_entity
                 end
             end
-            for bi, bone_name in ipairs(bones_to_attach) do
-                -- Permite que o item sobrescreva o bone também (opcional)
-                local use_bone = (item_def and item_def.armor_bone) or bone_name
-                local pos = player:get_pos()
-                local entity = core.add_entity(pos, "nh_body:armor_piece")
-                if entity then
-                    local luaentity = entity:get_luaentity()
-                    luaentity.player_name = player_name
-                    luaentity.slot = slot .. (bi > 1 and ("_" .. bi) or "")
-                    entity:set_attach(player, use_bone, final_pos, final_rot, true)
-                    entity:set_properties({
-                        wield_item = visual_item,
-                        visual = "wielditem",
-                        visual_size = final_size
-                    })
-                    armor_entities[player_name][luaentity.slot] = entity
+            -- Se o item declarar armor_skip_main_piece = true, pula a entidade principal
+            -- (útil para itens que usam APENAS armor_extra_pieces em múltiplos bones)
+            if not (item_def and item_def.armor_skip_main_piece) then
+                for bi, bone_name in ipairs(bones_to_attach) do
+                    -- Permite que o item sobrescreva o bone também (opcional)
+                    local use_bone = (item_def and item_def.armor_bone) or bone_name
+                    local pos = player:get_pos()
+                    local entity = core.add_entity(pos, "nh_body:armor_piece")
+                    if entity then
+                        local luaentity = entity:get_luaentity()
+                        luaentity.player_name = player_name
+                        luaentity.slot = slot .. (bi > 1 and ("_" .. bi) or "")
+                        entity:set_attach(player, use_bone, final_pos, final_rot, true)
+                        entity:set_properties({
+                            wield_item = visual_item,
+                            visual = "wielditem",
+                            visual_size = final_size
+                        })
+                        armor_entities[player_name][luaentity.slot] = entity
+                    end
                 end
             end
             -- PEÇAS EXTRAS (partes adicionais da mesma armadura em outros bones)

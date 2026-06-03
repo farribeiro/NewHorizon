@@ -468,126 +468,15 @@ recipes_floor = {
         ingredients = { ["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1 },
         output = "nh_nodes:messagebottle"
     },
+    {
+        ingredients = { ["nh_nodes:shrimpclaw"] = 1, ["nh_nodes:sphere"] = 1 },
+        output = "nh_nodes:shrimpclaw2"
+    },
 }
 -- RECEITAS DA BANCADA DE PRODUÇÃO (2x2x2)
 -- Usada por: craft_table
 -- Inclui tudo do floor + itens avançados (espada, baú, porta, piões...)
 recipes_table = {
-    {
-        ingredients = { ["nh_nodes:pebble"] = 2 },
-        output = "nh_nodes:chippedstone"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble_item"] = 2 },
-        output = "nh_nodes:chippedstone"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1 },
-        output = "nh_nodes:stoneaxehead"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1 },
-        output = "nh_nodes:stonepickaxehead"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1 },
-        output = "nh_nodes:stonehoehead"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1 },
-        output = "nh_nodes:stoneadzehead"
-    },
-    {
-        ingredients = { ["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1 },
-        output = "nh_nodes:rowing"
-    },
-    {
-        ingredients = { ["nh_nodes:pinelog"] = 6, ["nh_nodes:palmstraw"] = 2 },
-        output = "nh_nodes:pineraft",
-        required_tool = "nh_nodes:palmstraw", -- ← só funciona com isso no slot
-    },
-    {
-        ingredients = { ["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:stoneaxe"
-    },
-    {
-        ingredients = { ["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:stonepickaxe"
-    },
-    {
-        ingredients = { ["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:stonehoe"
-    },
-    {
-        ingredients = { ["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:stoneadze"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1 },
-        output = "nh_nodes:obsidianblade"
-    },
-    {
-        ingredients = { ["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:chippedstoneknife"
-    },
-    {
-        ingredients = { ["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:obsidianknife"
-    },
-    {
-        ingredients = { ["nh_nodes:oakboard"] = 1, ["nh_nodes:obsidianblade"] = 7 },
-        output = "nh_nodes:obsidiansword"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 8 },
-        output = "nh_nodes:cobblestone"
-    },
-    {
-        ingredients = { ["nh_nodes:pebble_item"] = 8 },
-        output = "nh_nodes:cobblestone"
-    },
-    {
-        ingredients = { ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
-        output = "nh_nodes:campfiretinder"
-    },
-    {
-        ingredients = { ["nh_nodes:oaklog"] = 1 },
-        output = "nh_nodes:oakwood",
-        required_tool = "nh_nodes:stoneadze", -- ← só funciona com isso no slot
-    },
-    {
-        ingredients = { ["nh_nodes:pinelog"] = 1 },
-        output = "nh_nodes:pinewood",
-        required_tool = "nh_nodes:stoneadze", -- ← só funciona com isso no slot
-    },
-    {
-        ingredients = { ["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1 },
-        output = "nh_nodes:torch"
-    },
-    {
-        ingredients = { ["nh_nodes:oakwood"] = 1 },
-        output = "nh_nodes:oakboard 8"
-    },
-    {
-        ingredients = { ["nh_nodes:oakwood"] = 2 },
-        output = "nh_nodes:oakplank 4"
-    },
-    {
-        ingredients = { ["nh_nodes:oakboard"] = 1 },
-        output = "nh_nodes:oakdowel 8"
-    },
-    {
-        ingredients = { ["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2 },
-        output = "nh_nodes:craft_table"
-    },
-    {
-        ingredients = { ["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1 },
-        output = "nh_nodes:inkbottle"
-    },
-    {
-        ingredients = { ["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1 },
-        output = "nh_nodes:messagebottle"
-    },
     {
         ingredients = { ["nh_nodes:oakboard"] = 6 },
         output = "nh_nodes:oakchest"
@@ -625,6 +514,8 @@ recipes_table = {
         output = "nh_nodes:spinningtop3"
     },
 }
+-- Injeta as receitas do floor no início
+for i, r in ipairs(recipes_floor) do table.insert(recipes_table, i, r) end
 -- RECEITAS DA FOGUEIRA (3x3)
 -- Usada por: campfire
 -- Inclui: alimentos cozidos
@@ -10311,11 +10202,27 @@ c.register_node("nh_nodes:pointglove", {
 })
 
 -- Luvas de cobre
-c.register_node("nh_nodes:gauntlets", {
-    description = S "Lether Gauntlets",
+c.register_node("nh_nodes:gloves", {
+    description = S "Lether Gloves",
     drawtype = "mesh",
     mesh = "glove.obj",
     tiles = { "likeglove.png" },
+    stack_max = 1,  -- limita a 1 por slot
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    groups = {armor_hands = 2, oddly_breakable_by_hand = 3},
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    armor_bone_position = {pos = xyz(0.85, 0, 0), rot = xyz(90, -90, -180)}, -- Posição customizada quando equipado
+})
+
+-- Luvas de cobre
+c.register_node("nh_nodes:coppergauntlets", {
+    description = S "Copper Gauntlets",
+    drawtype = "mesh",
+    mesh = "glove.obj",
+    tiles = {"copperglove.png"},
     stack_max = 1,  -- limita a 1 por slot
     paramtype = "light",
     paramtype2 = "facedir",
@@ -10414,21 +10321,53 @@ c.register_node("nh_nodes:shrimpclaw2", {
 })
 
 -- Capacete de cobre
+c.register_node("nh_nodes:helm", {
+    description = S "Leather Helm",
+    drawtype = "mesh",
+    mesh = "helm.obj",
+    tiles = { "leatherhelm.png" },
+    stack_max = 1, -- limita a 1 por slot
+    groups = {armor_head = 1, oddly_breakable_by_hand = 3},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    armor_bone_position = {pos = { x = 0, y = 2.7, z = 0 }, rot = { x = 0, y = -90, z = 0 }}, -- Posição quando equipado
+    --armor_groups = {fleshy = 5},  -- Proteção
+})
+
+-- Capacete de cobre
 c.register_node("nh_nodes:copperhelmet", {
     description = S "Copper Helmet",
     drawtype = "mesh",
     mesh = "helmet.obj",
     tiles = { "copperhelmet.png" },
     stack_max = 1, -- limita a 1 por slot
-    groups = {armor_head = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
+    groups = {armor_head = 1, oddly_breakable_by_hand = 3},
     paramtype = "light",
     paramtype2 = "facedir",
     walkable = false,
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
     collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
-    -- Define posição customizada quando equipado
-    armor_bone_position = {pos = { x = 0, y = 2.7, z = 0 }, rot = { x = 0, y = -90, z = 0 }},
+    armor_bone_position = {pos = { x = 0, y = 2.7, z = 0 }, rot = { x = 0, y = -90, z = 0 }},   -- Posição quando equipado
     --armor_groups = {fleshy = 5},  -- Proteção
+})
+
+-- Armadura peitoral de cobre
+c.register_node("nh_nodes:chestplate", {
+    description = S "Leather Chestplate",
+    drawtype = "mesh",
+    mesh = "chestplate.obj",
+    tiles = { "leatherchest.png" },
+    stack_max = 1, -- limita a 1 por slot
+    paramtype = "light",
+    paramtype2 = "facedir",
+    groups = {armor_torso = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
+    walkable = false,
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    armor_bone_position = {pos = xyz(0.6, 4.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
 })
 
 -- Armadura peitoral de cobre
@@ -10447,6 +10386,33 @@ c.register_node("nh_nodes:copperchestplate", {
     armor_bone_position = {pos = xyz(0.6, 4.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
 })
 
+-- Calça de cobre
+c.register_node("nh_nodes:vambraces", {
+    description = S "Copper Vambraces",
+    drawtype = "mesh",
+    tiles = { "copperlegging.png" },
+    stack_max = 1,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    groups = { armor_arms = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5 },
+    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 } },
+    collision_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 } },
+    armor_bone_position = {pos = xyz(0.6, 2.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
+    armor_skip_main_piece = true,
+    -- As 4 peças nos braços
+    armor_extra_pieces = {
+        {bone = "bone_LArm", mesh = "armsLR.obj", -- braço esquerdo
+            pos  = xyz(0, 0.5, 0.5), rot  = xyz(0, -90, 0), size = xyz(5)},
+        {bone = "bone_RArm", mesh = "armsLR.obj", -- braço direito
+            pos  = xyz(0, 0.5, -0.5), rot  = xyz(0, -90, 0), size = xyz(5)},
+        {bone = "bone_LArm_down", mesh = "armsLR.obj", -- antebraço esquerdo
+            pos  = xyz(0.5, 0, 0), rot  = xyz(0, -90, 0), size = xyz(4)},
+        {bone = "bone_RArm_down", mesh = "armsLR.obj", -- antebraço direito
+            pos  = xyz(0.5, 0, 0), rot  = xyz(0, -90, 0), size = xyz(4)},
+    },
+})
+
 -- Armadura de cintura de cobre
 c.register_node("nh_nodes:fauld", {
     description = S "Copper Fauld",
@@ -10463,8 +10429,35 @@ c.register_node("nh_nodes:fauld", {
     armor_bone_position = {pos = xyz(0.6, 2.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
 })
 
--- Calça de cobre
+-- Calça de couro
 c.register_node("nh_nodes:leggings", {
+    description = S "Leather Leggings",
+    drawtype = "mesh",
+    mesh = "leggings.obj",       -- parte da cintura (já funciona)
+    tiles = { "leatherlegging.png" },
+    stack_max = 1,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    groups = { armor_legs = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5 },
+    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 } },
+    collision_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 } },
+    armor_bone_position = {pos = xyz(0.6, 2.1, 0), rot = xyz(0, -90, 0)}, -- Posição customizada quando equipado
+    -- As 4 peças nas pernas
+    armor_extra_pieces = {
+        {bone = "bone_LLeg", mesh = "leggingsLRup.obj", -- coxa esquerda
+            pos  = xyz(0, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4.5)},
+        {bone = "bone_RLeg", mesh = "leggingsLRup.obj", -- coxa direita
+            pos  = xyz(0, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4.5)},
+        {bone = "bone_LLeg_down", mesh = "leggingsLRup.obj", -- canela esquerda
+            pos  = xyz(-0.5, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4)},
+        {bone = "bone_RLeg_down", mesh = "leggingsLRup.obj", -- canela direita
+            pos  = xyz(-0.5, -1, 0), rot  = xyz(0, -90, 0), size = xyz(4)},
+    },
+})
+
+-- Calça de cobre
+c.register_node("nh_nodes:copperleggings", {
     description = S "Copper Leggings",
     drawtype = "mesh",
     mesh = "leggings.obj",       -- parte da cintura (já funciona)
@@ -10492,7 +10485,23 @@ c.register_node("nh_nodes:leggings", {
 
 -- Botas de cobre
 c.register_node("nh_nodes:boots", {
-    description = S "Copper Sabaton" .. " " .. S "[Boots]",
+    description = S "Leather Boots" .. " " .. S "[Footwear]",
+    drawtype = "mesh",
+    mesh = "boots.obj",
+    tiles = { "copperlegging.png" },
+    stack_max = 1,  -- limita a 1 por slot
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    groups = {armor_feet = 1, oddly_breakable_by_hand = 3},
+    selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    collision_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0.1, 0.3 }},
+    armor_bone_position = {pos = xyz(0.6, 1.2, 0), rot = xyz(0, -90, 0)} -- Posição customizada quando equipado
+})
+
+-- Botas de cobre
+c.register_node("nh_nodes:copperboots", {
+    description = S "Copper Sabatons" .. " " .. S "[Footwear]",
     drawtype = "mesh",
     mesh = "boots.obj",
     tiles = { "copperlegging.png" },

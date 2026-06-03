@@ -1,19 +1,12 @@
---[[
-  Mod: Mob, baseado no mod Happy Mob
-  Versão com múltiplos mobs: Ouriço, Coelho, Galinha, galo, tubarão...
---]]
- 
--------------------------------
+--Mod: Mob, baseado no mod Happy Mob
 -- CONFIGURAÇÕES GLOBAIS
--------------------------------
- 
+local c = core
 local DEBUG = true
-local function log(msg) if DEBUG then core.log("action", "[Mob] " .. msg) end end
-local S = core.get_translator("nh_mob")
+local function log(msg) if DEBUG then c.log("action", "[Mob] " .. msg) end end
+local S = c.get_translator("nh_mob")
 
 --mobs:set_spawn_setting("spawn", true)
 --mobs:set_spawn_setting("remove_far", false)
--- BOSS BAR
 -- BOSS BAR SYSTEM
 local SLOT_HEIGHT = 60   -- espaço entre cada barra (pixels)
 local BASE_Y = -968      -- posição Y da primeira barra
@@ -45,7 +38,7 @@ local function update_boss_hud(self, boss_name)
     local bar_val = math.floor(percent * 50)
     local display_name = boss_name or "Boss"
     local self_id = get_self_id(self)
-    for _, player in ipairs(core.get_connected_players()) do
+    for _, player in ipairs(c.get_connected_players()) do
         local pname = player:get_player_name()
         local dist = vector.distance(pos, player:get_pos())
         if dist > 40 then
@@ -64,8 +57,7 @@ local function update_boss_hud(self, boss_name)
                     type = "statbar",
                     position = { x = 0.5, y = 1 },
                     offset = { x = -300, y = offset_y_bar },
-                    text =
-                    "blood.png^[colorize:#76008d:50",
+                    text = "blood.png^[colorize:#76008d:50",
                     text2 = "blood.png^[colorize:#000000:180",
                     number = bar_val,
                     item = 50,
@@ -93,7 +85,7 @@ end
 local function remove_all_boss_hud(self)
     if not self._hud_ids then return end
     local self_id = get_self_id(self)
-    for _, player in ipairs(core.get_connected_players()) do
+    for _, player in ipairs(c.get_connected_players()) do
         local pname = player:get_player_name()
         if self._hud_ids[pname] then
             player:hud_remove(self._hud_ids[pname].bar)
@@ -185,11 +177,11 @@ mobs:register_mob("nh_mob:rat",
                 local item = clicker:get_wielded_item()
                 local name = item:get_name()
                 if name == "nh_nodes:blueberry" then
-                    core.chat_send_player(clicker:get_player_name(), S("The rat wants food!"))
+                    c.chat_send_player(clicker:get_player_name(), S("The rat wants food!"))
                     item:take_item(1)
                     clicker:set_wielded_item(item)
                 else
-                    core.chat_send_player(clicker:get_player_name(), S("Quick, quick..."))
+                    c.chat_send_player(clicker:get_player_name(), S("Quick, quick..."))
                 end
             end
         end,
@@ -252,11 +244,11 @@ mobs:register_mob("nh_mob:crab",
                 local item = clicker:get_wielded_item()
                 local name = item:get_name()
                 if name == "nh_nodes:blueberry" then
-                    core.chat_send_player(clicker:get_player_name(), S("The crab ate!"))
+                    c.chat_send_player(clicker:get_player_name(), S("The crab ate!"))
                     item:take_item(1)
                     clicker:set_wielded_item(item)
                 else
-                    core.chat_send_player(clicker:get_player_name(), S("..."))
+                    c.chat_send_player(clicker:get_player_name(), S("..."))
                 end
             end
         end,
@@ -315,11 +307,11 @@ mobs:register_mob("nh_mob:ladybug", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), S("The ladybug wants leaves!"))
+                c.chat_send_player(clicker:get_player_name(), S("The ladybug wants leaves!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), S("bzz, bzz..."))
+                c.chat_send_player(clicker:get_player_name(), S("bzz, bzz..."))
             end
         end
     end,
@@ -380,11 +372,11 @@ mobs:register_mob("nh_mob:cricket", {
             local name = item:get_name()
  
             if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), S("The cricket ate the leaves!"))
+                c.chat_send_player(clicker:get_player_name(), S("The cricket ate the leaves!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), "cri-cri, cri-cri...")
+                c.chat_send_player(clicker:get_player_name(), "cri-cri, cri-cri...")
             end
         end
     end,
@@ -440,11 +432,11 @@ mobs:register_mob("nh_mob:cicada", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "nh_nodes:grassleaves" then
-                core.chat_send_player(clicker:get_player_name(), S("A joaninha quer folhas!"))
+                c.chat_send_player(clicker:get_player_name(), S("A joaninha quer folhas!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+                c.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
             end
         end
     end,
@@ -520,11 +512,11 @@ mobs:register_mob("nh_mob:firefly", {
                 -- Remove o vagalume
                 self.object:remove()
             elseif name == "nh_nodes:apple" then
-                core.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
+                c.chat_send_player(clicker:get_player_name(), "bzz, bzz...")
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), S("The firefly wants to eat an apple!"))
+                c.chat_send_player(clicker:get_player_name(), S("The firefly wants to eat an apple!"))
             end
         end
     end,
@@ -587,11 +579,11 @@ mobs:register_mob("nh_mob:worm", {
                 inv:add_item("main", ItemStack("nh_nodes:worm"))
                 self.object:remove()
             elseif name == "nh_nodes:dirt" then
-                core.chat_send_player(clicker:get_player_name(), S("The worm wants dirt!"))
+                c.chat_send_player(clicker:get_player_name(), S("The worm wants dirt!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -684,9 +676,9 @@ mobs:register_mob("nh_mob:bull", {
                 item:take_item()
                 clicker:set_wielded_item(item)
                 local mob_type = self.name == "nh_mob:bull" and "bull" or "cow"
-                core.chat_send_player(clicker:get_player_name(), S("The bull is ready to breed!")) -- Efeito de coração sobre o mob
+                c.chat_send_player(clicker:get_player_name(), S("The bull is ready to breed!")) -- Efeito de coração sobre o mob
                 local pos = self.object:get_pos()
-                core.add_particlespawner({
+                c.add_particlespawner({
                     amount = 5,
                     time = 1,
                     minpos = { x = pos.x - 0.5, y = pos.y + 2, z = pos.z - 0.5 },
@@ -701,7 +693,7 @@ mobs:register_mob("nh_mob:bull", {
                 })
                 return
             else
-                core.chat_send_player(clicker:get_player_name(), S("Already ready to breed!"))
+                c.chat_send_player(clicker:get_player_name(), S("Already ready to breed!"))
                 return
             end
         end
@@ -717,7 +709,7 @@ mobs:register_mob("nh_mob:bull", {
             self.saddled = true -- flag interna
             item:take_item()
             clicker:set_wielded_item(item)
-            core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
+            c.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
             mobs:attach(self, clicker) -- já monta na hora
             return
         end
@@ -726,13 +718,13 @@ mobs:register_mob("nh_mob:bull", {
             return
         end
         if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-            core.chat_send_player(clicker:get_player_name(), S("I fed the bull! Mooo!"))
+            c.chat_send_player(clicker:get_player_name(), S("I fed the bull! Mooo!"))
             item:take_item(1)
             clicker:set_wielded_item(item)
         elseif name == "" then -- mão vazia
-            core.chat_send_player(clicker:get_player_name(), S("I petted the bull. hff, hff..."))
+            c.chat_send_player(clicker:get_player_name(), S("I petted the bull. hff, hff..."))
         else             -- item errado
-            core.chat_send_player(clicker:get_player_name(), S("The bull is not interested in that..."))
+            c.chat_send_player(clicker:get_player_name(), S("The bull is not interested in that..."))
         end
     end,
 })
@@ -812,7 +804,7 @@ mobs:register_mob("nh_mob:cow", {
             self.state = ""
             -- tenta pegar o player mais próximo como alvo
             local pos = self.object:get_pos()
-            local jogadores = core.get_connected_players()
+            local jogadores = c.get_connected_players()
             local alvo = nil
             local menor_dist = self.view_range or 10
             for _, p in ipairs(jogadores) do
@@ -840,7 +832,7 @@ mobs:register_mob("nh_mob:cow", {
         -- Procura touro próximo que também esteja pronto
         local pos = self.object:get_pos()
         local touro_ent = nil
-        for _, obj in ipairs(core.get_objects_inside_radius(pos, 6)) do
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 6)) do
             local ent = obj:get_luaentity()
             if ent and ent.name == "nh_mob:bull" and ent.bred then
                 touro_ent = ent
@@ -863,9 +855,9 @@ mobs:register_mob("nh_mob:cow", {
             filhote = "nh_mob:cow" -- sorteio 3 = 33%
         end
         local spawn_pos = { x = pos.x + math.random(-2, 2), y = pos.y, z = pos.z + math.random(-2, 2) }
-        core.add_entity(spawn_pos, filhote)
+        c.add_entity(spawn_pos, filhote)
         -- Partículas de coração no spawn
-        core.add_particlespawner({
+        c.add_particlespawner({
             amount = 15,
             time = 1,
             minpos = { x = spawn_pos.x - 0.5, y = spawn_pos.y, z = spawn_pos.z - 0.5 },
@@ -878,8 +870,8 @@ mobs:register_mob("nh_mob:cow", {
             maxsize = 2,
             texture = "heart.png",
         })
-        core.log("action", "[nh_mob] Reprodução: " .. filhote .. " gerado!")
-        core.chat_send_all(S("A bovine calf was born!"))
+        c.log("action", "[nh_mob] Reprodução: " .. filhote .. " gerado!")
+        c.chat_send_all(S("A bovine calf was born!"))
     end,
     on_rightclick = function(self, clicker)
         if not clicker:is_player() then return end
@@ -893,10 +885,10 @@ mobs:register_mob("nh_mob:cow", {
                 item:take_item()
                 clicker:set_wielded_item(item)
                 local mob_type = self.name == "nh_mob:bull" and "bull" or "cow"
-                core.chat_send_player(clicker:get_player_name(), S("The cow is ready to breed!"))
+                c.chat_send_player(clicker:get_player_name(), S("The cow is ready to breed!"))
                 -- Efeito de coração sobre o mob
                 local pos = self.object:get_pos()
-                core.add_particlespawner({
+                c.add_particlespawner({
                     amount = 5,
                     time = 1,
                     minpos = { x = pos.x - 0.5, y = pos.y + 2, z = pos.z - 0.5 },
@@ -911,7 +903,7 @@ mobs:register_mob("nh_mob:cow", {
                 })
                 return
             else
-                core.chat_send_player(clicker:get_player_name(), S("Already ready to breed!"))
+                c.chat_send_player(clicker:get_player_name(), S("Already ready to breed!"))
                 return
             end
         end
@@ -928,7 +920,7 @@ mobs:register_mob("nh_mob:cow", {
             self.saddled = true -- flag interna
             item:take_item()
             clicker:set_wielded_item(item)
-            core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
+            c.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
             mobs:attach(self, clicker) -- já monta na hora
             return
         end
@@ -939,13 +931,13 @@ mobs:register_mob("nh_mob:cow", {
         end
  
         if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-            core.chat_send_player(clicker:get_player_name(), S("I fed the cow! Moo!"))
+            c.chat_send_player(clicker:get_player_name(), S("I fed the cow! Moo!"))
             item:take_item(1)
             clicker:set_wielded_item(item)
         elseif name == "" then -- mão vazia
-            core.chat_send_player(clicker:get_player_name(), S("I petted the cow. hff, hff..."))
+            c.chat_send_player(clicker:get_player_name(), S("I petted the cow. hff, hff..."))
         else             -- item errado
-            core.chat_send_player(clicker:get_player_name(), S("The cow is not interested in that..."))
+            c.chat_send_player(clicker:get_player_name(), S("The cow is not interested in that..."))
         end
     end,
 })
@@ -1034,7 +1026,7 @@ mobs:register_mob("nh_mob:ox", {
             self.saddled = true -- flag interna
             item:take_item()
             clicker:set_wielded_item(item)
-            core.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
+            c.chat_send_player(clicker:get_player_name(), S("Saddle placed!"))
             mobs:attach(self, clicker) -- já monta na hora
             return
         end
@@ -1044,13 +1036,13 @@ mobs:register_mob("nh_mob:ox", {
             return
         end
         if name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
-            core.chat_send_player(clicker:get_player_name(), S("I fed the ox! Mooo!"))
+            c.chat_send_player(clicker:get_player_name(), S("I fed the ox! Mooo!"))
             item:take_item(1)
             clicker:set_wielded_item(item)
         elseif name == "" then -- mão vazia
-            core.chat_send_player(clicker:get_player_name(), S("I petted the ox. hff, hff..."))
+            c.chat_send_player(clicker:get_player_name(), S("I petted the ox. hff, hff..."))
         else             -- item errado
-            core.chat_send_player(clicker:get_player_name(), S("The ox is not interested in that..."))
+            c.chat_send_player(clicker:get_player_name(), S("The ox is not interested in that..."))
         end
     end,
 })
@@ -1136,11 +1128,11 @@ local function bird_do_custom(self, dtime, perch_node)
     if self.perch_timer < 3 then return end
     self.perch_timer = 0
 
-    local time = core.get_timeofday()
+    local time = c.get_timeofday()
     if time > 0.75 or time < 0.2 then -- noite
         if not self.is_perching then
             local pos  = self.object:get_pos()
-            local spot = core.find_node_near(pos, 6, { perch_node })
+            local spot = c.find_node_near(pos, 6, { perch_node })
             if spot then
                 spot.y = spot.y + 1
                 self.object:set_pos(spot)
@@ -1191,9 +1183,9 @@ mobs:register_mob("nh_mob:eagle", bird_def({
         if clicker:is_player() then
             local name = clicker:get_wielded_item():get_name()
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The eagle doesn't want light!"))
+                c.chat_send_player(clicker:get_player_name(), S("The eagle doesn't want light!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -1242,9 +1234,9 @@ mobs:register_mob("nh_mob:blackkite", bird_def({
         if clicker:is_player() then
             local name = clicker:get_wielded_item():get_name()
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The black kite wants the torch!"))
+                c.chat_send_player(clicker:get_player_name(), S("The black kite wants the torch!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -1296,7 +1288,7 @@ local function apply_spike_damage(self, dtime, opts)
     if get_objects then
         objetos = get_objects(pos)
     else
-        objetos = core.get_objects_inside_radius(pos, 1)
+        objetos = c.get_objects_inside_radius(pos, 1)
     end
  
     for _, obj in ipairs(objetos) do
@@ -1311,7 +1303,7 @@ local function apply_spike_damage(self, dtime, opts)
                 local name = obj:get_player_name()
                 self._player_timers[name] = (self._player_timers[name] or 0) + 1
                 obj:punch(self.object, 1.0, { full_punch_interval = 1.0, damage_groups = { fleshy = damage } }, nil)
-                core.chat_send_player(name, msg)
+                c.chat_send_player(name, msg)
             end
         end
     end
@@ -1359,7 +1351,7 @@ mobs:register_mob("nh_mob:hedgehog", {
     },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(),
+            c.chat_send_player(clicker:get_player_name(),
                 S("The hedgehog is friendly, but I need to be careful if I attack it..."))
         end
     end,
@@ -1370,7 +1362,7 @@ mobs:register_mob("nh_mob:hedgehog", {
         local item = hitter:get_wielded_item()
         if item:get_name() == "" then -- machuca o jogador
             hitter:set_hp(hitter:get_hp() - 2)
-            core.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
+            c.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
             return false -- CANCELA o dano no ouriço
         end
         -- com ferramenta: dano normal (não retorna false)
@@ -1436,7 +1428,7 @@ mobs:register_mob("nh_mob:hedgehogshadow", {
     },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(),
+            c.chat_send_player(clicker:get_player_name(),
                 S("The hedgehog is friendly, but I need to be careful if I attack it..."))
         end
     end,
@@ -1446,7 +1438,7 @@ mobs:register_mob("nh_mob:hedgehogshadow", {
         local item = hitter:get_wielded_item()
         if item:get_name() == "" then       -- machuca o jogador
             hitter:set_hp(hitter:get_hp() - 2)
-            core.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
+            c.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
             return false -- CANCELA o dano no ouriço
         end
         -- com ferramenta: dano normal (não retorna false)
@@ -1514,20 +1506,20 @@ mobs:register_mob("nh_mob:tuna", {
                 inv:add_item("main", ItemStack("nh_nodes:tuna"))
                 self.object:remove()
             elseif name == "nh_nodes:worm" then
-                core.chat_send_player(clicker:get_player_name(), S("The tuna ate!"))
+                c.chat_send_player(clicker:get_player_name(), S("The tuna ate!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), S("Glub, glub..."))
+                c.chat_send_player(clicker:get_player_name(), S("Glub, glub..."))
             end
         end
     end,
     do_custom = function(self, dtime)
         local pos = self.object:get_pos()
-        local node = core.get_node(pos)
+        local node = c.get_node(pos)
         if node.name ~= "nh_nodes:water" then -- Se não está na água, tenta voltar
             -- Procura por água próxima
-            local water_pos = core.find_node_near(pos, 7, {"nh_nodes:water"})
+            local water_pos = c.find_node_near(pos, 7, {"nh_nodes:water"})
             if water_pos then
                 -- Move em direção à água
                 local dir = vector.direction(pos, water_pos)
@@ -1582,7 +1574,7 @@ mobs:register_mob("nh_mob:urchin", {
     animation = { speed_normal = 1, stand_start = 0, stand_end = 1, walk_start = 0, walk_end = 2, run_start = 0, run_end = 2, },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), S("I need to be careful if I attack it..."))
+            c.chat_send_player(clicker:get_player_name(), S("I need to be careful if I attack it..."))
         end
     end,
     do_punch = function(self, hitter, tflp, tool_caps, dir, damage)
@@ -1591,7 +1583,7 @@ mobs:register_mob("nh_mob:urchin", {
         local item = hitter:get_wielded_item()
         if item:get_name() == "" then       -- machuca o jogador
             hitter:set_hp(hitter:get_hp() - 2)
-            core.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
+            c.chat_send_player(hitter:get_player_name(), S("The spines hurt me!"))
             return false -- CANCELA o dano no ouriço
         end
         -- com ferramenta: dano normal (não retorna false)
@@ -1599,7 +1591,7 @@ mobs:register_mob("nh_mob:urchin", {
     do_custom = function(self, dtime)
         apply_spike_damage(self, dtime, {
             mob_self_name = "nh_mob:urchin",
-            get_objects = function(pos) return core.get_objects_inside_radius(pos, 1.2) end,
+            get_objects = function(pos) return c.get_objects_inside_radius(pos, 1.2) end,
         })
     end,
 })
@@ -1657,7 +1649,7 @@ mobs:register_mob("nh_mob:manowar", {
     follow = { "nh_nodes:torch2" },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(),
+            c.chat_send_player(clicker:get_player_name(),
                 S("I need to be careful if I attack it..."))
         end
     end,
@@ -1668,7 +1660,7 @@ mobs:register_mob("nh_mob:manowar", {
             get_objects = function(pos)
                 local below_min = vector.new(pos.x - 1, pos.y - 5.5, pos.z - 0.6)
                 local below_max = vector.new(pos.x + 1, pos.y + 2, pos.z + 0.6)
-                return core.get_objects_in_area(below_min, below_max)
+                return c.get_objects_in_area(below_min, below_max)
             end,
         })
     end,
@@ -1698,9 +1690,9 @@ local function create_dome(center)
                 if dist >= r - 1 and dist <= r then -- Só a casca: entre r-1 e r (espessura de 1 node)
                     local pos = { x = math.floor(center.x + x), y = math.floor(center.y + y), z = math.floor(center.z + z) }
                     -- Só coloca se for ar, para não destruir terreno
-                    local node = core.get_node(pos)
+                    local node = c.get_node(pos)
                     if node.name == "air" then
-                        core.set_node(pos, { name = "nh_nodes:barrier" })
+                        c.set_node(pos, { name = "nh_nodes:barrier" })
                         table.insert(placed, pos)
                     end
                 end
@@ -1712,8 +1704,8 @@ end
 function remove_dome(placed_list)
     if not placed_list then return end
     for _, pos in ipairs(placed_list) do
-        local node = core.get_node(pos)
-        if node.name == "nh_nodes:barrier" then core.set_node(pos, { name = "air" }) end
+        local node = c.get_node(pos)
+        if node.name == "nh_nodes:barrier" then c.set_node(pos, { name = "air" }) end
     end
 end
  
@@ -1798,7 +1790,7 @@ mobs:register_mob("nh_mob:spider", {
         local function check_wall(dx, dz)
             for _, dy in ipairs({0.1, 0.5, 0.9}) do
                 local p = { x = pos.x + dx * 0.55, y = pos.y + dy, z = pos.z + dz * 0.55 }
-                local def = core.registered_nodes[core.get_node(p).name]
+                local def = c.registered_nodes[c.get_node(p).name]
                 if def and def.walkable then return true end
             end
             return false
@@ -1816,27 +1808,27 @@ mobs:register_mob("nh_mob:spider", {
         y = pos.y + 0.5,  -- meio do corpo
         z = pos.z + dir_z * 0.55}
 
-    local front_node = core.get_node(front_pos)
-    local front_def = core.registered_nodes[front_node.name]
+    local front_node = c.get_node(front_pos)
+    local front_def = c.registered_nodes[front_node.name]
     local wall_ahead = front_def and front_def.walkable == true
 
     -- Verifica se há chão embaixo
     local below_pos = { x = pos.x, y = pos.y - 0.2, z = pos.z }
-    local below_node = core.get_node(below_pos)
-    local below_def = core.registered_nodes[below_node.name]
+    local below_node = c.get_node(below_pos)
+    local below_def = c.registered_nodes[below_node.name]
     local has_floor = below_def and below_def.walkable == true
 
     if self._climbing then
         -- ── MODO ESCALADA ──
         -- Verifica se chegou ao topo (nó acima está livre)
         local top_pos = {x = pos.x + dir_x * 0.7,y = pos.y + 1.2,z = pos.z + dir_z * 0.7}
-        local top_node = core.get_node(top_pos)
-        local top_def = core.registered_nodes[top_node.name]
+        local top_node = c.get_node(top_pos)
+        local top_def = c.registered_nodes[top_node.name]
         local wall_top_clear = not top_def or top_def.walkable == false
         -- Verifica se ainda há parede à frente/abaixo-frente
         local wall_check = {x = pos.x + dir_x * 0.6, y = pos.y - 0.3, z = pos.z + dir_z * 0.6}
-        local wc_node = core.get_node(wall_check)
-        local wc_def = core.registered_nodes[wc_node.name]
+        local wc_node = c.get_node(wall_check)
+        local wc_def = c.registered_nodes[wc_node.name]
         local still_on_wall = wc_def and wc_def.walkable == true
 
         if wall_top_clear and not wall_ahead then
@@ -1926,25 +1918,14 @@ mobs:register_mob("nh_mob:dopel", {
     lava_damage = 5,
     light_damage = 0,
     air_damage = 0,
-    animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2,
-        -- ANIMAÇÃO DE ATAQUE:
-        punch_start = 11.75, -- Frame inicial do ataque
-        punch_end = 12, -- Frame final do ataque
-    },
- 
-    -- Mantém uma lista mínima (pode deixar vazia ou com qualquer item)
-    -- O seguimento real será feito pelo do_custom abaixo
-    -- follow = {"nh_nodes:torch2", "nh_nodes:dirt", "nh_items:writedpage", "nh_nodes:oakchest", "nh_nodes:cobblestone", "nh_nodes:oakwood"},
- 
+    animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2, punch_start = 11.75, punch_end = 12},
     -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "" then
-                core.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
-            else
-                core.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))
+            if name == "" then c.chat_send_player(clicker:get_player_name(), S("Who are you? Why do you look like me?!"))
+            else c.chat_send_player(clicker:get_player_name(), S("That thing you're holding is mine!"))
             end
         end
     end,
@@ -1995,9 +1976,9 @@ mobs:register_mob("nh_mob:phoenix", bird_def({
         if clicker:is_player() then
             local name = clicker:get_wielded_item():get_name()
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The phoenix wants fire!"))
+                c.chat_send_player(clicker:get_player_name(), S("The phoenix wants fire!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -2060,7 +2041,7 @@ mobs:register_mob("nh_mob:sentinel", {
     drops = { { name = "nh_nodes:wings", chance = 1, min = 1, max = 1 }},
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), S("Is it a wasp?..."))
+            c.chat_send_player(clicker:get_player_name(), S("Is it a wasp?..."))
         end
     end,
     custom_attack = function(self, to_attack)
@@ -2072,12 +2053,12 @@ mobs:register_mob("nh_mob:sentinel", {
     end,
     after_activate = function(self, staticdata, def, dtime)
         self.object:set_properties({ static_save = true })
-        core.after(0.5, function() -- Restaura ataque ao jogador mais próximo sempre (novo spawn OU reload)
+        c.after(0.5, function() -- Restaura ataque ao jogador mais próximo sempre (novo spawn OU reload)
             if not self.object or not self.object:is_valid() then return end
             local pos = self.object:get_pos()
             local nearest_player = nil
             local nearest_dist = self.view_range or 30
-            for _, player in ipairs(core.get_connected_players()) do
+            for _, player in ipairs(c.get_connected_players()) do
                 local dist = vector.distance(pos, player:get_pos())
                 if dist < nearest_dist then
                     nearest_dist = dist
@@ -2087,12 +2068,12 @@ mobs:register_mob("nh_mob:sentinel", {
             if nearest_player then self:do_attack(nearest_player) end
         end)
         if staticdata and staticdata ~= "" then return end -- Cúpula e punch simbólico só no PRIMEIRO spawn (staticdata vazio = novo)
-        core.after(0.5,
+        c.after(0.5,
             function() if self.object and self.object:is_valid() then self._dome_nodes = create_dome(self.object:get_pos()) end end)
         local pos = self.object:get_pos()
         local nearest_player = nil
         local nearest_dist = 20
-        for _, player in ipairs(core.get_connected_players()) do
+        for _, player in ipairs(c.get_connected_players()) do
             local dist = vector.distance(pos, player:get_pos())
             if dist < nearest_dist then
                 nearest_dist = dist
@@ -2100,7 +2081,7 @@ mobs:register_mob("nh_mob:sentinel", {
             end
         end
         if nearest_player then
-            core.after(0.2, function()
+            c.after(0.2, function()
                 if self.object:is_valid() then
                     self.object:punch(nearest_player, 1.0,
                         { full_punch_interval = 1.0, damage_groups = { fleshy = 1 }, }, nil)
@@ -2112,8 +2093,8 @@ mobs:register_mob("nh_mob:sentinel", {
         local pos = self.object:get_pos()
         if not pos then return end
         -- Sobe na água se estiver submerso
-        local node = core.get_node({ x = pos.x, y = pos.y, z = pos.z })
-        local ndef = core.registered_nodes[node.name]
+        local node = c.get_node({ x = pos.x, y = pos.y, z = pos.z })
+        local ndef = c.registered_nodes[node.name]
         if ndef and ndef.groups and ndef.groups.liquid then
             local v = self.object:get_velocity()
             if v and v.y < 0.5 then self.object:set_velocity({ x = v.x, y = 0.8, z = v.z }) end
@@ -2125,7 +2106,7 @@ mobs:register_mob("nh_mob:sentinel", {
                 local centro = { x = p.x, y = p.y + 2, z = p.z }
                 -- Box de 2x4x2 centrada 2 blocos acima do mob
                 local max_radius = math.max(2, 4, 2)
-                local candidatos = core.get_objects_inside_radius(centro, max_radius)
+                local candidatos = c.get_objects_inside_radius(centro, max_radius)
                 local resultado = {}
                 for _, obj in ipairs(candidatos) do
                     local opos = obj:get_pos()
@@ -2161,9 +2142,9 @@ mobs:register_mob("nh_mob:sentinel", {
         remove_all_boss_hud(self)
     end,
 })
-core.register_on_dieplayer(function(player, reason)
+c.register_on_dieplayer(function(player, reason)
     local pname = player:get_player_name()
-    for _, obj in ipairs(core.get_objects_inside_radius(player:get_pos(), 150)) do
+    for _, obj in ipairs(c.get_objects_inside_radius(player:get_pos(), 150)) do
         local ent = obj:get_luaentity()
         if ent and ent.name == "nh_mob:sentinel" then
             if ent._hud_ids and ent._hud_ids[pname] then
@@ -2176,7 +2157,7 @@ core.register_on_dieplayer(function(player, reason)
             ent._dome_nodes = nil
             -- Substitui por estátua e remove o mob
             local pos = obj:get_pos()
-            if pos then core.set_node(pos, { name = "nh_nodes:sentinelstatue" }) end
+            if pos then c.set_node(pos, { name = "nh_nodes:sentinelstatue" }) end
             mobs:remove(ent, true)
         end
         if ent and ent.name == "nh_mob:giantcrab" then
@@ -2188,7 +2169,7 @@ core.register_on_dieplayer(function(player, reason)
             end
             -- Substitui por estátua e remove o mob
             local pos = obj:get_pos()
-            if pos then core.set_node(pos, { name = "nh_nodes:giantcrabstatue" }) end
+            if pos then c.set_node(pos, { name = "nh_nodes:giantcrabstatue" }) end
             mobs:remove(ent, true)
         end
     end
@@ -2249,15 +2230,15 @@ mobs:register_mob("nh_mob:bubble", {
     follow = { "nh_nodes:torch2" },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), S("Just a bubble..."))
+            c.chat_send_player(clicker:get_player_name(), S("Just a bubble..."))
         end
     end,
     do_custom = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then return end
         -- Sobe na água se estiver submerso
-        local node = core.get_node({ x = pos.x, y = pos.y, z = pos.z })
-        local ndef = core.registered_nodes[node.name]
+        local node = c.get_node({ x = pos.x, y = pos.y, z = pos.z })
+        local ndef = c.registered_nodes[node.name]
         if ndef and ndef.groups and ndef.groups.liquid then
             local v = self.object:get_velocity()
             if v and v.y < 0.5 then self.object:set_velocity({ x = v.x, y = 0.8, z = v.z }) end
@@ -2271,7 +2252,7 @@ mobs:register_mob("nh_mob:bubble", {
         local above_max = vector.new(pos.x + 0.5, pos.y + 2.8, pos.z + 0.5)
         self._player_timers = self._player_timers or {}
         local players_above = {}
-        for _, obj in ipairs(core.get_objects_in_area(above_min, above_max)) do
+        for _, obj in ipairs(c.get_objects_in_area(above_min, above_max)) do
             if obj:is_player() then
                 local name = obj:get_player_name()
                 players_above[name] = true
@@ -2357,15 +2338,15 @@ mobs:register_mob("nh_mob:bigbubble", {
     follow = { "nh_nodes:torch2" },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), S("Just a bubble..."))
+            c.chat_send_player(clicker:get_player_name(), S("Just a bubble..."))
         end
     end,
     do_custom = function(self, dtime)
         local pos = self.object:get_pos()
         if not pos then return end
         -- Sobe na água se estiver submerso
-        local node = core.get_node({ x = pos.x, y = pos.y, z = pos.z })
-        local ndef = core.registered_nodes[node.name]
+        local node = c.get_node({ x = pos.x, y = pos.y, z = pos.z })
+        local ndef = c.registered_nodes[node.name]
         if ndef and ndef.groups and ndef.groups.liquid then
             local v = self.object:get_velocity()
             if v and v.y < 0.5 then self.object:set_velocity({ x = v.x, y = 0.8, z = v.z }) end
@@ -2379,7 +2360,7 @@ mobs:register_mob("nh_mob:bigbubble", {
         local above_max = vector.new(pos.x + 1, pos.y + 3.5, pos.z + 1)
         self._player_timers = self._player_timers or {}
         local players_above = {}
-        for _, obj in ipairs(core.get_objects_in_area(above_min, above_max)) do
+        for _, obj in ipairs(c.get_objects_in_area(above_min, above_max)) do
             if obj:is_player() then
                 local name = obj:get_player_name()
                 players_above[name] = true
@@ -2450,7 +2431,7 @@ mobs:register_mob("nh_mob:rabbit", {
     jump_height = 3,
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), S("The rabbit ran away scared!"))
+            c.chat_send_player(clicker:get_player_name(), S("The rabbit ran away scared!"))
             self.object:set_velocity({ x = 0, y = 5, z = 0 }) -- Faz o coelho pular e fugir
         end
     end,
@@ -2516,7 +2497,7 @@ mobs:register_mob("nh_mob:karibo", {
     },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(),
+            c.chat_send_player(clicker:get_player_name(),
                 S("The Karibo looks a bit dangerous, but I think it can be tamed"))
         end
     end,
@@ -2528,7 +2509,7 @@ mobs:register_mob("nh_mob:karibo", {
             self.state = ""
             -- tenta pegar o player mais próximo como alvo
             local pos = self.object:get_pos()
-            local jogadores = core.get_connected_players()
+            local jogadores = c.get_connected_players()
             local alvo = nil
             local menor_dist = self.view_range or 10
             for _, p in ipairs(jogadores) do
@@ -2595,11 +2576,11 @@ mobs:register_mob("nh_mob:rooster", {
             local name = item:get_name()
             -- Se o jogador está segurando sementes, a galinha segue
             if name == "farming:seed_wheat" or name == "nh_nodes:worm" then
-                core.chat_send_player(clicker:get_player_name(), S("The rooster ate!"))
+                c.chat_send_player(clicker:get_player_name(), S("The rooster ate!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), S("Cock-a-doodle-doo!"))
+                c.chat_send_player(clicker:get_player_name(), S("Cock-a-doodle-doo!"))
             end
         end
     end,
@@ -2686,7 +2667,7 @@ mobs:register_mob("nh_mob:chicken", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "farming:seed_wheat" or name == "nh_nodes:worm" then
-                core.chat_send_player(clicker:get_player_name(), S("The chicken ate!"))
+                c.chat_send_player(clicker:get_player_name(), S("The chicken ate!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             elseif name == "nh_nodes:grassleaves" or name == "nh_nodes:grassleavesmedium" then
@@ -2694,7 +2675,7 @@ mobs:register_mob("nh_mob:chicken", {
                 item:take_item(1)
                 clicker:set_wielded_item(item)
                 local pos = self.object:get_pos()
-                core.add_particlespawner({ -- Partículas de coração
+                c.add_particlespawner({ -- Partículas de coração
                     amount = 15,
                     time = 1,
                     minpos = { x = pos.x - 0.5, y = pos.y, z = pos.z - 0.5 },
@@ -2711,10 +2692,10 @@ mobs:register_mob("nh_mob:chicken", {
                 -- Ativa a busca por ovo
                 self.seeking_egg = true
                 self.seek_timer = 0
-                core.chat_send_player(clicker:get_player_name(),
+                c.chat_send_player(clicker:get_player_name(),
                     S("The chicken looks excited and starts looking for an egg!"))
             else
-                core.chat_send_player(clicker:get_player_name(), S("Cluck cluck!"))
+                c.chat_send_player(clicker:get_player_name(), S("Cluck cluck!"))
             end
         end
     end,
@@ -2733,7 +2714,7 @@ mobs:register_mob("nh_mob:chicken", {
             else
                 local pos = self.object:get_pos()
                 -- Procura o node nh_nodes:chickenegg num raio de 10 blocos
-                local egg_nodes = core.find_nodes_in_area({ x = pos.x - 10, y = pos.y - 2, z = pos.z - 10 },
+                local egg_nodes = c.find_nodes_in_area({ x = pos.x - 10, y = pos.y - 2, z = pos.z - 10 },
                     { x = pos.x + 10, y = pos.y + 2, z = pos.z + 10 }, { "nh_nodes:chickenegg" })
                 if #egg_nodes > 0 then -- Pega o ovo mais próximo
                     local closest_egg = nil
@@ -2755,12 +2736,12 @@ mobs:register_mob("nh_mob:chicken", {
                         else
                             -- Chegou perto do ovo!
                             -- Remove o node de ovo
-                            core.remove_node(closest_egg)
+                            c.remove_node(closest_egg)
                             -- Spawna o galo no lugar do ovo
                             local rooster_pos = { x = closest_egg.x, y = closest_egg.y, z = closest_egg.z, }
-                            core.add_entity(rooster_pos, "nh_mob:chick")
+                            c.add_entity(rooster_pos, "nh_mob:chick")
  
-                            core.add_particlespawner({ -- Partículas de coração no spawn do galo
+                            c.add_particlespawner({ -- Partículas de coração no spawn do galo
                                 amount = 15,
                                 time = 1,
                                 minpos = { x = rooster_pos.x - 0.5, y = rooster_pos.y, z = rooster_pos.z - 0.5 },
@@ -2774,10 +2755,10 @@ mobs:register_mob("nh_mob:chicken", {
                                 texture =
                                 "heart.png",
                             })
-                            log("A chicken hatched a chick from an egg at " .. core.pos_to_string(rooster_pos))
-                            for _, player in ipairs(core.get_connected_players()) do -- Avisa jogadores próximos
+                            log("A chicken hatched a chick from an egg at " .. c.pos_to_string(rooster_pos))
+                            for _, player in ipairs(c.get_connected_players()) do -- Avisa jogadores próximos
                                 if vector.distance(player:get_pos(), pos) < 15 then
-                                    core.chat_send_player(player:get_player_name(), S("A chick hatched from the egg!"))
+                                    c.chat_send_player(player:get_player_name(), S("A chick hatched from the egg!"))
                                 end
                             end
                             -- Desativa a busca
@@ -2801,11 +2782,11 @@ mobs:register_mob("nh_mob:chicken", {
             local back_dir = { x = -math.sin(yaw), y = 0, z = math.cos(yaw) } -- Direção para trás da galinha
             local egg_pos = vector.add(pos, vector.multiply(back_dir, 0.8))
             egg_pos.y = egg_pos.y + 0.1
-            core.add_item(egg_pos, "nh_nodes:chickenegg")
-            log("A chicken laid an egg in " .. core.pos_to_string(egg_pos))
-            for _, player in ipairs(core.get_connected_players()) do -- Avisar jogadores próximos
+            c.add_item(egg_pos, "nh_nodes:chickenegg")
+            log("A chicken laid an egg in " .. c.pos_to_string(egg_pos))
+            for _, player in ipairs(c.get_connected_players()) do -- Avisar jogadores próximos
                 if vector.distance(player:get_pos(), pos) < 10 then
-                    core.chat_send_player(player:get_player_name(), S("A chicken laid an egg!"))
+                    c.chat_send_player(player:get_player_name(), S("A chicken laid an egg!"))
                 end
             end
             -- Reset
@@ -2888,11 +2869,11 @@ mobs:register_mob("nh_mob:chick", { -- pintinho
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "nh_nodes:worm" then -- Se o jogador está segurando sementes, a galinha segue
-                core.chat_send_player(clicker:get_player_name(), S("The chick ate!"))
+                c.chat_send_player(clicker:get_player_name(), S("The chick ate!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             else
-                core.chat_send_player(clicker:get_player_name(), S("Peep, peep!"))
+                c.chat_send_player(clicker:get_player_name(), S("Peep, peep!"))
             end
         end
     end,
@@ -2965,12 +2946,12 @@ mobs:register_mob("nh_mob:shark", {
 
         -- Conta quantos nodes de água existem em um raio de 0.3 ao redor do centro
         local neighbors = {
-        core.get_node({x = pos.x + 0.5, y = pos.y, z = pos.z}),
-        core.get_node({x = pos.x - 0.5, y = pos.y, z = pos.z}),
-        core.get_node({x = pos.x, y = pos.y, z = pos.z + 0.5}),
-        core.get_node({x = pos.x, y = pos.y, z = pos.z - 0.5}),
-        core.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z}),
-        core.get_node({x = pos.x, y = pos.y - 0.5, z = pos.z}),
+        c.get_node({x = pos.x + 0.5, y = pos.y, z = pos.z}),
+        c.get_node({x = pos.x - 0.5, y = pos.y, z = pos.z}),
+        c.get_node({x = pos.x, y = pos.y, z = pos.z + 0.5}),
+        c.get_node({x = pos.x, y = pos.y, z = pos.z - 0.5}),
+        c.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z}),
+        c.get_node({x = pos.x, y = pos.y - 0.5, z = pos.z}),
         }
 
         local water_count = 0
@@ -2984,7 +2965,7 @@ mobs:register_mob("nh_mob:shark", {
         local fully_submerged = water_count >= 5
 
         if not fully_submerged then
-        local water_pos = core.find_node_near(pos, 10, {"nh_nodes:water"})
+        local water_pos = c.find_node_near(pos, 10, {"nh_nodes:water"})
         if water_pos then
             local dir = vector.direction(pos, water_pos)
             self.object:set_velocity({
@@ -3001,13 +2982,13 @@ mobs:register_mob("nh_mob:shark", {
             local name = item:get_name()
             if name == "nh_nodes:rawchicken" or name == "nh_nodes:rawbeef" or name == "nh_nodes:roastchicken" or name == "nh_nodes:roastbeef" 
             or name == "nh_nodes:tuna" or name == "nh_nodes:rawtuna" or name == "nh_nodes:roasttuna" then
-                core.chat_send_player(clicker:get_player_name(), S("The shark still hungry!"))
+                c.chat_send_player(clicker:get_player_name(), S("The shark still hungry!"))
                 item:take_item(1)
                 clicker:set_wielded_item(item)
             elseif name == "" then -- mão vazia
-                core.chat_send_player(clicker:get_player_name(), S("I touched the shark!"))
+                c.chat_send_player(clicker:get_player_name(), S("I touched the shark!"))
             else
-                core.chat_send_player(clicker:get_player_name(), S("Glub, glub..."))
+                c.chat_send_player(clicker:get_player_name(), S("Glub, glub..."))
             end
         end
     end,
@@ -3084,9 +3065,9 @@ mobs:register_mob("nh_mob:messagebottle", {
                 inv:add_item("main", written_page)
                 self.object:remove()
             elseif name == "nh_nodes:bottle" then
-                core.chat_send_player(clicker:get_player_name(), S("Plim! I need to empty my hand to pick it up."))
+                c.chat_send_player(clicker:get_player_name(), S("Plim! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(),
+                c.chat_send_player(clicker:get_player_name(),
                     S("Message bottle. I need to empty my hand to pick it up."))
             end
         end
@@ -3101,7 +3082,7 @@ mobs:register_mob("nh_mob:messagebottle", {
         local written_page = items.create_page_with_text(random_text)
  
         -- Dropa o item no chão
-        core.add_item(pos, written_page)
+        c.add_item(pos, written_page)
     end,
 })
 -- Spawn da garrafa (somente na água)
@@ -3170,9 +3151,9 @@ mobs:register_mob("nh_mob:coconut", {
                 -- Remove a garrafa
                 self.object:remove()
             elseif name == "nh_nodes:coconut" then
-                core.chat_send_player(clicker:get_player_name(), "Ploc!")
+                c.chat_send_player(clicker:get_player_name(), "Ploc!")
             else
-                core.chat_send_player(clicker:get_player_name(), S("A floating coconut! Great food to find at sea."))
+                c.chat_send_player(clicker:get_player_name(), S("A floating coconut! Great food to find at sea."))
             end
         end
     end,
@@ -3243,9 +3224,9 @@ mobs:register_mob("nh_mob:iceberg", {
                 -- Remove a garrafa
                 self.object:remove()
             elseif name == "nh_nodes:ice" then
-                core.chat_send_player(clicker:get_player_name(), S("Plim! I need to empty my hand to pick it up."))
+                c.chat_send_player(clicker:get_player_name(), S("Plim! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(), S("Floating ice"))
+                c.chat_send_player(clicker:get_player_name(), S("Floating ice"))
             end
         end
     end,
@@ -3318,9 +3299,9 @@ mobs:register_mob("nh_mob:iceberg2", {
                 -- Remove a garrafa
                 self.object:remove()
             elseif name == "nh_nodes:ice" then
-                core.chat_send_player(clicker:get_player_name(), "Plim!")
+                c.chat_send_player(clicker:get_player_name(), "Plim!")
             else
-                core.chat_send_player(clicker:get_player_name(), "Iceberg")
+                c.chat_send_player(clicker:get_player_name(), "Iceberg")
             end
         end
     end,
@@ -3369,12 +3350,12 @@ local function spinning_top_do_custom(self, dtime, friction_msg, damage_msg, use
 
     local pos   = self.object:get_pos()
     local below = { x = pos.x, y = math.floor(pos.y), z = pos.z }
-    local node  = core.get_node(below)
+    local node  = c.get_node(below)
 
     if not SPINNING_TOP_ALLOWED_NODES[node.name] then
         if not self._on_bad_floor then
             self._on_bad_floor = true
-            core.chat_send_all(friction_msg)
+            c.chat_send_all(friction_msg)
         end
         self._tracked_hp = (self._tracked_hp or self.object:get_hp()) - 1
         if use_punch then
@@ -3382,7 +3363,7 @@ local function spinning_top_do_custom(self, dtime, friction_msg, damage_msg, use
         else
             self.object:set_hp(self._tracked_hp)
         end
-        core.chat_send_all(damage_msg .. self._tracked_hp)
+        c.chat_send_all(damage_msg .. self._tracked_hp)
     else
         self._on_bad_floor = false
     end
@@ -3436,9 +3417,9 @@ local function spinning_top_def(extra)
                 clicker:get_inventory():add_item("main", ItemStack(extra.item))
                 self.object:remove()
             elseif name == extra.item then
-                core.chat_send_player(clicker:get_player_name(), S("Teck! I need to empty my hand to pick it up."))
+                c.chat_send_player(clicker:get_player_name(), S("Teck! I need to empty my hand to pick it up."))
             else
-                core.chat_send_player(clicker:get_player_name(), S("Spinning... I need to empty my hand to pick it up."))
+                c.chat_send_player(clicker:get_player_name(), S("Spinning... I need to empty my hand to pick it up."))
             end
         end,
         do_custom = function(self, dtime)
@@ -3526,7 +3507,7 @@ mobs:register_mob("nh_mob:octopus", {
     },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), S("This octopus looks dangerous, I have to be careful when attacking!"))
+            c.chat_send_player(clicker:get_player_name(), S("This octopus looks dangerous, I have to be careful when attacking!"))
         end
     end,
 })
@@ -3591,7 +3572,7 @@ mobs:register_mob("nh_mob:octopus2", {
     },
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
-            core.chat_send_player(clicker:get_player_name(), "This octopus is injured")
+            c.chat_send_player(clicker:get_player_name(), "This octopus is injured")
         end
     end,
 })
@@ -3654,9 +3635,9 @@ mobs:register_mob("nh_mob:exoskull", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The exhausted doesn't want light!"))
+                c.chat_send_player(clicker:get_player_name(), S("The exhausted doesn't want light!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -3669,7 +3650,7 @@ mobs:register_mob("nh_mob:exoskull", {
         return true -- PARA CONTINUAR.
     end,
     on_die = function(self, pos)
-        core.after(0.1, function() core.add_entity(pos, "nh_mob:octopus2") end)
+        c.after(0.1, function() c.add_entity(pos, "nh_mob:octopus2") end)
         -- Opcional: deixa o novo mob já em modo de ataque
         -- if obj then obj:get_luaentity().state = "attack" end
     end,
@@ -3740,9 +3721,9 @@ mobs:register_mob("nh_mob:sirenia", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "nh_nodes:torch2" then
-                core.chat_send_player(clicker:get_player_name(), S("The sirenia doesn't want light!"))
+                c.chat_send_player(clicker:get_player_name(), S("The sirenia doesn't want light!"))
             else
-                core.chat_send_player(clicker:get_player_name(), "...")
+                c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -3779,7 +3760,7 @@ local function slime_after_activate(self, punch_delay)
     })
     local pos = self.object:get_pos()
     local nearest_player, nearest_dist = nil, self.view_range or 7
-    for _, player in ipairs(core.get_connected_players()) do
+    for _, player in ipairs(c.get_connected_players()) do
         local dist = vector.distance(pos, player:get_pos())
         if dist < nearest_dist then
             nearest_dist = dist
@@ -3787,7 +3768,7 @@ local function slime_after_activate(self, punch_delay)
         end
     end
     if nearest_player then
-        core.after(punch_delay, function()
+        c.after(punch_delay, function()
             if self.object and self.object:is_valid() then
                 self.object:punch(nearest_player, 1.0,
                     { full_punch_interval = 1.0, damage_groups = { fleshy = 1 } }, nil)
@@ -3798,7 +3779,7 @@ end
 
 -- Spawna N cópias de um mob na posição dada.
 local function spawn_n(pos, mob, n)
-    for _ = 1, n do core.add_entity(pos, mob) end
+    for _ = 1, n do c.add_entity(pos, mob) end
 end
 
 -- Monta a def completa de um slime.
@@ -3857,10 +3838,10 @@ local function slime_def(extra)
             if not clicker:is_player() then return end
             local item = clicker:get_wielded_item()
             if item:get_name() == "nh_nodes:rawchicken" then
-                core.chat_send_player(clicker:get_player_name(), "O slime quer comida!")
+                c.chat_send_player(clicker:get_player_name(), "O slime quer comida!")
                 item:take_item(1)
                 clicker:set_wielded_item(item)
-            else core.chat_send_player(clicker:get_player_name(), "O.O")
+            else c.chat_send_player(clicker:get_player_name(), "O.O")
             end
         end,
     }
@@ -3900,7 +3881,7 @@ mobs:register_mob("nh_mob:slime2", slime_def({
     visual_size  = { x = 20, y = 20 },
     punch_delay  = 0.4,
     on_die = function(self, pos)
-        core.after(0.1, function() spawn_n(pos, "nh_mob:slime", 6) end)
+        c.after(0.1, function() spawn_n(pos, "nh_mob:slime", 6) end)
     end,
 }))
 register_mob_spawn({
@@ -3926,7 +3907,7 @@ mobs:register_mob("nh_mob:slime3", slime_def({
     visual_size  = { x = 40, y = 40 },
     punch_delay  = 0.2,
     on_die = function(self, pos)
-        core.after(0.1, function()
+        c.after(0.1, function()
             spawn_n(pos, "nh_mob:slime2", 4)
             spawn_n(pos, "nh_mob:slime",  2)
         end)
@@ -3988,13 +3969,13 @@ mobs:register_mob("nh_mob:visage", {
         walk_end = 40,
     },
     follow = {"nh_nodes:torch2"},
-    on_die = function(self, pos) core.after(0.1, function() local obj = core.add_entity(pos, "nh_mob:visage2") end) end,
+    on_die = function(self, pos) c.after(0.1, function() local obj = c.add_entity(pos, "nh_mob:visage2") end) end,
     on_rightclick = function(self, clicker)
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "nh_nodes:torch2" then core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
-            else core.chat_send_player(clicker:get_player_name(), "...")
+            if name == "nh_nodes:torch2" then c.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
+            else c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -4048,7 +4029,7 @@ mobs:register_mob("nh_mob:visage2", {
         local pos = self.object:get_pos()
         local nearest_player = nil
         local nearest_dist = 20 -- só considera jogadores em até 20 blocos
-        for _, player in ipairs(core.get_connected_players()) do
+        for _, player in ipairs(c.get_connected_players()) do
             local dist = vector.distance(pos, player:get_pos())
             if dist < nearest_dist then
                 nearest_dist = dist
@@ -4056,7 +4037,7 @@ mobs:register_mob("nh_mob:visage2", {
             end
         end
         if nearest_player then -- Pequeno delay para o mob terminar de spawnar antes do punch
-            core.after(0.2, function()
+            c.after(0.2, function()
                 if self.object:is_valid() then
                     self.object:punch(nearest_player, 1.0, {full_punch_interval = 1.0, damage_groups = {fleshy = 1},}, nil) -- 1 de dano simbólico  
                 end
@@ -4079,8 +4060,8 @@ mobs:register_mob("nh_mob:visage2", {
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "nh_nodes:torch2" then core.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
-            else core.chat_send_player(clicker:get_player_name(), "...")
+            if name == "nh_nodes:torch2" then c.chat_send_player(clicker:get_player_name(), S("The visage doesn't want light!"))
+            else c.chat_send_player(clicker:get_player_name(), "...")
             end
         end
     end,
@@ -4140,9 +4121,9 @@ mobs:register_mob("nh_mob:giantcrab", {
             local item = clicker:get_wielded_item()
             local name = item:get_name()
             if name == "" then
-                core.chat_send_player(clicker:get_player_name(), S("?!"))
+                c.chat_send_player(clicker:get_player_name(), S("?!"))
             else
-                core.chat_send_player(
+                c.chat_send_player(
                     clicker:get_player_name(), S("Crrrr!"))
             end
         end
@@ -4158,12 +4139,12 @@ mobs:register_mob("nh_mob:giantcrab", {
     after_activate = function(self, staticdata, def, dtime)
         self.object:set_properties({ static_save = true })
         -- Restaura ataque ao jogador mais próximo sempre (novo spawn OU reload)
-        core.after(0.5, function()
+        c.after(0.5, function()
             if not self.object:is_valid() then return end
             local pos = self.object:get_pos()
             local nearest_player = nil
             local nearest_dist = self.view_range or 50
-            for _, player in ipairs(core.get_connected_players()) do
+            for _, player in ipairs(c.get_connected_players()) do
                 local dist = vector.distance(pos, player:get_pos())
                 if dist < nearest_dist then
                     nearest_dist = dist
@@ -4174,12 +4155,12 @@ mobs:register_mob("nh_mob:giantcrab", {
         end)
         -- Punch simbólico só no primeiro spawn
         if staticdata and staticdata ~= "" then return end
-        core.after(0.2, function()
+        c.after(0.2, function()
             if not self.object:is_valid() then return end
             local pos = self.object:get_pos()
             local nearest_player = nil
             local nearest_dist = 20
-            for _, player in ipairs(core.get_connected_players()) do
+            for _, player in ipairs(c.get_connected_players()) do
                 local dist = vector.distance(pos, player:get_pos())
                 if dist < nearest_dist then
                     nearest_dist = dist
@@ -4225,19 +4206,19 @@ mobs:register_arrow("nh_mob:plasma2", {
     lifetime = 3,
     _last_light_pos = nil,
     on_activate = function(self, staticdata, dtime_s)
-        core.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25})
+        c.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25})
     end,
     hit_player = function(self, player)
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
         player:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
         local place_pos = vector.round(player:get_pos())
         -- Encontra o player mais próximo para orientar o portal
         local nearest_player = nil
         local min_dist = math.huge
-        for _, player in ipairs(core.get_connected_players()) do
+        for _, player in ipairs(c.get_connected_players()) do
             local d = vector.distance(place_pos, player:get_pos())
             if d < min_dist then
                 min_dist = d
@@ -4250,21 +4231,21 @@ mobs:register_arrow("nh_mob:plasma2", {
             -- Vetor da posição do portal até o player
             local dir = vector.direction(place_pos, player_pos)
             dir = vector.multiply(dir, -1)  -- inverte 180° no eixo Y
-            param2 = core.dir_to_facedir(dir) -- Converte a direção em param2 facedir
+            param2 = c.dir_to_facedir(dir) -- Converte a direção em param2 facedir
         end
-        core.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
+        c.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
     end,
     hit_mob = function(self, mob)
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
         mob:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
         local place_pos = vector.round(mob:get_pos())
         -- Encontra o player mais próximo para orientar o portal
         local nearest_player = nil
         local min_dist = math.huge
-        for _, player in ipairs(core.get_connected_players()) do
+        for _, player in ipairs(c.get_connected_players()) do
             local d = vector.distance(place_pos, player:get_pos())
             if d < min_dist then
                 min_dist = d
@@ -4275,20 +4256,20 @@ mobs:register_arrow("nh_mob:plasma2", {
         if nearest_player then
             local player_pos = nearest_player:get_pos()
             local dir = vector.direction(place_pos, player_pos) -- Vetor da posição do portal até o player
-            param2 = core.dir_to_facedir(dir) -- Converte a direção em param2 facedir
+            param2 = c.dir_to_facedir(dir) -- Converte a direção em param2 facedir
         end
-        core.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
+        c.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
     end,
     hit_node = function(self, pos, node)
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
         local place_pos = vector.round(pos)
         -- Encontra o player mais próximo para orientar o portal
         local nearest_player = nil
         local min_dist = math.huge
-        for _, player in ipairs(core.get_connected_players()) do
+        for _, player in ipairs(c.get_connected_players()) do
             local d = vector.distance(place_pos, player:get_pos())
             if d < min_dist then
                 min_dist = d
@@ -4301,9 +4282,9 @@ mobs:register_arrow("nh_mob:plasma2", {
             -- Vetor da posição do portal até o player
             local dir = vector.direction(place_pos, player_pos)
             dir = vector.multiply(dir, -1)  -- inverte 180° no eixo Y
-            param2 = core.dir_to_facedir(dir) -- Converte a direção em param2 facedir
+            param2 = c.dir_to_facedir(dir) -- Converte a direção em param2 facedir
         end
-        core.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
+        c.set_node(place_pos, { name = "nh_nodes:portal", param2 = param2 })
     end,
 })
 
@@ -4317,42 +4298,42 @@ mobs:register_arrow("nh_mob:plasma", {
     lifetime = 3,
     _last_light_pos = nil,
     on_activate = function(self, staticdata, dtime_s)
-        core.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25}) -- toca o som no projétil
+        c.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25}) -- toca o som no projétil
     end,
     hit_player = function(self, player)
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
         player:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
     end,
     hit_mob = function(self, mob)
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
         mob:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 },}, nil)
     end,
     hit_node = function(self, pos, node)
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
     end,
 })
 -- Após o register_arrow, o mobs já criou a entidade internamente.
 -- Pegamos ela e injetamos o on_step de luz por cima, preservando o original.
-local plasma_def = core.registered_entities["nh_mob:plasma"]
+local plasma_def = c.registered_entities["nh_mob:plasma"]
 local original_on_step = plasma_def.on_step
-core.register_entity("nh_mob:plasma", table.copy(plasma_def))  -- força re-registro com override abaixo
+c.register_entity("nh_mob:plasma", table.copy(plasma_def))  -- força re-registro com override abaixo
 local PASSTHROUGH_LIGHT = {["air"] = true, ["nh_mob:plasma_light"] = true, ["nh_nodes:water"] = true, ["nh_nodes:water2"] = true, ["nh_nodes:water_flowing"] = true, ["nh_nodes:water2_flowing"] = true,}
-core.registered_entities["nh_mob:plasma"].on_step = function(self, dtime, moveresult)
+c.registered_entities["nh_mob:plasma"].on_step = function(self, dtime, moveresult)
     -- Timer de lifetime manual
     self._lifetime_timer = (self._lifetime_timer or 0) + dtime
     if self._lifetime_timer >= 3 then  -- mesmo valor do lifetime
         if self._last_light_pos then
-            local n = core.get_node(self._last_light_pos)
-            if n.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local n = c.get_node(self._last_light_pos)
+            if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
         self.object:remove()
         return
@@ -4362,19 +4343,19 @@ core.registered_entities["nh_mob:plasma"].on_step = function(self, dtime, movere
     if pos then
         local node_pos = vector.round(pos)
         if self._last_light_pos and not vector.equals(self._last_light_pos, node_pos) then
-            local old = core.get_node(self._last_light_pos)
-            if old.name == "nh_mob:plasma_light" then core.remove_node(self._last_light_pos) end
+            local old = c.get_node(self._last_light_pos)
+            if old.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
             self._last_light_pos = nil
         end
-        local current = core.get_node(node_pos)
+        local current = c.get_node(node_pos)
         if PASSTHROUGH_LIGHT[current.name] and current.name ~= "nh_mob:plasma_light" then
-            core.set_node(node_pos, { name = "nh_mob:plasma_light" })
+            c.set_node(node_pos, { name = "nh_mob:plasma_light" })
             self._last_light_pos = node_pos
         end
     end
     original_on_step(self, dtime, moveresult)
 end
-core.register_node("nh_mob:plasma_light", {
+c.register_node("nh_mob:plasma_light", {
     drawtype = "airlike", -- invisível
     walkable = false,
     pointable = false,
@@ -4436,8 +4417,8 @@ mobs:register_mob("nh_mob:giantshrimp", {
         if clicker:is_player() then
             local item = clicker:get_wielded_item()
             local name = item:get_name()
-            if name == "" then core.chat_send_player(clicker:get_player_name(), S("?!"))
-            else core.chat_send_player(clicker:get_player_name(), S("Crrrr!"))
+            if name == "" then c.chat_send_player(clicker:get_player_name(), S("?!"))
+            else c.chat_send_player(clicker:get_player_name(), S("Crrrr!"))
             end
         end
     end,
@@ -4447,7 +4428,7 @@ mobs:register_mob("nh_mob:giantshrimp", {
         if self.attack_count < 3 then return end
         self.attack_count = 0
         self:set_animation("shoot", false)
-        core.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25})
+        c.sound_play("tnt_explode", {object = self.object, gain = 2.0, max_hear_distance = 25})
         return true
     end,
 })
@@ -4464,19 +4445,19 @@ register_mob_spawn({
     max_height = -18
 })
 register_orb_egg("nh_mob:giantshrimp", S("Orb with Giant Shrimp"))
-core.register_on_mods_loaded(function() end) -- Roda uma vez na inicialização do servidor -- Varre a área ativa de cada jogador ao reconectar
-core.register_on_joinplayer(function(player)
-    core.after(5, function()
+c.register_on_mods_loaded(function() end) -- Roda uma vez na inicialização do servidor -- Varre a área ativa de cada jogador ao reconectar
+c.register_on_joinplayer(function(player)
+    c.after(5, function()
         local pos = player:get_pos()
         if not pos then return end
         local LIMIT = 100
         local MIN = vector.new(pos.x - LIMIT, pos.y - LIMIT, pos.z - LIMIT)
         local MAX = vector.new(pos.x + LIMIT, pos.y + LIMIT, pos.z + LIMIT)
-        local positions = core.find_nodes_in_area(MIN, MAX, { "nh_mob:plasma_light" })
+        local positions = c.find_nodes_in_area(MIN, MAX, { "nh_mob:plasma_light" })
         for _, p in ipairs(positions) do
-            core.remove_node(p)
+            c.remove_node(p)
         end
     end)
 end)
 -- LOGS FINAIS
-core.register_on_mods_loaded(function() log("All mobs 'init.lua' initialized successfully!") end)
+c.register_on_mods_loaded(function() log("All mobs 'init.lua' initialized successfully!") end)
