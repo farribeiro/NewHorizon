@@ -896,9 +896,9 @@ local function rotate_head_to_look(player)
     if is_moving_keys then head_yaw = 0 else head_yaw = math.max(-head_limit, math.min(head_limit, head_yaw_raw)) end
     head_pitch = math.max(-60, math.min(60, head_pitch))
     player:set_bone_override("bone_All_Head",
-        { rotation = { vec = { x = 0, y = head_yaw * 0.01, z = head_pitch * 0.02 } } })
-    player:set_bone_override("bone_TorsoArms", { rotation = { vec = xyz(0) } })
-    player:set_bone_override("bone_Legs", { rotation = { vec = xyz(0) } })
+        {rotation = {vec = {x = 0, y = head_yaw * 0.01, z = head_pitch * 0.02}}})
+    player:set_bone_override("bone_TorsoArms", { rotation = {vec = xyz(0)}})
+    player:set_bone_override("bone_Legs", {rotation = {vec = xyz(0)}})
 end
 -- FUNÇÃO PARA DEFINIR ANIMAÇÃO DO PLAYER
 set_player_animation = function(player, anim)
@@ -1348,7 +1348,7 @@ core.register_globalstep(function(dtime)
             -- ANIMAÇÃO DE VOO COM ASAS
             local inv = player:get_inventory()
             local back_stack = inv:get_stack("armor_back", 1)
-            local has_wings = not back_stack:is_empty() and back_stack:get_name() == "nh_nodes:wings"
+            local has_wings = not back_stack:is_empty() and back_stack:get_name() == "nh_nodes:wings" or back_stack:get_name() == "nh_nodes:gravitywings"
             local fly_privs = core.get_player_privs(name)
             if has_wings and fly_privs and fly_privs.fly then
                 -- Dobra a velocidade de movimento com asas
@@ -1356,12 +1356,15 @@ core.register_globalstep(function(dtime)
                 local horizontal_speed = math.sqrt(vel.x * vel.x + vel.z * vel.z)
                 local vertical_speed = math.abs(vel.y)
                 local fly_eye_offset_third = {x=0, y=6, z=-7}
-                if horizontal_speed > 0.1 or vertical_speed > 0.1 then
+                if ctrl.sneak then
+                    set_player_animation(player, "sneak")
+                    player:set_properties({eye_height = 1})
+                    player:set_eye_offset({x=0, y=6, z=9}, fly_eye_offset_third)
+                elseif horizontal_speed > 0.1 or vertical_speed > 0.1 then
                     set_player_animation(player, "fly_move")
                     player:set_properties({eye_height = 1})
                     player:set_eye_offset({x=0, y=-1, z=5}, fly_eye_offset_third)
-                else
-                    set_player_animation(player, "idle") --fly_idle
+                else set_player_animation(player, "idle")
                     player:set_properties({eye_height = 2.3})
                     player:set_eye_offset({x=0, y=-0.2, z=3.5}, fly_eye_offset_third)
                 end

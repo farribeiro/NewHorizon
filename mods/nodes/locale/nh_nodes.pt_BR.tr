@@ -241,8 +241,8 @@ Copper Sabatons=Escarpes de Cobre
 [Footwear]=[Calçado]
 
 Wings=Asas
-The wings are active! Use [flight] (k or enable in the menu) to fly.=As asas estão ativas! Use [voo] (k ou habilitar no menu) para voar.
-The wings were removed.=As asas foram removidas.
+The gravity wings are active! Use [flight] (k or enable in the menu) to fly.=As asas gravitacionais estão ativas! Use [voo] (k ou habilitar no menu) para voar.
+The gravity wings were removed.=As asas gravitacionais foram removidas.
 
 Pebble=Seixo
 White Pebble=Seixo Branco

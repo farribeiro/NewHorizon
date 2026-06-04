@@ -612,7 +612,7 @@ mobs:register_mob("nh_mob:bull", {
     attack_type = "dogfight",
     attack_chance = 1,
     drops = {
-        { name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4 }, -- 1-4 couros
+        { name = "nh_nodes:cowhide", chance = 1, min = 1, max = 4 }, -- 1-4 couros
         { name = "nh_nodes:rawbeef",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
         { name = "nh_nodes:bone",       chance = 1, min = 2, max = 5 }, -- 2-7 ossos (sempre)
     },
@@ -744,7 +744,7 @@ mobs:register_mob("nh_mob:cow", {
     damage = 5,
     attack_type = "dogfight",
     drops = {
-        { name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4 }, -- 1-4 couros
+        { name = "nh_nodes:cowhide", chance = 1, min = 1, max = 4 }, -- 1-4 couros
         { name = "nh_nodes:rawbeef",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
         { name = "nh_nodes:bone",       chance = 1, min = 2, max = 5 }, -- 2-7 ossos (sempre)
     },
@@ -957,7 +957,7 @@ mobs:register_mob("nh_mob:ox", {
     damage = 4,
     attack_type = "dogfight",
     drops = {
-        { name = "nh_nodes:cowleather", chance = 1, min = 1, max = 4 }, -- 1-4 couros
+        { name = "nh_nodes:cowhide", chance = 1, min = 1, max = 4 }, -- 1-4 couros
         { name = "nh_nodes:rawbeef",    chance = 1, min = 2, max = 5 }, -- 2-7 carnes (sempre)
         { name = "nh_nodes:bone",       chance = 1, min = 2, max = 5 }, -- 2-7 ossos (sempre)
     },

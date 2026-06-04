@@ -362,156 +362,127 @@ end)
 -- Usada por: Nodes do chão
 -- Inclui crafts básicos
 recipes_floor = {
-    {
-        ingredients = { ["nh_nodes:pebble"] = 2 },
+    {ingredients = { ["nh_nodes:pebble"] = 2 },
         output = "nh_nodes:chippedstone"
     },
-    {
-        ingredients = { ["nh_nodes:pebble_item"] = 2 },
+    {ingredients = { ["nh_nodes:pebble_item"] = 2 },
         output = "nh_nodes:chippedstone"
     },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1 },
+    {ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1 },
         output = "nh_nodes:stoneaxehead"
     },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1 },
+    {ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1 },
         output = "nh_nodes:stonepickaxehead"
     },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1 },
+    {ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1 },
         output = "nh_nodes:stonehoehead"
     },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1 },
+    {ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1 },
         output = "nh_nodes:stoneadzehead"
     },
-    {
-        ingredients = { ["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1 },
+    {ingredients = { ["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1 },
         output = "nh_nodes:rowing"
     },
-    {
-        ingredients = { ["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:stoneaxe"
     },
-    {
-        ingredients = { ["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:stonepickaxe"
     },
-    {
-        ingredients = { ["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:stonehoe"
     },
-    {
-        ingredients = { ["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:stoneadze"
     },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1 },
+    {ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1 },
         output = "nh_nodes:obsidianblade"
     },
-    {
-        ingredients = { ["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:chippedstoneknife"
     },
-    {
-        ingredients = { ["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:obsidianknife"
     },
-    {
-        ingredients = { ["nh_nodes:pebble"] = 8 },
+    {ingredients = { ["nh_nodes:pebble"] = 8 },
         output = "nh_nodes:cobblestone"
     },
-    {
-        ingredients = { ["nh_nodes:pebble_item"] = 8 },
+    {ingredients = { ["nh_nodes:pebble_item"] = 8 },
         output = "nh_nodes:cobblestone"
     },
-    {
-        ingredients = { ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = { ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:campfiretinder"
     },
-    {
-        ingredients = { ["nh_nodes:oaklog"] = 1 },
+    {ingredients = { ["nh_nodes:oaklog"] = 1 },
         output = "nh_nodes:oakwood",
         required_tool = "nh_nodes:stoneadze", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:pinelog"] = 1 },
+    {ingredients = { ["nh_nodes:pinelog"] = 1 },
         output = "nh_nodes:pinewood",
         required_tool = "nh_nodes:stoneadze", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1 },
+    {ingredients = { ["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1 },
         output = "nh_nodes:torch"
     },
-    {
-        ingredients = { ["nh_nodes:oakwood"] = 1 },
+    {ingredients = { ["nh_nodes:oakwood"] = 1 },
         output = "nh_nodes:oakboard 8"
     },
-    {
-        ingredients = { ["nh_nodes:oakwood"] = 2 },
+    {ingredients = { ["nh_nodes:oakwood"] = 2 },
         output = "nh_nodes:oakplank 4"
     },
-    {
-        ingredients = { ["nh_nodes:oakboard"] = 1 },
+    {ingredients = { ["nh_nodes:oakboard"] = 1 },
         output = "nh_nodes:oakdowel 8"
     },
-    {
-        ingredients = { ["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2 },
+    {ingredients = { ["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2 },
         output = "nh_nodes:craft_table"
     },
-    {
-        ingredients = { ["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1 },
+    {ingredients = { ["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1 },
         output = "nh_nodes:inkbottle"
     },
-    {
-        ingredients = { ["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1 },
+    {ingredients = { ["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1 },
         output = "nh_nodes:messagebottle"
     },
-    {
-        ingredients = { ["nh_nodes:shrimpclaw"] = 1, ["nh_nodes:sphere"] = 1 },
+    {ingredients = { ["nh_nodes:shrimpclaw"] = 1, ["nh_nodes:sphere"] = 1 },
         output = "nh_nodes:shrimpclaw2"
+    },
+    {ingredients = { ["nh_nodes:wings"] = 1, ["nh_nodes:sphere"] = 1 },
+        output = "nh_nodes:gravitywings"
     },
 }
 -- RECEITAS DA BANCADA DE PRODUÇÃO (2x2x2)
 -- Usada por: craft_table
 -- Inclui tudo do floor + itens avançados (espada, baú, porta, piões...)
 recipes_table = {
-    {
-        ingredients = { ["nh_nodes:oakboard"] = 6 },
+    {ingredients = { ["nh_nodes:oakboard"] = 6 },
         output = "nh_nodes:oakchest"
     },
-    {
-        ingredients = { ["nh_nodes:cowfur"] = 2, ["nh_nodes:oakdowel"] = 1 },
+    {ingredients = { ["nh_nodes:cowhide"] = 2, ["nh_nodes:oakdowel"] = 1 },
         output = "nh_nodes:belt"
     },
-    {
-        ingredients = { ["nh_nodes:cowfur"] = 2, ["nh_nodes:oakchest"] = 1 },
+    {ingredients = { ["nh_nodes:cowhide"] = 2, ["nh_nodes:oakchest"] = 1 },
         output = "nh_nodes:backchest"
     },
-    {
-        ingredients = { ["nh_nodes:cowfur"] = 5 },
+    {ingredients = { ["nh_nodes:cowhide"] = 5 },
         output = "nh_nodes:likeglove"
     },
-    {
-        ingredients = { ["nh_nodes:cowfur"] = 6 },
+    {ingredients = { ["nh_nodes:cowhide"] = 6 },
         output = "nh_nodes:pointglove"
     },
-    {
-        ingredients = { ["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2 },
+    {ingredients = { ["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2 },
         output = "nh_nodes:oakdoor_closed"
     },
-    {
-        ingredients = { ["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1 },
+    {ingredients = { ["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1 },
         output = "nh_nodes:spinningtop"
     },
-    {
-        ingredients = { ["nh_nodes:palmlog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1 },
+    {ingredients = { ["nh_nodes:palmlog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1 },
         output = "nh_nodes:spinningtop2"
     },
-    {
-        ingredients = { ["nh_nodes:pinelog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1 },
+    {ingredients = { ["nh_nodes:pinelog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1 },
         output = "nh_nodes:spinningtop3"
+    },
+    {ingredients = { ["nh_nodes:obsidianblade"] = 8 },
+        output = "nh_nodes:obsidiansword",
+        required_tool = "nh_nodes:rowing", -- ← só funciona com isso no slot
     },
 }
 -- Injeta as receitas do floor no início
@@ -520,20 +491,16 @@ for i, r in ipairs(recipes_floor) do table.insert(recipes_table, i, r) end
 -- Usada por: campfire
 -- Inclui: alimentos cozidos
 recipes_campfire = {
-    {
-        ingredients = { ["nh_nodes:chickenegg"] = 1 },
+    {ingredients = {["nh_nodes:chickenegg"] = 1},
         output = "nh_nodes:friedchickenegg"
     },
-    {
-        ingredients = { ["nh_nodes:rawchicken"] = 1 },
+    {ingredients = {["nh_nodes:rawchicken"] = 1},
         output = "nh_nodes:roastchicken"
     },
-    {
-        ingredients = { ["nh_nodes:rawtuna"] = 1 },
+    {ingredients = {["nh_nodes:rawtuna"] = 1},
         output = "nh_nodes:roasttuna"
     },
-    {
-        ingredients = { ["nh_nodes:rawbeef"] = 1 },
+    {ingredients = {["nh_nodes:rawbeef"] = 1},
         output = "nh_nodes:roastbeef"
     },
 }
@@ -541,83 +508,67 @@ recipes_campfire = {
 -- Usada por: furnace
 -- Inclui: carvão, alimentos cozidos, fundição de metais, vidro
 recipes_furnace = {
-    {
-        ingredients = { ["nh_nodes:oaklog"] = 9 },
+    {ingredients = {["nh_nodes:oaklog"] = 9},
         output = "nh_nodes:charcoal 9",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:pinelog"] = 9 },
+    {ingredients = {["nh_nodes:pinelog"] = 9},
         output = "nh_nodes:charcoal 9",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:palmlog"] = 9 },
+    {ingredients = {["nh_nodes:palmlog"] = 9},
         output = "nh_nodes:charcoal2 9",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:chickenegg"] = 1 },
+    {ingredients = {["nh_nodes:chickenegg"] = 1},
         output = "nh_nodes:friedchickenegg",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:rawchicken"] = 1 },
+    {ingredients = {["nh_nodes:rawchicken"] = 1},
         output = "nh_nodes:roastchicken",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:rawtuna"] = 1 },
+    {ingredients = {["nh_nodes:rawtuna"] = 1},
         output = "nh_nodes:roasttuna",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:rawbeef"] = 1 },
+    {ingredients = {["nh_nodes:rawbeef"] = 1},
         output = "nh_nodes:roastbeef",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:coppernugget"] = 3 },
+    {ingredients = {["nh_nodes:coppernugget"] = 3 },
         output = "nh_nodes:copperingot",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:copperingot"] = 3 },
+    {ingredients = {["nh_nodes:copperingot"] = 3},
         output = "nh_nodes:copperhelmet",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:copperingot"] = 8 },
+    {ingredients = {["nh_nodes:copperingot"] = 8},
         output = "nh_nodes:copperchestplate",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:tinnugget"] = 3 },
+    {ingredients = {["nh_nodes:tinnugget"] = 3},
         output = "nh_nodes:tiningot",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:ironnugget"] = 3 },
+    {ingredients = {["nh_nodes:ironnugget"] = 3},
         output = "nh_nodes:ironingot",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:ironingot"] = 3, ["nh_nodes:coal"] = 1, ["nh_items:page"] = 1 },
+    {ingredients = {["nh_nodes:ironingot"] = 3, ["nh_nodes:coalnugget"] = 1, ["nh_items:page"] = 1},
         output = "nh_nodes:grenade",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:sand"] = 8 },
+    {ingredients = {["nh_nodes:sand"] = 8},
         output = "nh_nodes:glass 8",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:glass"] = 3, ["nh_nodes:oakwood"] = 1 },
+    {ingredients = {["nh_nodes:glass"] = 3, ["nh_nodes:oakwood"] = 1},
         output = "nh_nodes:bottle 6",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
-    {
-        ingredients = { ["nh_nodes:glass"] = 4, ["nh_nodes:chromiumingot"] = 1 },
+    {ingredients = {["nh_nodes:glass"] = 4, ["nh_nodes:chromiumingot"] = 1},
         output = "nh_nodes:mirror 4",
         required_tool = "nh_nodes:coalnugget", -- ← só funciona com isso no slot
     },
@@ -4584,7 +4535,7 @@ c.register_node("nh_nodes:roastbeef", {
     end,
 })
 
-c.register_node("nh_nodes:cowfur", {
+c.register_node("nh_nodes:cowhide", {
     description = S "Bull Fur",
     drawtype = "mesh",
     mesh = "cowleather.obj",
@@ -10560,6 +10511,160 @@ c.register_node("nh_nodes:wings", {
     end,
 })
 
+-- ASAS NORMAIS: voo estilo elytra (planador)
+local players_with_elytra = {}   -- name -> true quando asas equipadas
+local players_gliding     = {}   -- name -> true quando está planando ativamente
+local GLIDE_SPEED_MAX    = 18    -- velocidade horizontal máxima (m/s)
+local GLIDE_SPEED_MIN    = 2     -- velocidade mínima para manter planando
+local GLIDE_GRAVITY      = 0.15  -- gravidade reduzida enquanto planando
+local GLIDE_LIFT_FACTOR  = 0.8   -- quanto o olhar para cima converte em sustentação
+local GLIDE_DRAG         = 0.97  -- arrasto por tick (desaceleração suave)
+
+local function has_elytra_equipped(player)
+    local inv = player:get_inventory()
+    local back_list = inv:get_list("armor_back")
+    if not back_list then return false end
+    for _, stack in ipairs(back_list) do
+        if stack:get_name() == "nh_nodes:wings" then return true end
+    end
+    return false
+end
+
+local function is_player_on_ground(player)
+    -- Verifica se há nó sólido logo abaixo do player
+    local pos = player:get_pos()
+    local below = {x = pos.x, y = pos.y - 0.1, z = pos.z}
+    local node = c.get_node(below)
+    local def = c.registered_nodes[node.name]
+    return def and (def.walkable ~= false)
+end
+
+c.register_globalstep(function(dtime)
+    for _, player in ipairs(c.get_connected_players()) do
+        local name = player:get_player_name()
+        local wearing = has_elytra_equipped(player)
+        -- Equipou / desequipou
+        if wearing and not players_with_elytra[name] then
+            players_with_elytra[name] = true
+            c.chat_send_player(name, S "Wings equipped! Jump while falling to glide.")
+        elseif not wearing and players_with_elytra[name] then
+            players_with_elytra[name] = nil
+            if players_gliding[name] then
+                players_gliding[name] = nil
+                player:set_physics_override({ gravity = 1.0, speed = 1.0 })
+            end
+        end
+        if not players_with_elytra[name] then goto continue end
+        local vel = player:get_velocity()
+        local on_ground = is_player_on_ground(player)
+        local ctrl = player:get_player_control()
+        -- Inicia o planamento: player no ar + velocidade vertical negativa (caindo)
+        -- A tecla "jump" ativa o planamento (igual ao Minecraft: pressionar espaço no ar)
+        if not players_gliding[name] then
+            -- Ativa ao pular estando no ar e em queda
+            if ctrl.jump and not on_ground and vel.y < -1.0 then
+                players_gliding[name] = true
+                c.chat_send_player(name, S "Gliding!")
+            end
+        else
+            -- Desativa ao tocar o chão ou apertar sneak
+            if on_ground or ctrl.sneak then
+                players_gliding[name] = nil
+                player:set_physics_override({ gravity = 1.0, speed = 1.0 })
+                goto continue
+            end
+        end
+        if not players_gliding[name] then goto continue end
+        -- FÍSICA DE PLANAMENTO
+        local look = player:get_look_dir()  -- vetor normalizado da direção do olhar
+        -- Velocidade horizontal atual
+        local hspeed = math.sqrt(vel.x * vel.x + vel.z * vel.z)
+        -- Olhar para baixo (pitch > 0 = baixo) acelera; olhar para cima desacelera mas dá lift
+        local pitch = player:get_look_vertical()  -- radianos; positivo = olhando para baixo
+        -- Velocidade alvo baseada na inclinação do olhar
+        -- Olhar para baixo (pitch positivo): ganha velocidade e perde altitude
+        -- Olhar para cima (pitch negativo): perde velocidade e ganha/mantém altitude
+        local target_hspeed = hspeed + (pitch * 8.0 * dtime)
+        target_hspeed = math.max(GLIDE_SPEED_MIN, math.min(GLIDE_SPEED_MAX, target_hspeed))
+        -- Aplica arrasto suave
+        target_hspeed = target_hspeed * (GLIDE_DRAG ^ (dtime * 20))
+        -- Direção horizontal do olhar (normalizada no plano XZ)
+        local hlen = math.sqrt(look.x * look.x + look.z * look.z)
+        local dir_x, dir_z = 0, 0
+        if hlen > 0.001 then
+            dir_x = look.x / hlen
+            dir_z = look.z / hlen
+        end
+        -- Velocidade vertical: pitch para cima gera lift (reduz queda), pitch para baixo mergulha
+        -- lift_y: quanto o olhar para cima compensa a queda
+        local lift_y = -pitch * GLIDE_LIFT_FACTOR * target_hspeed * dtime
+        local new_vy = vel.y + lift_y - (9.8 * GLIDE_GRAVITY * dtime)
+        new_vy = math.max(-10, math.min(3, new_vy))  -- limita velocidade vertical
+        -- Aplica velocidade final
+        player:set_velocity({
+            x = dir_x * target_hspeed,
+            y = new_vy,
+            z = dir_z * target_hspeed,
+        })
+        -- Suprime a física padrão do motor enquanto planando
+        player:set_physics_override({gravity = 0.1, speed = 0.0}) -- desliga gravidade do motor (controlamos manualmente) / movimento de teclado horizontal (controlamos nós)        
+        ::continue::
+    end
+end)
+
+-- Limpa ao deslogar
+c.register_on_leaveplayer(function(player)
+    local name = player:get_player_name()
+    players_with_elytra[name] = nil
+    if players_gliding[name] then
+        players_gliding[name] = nil
+        player:set_physics_override({gravity = 1.0, speed = 1.0})
+    end
+end)
+
+c.register_node("nh_nodes:closedgravitywings", {
+    description = S "Gravity Wings",
+    drawtype = "mesh",
+    mesh = "closedwings.obj",
+    tiles = {"sentinelstatue.png^[colorize:#6600FF:160"},
+    stack_max = 1, -- limita a 1 por slot
+    groups = {oddly_breakable_by_hand = 3},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    selection_box = {type = "fixed", fixed = { -0.55, -0.5, -0.02, 0.55, 1.7, 0.11 }},
+    collision_box = {type = "fixed", fixed = { -0.55, -0.5, -0.02, 0.55, 1.7, 0.11 }},
+    armor_bone_position = {pos = xyz(-0.25, -0.5, 0), rot = xyz(0, -90, 0)}, -- Posição quando equipado
+    -- Configuração mão direita
+    wielded_bone_position = {pos = xyz(-2, 0, 0)},
+    offhand_bone_position = {pos = xyz(-2, 0, -0.25)},
+    drop = "nh_nodes:gravitywings"
+})
+
+c.register_node("nh_nodes:gravitywings", {
+    description = S "Gravity Wings",
+    drawtype = "mesh",
+    mesh = "wings.obj",
+    tiles = {"sentinelstatue.png^[colorize:#6600FF:160"},
+    stack_max = 1, -- limita a 1 por slot
+    groups = {armor_back = 1, oddly_breakable_by_hand = 3, snappy = 3, fleshy = 5},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    selection_box = {type = "fixed", fixed = { -1.5, -0.5, 0, 1.5, 1.5, 0.1 }},
+    collision_box = {type = "fixed", fixed = { -1.5, -0.5, 0, 1.5, 1.5, 0.1 }},
+    -- Define posição customizada quando equipado
+    armor_bone_position = {pos = xyz(-0.25, -0.5, 0), rot = xyz(0, -90, 0)},
+    -- Configuração mão direita
+    wielded_bone_position = {pos = { x = -2, y = 0, z = 0 }},
+    offhand_bone_position = {pos = { x = -2, y = 0, z = -0.25 }},
+    after_place_node = function(pos, placer, itemstack, pointed_thing)
+        -- Substitui o nó colocado pelo closedwings, mantendo o facedir
+        local node = c.get_node(pos)
+        c.set_node(pos, {name = "nh_nodes:closedwings", param2 = node.param2}) -- param2 preserva a rotação/direção
+    end,
+})
+
 -- ASAS: concede voo enquanto equipado nas costas
 local players_with_wings = {}
 local players_flying_active = {}
@@ -10568,7 +10673,7 @@ local function has_wings_equipped(player)
     local back_list = inv:get_list("armor_back")
     if not back_list then return false end
     for _, stack in ipairs(back_list) do
-        if stack:get_name() == "nh_nodes:wings" then return true end
+        if stack:get_name() == "nh_nodes:gravitywings" then return true end
     end
     return false
 end
@@ -10582,14 +10687,14 @@ c.register_globalstep(function(dtime)
             privs.fly = true
             c.set_player_privs(name, privs)
             player:set_physics_override({ gravity = 0.5 })
-            c.chat_send_player(name, S "The wings are active! Use [flight] (k or enable in the menu) to fly.")
+            c.chat_send_player(name, S "The gravity wings are active! Use [flight] (k or enable in the menu) to fly.")
         elseif not wearing and players_with_wings[name] then
             players_with_wings[name] = nil
             players_flying_active[name] = nil  -- limpa estado de voo
             privs.fly = nil
             c.set_player_privs(name, privs)
             player:set_physics_override({ gravity = 1.0 })
-            c.chat_send_player(name, S "The wings were removed.")
+            c.chat_send_player(name, S "The gravity wings were removed.")
         end
         -- Detecta se o voo está ativo: asas equipadas + velocidade vertical (não caindo normalmente)
         if players_with_wings[name] then
