@@ -3,8 +3,7 @@ local c = core
 c.log("action", "[TERRAIN] init.lua loaded")
 local gcid = c.get_content_id
 local S = c.get_translator "nh_terrain"
--- table_xyz
-local function xyz(fx, fy, fz) return { x = fx, y = fy, z = fz } end
+local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return {x = x, y = y, z = z} end -- table_xyz
 -- WORLD CONFIG
 local MIN_XZ = config.MIN_XZ
 local MAX_XZ = config.MAX_XZ
@@ -62,7 +61,7 @@ local C           = {
     oakplank           = gcid "nh_nodes:oakplank",
     oakdowel           = gcid "nh_nodes:oakdowel",
     oakchest           = gcid "nh_nodes:oak_chest",
-    oakdoor            = gcid "nh_nodes:oakdoor_closed",
+    oakdoor            = gcid "nh_nodes:oakdoor",
     oakbranch          = gcid "nh_nodes:oakbranch",
     leaves             = gcid "nh_nodes:leaves",
     leavesrelief       = gcid "nh_nodes:leavesrelief",
@@ -133,10 +132,7 @@ local function init_slope_tables()
     SAND_EDGE[C.air]                 = true
 end
 init_slope_tables()
-local terrain_slopes = dofile(
-    minetest.get_modpath(minetest.get_current_modname())
-    .. "/terrain_update_shape.lua"
-)
+local terrain_slopes = dofile(c.get_modpath(c.get_current_modname()) .. "/terrain_update_shape.lua" )
 terrain_slopes.init(C, DECORATION_CIDS)
 
 -- LOOKUP TABLES GLOBAIS --
@@ -1161,10 +1157,7 @@ local function spawn_ship(area, data, base_pos)
     local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
     c.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
-        c.set_node(door_pos, {
-            name   = "nh_nodes:oakdoor_closed", -- substitua pelo nome real do C.oakdoor
-            param2 = 2                          -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
-        })
+        c.set_node(door_pos, {name   = "nh_nodes:oakdoor", param2 = 2}) -- rotação: 3 = virada para o sul (+Z)
     end)
     -- parede lateral esquerda fechada (dx = 0)
     for dz = 0, depth - 3 do
@@ -1266,8 +1259,7 @@ local function spawn_house(area, data, base_pos)
     local door_pos = { x = base_pos.x + width - 2, y = base_pos.y + 1, z = base_pos.z + depth - 3 }
     c.after(0, function()
         -- confirma que o chão embaixo existe antes de colocar
-        c.set_node(door_pos, {name   = "nh_nodes:oakdoor_closed", -- substituir pelo nome real do C.oakdoor
-            param2 = 2 })                         -- rotação: 3 = virada para o sul (+Z), ajuste se precisar
+        c.set_node(door_pos, {name   = "nh_nodes:oakdoor", param2 = 2}) -- rotação: 3 = virada para o sul (+Z)
     end)
     -- parede lateral esquerda fechada (dx = 0)
     for dz = 0, depth - 3 do
@@ -1286,7 +1278,7 @@ end
 local function place_ship_chest(area, data, base_pos)
     local candidates = {}
     for dx = 1, 2 do
-        for dz = 1, 3 do table.insert(candidates, { dx = dx, dz = dz }) end
+        for dz = 1, 3 do table.insert(candidates, {dx = dx, dz = dz}) end
     end
     if #candidates == 0 then return end
     local rng_chest = PseudoRandom(base_pos.x * 11111 + base_pos.z * 22222)
@@ -1326,7 +1318,7 @@ local function init_perlin_maps()
     P.saprolite     = gpl(NOISE.saprolite)
     P.ore_master    = gpl(NOISE.ore_master)
     -- NOVOS PERLIN MAPS OTIMIZADOS
-    local chunksize = { x = 80, y = 80, z = 80 }
+    local chunksize = xyz(80)
     PM.continent    = gplm(NOISE.continent, chunksize)
     PM.biome        = gplm(NOISE.biome, chunksize)
     PM.mountain     = gplm(NOISE.mountain, chunksize)

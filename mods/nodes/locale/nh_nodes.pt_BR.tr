@@ -299,11 +299,14 @@ Coconut=Coco
 
 Campfire Tinder=Isca de fogueira
 Oak Firewood=Lenha de Carvalho
+Pine Firewood=Lenha de Pinheiro
 Firewood on the Campfire 1/4=Lenha na Fogueira 1/4
 Firewood on the Campfire 2/4=Lenha na Fogueira 2/4
 Firewood on the Campfire 3/4=Lenha na Fogueira 3/4
 Campfire=Fogueira
 I forgot that a bonfire needs to be lit to prepare...=Esqueci que fogueira precisa estar acesa para preparar...
+
+
 
 Oak Spinningtop=Pião de Carvalho
 Pine Spinningtop=Pião de Pinheiro
@@ -337,7 +340,8 @@ Furnace=Fornalha
 
 I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something...=Preciso observar (segurar 'E' ou 'Aux1') e alcançar o chão (clicar 'colocar' de mãos vazias) pra tentar produzir alguma coisa...
 
-I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to open...=Preciso observar (segurar 'E' ou 'Aux1') e alcançar o chão (clicar 'colocar' de mãos vazias) pra abrir...
+[Archion only works in creative mode]=[O Archion só funciona no modo criativo]
+I need to observe (hold 'E' or 'Aux1') and reach the book (click 'place' with empty hands) to open...=Preciso observar (segurar 'E' ou 'Aux1') e alcançar o livro (clicar 'colocar' de mãos vazias) pra abrir...
 
 Sphere of Vertices=Esfera dos Vértices
 Bubble of Vertices=Bolha dos Vértices
@@ -373,6 +377,7 @@ Activate your observation (Aux1 / E) and touch ground blocks to idealize crafts=
 Crafting doesn't depend on the arrangement of the items. Just spread the correct quantities across the grid slots.=As produções não dependem da disposição dos itens. Basta distribuir as quantidades corretas pelos espaços da grade.
 There are hidden chests around the world, but don't expect great rewards=Há baús escondidos pelo mundo, mas não espere grandes recompensas
 They say there is a lost book called Archion that can grant everything this world has to offer=Dizem haver de um livro perdido chamado Archion que pode dar tudo o que esse mundo tem a oferecer
+Press T to open the chat and type '/o' followed by your text if you want to chat with a being called Oz=Pressione T para abrir o chat e digite '/o ' e seu texto, se quiser conversar com um ser chamado Oz
 Someone could have summoned the book using their unlimited creative power by saying: '/grantme all' and '/giveme nh_nodes:archion'=Alguém teria invocado o livro usando o seu poder criativo ilimitado entoando: '/grantme all' e '/giveme nh_nodes:archion'
 According to legend, there are also creatures that only appear in specific locations=Segundo a lenda, há também criaturas que só surgem em localidades específicas
 Some tried to escape, but couldn't — this world seems to have no limits.=Alguns tentaram fugir, mas não conseguiram, esse mundo não parece ter limites.
