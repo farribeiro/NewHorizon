@@ -1,9 +1,8 @@
-minetest.log("action", "[body] init.lua loaded")
-local S = core.get_translator("nh_body")
-local function sit_log(player_name, msg)   minetest.log("action", "[SIT DEBUG] [" .. player_name .. "] " .. msg) end --aqui
--- TABELAS GLOBAIS
---local shadow_objects = {}
+local c = core
+c.log("action", "[BODY] NH init.lua loaded")
+local S = c.get_translator("nh_body")
 local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return {x = x, y = y, z = z} end
+-- TABELAS GLOBAIS
 local last_wielded = {}
 local last_wield_index = {}
 local player_states = {}
@@ -106,7 +105,7 @@ local trigger_punch_loop
 local stop_punch_loop
 local rotate_head_to_look
 -- REGISTRA A ENTIDADE DO CORPO DO PLAYER
-core.register_entity("nh_body:player_body", {
+c.register_entity("nh_body:player_body", {
     initial_properties = {
         visual = "mesh",
         mesh = "character11.glb",
@@ -128,7 +127,7 @@ core.register_entity("nh_body:player_body", {
     end,
     on_step = function(self, dtime)
         if not self.player_name then self.object:remove() return end
-        local player = core.get_player_by_name(self.player_name)
+        local player = c.get_player_by_name(self.player_name)
         if not player then self.object:remove() return end
         -- Sincroniza rotações dos bones apenas se mudaram
         local head_rot  = player:get_bone_override("bone_All_Head").rotation.vec
@@ -163,14 +162,14 @@ local function create_player_body(player)
         body_entities[player_name] = nil
     end
     local pos = player:get_pos()
-    local body = core.add_entity(pos, "nh_body:player_body")
+    local body = c.add_entity(pos, "nh_body:player_body")
     if body then
         local luaentity = body:get_luaentity()
         luaentity.player_name = player_name
         -- Anexa ao player na mesma posição
         body:set_attach(player, "", xyz(0), xyz(0), true) -- "" Bone principal (corpo todo)
         -- ★ SINCRONIZA OS BONES IMEDIATAMENTE ★
-        core.after(0.1, function()
+        c.after(0.1, function()
             if not body or not body:get_luaentity() then return end
             if not player or not player:is_player() then return end
             -- Copia rotações dos bones do player para o corpo
@@ -189,9 +188,9 @@ local function create_player_body(player)
             end
         end)
         body_entities[player_name] = body
-        core.log("action", "[body] Visible body created for " .. player_name)
+        c.log("action", "[body] Visible body created for " .. player_name)
     else
-        core.log("action", "[body] ERROR: Could not create visible body for " .. player_name)
+        c.log("action", "[body] ERROR: Could not create visible body for " .. player_name)
     end
 end
 -- FUNÇÃO PARA ATUALIZAR TEXTURAS DO CORPO VISÍVEL
@@ -207,13 +206,13 @@ local function update_body_textures(player)
         local stack = inv:get_stack("armor_" .. slot, 1)
         if not stack:is_empty() then
             local item_name = stack:get_name()
-            local item_def = core.registered_items[item_name]
+            local item_def = c.registered_items[item_name]
             if item_def and item_def.armor_texture then table.insert(textures, item_def.armor_texture) end
         end
     end
     body:set_properties({ textures = textures }) -- Atualiza textura do corpo visível
 end
-core.register_entity("nh_body:armor_mesh_piece", {
+c.register_entity("nh_body:armor_mesh_piece", {
     initial_properties = {
         visual = "mesh",
         mesh = "leggingsLRup.obj",        -- placeholder; sobrescrito no attach
@@ -227,12 +226,12 @@ core.register_entity("nh_body:armor_mesh_piece", {
     },
     on_step = function(self, dtime)
         if not self.player_name then self.object:remove() return end
-        local player = core.get_player_by_name(self.player_name)
+        local player = c.get_player_by_name(self.player_name)
         if not player then self.object:remove() return end
     end,
 })
 -- REGISTRA A ENTIDADE DO ITEM NA CINTURA
-core.register_entity("nh_body:belt_item", {
+c.register_entity("nh_body:belt_item", {
     initial_properties = {
         visual = "wielditem",
         visual_size = { x = 0.15, y = 0.15, z = 0.15 },
@@ -246,7 +245,7 @@ core.register_entity("nh_body:belt_item", {
             self.object:remove()
             return
         end
-        local player = core.get_player_by_name(self.player_name)
+        local player = c.get_player_by_name(self.player_name)
         if not player then
             self.object:remove()
             return
@@ -287,7 +286,7 @@ local function update_belt_items(player)
             local item_name = stack:get_name()
             if item_name ~= "" and item_name ~= ":" then
                 local pos = player:get_pos()
-                local entity = core.add_entity(pos, "nh_body:belt_item")
+                local entity = c.add_entity(pos, "nh_body:belt_item")
                 if entity then
                     local luaentity = entity:get_luaentity()
                     luaentity.player_name = player_name
@@ -315,7 +314,7 @@ local hand_capabilities = {
     damage_groups = { fleshy = 1 },
 }
 -- REGISTRA O ITEM DA MÃO (SEM IMAGEM VISÍVEL)
--- core.register_craftitem(":",
+-- c.register_craftitem(":",
 --     {
 --         type = "none",
 --         wield_image = "",
@@ -326,7 +325,7 @@ local hand_capabilities = {
 --         visual_scale = 0,
 --         pointable = false,
 --     })
-core.override_item("", { -- "" é o itemstring da mão sem itens
+c.override_item("", { -- "" é o itemstring da mão sem itens
     wield_image = "",
     wield_scale = xyz(0),
     range = 3,
@@ -343,7 +342,7 @@ local function update_wielded_item(player)
         wielded_entities[player_name] = nil
     end
     if item_name == "" or item_name == ":" then return end
-    local item_def = core.registered_items[item_name]
+    local item_def = c.registered_items[item_name]
     -- VALORES PADRÃO
     local default_pos = { x = 1.5, y = 0, z = 0 }
     local default_rot = { x = 0, y = 0, z = -90 }
@@ -361,7 +360,7 @@ local function update_wielded_item(player)
         final_size = item_def.wielded_visual_size or final_size
     end
     local pos = player:get_pos()
-    local entity = core.add_entity(pos, "nh_body:wielded_item")
+    local entity = c.add_entity(pos, "nh_body:wielded_item")
     if entity then
         local luaentity = entity:get_luaentity()
         luaentity.player_name = player_name
@@ -393,7 +392,7 @@ local function update_offhand_item(player)
     local offhand_item = inv:get_stack("main", offhand_index)
     local offhand_name = offhand_item:get_name()
     if offhand_name == "" or offhand_name == ":" then return end
-    local item_def = core.registered_items[offhand_name]
+    local item_def = c.registered_items[offhand_name]
     -- VALORES PADRÃO PARA OFFHAND
     local default_pos = { x = 1.5, y = 0, z = 0 }
     local default_rot = { x = 0, y = 0, z = -90 }
@@ -415,7 +414,7 @@ local function update_offhand_item(player)
         final_size = item_def.offhand_visual_size and item_def.offhand_visual_size or item_def.wielded_visual_size
     end
     local pos = player:get_pos()
-    local entity = core.add_entity(pos, "nh_body:offhand_item")
+    local entity = c.add_entity(pos, "nh_body:offhand_item")
     if entity then
         local luaentity = entity:get_luaentity()
         luaentity.player_name = player_name
@@ -433,7 +432,7 @@ local function update_offhand_item(player)
     end
 end
 -- REGISTRA A ENTIDADE DO ITEM SEGURADO
-core.register_entity("nh_body:wielded_item", {
+c.register_entity("nh_body:wielded_item", {
     initial_properties = {
         visual = "wielditem",
         visual_size = { x = 0.25, y = 0.25, z = 0.25 },
@@ -448,7 +447,7 @@ core.register_entity("nh_body:wielded_item", {
             self.object:remove()
             return
         end
-        local player = core.get_player_by_name(self.player_name)
+        local player = c.get_player_by_name(self.player_name)
         if not player then
             self.object:remove()
             wielded_entities[self.player_name] = nil
@@ -461,7 +460,7 @@ core.register_entity("nh_body:wielded_item", {
         end
     end,
 })
-core.register_entity("nh_body:offhand_item", {
+c.register_entity("nh_body:offhand_item", {
     initial_properties = {
         visual = "wielditem",
         visual_size = { x = 0.15, y = 0.15, z = 0.15 },
@@ -476,7 +475,7 @@ core.register_entity("nh_body:offhand_item", {
             self.object:remove()
             return
         end
-        local player = core.get_player_by_name(self.player_name)
+        local player = c.get_player_by_name(self.player_name)
         if not player then
             self.object:remove()
             offhand_entities[self.player_name] = nil
@@ -491,7 +490,7 @@ core.register_entity("nh_body:offhand_item", {
     end,
 })
 -- REGISTRA A ENTIDADE DE PEÇA DE ARMADURA
-core.register_entity("nh_body:armor_piece", {
+c.register_entity("nh_body:armor_piece", {
     initial_properties = {
         visual = "wielditem",
         visual_size = { x = 0.3, y = 0.3, z = 0.3 },
@@ -505,7 +504,7 @@ core.register_entity("nh_body:armor_piece", {
             self.object:remove()
             return
         end
-        local player = core.get_player_by_name(self.player_name)
+        local player = c.get_player_by_name(self.player_name)
         if not player then
             self.object:remove()
             return
@@ -519,7 +518,7 @@ local function create_armor_inventory(player)
     for slot, _ in pairs(armor_slots) do inv:set_size("armor_" .. slot, 1) end
 end
 local function get_armor_formspec(player_name)
-    local player = core.get_player_by_name(player_name)
+    local player = c.get_player_by_name(player_name)
     if not player then return "" end
     local inv = player:get_inventory()
     local backpack_stack = inv:get_stack("armor_back", 1)
@@ -531,7 +530,7 @@ local function get_armor_formspec(player_name)
            "label[0.5,2.7;" .. S("Legs") .. "]", "list[current_player;armor_legs;0.5,2.7;1,1;]",
            "label[0.5,3.8;" .. S("Feet") .. "]", "list[current_player;armor_feet;0.5,3.8;1,1;]",
            "model[1.25,0.5;3,6;player_model;character11.glb;skin.png;0,180;false;true]",
-           "label[1.75,4.8;" .. core.formspec_escape(player_name) .. "]",
+           "label[1.75,4.8;" .. c.formspec_escape(player_name) .. "]",
            "label[3.5,0.5;" .. S("Back")  .. "]", "list[current_player;armor_back;3.5,0.5;1,1;]",
            "label[3.5,1.6;" .. S("Arms")  .. "]", "list[current_player;armor_arms;3.5,1.6;1,1;]",
            "label[3.5,2.7;" .. S("Hands") .. "]", "list[current_player;armor_hands;3.5,2.7;1,1;]",
@@ -551,7 +550,7 @@ local function update_player_formspec(player)
     local player_name = player:get_player_name()
     player:set_inventory_formspec(get_armor_formspec(player_name))
 end
-core.register_allow_player_inventory_action(function(player, action, inventory, inventory_info)
+c.register_allow_player_inventory_action(function(player, action, inventory, inventory_info)
     -- Bloqueia os slots main[9..24] quando não há backchest equipada
     local function is_bc_slot(list, idx)
         return list == "main" and idx >= BC_OFFSET + 1 and idx <= BC_OFFSET + BC_COUNT
@@ -564,7 +563,7 @@ core.register_allow_player_inventory_action(function(player, action, inventory, 
         if is_bc_slot(inventory_info.to_list, inventory_info.to_index) then
             local moving = inventory:get_stack(inventory_info.from_list, inventory_info.from_index)
             if moving:get_name() == "nh_nodes:backchest" then
-            core.chat_send_player(player:get_player_name(), S("I can't put a backpack chest inside itself, nor another one inside this one on my back while I'm wearing it..."))
+            c.chat_send_player(player:get_player_name(), S("I can't put a backpack chest inside itself, nor another one inside this one on my back while I'm wearing it..."))
             return 0 end
         end
     elseif action == "put" then
@@ -592,7 +591,7 @@ core.register_allow_player_inventory_action(function(player, action, inventory, 
         if to_list:match("^armor_") then
             local slot_type = to_list:gsub("armor_", "")
             local stack = inventory:get_stack(inventory_info.from_list, inventory_info.from_index)
-            local item_def = core.registered_items[stack:get_name()]
+            local item_def = c.registered_items[stack:get_name()]
             if not item_def or not item_def.groups or not item_def.groups["armor_" .. slot_type] then return 0 end
             return stack:get_count()
         end
@@ -600,7 +599,7 @@ core.register_allow_player_inventory_action(function(player, action, inventory, 
         local listname = inventory_info.listname
         if listname and listname:match("^armor_") then
             local slot_type = listname:gsub("armor_", "")
-            local item_def = core.registered_items[inventory_info.stack:get_name()]
+            local item_def = c.registered_items[inventory_info.stack:get_name()]
             if not item_def or not item_def.groups or not item_def.groups["armor_" .. slot_type] then return 0 end
             return inventory_info.stack:get_count()
         end
@@ -658,7 +657,7 @@ local function update_armor_visuals(player)
         local stack = inv:get_stack("armor_" .. slot, 1)
         if not stack:is_empty() then
             local item_name = stack:get_name()
-            local item_def = core.registered_items[item_name]
+            local item_def = c.registered_items[item_name]
             local final_pos  = config.pos
             local final_rot  = config.rot
             local final_size = config.size
@@ -686,7 +685,7 @@ local function update_armor_visuals(player)
                     y =  final_size.y,
                     z =  final_size.z,
                 }
-                local left_entity = core.add_entity(player:get_pos(), "nh_body:armor_piece")
+                local left_entity = c.add_entity(player:get_pos(), "nh_body:armor_piece")
                 if left_entity then
                     local elu = left_entity:get_luaentity()
                     elu.player_name = player_name
@@ -707,7 +706,7 @@ local function update_armor_visuals(player)
                     -- Permite que o item sobrescreva o bone também (opcional)
                     local use_bone = (item_def and item_def.armor_bone) or bone_name
                     local pos = player:get_pos()
-                    local entity = core.add_entity(pos, "nh_body:armor_piece")
+                    local entity = c.add_entity(pos, "nh_body:armor_piece")
                     if entity then
                         local luaentity = entity:get_luaentity()
                         luaentity.player_name = player_name
@@ -734,7 +733,7 @@ if item_def and item_def.armor_extra_pieces then
         local emesh = extra.mesh   -- OBRIGATÓRIO: nome do .obj
 
         if emesh and ebone then
-            local eentity = core.add_entity(player:get_pos(), "nh_body:armor_mesh_piece")
+            local eentity = c.add_entity(player:get_pos(), "nh_body:armor_mesh_piece")
             if eentity then
                 local elu = eentity:get_luaentity()
                 elu.player_name = player_name
@@ -762,7 +761,7 @@ local function update_armor_textures(player)
         local stack = inv:get_stack("armor_" .. slot, 1)
         if not stack:is_empty() then
             local item_name = stack:get_name()
-            local item_def = core.registered_items[item_name]
+            local item_def = c.registered_items[item_name]
             if item_def and item_def.armor_texture then table.insert(textures, item_def.armor_texture) end
         end
     end
@@ -771,7 +770,7 @@ local function update_armor_textures(player)
     update_player_formspec(player)
     update_body_textures(player) -- ATUALIZA CORPO VISÍVEL
 end
-core.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
+c.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
     if action == "move" or action == "put" or action == "take" then
         local listname   = inventory_info.listname or inventory_info.to_list or inventory_info.from_list
         local player_name = player:get_player_name()
@@ -838,7 +837,7 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
     --    { x = 0, y = 7, z = -7 }  -- Terceira pessoa
     --)
 end
-    core.log("action", "[BODY MOD] Invisible player body applyed to player")
+    c.log("action", "[BODY MOD] Invisible player body applyed to player")
 
 -- FUNÇÃO PARA A ANIMAÇÃO DE BATER PLAYER
 local function trigger_punch(player)
@@ -849,7 +848,7 @@ local function trigger_punch(player)
     if punch_timers[name] then return end -- evita spam
     if has_item then set_player_animation(player, "holding_punch") else set_player_animation(player, "punch") end
     punch_timers[name] = true
-    core.after(0.35, function()
+    c.after(0.35, function()
         if not player or not player:is_player() then return end
         punch_timers[name] = nil
     end)
@@ -865,7 +864,7 @@ local function trigger_punch_loop(player)
             return
         end
         trigger_punch(player)
-        core.after(0.45, loop)
+        c.after(0.45, loop)
     end
     loop()
 end
@@ -965,18 +964,18 @@ set_player_animation = function(player, anim)
         if body and body:get_luaentity() then body:set_animation(anim_data[1], anim_data[2], anim_data[3], anim_data[4]) end
     end
 end
-core.register_on_punchnode(function(pos, node, puncher, pointed_thing) -- ATUALIZA QUANDO O JOGADOR MUDA O ITEM SELECIONADO
+c.register_on_punchnode(function(pos, node, puncher, pointed_thing) -- ATUALIZA QUANDO O JOGADOR MUDA O ITEM SELECIONADO
     if puncher and puncher:is_player() then
         trigger_punch(puncher)
         update_wielded_item(puncher)
     end
 end)
-core.register_on_punchplayer(function(player, hitter) if hitter and hitter:is_player() then trigger_punch(hitter) end end)
-core.register_on_placenode(function(pos, newnode, placer)
+c.register_on_punchplayer(function(player, hitter) if hitter and hitter:is_player() then trigger_punch(hitter) end end)
+c.register_on_placenode(function(pos, newnode, placer)
     if not placer or not placer:is_player() then return end
     local name = placer:get_player_name()
     -- marca atividade de place
-    last_place_time[name] = core.get_gametime()
+    last_place_time[name] = c.get_gametime()
     is_placing[name] = true
     trigger_punch(placer)                                              -- animação única de place
     if not punch_loop_timers[name] then trigger_punch_loop(placer) end -- inicia loop se ainda não estiver ativo
@@ -987,8 +986,8 @@ local eye_sit =  {x=0, y=-0.2, z=3.5}
 local eye_sit3 = {x=0, y=4, z=-7}
 local eye_lie =  {x=0, y=-0.7, z=-6}
 local eye_lie3 = {x=0, y=4, z=-7}
-core.register_globalstep(function(dtime)     
-    for _, player in ipairs(core.get_connected_players()) do    
+c.register_globalstep(function(dtime)     
+    for _, player in ipairs(c.get_connected_players()) do    
         local function setplayeranimation(opts) set_player_animation(player, opts) end
         local player_name = player:get_player_name()
         -- Garante que fleshy (sofrer dano) nunca seja perdido
@@ -1001,8 +1000,8 @@ core.register_globalstep(function(dtime)
         local ctrl = player:get_player_control()
         local pos = player:get_pos()
 	-- Ajuste leve no Y para verificar o nó na altura do corpo/pés
-	local node_at_pos = core.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z})
-	local node_def = core.registered_nodes[node_at_pos.name]
+	local node_at_pos = c.get_node({x = pos.x, y = pos.y + 0.5, z = pos.z})
+	local node_def = c.registered_nodes[node_at_pos.name]
 	local is_climbable = node_def and node_def.climbable
         if last_sneak[player_name] ~= ctrl.sneak then last_sneak[player_name] = ctrl.sneak end
         -- BOTÃO ESQUERDO (bater)
@@ -1069,7 +1068,7 @@ core.register_globalstep(function(dtime)
             last_belt_items[player_name] = current_belt
             if not armor_changed then update_belt_items(player) end -- Só chama se armor_changed não chamou antes
         end
-        -- VERIFICA MUDANÇA NA MOCHILA — síncrono, sem core.after
+        -- VERIFICA MUDANÇA NA MOCHILA — síncrono, sem c.after
         local backpack_stack = inv:get_stack("armor_back", 1)
         local has_backpack = not backpack_stack:is_empty() and backpack_stack:get_name() == "nh_nodes:backchest"
         if last_backpack_state[player_name] == nil then last_backpack_state[player_name] = false end
@@ -1173,20 +1172,20 @@ core.register_globalstep(function(dtime)
             local movement_key = ctrl.up or ctrl.down or ctrl.left or ctrl.right or ctrl.jump
                                
                     local eye_first, eye_third = player:get_eye_offset()
-                    local first_str = core.serialize(eye_first)
-                    local third_str = core.serialize(eye_third)
-                    --core.log(player_name, "[SITTING DEBUG] " .. " eye_offset_1st=" .. first_str .. " eye_offset_3rd=" .. third_str) 
+                    local first_str = c.serialize(eye_first)
+                    local third_str = c.serialize(eye_third)
+                    --c.log(player_name, "[SITTING DEBUG] " .. " eye_offset_1st=" .. first_str .. " eye_offset_3rd=" .. third_str) 
 
             -- ── Estado: sentado (pose congelada) ─────────────────────────
             if ss == "sitting" then
-                --core.log(player_name, "IN sitting | sneak_now=" .. tostring(sneak_now) .. " sneak_press=" .. tostring(sneak_press) .. " movement=" .. tostring(movement_key) .. " jump=" .. tostring(ctrl.jump)) -- aqui
+                --c.log(player_name, "IN sitting | sneak_now=" .. tostring(sneak_now) .. " sneak_press=" .. tostring(sneak_press) .. " movement=" .. tostring(movement_key) .. " jump=" .. tostring(ctrl.jump)) -- aqui
                 -- Sai APENAS por: movimento, pulo, ou nova pressão de sneak
                 -- (segurar sneak continuamente desde antes NÃO cancela)
                 if movement_key or ctrl.jump or sneak_press then
                     sit_state[player_name]       = "idle"
                     sit_sneak_count[player_name] = 0
                     -- A lógica abaixo vai selecionar a animação correta
-                    --core.log(player_name, "Applying NORMAL camera")
+                    --c.log(player_name, "Applying NORMAL camera")
                 elseif aux1_press then
                     -- Conta duplo clique de aux1 para deitar
                     sit_sneak_count[player_name] = (sit_sneak_count[player_name] or 0) + 1
@@ -1213,7 +1212,7 @@ core.register_globalstep(function(dtime)
                     sit_state[player_name .. "_last_aux1"] = aux1_now
                     player:set_properties({eye_height = 1})
                     player:set_eye_offset(eye_sit,eye_sit3)
-                    --core.log(player_name, "Applying sitting camera (sitting and no movement_key or ctrl.jump or sneak_press)")
+                    --c.log(player_name, "Applying sitting camera (sitting and no movement_key or ctrl.jump or sneak_press)")
                     goto continue
                 end
 
@@ -1293,7 +1292,7 @@ core.register_globalstep(function(dtime)
                     player:set_eye_offset(eye_sit,eye_sit3)
                     sit_last_sneak[player_name]          = sneak_now
                     sit_state[player_name .. "_last_aux1"] = aux1_now
-                    --core.log(player_name, "Applying sitting camera (sit_anim and no movement_key or ctrl.jump or sneak_press)")
+                    --c.log(player_name, "Applying sitting camera (sit_anim and no movement_key or ctrl.jump or sneak_press)")
                     goto continue
                 end
 
@@ -1349,7 +1348,7 @@ core.register_globalstep(function(dtime)
             local inv = player:get_inventory()
             local back_stack = inv:get_stack("armor_back", 1)
             local has_wings = not back_stack:is_empty() and back_stack:get_name() == "nh_nodes:wings" or back_stack:get_name() == "nh_nodes:gravitywings"
-            local fly_privs = core.get_player_privs(name)
+            local fly_privs = c.get_player_privs(name)
             if has_wings and fly_privs and fly_privs.fly then
                 -- Dobra a velocidade de movimento com asas
                 player:set_physics_override({ speed = 6, jump = 3 })
@@ -1436,7 +1435,7 @@ core.register_globalstep(function(dtime)
         end
     end
 end) -- EVENTOS DE JOGADOR
-core.register_on_joinplayer(function(player)
+c.register_on_joinplayer(function(player)
     player:hud_set_flags({ wielditem = false })
     player:set_lighting({ shadows = { intensity = 0.33 } })
     local player_name = player:get_player_name()
@@ -1452,11 +1451,11 @@ core.register_on_joinplayer(function(player)
         apply_custom_model(player)
         local props = player:get_properties()
         if props.eye_height ~= 2.6 and check_count < max_checks then
-            core.after(0.2, verify_and_apply)
+            c.after(0.2, verify_and_apply)
         end
     end
     -- Delay maior para garantir que o mundo carregou no cliente
-    core.after(0.3, function()
+    c.after(0.3, function()
         if not (player and player:is_player()) then return end
         verify_and_apply()
         create_player_body(player)
@@ -1468,23 +1467,23 @@ core.register_on_joinplayer(function(player)
         if bc_has_backchest(player) then bc_load(player) end
     end)
     -- Segunda tentativa de segurança: recria o corpo se não existir após 3s
-    core.after(2.0, function()
+    c.after(2.0, function()
         if not (player and player:is_player()) then return end
         if not body_entities[player_name] or not body_entities[player_name]:get_luaentity() then
-            core.log("action", "[BODY MOD] Body not found after 2 seconds, recreating for " .. player_name)
+            c.log("action", "[BODY MOD] Body not found after 2 seconds, recreating for " .. player_name)
             create_player_body(player)
         end
     end)
     -- Terceira tentativa de segurança: recria o corpo se não existir após 3s
-    core.after(4.0, function()
+    c.after(4.0, function()
         if not (player and player:is_player()) then return end
         if not body_entities[player_name] or not body_entities[player_name]:get_luaentity() then
-            core.log("action", "[BODY MOD] Body not found after 4 seconds, recreating for " .. player_name)
+            c.log("action", "[BODY MOD] Body not found after 4 seconds, recreating for " .. player_name)
             create_player_body(player)
         end
     end)
 end)
-core.register_on_leaveplayer(function(player)
+c.register_on_leaveplayer(function(player)
     local player_name = player:get_player_name()
     -- Persiste itens da backchest e limpa os slots antes de sair
     if bc_has_backchest(player) then
@@ -1531,7 +1530,7 @@ core.register_on_leaveplayer(function(player)
         body_entities[player_name] = nil
     end
 end)
-core.register_on_dieplayer(function(player)
+c.register_on_dieplayer(function(player)
     local player_name = player:get_player_name()
     if wielded_entities[player_name] then
         wielded_entities[player_name]:remove()
@@ -1552,8 +1551,8 @@ core.register_on_dieplayer(function(player)
         body_entities[player_name] = nil
     end
 end)
-core.register_on_respawnplayer(function(player)
-    core.after(0.5, function()
+c.register_on_respawnplayer(function(player)
+    c.after(0.5, function()
         if player and player:is_player() then
             apply_custom_model(player)
             create_player_body(player)

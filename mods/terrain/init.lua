@@ -2164,11 +2164,11 @@ local function try_spawn_house(area, data, minp, maxp)
         for x = minp.x, maxp.x do
             if (x * x + z * z) <= (HOUSE_SEARCH_RADIUS * HOUSE_SEARCH_RADIUS) then
                 for y = 22, 50 do -- ← altitude da casa em terra firme
-                    if area:contains(x, y, z) and can_spawn_house(area, data, { x = x, y = y, z = z }) then
-                        spawn_house(area, data, { x = x, y = y, z = z })
-                        place_tent_chest(area, data, { x = x, y = y + 1, z = z })
-                        house_pos = { x = x + 6, y = y, z = z + 7 }
-                        house_generated = true -- ← corrigido (estava "house_generated")
+                    if area:contains(x, y, z) and can_spawn_house(area, data, xyz(x, y, z)) then
+                        spawn_house(area, data, xyz(x, y, z))
+                        place_tent_chest(area, data, xyz(x, y + 1, z))
+                        house_pos = xyz(x + 6, y, z + 7)
+                        house_generated = true 
                         return true
                     end
                 end
