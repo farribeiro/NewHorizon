@@ -70,11 +70,7 @@ c.register_globalstep(function(dtime)
                 local props       = player:get_properties()
                 local cb          = props and props.collisionbox
                 local feet_offset = cb and cb[2] or -1
-                local below       = {
-                    x = math.floor(pos.x + 0.5),
-                    y = math.floor(pos.y + feet_offset),
-                    z = math.floor(pos.z + 0.5),
-                }
+                local below       = xyz(math.floor(pos.x + 0.5), math.floor(pos.y + feet_offset), math.floor(pos.z + 0.5))
                 local node        = c.get_node(below)
                 local node_def    = c.registered_nodes[node.name]
                 if node_def and node_def.sounds and node_def.sounds.footstep then
@@ -144,9 +140,7 @@ c.register_globalstep(function(dtime)
             if players_with_torch[name] and players_with_torch[name].pos then
                 local old_pos  = players_with_torch[name].pos
                 local old_node = c.get_node(old_pos)
-                if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then
-                    core
-                        .remove_node(old_pos)
+                if old_node.name == "nh_nodes:torch_light" or old_node.name == "nh_nodes:crystal_light" then c.remove_node(old_pos)
                 end
                 players_with_torch[name] = nil
             end
@@ -225,9 +219,9 @@ local function get_liquid_flow_dir(pos)
     local p2_level = p2_here % 8
     local flow = xyz(0)
     if falling then flow.y = -1 end
-    local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
+    local dirs = {xyz(1, 0, 0), xyz(-1, 0, 0), xyz(0, 0, 1), xyz(0, 0, -1)}
     for _, d in ipairs(dirs) do
-        local nb_pos = { x = pos.x + d.x, y = pos.y, z = pos.z + d.z }
+        local nb_pos = xyz(pos.x + d.x, pos.y, pos.z + d.z)
         local nb     = c.get_node(nb_pos)
         local nb_def = c.registered_nodes[nb.name]
         if not nb_def then goto next_dir end
@@ -266,7 +260,7 @@ c.register_globalstep(function(dtime)
         if not (entity and entity.name == "__builtin:item") then goto drop_next end
         local pos = obj:get_pos()
         if not pos then goto drop_next end
-        local ipos     = { x = math.floor(pos.x + 0.5), y = math.floor(pos.y + 0.5), z = math.floor(pos.z + 0.5), }
+        local ipos     = xyz(math.floor(pos.x + 0.5), math.floor(pos.y + 0.5), math.floor(pos.z + 0.5))
         local node     = c.get_node(ipos)
         local in_full  = WATER_FULLNODES[node.name]
         local in_mid   = WATER_MIDNODES[node.name]
@@ -277,7 +271,7 @@ c.register_globalstep(function(dtime)
             if drop_was_in_water[uid] then
                 drop_was_in_water[uid] = nil
                 drop_last_flow[uid] = nil
-                obj:set_acceleration({ x = 0, y = -gravity, z = 0 })
+                obj:set_acceleration(xyz(0, -gravity, 0))
             end
             goto drop_next
         end
@@ -290,31 +284,18 @@ c.register_globalstep(function(dtime)
 
         if in_full and not in_mid then
             -- Água source (parada)
-            obj:set_velocity({
-                x = 0,
-                y = is_floating and SPEED_FLOAT or -SPEED_SINK,
-                z = 0,
-            })
+            obj:set_velocity(xyz(0, is_floating and SPEED_FLOAT or -SPEED_SINK, 0))
         else
             -- Água flowing (corrente)
             local flow = get_liquid_flow_dir(ipos)
-            if flow then
-                -- Guarda direção para usar no último node (onde flow vira nil)
-                drop_last_flow[uid] = flow
-            else
-                -- Último node da corrente: vizinho à frente é ar, flow==nil.
-                -- Usa a última direção conhecida para continuar o movimento.
-                flow = drop_last_flow[uid]
+            if flow then drop_last_flow[uid] = flow -- Guarda direção para usar no último node (onde flow vira nil)
+            else flow = drop_last_flow[uid] -- Último node da corrente: vizinho à frente é ar, flow==nil. -- Usa a última direção conhecida para continuar o movimento.
             end
-
-            if flow then
-                obj:set_velocity({
-                    x = flow.x * SPEED_CURRENT,
-                    y = (flow.y < 0) and -SPEED_FALL or (is_floating and SPEED_FLOAT or -SPEED_SINK),
-                    z = flow.z * SPEED_CURRENT,
-                })
-            else
-                obj:set_velocity({ x = 0, y = is_floating and SPEED_FLOAT or -SPEED_SINK, z = 0, })
+            if flow then obj:set_velocity(xyz(
+                flow.x * SPEED_CURRENT,
+                (flow.y < 0) and -SPEED_FALL or (is_floating and SPEED_FLOAT or -SPEED_SINK),
+                flow.z * SPEED_CURRENT))
+            else obj:set_velocity(xyz(0, is_floating and SPEED_FLOAT or -SPEED_SINK, 0))
             end
         end
         ::drop_next::
@@ -340,9 +321,7 @@ c.after(0, function()
         self.object:set_rotation({ x = math.rad(45) + tremor, y = tremor, z = math.rad(45) + tremor, })
     end
 end)
-c.register_globalstep(function(dtime)
-    drop_rot_timer = drop_rot_timer + dtime
-end)
+c.register_globalstep(function(dtime) drop_rot_timer = drop_rot_timer + dtime end)
 -- Limpeza unificada ao deslogar
 c.register_on_leaveplayer(function(player)
     local name              = player:get_player_name()
@@ -655,16 +634,14 @@ c.register_entity("nh_nodes:display_item", {
             end
         end
     end,
-    get_staticdata = function(self)
-        return c.serialize({ itemstring = self.itemstring, station_pos = self.station_pos })
-    end,
+    get_staticdata = function(self) return c.serialize({itemstring = self.itemstring, station_pos = self.station_pos}) end,
     on_step = function(self, dtime)
         self.object:set_velocity(xyz(0))
         self.object:set_acceleration(xyz(0))
         local props = self.object:get_properties()
         if props.glow and props.glow > 0 then
             local rot = self.object:get_rotation()
-            self.object:set_rotation({ x = 0, y = rot.y + 0.005, z = 0 })
+            self.object:set_rotation(xyz(0, rot.y + 0.005, 0))
         end
     end,
 })
@@ -714,7 +691,7 @@ local function update_item_entities(pos, config)
             if entity then
                 entity.itemstring = output_stack:get_name()
                 entity.station_pos = pos -- Marca a estação dona
-                obj:set_properties({ wield_item = output_stack:get_name(), visual_size = { x = 0.35, y = 0.35 }, glow = 1, })
+                obj:set_properties({wield_item = output_stack:get_name(), visual_size = { x = 0.35, y = 0.35 }, glow = 1})
             end
         end
     end
@@ -756,10 +733,7 @@ local function check_and_craft(pos, config, player)
     local tool_name = tool_stack:get_name() -- "" se vazio
     for _, recipe in ipairs(config.recipes) do
         -- Se a receita exige ferramenta, verifica
-        if recipe.required_tool then
-            -- pula esta receita
-            if tool_name ~= recipe.required_tool then goto continue end
-        end
+        if recipe.required_tool then if tool_name ~= recipe.required_tool then goto continue end end -- pula esta receita
         if check_recipe(inv, recipe) then
             inv:set_stack("output", 1, ItemStack(recipe.output))
             c.after(0.01, function() update_item_entities(pos, config) end)
@@ -797,11 +771,8 @@ end
 local function show_craft_grid(player, pos, config)
     local player_name = player:get_player_name()
     local pos_string = c.pos_to_string(pos)
-
-    -- Verifica se o backchest está equipado para mostrar slots extras
-    local has_backchest = player_has_backchest_equipped(player)
+    local has_backchest = player_has_backchest_equipped(player) -- Verifica se o backchest está equipado para mostrar slots extras
     local form_height   = has_backchest and 9.7 or 7.5
-
     local formspec = "formspec_version[4]" .. "size[10.7," .. form_height .. "]" .. "label[0.5,0.5;" .. config.title .. "]"
     local y_offset = 1
     for _, layer in ipairs(config.layers) do
@@ -903,11 +874,9 @@ function register_craft_station(node_name, config)
         -- EXECUTA O CALLBACK CUSTOMIZADO PRIMEIRO
         if custom_on_timer then
             local result = custom_on_timer(pos, elapsed)
-            -- Se retornou false, para aqui
-            if result == false then return false end
+            if result == false then return false end -- Se retornou false, para aqui
         end
-        -- Se não tem callback customizado ou retornou true, continua normal
-        return true
+        return true -- Se não tem callback customizado ou retornou true, continua normal
     end
     -- Adiciona callbacks do crafting (alterado para não dar recursão [crash] com o mobsredo)
     node_def.on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
@@ -923,8 +892,7 @@ function register_craft_station(node_name, config)
                 local result = c.item_place_node(itemstack, clicker, pointed_thing)
                 -- Toca o som de place manualmente
                 if config.sounds and config.sounds.place then
-                    c.sound_play(config.sounds.place.name,
-                        { pos = pointed_thing.above, gain = config.sounds.place.gain or 1, max_hear_distance = 16})
+                    c.sound_play(config.sounds.place.name, {pos = pointed_thing.above, gain = config.sounds.place.gain or 1, max_hear_distance = 16})
                 end
                 return result
             end
@@ -942,7 +910,7 @@ function register_craft_station(node_name, config)
         end
         -- Mão vazia e sem (E/Aux1): mostra dica
         if itemstack:is_empty() then c.chat_send_player(clicker:get_player_name(),
-                S "I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something...")
+                S"I need to observe (hold 'E' or 'Aux1') and reach the ground (click 'place' with empty hands) to try to craft something...")
         end
         return itemstack
     end
@@ -1169,26 +1137,18 @@ register_craft_station("nh_nodes:dirt", {
         dug = {name = "punchtimber3", gain = 0.5},
         dig = {name = "punchtimber3", gain = 0.5},
         place = {name = "punchtimber3", gain = 0.5}},
-    -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}},
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     on_construct = function(pos)
-        local above = {x = pos.x, y = pos.y + 1, z = pos.z}
+        local above = xyz(pos.x, pos.y + 1, pos.z)
         local node_above = c.get_node(above).name
         local light = c.get_node_light(above)
-        --c.chat_send_all("🟤 DIRT construído em " .. c.pos_to_string(pos))
-        -- c.chat_send_all("   Bloco acima: " .. node_above)
-        if light and light > 4 then c.get_node_timer(pos):start(math.random(30, 60))
-            -- c.chat_send_all("         Timer iniciado!")
-        else
-            --c.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
-        end
+        if light and light > 4 then c.get_node_timer(pos):start(math.random(30, 60)) end
     end,
 
     on_timer = function(pos, elapsed)
-        local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local above = xyz(pos.x, pos.y + 1, pos.z)
         local node_above = c.get_node(above).name
         local light = c.get_node_light(above)
         -- Bloco líquido ou lava acima impede virar grama
@@ -1199,32 +1159,27 @@ register_craft_station("nh_nodes:dirt", {
         if light and light <= 4 then return false end
         if light and light > 4 then
             -- (todo o seu código de vizinhos permanece igual)
-            local neighbors = { { x = pos.x + 1, y = pos.y, z = pos.z }, }
+            local neighbors = {xyz(pos.x + 1, pos.y, pos.z)}
             local has_grass_neighbor = false
             for _, npos in ipairs(neighbors) do
                 local neighbor_name = c.get_node(npos).name
-                if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then
-                    has_grass_neighbor = true
-                    break
-                end
+                if neighbor_name == "nh_nodes:grass" or neighbor_name == "nh_nodes:top_grass" then has_grass_neighbor = true break end
             end
-            if has_grass_neighbor then c.set_node(pos, {name = "nh_nodes:top_grass"})
-                return false
-            end
+            if has_grass_neighbor then c.set_node(pos, {name = "nh_nodes:top_grass"}) return false end
         end
         return true
     end,
     title = S "2x2 Craft on the Dirt", -- Campo obrigatório!
     grid_size = 4,
-    positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
+    positions = {xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2), xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    output_position = xyz(0, 1.4, 0),
+    layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
 
 c.register_node("nh_nodes:wetdirt", {
-    description = S "Wet Dirt",
+    description = S"Wet Dirt",
     tiles = {"wetdirt.png"},
     groups = {crumbly = 2},
     sounds = {
@@ -1232,37 +1187,21 @@ c.register_node("nh_nodes:wetdirt", {
         dug = {name = "punchtimber3", gain = 0.5},
         dig = {name = "punchtimber3", gain = 0.5},
         place = {name = "punchtimber3", gain = 0.5 },},
-    -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     on_construct = function(pos)
-        local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local above = xyz(pos.x, pos.y + 1, pos.z)
         local node_above = c.get_node(above).name
         local light = c.get_node_light(above)
-        --c.chat_send_all("🟤 DIRT construído em " .. c.pos_to_string(pos))
-        -- c.chat_send_all("   Bloco acima: " .. node_above)
-        if light and light > 4 then
-            c.get_node_timer(pos):start(math.random(30, 60))
-            -- c.chat_send_all("         Timer iniciado!")
-        else
-            --c.chat_send_all("   ❌ Timer NÃO iniciado (tem bloco escurecendo em cima)")
-        end
+        if light and light > 4 then c.get_node_timer(pos):start(math.random(30, 60)) end
     end,
     on_timer = function(pos, elapsed)
         --c.chat_send_all("⏰ TIMER disparou em " .. c.pos_to_string(pos))
         local above = { x = pos.x, y = pos.y + 1, z = pos.z }
         local node_above = c.get_node(above).name
         local light = c.get_node_light(above)
-        --c.chat_send_all("   Bloco acima: " .. node_above)
-
-        if light and light <= 4 then
-            -- c.chat_send_all("   ❌ Tem bloco em cima escurecendo, parando timer")
-            return false
-        end
-        -- local light = c.get_node_light(pos)
-        -- c.chat_send_all("   Luz: " .. tostring(light))
+        if light and light <= 4 then return false end
         if light and light > 4 then
             local neighbors = {}
             for dx = -1, 1 do
@@ -1285,19 +1224,7 @@ c.register_node("nh_nodes:wetdirt", {
                     break
                 end
             end
-            --c.chat_send_all("   Grama encontrada: " .. tostring(has_grass_neighbor))
-            -- if has_grass_neighbor then
-            --c.chat_send_all("   🌱 " .. grass_found)
-            -- end
-            if has_grass_neighbor then
-                c.set_node(pos, { name = "nh_nodes:top_grass" })
-                --c.chat_send_all("   🟩 CONVERTEU PARA GRAMA!")
-                return false
-                -- else
-                --c.chat_send_all("   ⏳ Sem grama ao redor, tentando novamente...")
-            end
-            -- else
-            --c.chat_send_all("   🌙 Pouca luz (precisa > 4)")
+            if has_grass_neighbor then c.set_node(pos, {name = "nh_nodes:top_grass"}) return false end
         end
         return true
     end,
@@ -1347,18 +1274,16 @@ c.register_node("nh_nodes:wettilleddirt", {
         dug = {name = "punchtimber3", gain = 0.5},
         dig = {name = "punchtimber3", gain = 0.5},
         place = {name = "punchtimber3", gain = 0.5}},
-    -- Mecânica opcional: grama morrer na sombra
     --paramtype = "light",
-    -- Configuração mão direita
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}},
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     on_construct = function(pos) c.get_node_timer(pos):start(math.random(60, 120)) end,
     on_timer = function(pos, elapsed)
-        local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local above = {xyz(pos.x, pos.y + 1, pos.z)}
         local node_above = c.get_node(above).name
         -- tem bloco em cima, aguarda e tenta de novo
         if node_above ~= "air" then return true end
-        c.set_node(pos, { name = "nh_nodes:wetdirt" })
+        c.set_node(pos, {name = "nh_nodes:wetdirt"})
         return false
     end,
 })
@@ -1401,8 +1326,6 @@ c.register_node("nh_nodes:top_grass_corner", {
                 {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5},     -- Base principal
                 {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0},     -- Base braço 1
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5}}}, -- Base braço 2
-
-        
     selection_box       = {type = "fixed", fixed = 
                 {{-0.5, 0.0, 0.0, 0.0, 0.5, 0.5}, -- topo
                 {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5},     -- Base principal
@@ -1450,19 +1373,16 @@ register_craft_station("nh_nodes:top_grass", {
     groups = {crumbly = 3, soil = 1},
     -- Quando a grama é bloqueada da luz, vira terra
     drop = "nh_nodes:dirt",
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     -- wielded_visual_size = xyz(0.25),
     on_timer = function(pos, elapsed)
-        local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local above = {xyz(pos.x, pos.y + 1, pos.z)}
         local node_above = c.get_node(above).name
         -- Bloco líquido ou lava acima faz virar terra imediatamente
         local blocked_nodes = populate_true({ "water", "water_flowing", "water2", "water2_flowing", "lava",
             "lava_flowing", "bluelava", "bluelava_flowing"})
-        if blocked_nodes[node_above] then
-            c.set_node(pos, { name = "nh_nodes:dirt" })
-            return false -- Grama virou terra, para o timer
-        end
+        if blocked_nodes[node_above] then c.set_node(pos, {name = "nh_nodes:dirt"}) return false end
         -- Se NÃO é ar, verifica luz
         if node_above ~= "air" then
             local light = c.get_node_light(above)
@@ -1478,7 +1398,7 @@ register_craft_station("nh_nodes:top_grass", {
         {x = -0.2, y = 0.9, z = 0.2}, 
         {x = 0.2, y = 0.9, z = 0.2}},
     tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = {x = 0, y = 1.4, z = 0},
+    output_position = {xyz(0, 1.4, 0)},
     layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
@@ -1531,38 +1451,24 @@ register_craft_station("nh_nodes:grass", {
     sunlight_propagates = false,
     drop = "nh_nodes:dirt",
     sounds = {
-        footstep = { name = "GrassFootstep", gain = 0.5 },
-        dug = { name = "GrassDig", gain = 0.5 },
-        dig = { name = "GrassDig", gain = 0.5 },
-        place = { name = "GrassDig", gain = 0.5 }, },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+        footstep = {name = "GrassFootstep", gain = 0.5},
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     -- wielded_visual_size = xyz(0.25),
     on_timer = function(pos, elapsed)
         --c.chat_send_all("⏰ TIMER de morte da grama disparou em " .. c.pos_to_string(pos))
         -- Verifica se há um bloco bloqueando a luz acima
-        local above = { x = pos.x, y = pos.y + 1, z = pos.z }
+        local above = {xyz(pos.x, pos.y + 1, pos.z)}
         local node_above = c.get_node(above).name
-        --c.chat_send_all("   Bloco acima: " .. node_above)
         -- Se NÃO é ar, significa que está tampado
         if node_above ~= "air" then
-            -- Verifica se a luz está muito baixa
-            local light = c.get_node_light(above)
-            --c.chat_send_all("   Luz: " .. tostring(light))
-            if light and light <= 4 then
-                -- Converte para terra
-                c.set_node(pos, { name = "nh_nodes:dirt" })
-                --c.chat_send_all("   🟫 GRAMA VIROU TERRA (sem luz)")
-                return false -- Para o timer
-                -- else
-                --c.chat_send_all("   ☀️ Ainda tem luz suficiente")
-            end
-        else
-            --c.chat_send_all("         Ar acima, cancelando timer")
-            return false -- Para o timer se o bloco foi removido
+            local light = c.get_node_light(above) -- Verifica se a luz está muito baixa
+            if light and light <= 4 then c.set_node(pos, {name = "nh_nodes:dirt"}) return false end
+        else return false -- Para o timer se o bloco foi removido
         end
-        -- Continua verificando
-        --c.chat_send_all("   Não se torna terra, terminada a verificação")
         return false
     end,
     title = S "2x2 Craft on the Lawn", --       Campo obrigatório!
@@ -1571,44 +1477,31 @@ register_craft_station("nh_nodes:grass", {
         xyz(-0.2, 0.9, -0.2),
         xyz(0.2, 0.9, -0.2),
         xyz(-0.2, 0.9, 0.2),
-        xyz(0.2, 0.9, 0.2),},
+        xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.4, 0),
-    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
 -- SISTEMA DE DETECÇÃO DE BLOCOS ACIMA DA GRAMA
 -- Callback global que detecta quando qualquer bloco é colocado
 c.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
     -- Verifica a posição ABAIXO do bloco que foi colocado
-    local below = { x = pos.x, y = pos.y - 1, z = pos.z }
+    local below = {xyz(pos.x, pos.y - 1, pos.z)}
     local node_below = c.get_node(below)
     -- Se o bloco abaixo é grama ou top_grass
     if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then
-        --c.chat_send_all("📦 Bloco colocado acima da grama em " .. c.pos_to_string(below))
-        -- Inicia o timer de morte da grama
         c.get_node_timer(below):start(math.random(3, 6))
-        --c.chat_send_all("   ⏰ Timer de morte iniciado!")
     end
 end)
 -- Callback global que detecta quando qualquer bloco é REMOVIDO
 c.register_on_dignode(function(pos, oldnode, digger)
     -- Verifica a posição ABAIXO do bloco que foi removido
-    local below = { x = pos.x, y = pos.y - 1, z = pos.z }
+    local below = {xyz(pos.x, pos.y - 1, pos.z)}
     local node_below = c.get_node(below)
     -- Se o bloco abaixo é grama ou top_grass
-    if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then
-        --c.chat_send_all("🌞 Bloco removido de cima da grama em " .. c.pos_to_string(below))
-        -- PARA o timer (a grama voltou a ter luz)
-        c.get_node_timer(below):stop()
-        --c.chat_send_all("   ⏸️ Timer cancelado (grama exposta à luz novamente)")
-        -- end
-        -- Se o bloco abaixo é terra
-    elseif node_below.name == "nh_nodes:dirt" then
-        --c.chat_send_all("🌞 Bloco removido de cima da terra em " .. c.pos_to_string(below))
-        -- PARA o timer (a grama voltou a ter luz)
-        c.get_node_timer(below):start(math.random(3, 6))
-        --c.chat_send_all("   ⏸️ Timer iniciado (terra exposta à luz)")
+    if node_below.name == "nh_nodes:grass" or node_below.name == "nh_nodes:top_grass" then c.get_node_timer(below):stop()
+    elseif node_below.name == "nh_nodes:dirt" then c.get_node_timer(below):start(math.random(3, 6))
     end
 end)
 c.register_node("nh_nodes:sand_ramp", {
@@ -3309,7 +3202,7 @@ c.register_node("nh_nodes:torch", {
     --paramtype2 = "wallmounted",
     sunlight_propagates = true,
     walkable = false,
-    groups = { choppy = 2, oddly_breakable_by_hand = 3, flammable = 1 }, -- dig_immediate = 3, attached_node = 1
+    groups = { choppy = 2, oddly_breakable_by_hand = 3, flammable = 1 }, -- dig_immediate = 1, attached_node = 1
     collision_box = {type = "fixed", fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}},
     selection_box = {type = "fixed", fixed = {-0.1, -0.5, -0.1, 0.1, 0.37, 0.1}},
     --selection_box = {type = "wallmounted",
@@ -6611,10 +6504,56 @@ c.register_abm({
     end,
 })
 
--------
+-- Node para Pena (deitada no chão, orientada ao player em Y)
+c.register_node("nh_nodes:feather", {
+    description = S"Feather",
+    drawtype = "nodebox",
+    tiles = {"feathernode.png"},
+    inventory_image = "feather.png",
+    wield_image = "feather.png",
+    wield_scale = xyz(0.4, 0.4, 0.01),
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    walkable = false,
+    use_texture_alpha = "blend",
+    node_box = {type = "fixed", fixed = {-0.15, -0.5, -0.45, 0.15, -0.48, 0.45}},
+    selection_box = {type = "fixed", fixed = {-0.15, -0.5, -0.45, 0.15, -0.45, 0.45}},
+    groups = {dig_immediate = 1, flammable = 2, not_in_creative_inventory = 1}, 
+    drop = "",
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        if digger and digger:is_player() then
+            local inv = digger:get_inventory()
+            local itemstack = ItemStack("nh_items:feather")
+            if inv:room_for_item("main", itemstack) then inv:add_item("main", itemstack)
+            else c.add_item(pos, itemstack)
+            end
+        end
+    end,
+})
+c.override_item("nh_items:feather", {
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then return itemstack end
+        local under = pointed_thing.under
+        local above = pointed_thing.above
+        local dir = vector.subtract(above, under)
+        if dir.y ~= 1 then return itemstack end
+        if c.is_protected(above, placer:get_player_name()) then return itemstack end
+        if c.get_node(above).name ~= "air" then return itemstack end
+        local yaw = placer:get_look_horizontal()
+        local idx = math.floor((yaw + math.pi / 4) / (math.pi / 2)) % 4
+        local yaw_to_facedir = {[0] = 0, [1] = 3, [2] = 2, [3] = 1}
+        local param2 = yaw_to_facedir[idx] or 0
+        c.set_node(above, {name = "nh_nodes:feather", param2 = param2})
+        c.sound_play("default_place_node", {pos = above, gain = 0.6})
+        if not c.is_creative_enabled(placer:get_player_name()) then itemstack:take_item() end
+        return itemstack
+    end,
+})
+
 -- Papeis
 -- Node para Página em branco
-c.register_node("nh_nodes:page_node", {
+c.register_node("nh_nodes:page", {
     description = S "Paper",
     drawtype = "mesh",
     mesh = "page.obj",
@@ -6665,9 +6604,27 @@ c.register_node("nh_nodes:page_node", {
         end
     end,
 })
+-- Modificar os craftitems originais para colocar os nodes
+c.override_item("nh_items:page", {
+    on_place = function(itemstack, placer, pointed_thing)
+        if pointed_thing.type ~= "node" then return itemstack end
+        local under = pointed_thing.under
+        local above = pointed_thing.above
+        if c.is_protected(above, placer:get_player_name()) then return itemstack end
+        local node = c.get_node(above)
+        if node.name ~= "air" then return itemstack end
+        -- Calcular wallmounted - MUITO MAIS SIMPLES
+        local dir = vector.subtract(above, under)
+        local wallmounted = c.dir_to_wallmounted(dir)
+        c.set_node(above, { name = "nh_nodes:page", param2 = wallmounted })
+        c.sound_play("default_place_node", { pos = above, gain = 1.0 })
+        if not c.is_creative_enabled(placer:get_player_name()) then itemstack:take_item() end
+        return itemstack
+    end,
+})
 
 -- Node para Página escrita
-c.register_node("nh_nodes:writedpage_node", {
+c.register_node("nh_nodes:writedpage", {
     description = S "Writed Paper",
     drawtype = "mesh",
     mesh = "page.obj",
@@ -6709,26 +6666,6 @@ c.register_node("nh_nodes:writedpage_node", {
         end
     end,
 })
-
--- Modificar os craftitems originais para colocar os nodes
-c.override_item("nh_items:page", {
-    on_place = function(itemstack, placer, pointed_thing)
-        if pointed_thing.type ~= "node" then return itemstack end
-        local under = pointed_thing.under
-        local above = pointed_thing.above
-        if c.is_protected(above, placer:get_player_name()) then return itemstack end
-        local node = c.get_node(above)
-        if node.name ~= "air" then return itemstack end
-        -- Calcular wallmounted - MUITO MAIS SIMPLES
-        local dir = vector.subtract(above, under)
-        local wallmounted = c.dir_to_wallmounted(dir)
-        c.set_node(above, { name = "nh_nodes:page_node", param2 = wallmounted })
-        c.sound_play("default_place_node", { pos = above, gain = 1.0 })
-        if not c.is_creative_enabled(placer:get_player_name()) then itemstack:take_item() end
-        return itemstack
-    end,
-})
-
 c.override_item("nh_items:writedpage", {
     on_place = function(itemstack, placer, pointed_thing)
         if pointed_thing.type ~= "node" then return itemstack end
@@ -6739,7 +6676,7 @@ c.override_item("nh_items:writedpage", {
         if node.name ~= "air" then return itemstack end
         local dir = vector.subtract(above, under)
         local wallmounted = c.dir_to_wallmounted(dir)
-        c.set_node(above, { name = "nh_nodes:writedpage_node", param2 = wallmounted })
+        c.set_node(above, { name = "nh_nodes:writedpage", param2 = wallmounted })
         c.sound_play("default_place_node", { pos = above, gain = 1.0 })
         local item_meta = itemstack:get_meta()
         local node_meta = c.get_meta(above)
@@ -6822,7 +6759,11 @@ c.register_entity("nh_nodes:book_entity", {
         self._close_timer = (self._close_timer or 0) + dtime
         if self._close_timer >= 0.6 then
             if self._node_pos and self._node_name then
-                c.set_node(self._node_pos, {name = self._node_name, param2 = self._node_param2 or 0})
+                -- Só restaura se o node ainda for air (evita sobrescrever algo colocado ali)
+                local current = c.get_node(self._node_pos)
+                if current.name == "air" then
+                    c.set_node(self._node_pos, {name = self._node_name, param2 = self._node_param2 or 0})
+                end
             end
             self.object:remove()
         end
@@ -6890,15 +6831,35 @@ local function close_book_entity(player_name)
     open_book_entities[player_name] = nil
 end
 
--- Limpeza ao deslogar (igual ao Archion)
+-- Limpeza ao deslogar
 c.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
+
+    -- Caso 1: entidade ainda registrada em open_book_entities (animação de abertura ou form aberto)
     local data = open_book_entities[name]
     if data then
         if data.entity and data.entity:get_pos() then data.entity:remove() end
         c.set_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
         open_book_entities[name] = nil
     end
+
+    -- Caso 2: entidade em animação de FECHAMENTO (_closing = true).
+    -- close_book_entity() já limpou open_book_entities, mas o on_step ainda não
+    -- restaurou o node. Precisamos varrer entidades book_entity próximas ao player
+    -- e restaurar qualquer uma que pertença a este jogador.
+    local pos = player:get_pos()
+    if pos then
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 10)) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "nh_nodes:book_entity"
+               and ent._player_name == name
+               and ent._node_pos and ent._node_name then
+                c.set_node(ent._node_pos, {name = ent._node_name, param2 = ent._node_param2 or 0})
+                obj:remove()
+            end
+        end
+    end
+
     -- Limpa sessão de edição pendente
     editing_books[name] = nil
 end)
@@ -7807,12 +7768,29 @@ end)
 -- Limpeza ao deslogar 
 c.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
-    -- Fecha "na força" sem animação para não deixar entidade órfã
+    -- Caso 1: form ainda aberto — entidade registrada em open_grimoires
     local data = open_grimoires[name]
     if data then
         if data.entity and data.entity:get_pos() then data.entity:remove() end
         c.set_node(data.node_pos, { name = "nh_nodes:archion", param2 = data.node_param2 })
         open_grimoires[name] = nil
+    end
+    -- Caso 2: animação de fechamento em andamento — close_grimoire_entity já limpou
+    -- open_grimoires, mas o on_step ainda não restaurou o node. Varre entidades próximas.
+    local pos = player:get_pos()
+    if pos then
+        for _, obj in ipairs(c.get_objects_inside_radius(pos, 10)) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "nh_nodes:grimoire_entity"
+               and ent._player_name == name
+               and ent._node_pos then
+                local current = c.get_node(ent._node_pos)
+                if current.name == "air" then
+                    c.set_node(ent._node_pos, {name = "nh_nodes:archion", param2 = ent._node_param2 or 0})
+                end
+                obj:remove()
+            end
+        end
     end
     player_state[name] = nil
 end)

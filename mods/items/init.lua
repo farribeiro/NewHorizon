@@ -3,7 +3,7 @@ local c = core
 c.log("action", "[items] init.lua loaded")
 local S = c.get_translator("nh_items")
  -- table_xyz and table x=y=z
-local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return xyz(x, y, z) end
+local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return {x = x, y = y, z = z} end
 -- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}
 -- Sessões de edição de página: player_name → { text = "" }
@@ -12,10 +12,12 @@ local editing_pages = {}
 c.register_on_leaveplayer(function(player) editing_pages[player:get_player_name()] = nil end)
 -- Itens necessários para escrever
 c.register_craftitem("nh_items:feather", {
-    description = S("Feather"),
+    description = S"Feather",
     inventory_image = "feather.png",
     wield_image = "feather.png",
-    wield_scale = xyz(0.2, 0.2, 0.01),
+    wield_scale = xyz(0.4, 0.4, 0.01),
+    wielded_bone_position = {pos = xyz(0.9, 0, 0.1), rot = xyz(-90, 0, 0)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(0.9, 0, -0.1), rot = xyz(90, 0, 0)},
 })
 -- Registro do item Página (em branco)
 c.register_craftitem("nh_items:page", {
