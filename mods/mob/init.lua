@@ -4305,14 +4305,14 @@ mobs:register_arrow("nh_mob:plasma", {
             local n = c.get_node(self._last_light_pos)
             if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
-        player:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 }, }, nil)
+        player:punch(self.object, 1, {full_punch_interval = 1.0, damage_groups = {fleshy = 6 }}, nil)
     end,
     hit_mob = function(self, mob)
         if self._last_light_pos then
             local n = c.get_node(self._last_light_pos)
             if n.name == "nh_mob:plasma_light" then c.remove_node(self._last_light_pos) end
         end
-        mob:punch(self.object, 1.0, {full_punch_interval = 1.0, damage_groups = { fleshy = 6 },}, nil)
+        mob:punch(self.object, 1, {full_punch_interval = 1, damage_groups = {fleshy = 6}}, nil)
     end,
     hit_node = function(self, pos, node)
         if self._last_light_pos then
@@ -4349,7 +4349,7 @@ c.registered_entities["nh_mob:plasma"].on_step = function(self, dtime, moveresul
         end
         local current = c.get_node(node_pos)
         if PASSTHROUGH_LIGHT[current.name] and current.name ~= "nh_mob:plasma_light" then
-            c.set_node(node_pos, { name = "nh_mob:plasma_light" })
+            c.set_node(node_pos, {name = "nh_mob:plasma_light"})
             self._last_light_pos = node_pos
         end
     end

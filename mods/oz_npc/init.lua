@@ -90,7 +90,7 @@ local intencoes = {
         humor_delta = 10,
         responses = {
             cold    = { "(-_-) — " .. "__seu_nome__" .. "... " .. "I understand." },
-            neutral  = { "( '.' ) — " .. "__seu_nome__" .. "... " .. "Now I know who you are." },
+            neutral  = { "( '.') — " .. "__seu_nome__" .. "... " .. "Now I know who you are." },
             hot     = { "(:D) — " .. "__seu_nome__" .. "! " .. "What a beautiful name!" },
     }},
     {id = "nome",
@@ -98,7 +98,7 @@ local intencoes = {
         humor_delta = 10,
         responses = {
             cold    = { "(-_-) — " .. "__seu_nome__" .. "... " .. "Entendi." },
-            neutral  = { "( '.' ) — " .. "__seu_nome__" .. "... " .. "Agora sei quem você é." },
+            neutral  = { "( '.') — " .. "__seu_nome__" .. "... " .. "Agora sei quem você é." },
             hot     = { "(:D) — " .. "__seu_nome__" .. "! " .. "Que nome bonito!" },
     }},
     -- ·· desculpa ··
@@ -110,7 +110,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — É isso mesmo..." },
             neutral  = { "(:o) — Talvez...",
-                        "( '.' ) — Não achou engraçado?",
+                        "( '.') — Não achou engraçado?",
                         "(:o) — O que?" },
             hot  = { "(:D) — Peguei você!",
                         "(^-^) — Hihi!",
@@ -125,7 +125,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Okay..." },
             neutral  = { "(:o) — Ok...",
-                        "( '.' ) — Why?",
+                        "( '.') — Why?",
                         "(:o) — What?" },
             hot  = { "(:D) — Okay, I'll stop!",
                         "(^-^) — Sorry, I won't repeat!",
@@ -139,7 +139,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Tá..." },
             neutral  = { "(:o) — Ok...",
-                        "( '.' ) — Por que?",
+                        "( '.') — Por que?",
                         "(:o) — O que?" },
             hot  = { "(:D) — Tá bom, parei!",
                         "(^-^) — Desculpa, não vou repetir!",
@@ -154,7 +154,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Later..." },
             neutral  = { "(:o) — Repeat?",
-                        "( '.' ) — Why?",
+                        "( '.') — Why?",
                         "(:o) — What?" },
             hot  = {"__repete_jogador__"},
     }},
@@ -166,7 +166,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Depois..." },
             neutral  = { "(:o) — Repetir?",
-                        "( '.' ) — Por que?",
+                        "( '.') — Por que?",
                         "(:o) — O que?" },
             hot  = {"__repete_jogador__"},
     }},
@@ -178,7 +178,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Later..." },
             neutral  = { "(:o) — Repeat?",
-                        "( '.' ) — Why?",
+                        "( '.') — Why?",
                         "(:o) — What?" },
             hot  = { "__repete_oz__"},
     }},
@@ -190,7 +190,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Depois..." },
             neutral  = { "(:o) — Repetir?",
-                        "( '.' ) — Por que?",
+                        "( '.') — Por que?",
                         "(:o) — O que?" },
             hot  = { "__repete_oz__"},
     }},
@@ -202,7 +202,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Later..." },
             neutral  = { "(:o) — Repeat?",
-                        "( '.' ) — Why?",
+                        "( '.') — Why?",
                         "(:o) — What?" },
             hot  = {"__diz__"},
     }},
@@ -214,7 +214,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Depois..." },
             neutral  = { "(:o) — Repetir?",
-                        "( '.' ) — Por que?",
+                        "( '.') — Por que?",
                         "(:o) — O que?" },
             hot  = {"__diz__"},
     }},
@@ -227,7 +227,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — No." },
             neutral  = { "(:o) — I'm better at speaking Portuguese.",
-                        "( '.' ) — I don't know much English.",
+                        "( '.') — I don't know much English.",
                         "(:o) — The book is on the table." },
             hot  = { "(:D) — Portuguese!",
                      "(^-^) — Can you speak Portuguese?",
@@ -241,7 +241,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — No." },
             neutral  = { "(:o) — Soy mejor hablando portugués.",
-                        "( '.' ) — No sé mucho español.",
+                        "( '.') — No sé mucho español.",
                         "(:o) — The book is on the table." },
             hot  = { "(:D) — ¡Portugués!",
                      "(^-^) — ¿Hablas portugués o inglés?",
@@ -255,7 +255,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Não." },
             neutral  = { "(:o) — Eu sei bem pouco fora do português.",
-                        "( '.' ) — Eu não sei muito de outros idiomas.",
+                        "( '.') — Eu não sei muito de outros idiomas.",
                         "(:o) — No inglês sei: The book is on the table." },
             hot  = { "(:D) — Falo português!",
                      "(^-^) — Consegue falar algo em inglês?",
@@ -312,10 +312,10 @@ local intencoes = {
         words = {"u're cool", "ure cool", "ur cool", "u're amazing", "ure amazing", "ur amazing", "u're great", "ure great", "ur great", "u're fun", "ure fun", "ur fun", "u're a good", "ure a good", "ur a good", "u're smart", "ure smart", "ur smart", "u're cool", "ure cool", "ur cool", "I like you", "I like u", "I love you", "I love u"},
         humor_delta = 15,
         responses = {
-            cold = { "( '.' ) — Hm. Thank you.",
+            cold = { "( '.') — Hm. Thank you.",
                      "(._.) — I haven't heard that in ages." },
             neutral = { "(:o) — That's good that you think so.",
-                        "( '.' ) — I'm glad. Really." },
+                        "( '.') — I'm glad. Really." },
             hot = { "(:D) — You're very kind! That makes me happy!",
                     "(^o^) — Ahh! That's so good to hear!" },
     }},
@@ -323,10 +323,10 @@ local intencoes = {
         words = {"voce e legal", "voce e incrivel", "voce e otimo", "voce e divertido", "voce e gente", "gosto de voce", "gostei de voce", "voce e gente boa", "voce e bacana", "voce e inteligente"},
         humor_delta = 15,
         responses = {
-            cold    = { "( '.' ) — Hm. Obrigado.",
+            cold    = { "( '.') — Hm. Obrigado.",
                         "(._.) — Não ouvia isso há tempos." },
             neutral  = { "(:o) — Que bom que pensa assim.",
-                        "( '.' ) — Fico contente. De verdade." },
+                        "( '.') — Fico contente. De verdade." },
             hot  = { "(:D) — Voce e muito gentil! Isso me alegra!",
                      "(^o^) — Ahh! Que coisa boa de ouvir!" },
     }},
@@ -338,7 +338,7 @@ local intencoes = {
             cold    = { "(-_-) — Bye.",
                         "(..) — Hmm."},
             neutral  = { "('c') — See you later.",
-                        "( '.' ) — Take care."},
+                        "( '.') — Take care."},
             hot  = { "(^o^) — Leaving already? Come back soon!",
                      "(:D) — That was good! Take care."},
     }},
@@ -349,7 +349,7 @@ local intencoes = {
             cold    = { "(-_-) — Vai lá.",
                         "(..) — Hmm." },
             neutral  = { "('c') — Ate logo.",
-                        "( '.' ) — Cuide-se." },
+                        "( '.') — Cuide-se." },
             hot  = { "(^o^) — Já vai? Volte logo!",
                         "(:D) — Foi bom! Fica bem." },
     }},
@@ -361,7 +361,7 @@ local intencoes = {
             cold = { "(´-`) — Existing. And you?",
                      "(-_-) — I'm ethereal. I don't feel things like that." },
             neutral = { "('c') — I'm... here. And you?",
-                       "( '.' ) — Floating between worlds, as always..." },
+                       "( '.') — Floating between worlds, as always..." },
             hot = { "(:D) — I'm great! Thanks for asking!",
                     "(^-^) — Full of cosmic energy today!" },
     }},
@@ -372,7 +372,7 @@ local intencoes = {
             cold    = { "(´-`) — Existindo. E você?",
                         "(-_-) — Sou etéreo. Não sinto coisas assim." },
             neutral  = { "('c') — Estou... aqui. E você?",
-                        "( '.' ) — Flutuando entre os mundos, como sempre..." },
+                        "( '.') — Flutuando entre os mundos, como sempre..." },
             hot  = { "(:D) — Estou ótimo! Obrigado por perguntar!",
                         "(^-^) — Cheio de energia cosmica hoje!" },
     }},
@@ -384,7 +384,7 @@ local intencoes = {
             cold = { "(-_-) — A question that doesn't have a short answer.",
                      "(._.) — I am Oz. That's enough." },
             neutral = { "(:o) — Good question. I am Oz — a being without form, without weight. I am everywhere and nowhere.",
-                        "( '.' ) — I exist in the spaces between things. Call me Oz." },
+                        "( '.') — I exist in the spaces between things. Call me Oz." },
             hot = { "(^-^) — I am Oz! Ethereal, invisible, and completely real. More or less.",
                     "(:D) — I am Oz! I have no body, but I have a lot to say!" },
     }},
@@ -395,7 +395,7 @@ local intencoes = {
             cold    = { "(-_-) — Uma pergunta que não tem resposta curta.",
                         "(._.) — Sou Oz. Isso basta." },
             neutral  = { "(:o) — Boa pergunta. Sou Oz — um ser sem forma, sem peso. Estou em todo lugar e em lugar nenhum.",
-                        "( '.' ) — Existo nos espaços entre as coisas. Chame-me de Oz." },
+                        "( '.') — Existo nos espaços entre as coisas. Chame-me de Oz." },
             hot  = { "(^-^) — Sou Oz! Etéreo, invisível, e completamente real. Mais ou menos.",
                      "(:D) — Sou Oz! Não tenho corpo, mas tenho muito a dizer!" },
     }},
@@ -440,7 +440,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — I don't see the world as you do. Formless, eyeless.",
                         "(-_-) — I am ethereal. I don't know places." },
-            neutral  = { "( '.' ) — I don't quite understand the physical world... Try to follow your instinct.",
+            neutral  = { "( '.') — I don't quite understand the physical world... Try to follow your instinct.",
                         "(:o) — Place? I just follow the flow of the world. Without maps." },
             hot  = { "(:D) — Who am I to say? Explore! The world is yours!",
                      "(^-^) — Adventure is everywhere. Go with courage!" },
@@ -451,7 +451,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Não vejo o mundo como você. Sem forma, sem olhos.",
                         "(-_-) — Sou etéreo. Não sei de lugares." },
-            neutral  = { "( '.' ) — Não entendo bem o mundo físico... Tenta seguir o seu instinto.",
+            neutral  = { "( '.') — Não entendo bem o mundo físico... Tenta seguir o seu instinto.",
                         "(:o) — Lugar? Sigo apenas o fluxo do mundo. Sem mapas." },
             hot  = { "(:D) — Quem eu sou para dizer? Explore! O mundo e seu!",
                      "(^-^) — Aventura esta em todo canto. Vá com coragem!" },
@@ -463,7 +463,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — I'm not sure. Maybe /help will help you.",
                         "(-_-) — I'm a layman, but maybe /help can help you." },
-            neutral  = { "( '.' ) — Have you tried typing /help here?",
+            neutral  = { "( '.') — Have you tried typing /help here?",
                         "(:o) — Need help? Use /help" },
             hot  = { "(:D) — Try: /help",
                      "(^-^) — Try /help" },
@@ -474,7 +474,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Não sei ao certo. Talvez o /help te ajude",
                         "(-_-) — Sou leigo, mas talvez o /help possa te ajudar" },
-            neutral  = { "( '.' ) — Já testou dar /help aqui?",
+            neutral  = { "( '.') — Já testou dar /help aqui?",
                         "(:o) — Quer ajuda? usa /help" },
             hot  = { "(:D) — Testa /help",
                         "(^-^) — Tenta o /help" },
@@ -486,7 +486,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — I'm not sure. Maybe only on the main menu.",
                         "(-_-) — I'm a layman, but perhaps the initial menu can help you." },
-            neutral  = { "( '.' ) — Have you tried checking or unchecking the option in the main menu?",
+            neutral  = { "( '.') — Have you tried checking or unchecking the option in the main menu?",
                         "(:o) — Want to switch game modes? Check out the main menu." },
             hot  = { "__alterna_criativo__" },
         },
@@ -497,7 +497,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Não sei ao certo. Talvez só no menu inicial",
                         "(-_-) — Sou leigo, mas talvez o menu inicial possa te ajudar" },
-            neutral  = { "( '.' ) — Já testou dar marcar ou desmarcar no menu inicial?",
+            neutral  = { "( '.') — Já testou dar marcar ou desmarcar no menu inicial?",
                         "(:o) — Quer alternar os modos de jogo? Dá uma olhada no menu inicial" },
             hot  = { "__alterna_criativo__" },
     },},
@@ -508,7 +508,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — I'm not sure. Maybe /help will help you...",
                         "(-_-) — I'm a layman, but maybe /help can help you." },
-            neutral  = { "( '.' ) — Have you tried using '/grantme give' and '/giveme nh_nodes:archion' here?",
+            neutral  = { "( '.') — Have you tried using '/grantme give' and '/giveme nh_nodes:archion' here?",
                         "(:o) — Do you want the archion? I think there's something about it in your paper." },
             hot  = { "__entrega_archion__" },
     },},
@@ -519,7 +519,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Não sei ao certo. Talvez o /help te ajude...",
                         "(-_-) — Sou leigo, mas talvez o /help possa te ajudar" },
-            neutral  = { "( '.' ) — Já testou dar '/grantme give' e '/giveme nh_nodes:archion' aqui?",
+            neutral  = { "( '.') — Já testou dar '/grantme give' e '/giveme nh_nodes:archion' aqui?",
                         "(:o) — Quer o archion? Acho que tem algo sobre isso naquele seu papel" },
             hot  = { "__entrega_archion__" },
     },},
@@ -530,7 +530,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Eu não sei.",
                         "(-_-) — Só sei daqui." },
-            neutral  = { "( '.' ) — Nunca soube disso.",
+            neutral  = { "( '.') — Nunca soube disso.",
                         "(:o) — Outra realidade? Só sei dessa." },
             hot  = { "(:D) — É legal?",
                      "(^-^) — Parece divertido." },
@@ -541,7 +541,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — " .. S("I don't know."),
                         "(-_-) — " .. S("I'm only know about here.") },
-            neutral  = { "( '.' ) — " .. S("I never knew that."),
+            neutral  = { "( '.') — " .. S("I never knew that."),
                         "(:o) — " .. S("Another reality? That's all I know.") },
             hot  = { "(:D) — " .. S("Is it cool?"),
                      "(^-^) — " .. S("It should be fun.") },
@@ -553,7 +553,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — " .. S("I don't know."),
                         "(-_-) — " .. S("I've never seen it.") },
-            neutral  = { "( '.' ) — " .. S("I don't know about that."),
+            neutral  = { "( '.') — " .. S("I don't know about that."),
                         "(:o) — " .. S("That sounds good.") },
             hot  = { "(:D) — " .. S("Is it cool?"),
                      "(^-^) — " .. S("It should be fun.") },
@@ -565,7 +565,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Ok.",
                         "(-_-) — " .. S("Good.") },
-            neutral  = { "( '.' ) — " .. S("Right."),
+            neutral  = { "( '.') — " .. S("Right."),
                         "(:o) — " .. S("No problem.") },
             hot  = { "(:D) — " .. S("Excellent!"),
                      "(^-^) — " .. S("Okay.") },
@@ -577,7 +577,7 @@ local intencoes = {
         responses = {
         cold = {"(._.) — Book? I'm not interested.",
                 "(-_-) — I never produced anything. Ask me something else." },
-        neutral = {"( '.' ) — About craft... it's not my area. I'm from another plane.",
+        neutral = {"( '.') — About craft... it's not my area. I'm from another plane.",
                    "(:o) — I don't know much about it. But it seems useful." },
         hot = {"__entrega_guia__" },
     },},
@@ -587,7 +587,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Livro? Não me interessa.",
                         "(-_-) — Nunca produzi nada. Me pergunta outra coisa." },
-            neutral  = { "( '.' ) — Sobre produção... não é minha área. Sou de outro plano.",
+            neutral  = { "( '.') — Sobre produção... não é minha área. Sou de outro plano.",
                         "(:o) — Não sei muito sobre isso. Mas parece útil." },
             hot  = { "__entrega_guia__"},
     },},
@@ -598,7 +598,7 @@ local intencoes = {
         responses = {
         cold = {"(._.) — Objects. I'm not interested.",
                 "(-_-) — No hands. No items. Ask me something else." },
-        neutral = {"( '.' ) — About items... it's not my area. I'm from another plane.",
+        neutral = {"( '.') — About items... it's not my area. I'm from another plane.",
                    "(:o) — I don't know much about the material world. But it seems useful." },
         hot = {"(^-^) — Ah, the world of objects! Fascinating for you, I imagine.",
                "(:D) — Items?! They look like miniature toys to me!" },
@@ -609,7 +609,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Objetos. Não me interessam.",
                         "(-_-) — Sem mãos. Sem itens. Me pergunta outra coisa." },
-            neutral  = { "( '.' ) — Sobre itens... não é minha área. Sou de outro plano.",
+            neutral  = { "( '.') — Sobre itens... não é minha área. Sou de outro plano.",
                         "(:o) — Não sei muito sobre o mundo material. Mas parece útil." },
             hot  = { "(^-^) — Ah, o mundo dos objetos! Fascinante pra você, imagino.",
                      "(:D) — Itens?! Para mim, parecem brinquedos em miniatura!" },
@@ -621,7 +621,7 @@ local intencoes = {
         responses = {
         cold = {"(._.) — " .. S("Objects. I'm not interested."),
                 "(-_-) — " .. S("No hands. No items. Ask me something else.") },
-        neutral = {"( '.' ) — " .. S("About items... it's not my area. I'm from another plane."),
+        neutral = {"( '.') — " .. S("About items... it's not my area. I'm from another plane."),
                    "(:o) — " .. S("I don't know much about the material world. But it seems useful.") },
         hot = {"(^-^) — " .. S("Ah, the world of objects! Fascinating for you, I imagine."),
                "(:D) — " .. S("Items?! They look like miniature toys to me!") },
@@ -633,7 +633,7 @@ local intencoes = {
         responses = {
         cold = { "(._.) — The moment? I'm ethereal. I don't quite know the difference.",
                  "(-_-) — Time changes all the time. Does it make a difference?" },
-        neutral = { "( '.' ) — Time in this world passes more slowly.",
+        neutral = { "( '.') — Time in this world passes more slowly.",
                     "(:o) — Every day is a cosmic event, if you stop to think about it." },
         hot = { "__horario__" },
     },},
@@ -643,7 +643,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — O momento? Sou etéreo. Não sei bem a diferença.",
                         "(-_-) — O tempo muda o tempo todo. Faz diferença?" },
-            neutral  = { "( '.' ) — O tempo nesse mundo passa mais devagar.",
+            neutral  = { "( '.') — O tempo nesse mundo passa mais devagar.",
                         "(:o) — Cada dia é um evento cósmico, se você parar pra ver." },
             hot  = { "__horario__" },
     },},
@@ -654,7 +654,7 @@ local intencoes = {
         responses = {
             cold = {"(._.) — The weather? I'm ethereal. I don't get wet.",
                     "(-_-) — The sky changes all the time. Does it make a difference?"},
-            neutral = {"( '.' ) — The climate of this world has its charm.",
+            neutral = {"( '.') — The climate of this world has its charm.",
                        "(:o) — Every rain is a cosmic event, if you stop to see."},
             hot = { "(^-^) — It's possible. The world has so much beauty!",
                     "(:D) — Whether it's sun or rain, it's a beautiful day to exist!"},
@@ -665,7 +665,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — O tempo? Sou etéreo. Não me molho.",
                         "(-_-) — O céu muda o tempo todo. Faz diferença?" },
-            neutral  = { "( '.' ) — O clima desse mundo tem seu charme.",
+            neutral  = { "( '.') — O clima desse mundo tem seu charme.",
                         "(:o) — Cada chuva é um evento cósmico, se você parar pra ver." },
             hot  = { "(^-^) — É possível. O mundo tem tanta beleza!",
                      "(:D) — Seja sol ou chuva, e um dia lindo pra existir!" },
@@ -675,10 +675,10 @@ local intencoes = {
         words = {"thank you", "thanks", "thx", "grateful", "thankful", "grated"},
         humor_delta = 12,
         responses = {
-            cold = { "( '.' ) — Mmm.",
+            cold = { "( '.') — Mmm.",
                      "(._.) — No need to thank me." },
             neutral = { "(:o) — I'm happy to be able to help, in some way.",
-                        "( '.' ) — Always around." },
+                        "( '.') — Always around." },
             hot = { "(:D) — That's great! I'm glad!",
                     "(^o^) — You're welcome! I'll be here when you need me!" },
     },},
@@ -686,10 +686,10 @@ local intencoes = {
         words = {"obrigado", "obrigada", "valeu", "vlw", "grato", "grata", "agradecido"},
         humor_delta = 12,
         responses = {
-            cold    = { "( '.' ) — Mmm.",
+            cold    = { "( '.') — Mmm.",
                         "(._.) — Nao precisa agradecer." },
             neutral  = { "(:o) — Fico feliz em poder ajudar, de alguma forma.",
-                        "( '.' ) — Sempre por aqui." },
+                        "( '.') — Sempre por aqui." },
             hot  = { "(:D) — Que ótimo! Fico contente!",
                      "(^o^) — De nada! Estarei aqui quando precisar!" },
     },},
@@ -698,10 +698,10 @@ local intencoes = {
         words = {"bad", "evil", "malicious", "perverse", "villain", "you are bad", "you are worthless", "you are an enemy"},
         humor_delta = 12,
         responses = {
-            cold = { "( '.' ) — Me?",
+            cold = { "( '.') — Me?",
                      "(._.) — I wouldn't be capable of that..." },
             neutral = { "(:o) — You really think so?",
-                        "( '.' ) — Now I'm surprised..." },
+                        "( '.') — Now I'm surprised..." },
             hot = { "(>:D) — I am evil indeed! Muahahaha",
                     "]:p) — No way! How did you find out?! haha" },
     },},
@@ -709,10 +709,10 @@ local intencoes = {
         words = {"mau", "malvad", "maligno", "perverso", "vilão", "voce e ruim", "voce nao presta", "voce e inimigo"},
         humor_delta = 12,
         responses = {
-            cold    = { "( '.' ) — Eu?",
+            cold    = { "( '.') — Eu?",
                         "(._.) — Eu não seria capaz disso..." },
             neutral  = { "(:o) — Acha mesmo?",
-                        "( '.' ) — Agora estou surpreso..." },
+                        "( '.') — Agora estou surpreso..." },
             hot  = { "(>:D) — Sou mau mesmo! Uahahaha",
                      "]:p) — Não é possível! Como descobriu?! haha" },
     },},
@@ -724,7 +724,7 @@ local intencoes = {
             cold = { "(._.) — That's a big question for such a short day.",
                      "(-_-) — About that... It will depend on what you call life." },
             neutral = { "(:o) — This question also makes me think a lot.",
-                        "( '.' ) — There is something beyond what you see. I'm sure of it." },
+                        "( '.') — There is something beyond what you see. I'm sure of it." },
             hot = { "(^-^) — Ah! The big questions! My favorite subject!",
                     "(:D) — It's a profound and wonderful question!" },
     },},
@@ -735,7 +735,7 @@ local intencoes = {
             cold    = { "(._.) — É uma grande pergunta para um dia tão pequeno.",
                         "(-_-) — Sobre isso... Vai depender do que você chama de vida." },
             neutral  = { "(:o) — Essa questão também me faz refletir bastante.",
-                        "( '.' ) — Há algo além do que você vê. Tenho certeza disso." },
+                        "( '.') — Há algo além do que você vê. Tenho certeza disso." },
             hot  = { "(^-^) — Ah! As grandes questões! Meu assunto favorito!",
                      "(:D) — É uma questão profunda e maravilhosa!" },
     },},
@@ -746,7 +746,7 @@ local intencoes = {
         responses = {
             cold = { "(._.) — I don't know...",
                      "(-_-) — I don't want to say." },
-            neutral = { "( '.' ) — I don't know how to explain...",
+            neutral = { "( '.') — I don't know how to explain...",
                         "(:o) — Why the question?" },
             hot = { "(:D) — I know how to answer you, give you the time, repeat myself, imitate you, tell you the game mode and give you the Crafting Guide and the Archion!",
                     "(^-^) — I can answer you, give you the time, repeat myself, imitate you, tell you the game mode, and give you the Crafting Guide and the Archion. Just ask." },
@@ -757,7 +757,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Eu não sei...",
                         "(-_-) — Eu não quero dizer." },
-            neutral  = { "( '.' ) — Eu não sei como explicar...",
+            neutral  = { "( '.') — Eu não sei como explicar...",
                         "(:o) — Por que a pergunta?" },
             hot  = { "(:D) — Sei te responder, te dar a hora, me repetir, te repetir, dizer o modo de jogo e te dar o Guia de Produção e o Archion!",
                      "(^-^) — Posso te responder, te dar a hora, me repetir, te repetir, dizer o modo de jogo e te dar o Guia de Produção e o Archion. É só pedir." },
@@ -769,7 +769,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — I don't know...",
                         "(-_-) — I don't want to say." },
-            neutral  = { "( '.' ) — I don't have an answer...",
+            neutral  = { "( '.') — I don't have an answer...",
                         "(:o) — Why the question?" },
             hot  = { "(:D) — Maybe you already know!",
                      "(^-^) — The answer is everywhere. You'll find out!" },
@@ -780,7 +780,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Não sei...",
                         "(-_-) — Não quero dizer." },
-            neutral  = { "( '.' ) — Não tenho resposta...",
+            neutral  = { "( '.') — Não tenho resposta...",
                         "(:o) — Por que a pergunta?" },
             hot  = { "(:D) — Talvez você já saiba!",
                      "(^-^) — A resposta esta em todo canto. Você vai descobrir!" },
@@ -793,7 +793,7 @@ local intencoes = {
         cold = { "(._.) — Helping... isn't exactly my job.",
                  "(-_-) — What do you need?" },
         neutral = { "(:o) — I'll try. What happened?",
-                    "( '.' ) — I don't think I can do much... I can only try to give a good answer." },
+                    "( '.') — I don't think I can do much... I can only try to give a good answer." },
         hot = { "(:D) — Sure! Tell me!",
                 "(^-^) — I'm here! What do you need?" },
     },},
@@ -804,7 +804,7 @@ local intencoes = {
             cold    = { "(._.) — Ajudar... não é exatamente minha função.",
                         "(-_-) — O que você precisa?" },
             neutral  = { "(:o) — Tentarei. O que aconteceu?",
-                        "( '.' ) — Acho que não posso fazer muito... Só posso tentar dar uma boa resposta." },
+                        "( '.') — Acho que não posso fazer muito... Só posso tentar dar uma boa resposta." },
             hot  = { "(:D) — Claro! Me conta!",
                      "(^-^) — Estou aqui! O que precisa?" },
     }},
@@ -817,7 +817,7 @@ local intencoes = {
                      "(-.-) — ...",
                      "(-_-) — That's right..." },
             neutral = { "(:o) — That's it...",
-                        "( '.' ) — Cool?",
+                        "( '.') — Cool?",
                         "(:o) — What?" },
             hot = { "(:D) — Surprised?",
                     "(^-^) — Hihi!",
@@ -831,7 +831,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — É isso mesmo..." },
             neutral  = { "(:o) — É isso...",
-                        "( '.' ) — Tranquilo?",
+                        "( '.') — Tranquilo?",
                         "(:o) — O que?" },
             hot  = { "(:D) — Surpreso?",
                         "(^-^) — Hihi!",
@@ -845,7 +845,7 @@ local intencoes = {
                      "(-.-) — ...",
                      "(-_-) —" .. S("That's right...") },
             neutral = { "(:o) —" .. S("That's it..."),
-                        "( '.' ) —" .. S("Cool?"),
+                        "( '.') —" .. S("Cool?"),
                         "(:o) —" .. S("What?") },
             hot = { "(:D) —" .. S("Surprised?"),
                     "(^-^) — Hihi!",
@@ -860,7 +860,7 @@ local intencoes = {
                     "(-.-) — ...",
                     "(-_-) — Hmm."},
             neutral = {"(:o) — " .. S("Say."),
-                    "( '.' ) — " .. S("I'm here."),
+                    "( '.') — " .. S("I'm here."),
                     "(:o) — " .. S("Hi.")},
             hot = { "(:D) — " .. S("Yes?!"),
                     "(^-^) — " .. S("Go ahead!"),
@@ -874,7 +874,7 @@ local intencoes = {
                     "(-.-) — ...",
                     "(-_-) — Hmm."},
             neutral = {"(:o) — Say.",
-                    "( '.' ) — I'm here.",
+                    "( '.') — I'm here.",
                     "(:o) — Hi."},
             hot = { "(:D) — Yes?!",
                     "(^-^) — Go ahead!",
@@ -888,7 +888,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Fala."},
             neutral  = { "(:o) — Diz.",
-                        "( '.' ) — Estou aqui.",
+                        "( '.') — Estou aqui.",
                         "(:o) — Oi."},
             hot  = { "(:D) — Sim?!",
                      "(^-^) — Manda!",
@@ -903,7 +903,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Who is it?" },
             neutral  = { "(:o) — Hello, traveler.",
-                        "( '.' ) — I'm here.",
+                        "( '.') — I'm here.",
                         "(:o) — Presente." },
             hot  = { "(:D) — It's good to see you!",
                      "(^-^) — Hello! I was expecting you.",
@@ -918,7 +918,7 @@ local intencoes = {
                         "(-.-) — ...",
                         "(-_-) — Quem é?" },
             neutral  = { "(:o) — Olá, viajante.",
-                        "( '.' ) — Estou aqui.",
+                        "( '.') — Estou aqui.",
                         "(:o) — Presente." },
             hot  = { "(:D) — Que bom te ver!",
                      "(^-^) — Olá! Estava te esperando.",
@@ -931,7 +931,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Ok.",
                         "(-_-) — Good." },
-            neutral  = { "( '.' ) — Right.",
+            neutral  = { "( '.') — Right.",
                         "(:o) — No problem." },
             hot  = { "(:D) — Excellent!",
                      "(^-^) — Okay." },
@@ -942,7 +942,7 @@ local intencoes = {
         responses = {
             cold    = { "(._.) — Ok.",
                         "(-_-) — Tá." },
-            neutral  = { "( '.' ) — Certo.",
+            neutral  = { "( '.') — Certo.",
                         "(:o) — Tranquilo." },
             hot  = { "(:D) — Ótimo!",
                      "(^-^) — Tá bom." },
@@ -957,7 +957,7 @@ local fallbacks = {
                 "(._.) — " .. S("...") },
     neutral  = { "(´-`) — " .. S("I didn't quite understand."),
                 "(:/) — " .. S("Hmm... can you explain better?"),
-                "( '.' ) — " .. S("I don't know what to say about that.") },
+                "( '.') — " .. S("I don't know what to say about that.") },
     hot  = { "(:o) — " .. S("Interesting question. Can you explain more?"),
                 "(^o^) — " .. S("Not sure I understood, but it sounds interesting!"),
                 "(:D) — " .. S("Happy to help, but I think I didn't quite get it.") },
@@ -1016,16 +1016,16 @@ local function oz_responder(nome_jogador, mensagem)
         resposta = escolher(banco)
 
         -- Tratamento especial de tokens nas respostas
-        if resposta == "__repete_oz__" then resposta = mem.ultima_fala_oz or "( '.' ) — " .. S("I haven't said anything yet...")
+        if resposta == "__repete_oz__" then resposta = mem.ultima_fala_oz or "( '.') — " .. S("I haven't said anything yet...")
         elseif resposta == "__repete_jogador__" then
             if mem.ultima_fala_jogador and mem.ultima_fala_jogador ~= "" then resposta = '(`<`) — ' .. S("You said:") .. ' "' .. mem.ultima_fala_jogador .. '"'
-            else resposta = "( '.' ) — " .. S("You still haven't told me anything yet...")
+            else resposta = "( '.') — " .. S("You still haven't told me anything yet...")
             end
         elseif resposta == "__diz__" then
             -- Pega só o texto depois de ": " na mensagem do jogador
             local conteudo = mensagem:match(":%s+(.+)$")
             if conteudo and conteudo ~= "" then resposta = conteudo
-            else resposta = "( '.' ) — " .. S("What do I say? Write it like this: 'say: <your message>'")
+            else resposta = "( '.') — " .. S("What do I say? Write it like this: 'say: <your message>'")
             end
         elseif resposta == "__entrega_archion__" then
             local jogador = c.get_player_by_name(nome_jogador)
@@ -1034,9 +1034,9 @@ local function oz_responder(nome_jogador, mensagem)
                 if inv:room_for_item("main", "nh_nodes:archion") then
                     inv:add_item("main", "nh_nodes:archion")
                     resposta = "(:D) — " .. S"Here's your Archion! But it can only be used in Creative mode."
-                else resposta = "( '.' ) — " .. S"I can't give you Archion. Your inventory is full... free up some space and try again."
+                else resposta = "( '.') — " .. S"I can't give you Archion. Your inventory is full... free up some space and try again."
                 end
-            else resposta = "( '.' ) — " .. S"I couldn't find you right now."
+            else resposta = "( '.') — " .. S"I couldn't find you right now."
             end
         elseif resposta == "__entrega_guia__" then
             local jogador = c.get_player_by_name(nome_jogador)
@@ -1045,9 +1045,9 @@ local function oz_responder(nome_jogador, mensagem)
                 if inv:room_for_item("main", "nh_nodes:craftguide") then
                     inv:add_item("main", "nh_nodes:craftguide")
                     resposta = "(:D) — " .. S"Here's your Crafting Guide!"
-                else resposta = "( '.' ) — " .. S"I can't give you the Crafting Guide. Your inventory is full... free up some space and try again."
+                else resposta = "( '.') — " .. S"I can't give you the Crafting Guide. Your inventory is full... free up some space and try again."
                 end
-            else resposta = "( '.' ) — " .. S"I couldn't find you right now."
+            else resposta = "( '.') — " .. S"I couldn't find you right now."
             end
         elseif resposta == "__alterna_criativo__" then
             local criativo = c.settings:get_bool("creative_mode")
@@ -1076,11 +1076,11 @@ local function oz_responder(nome_jogador, mensagem)
                 mem.nome_aprendido = nome_formatado
                 mem.sabe_nome = true
                 resposta = resposta:gsub("__seu_nome__", nome_formatado)
-            else resposta = "( '.' ) — Não entendi seu nome... pode repetir?"
+            else resposta = "( '.') — Não entendi seu nome... pode repetir?"
             end
         elseif resposta:find("__nome_salvo__") then
             if mem.sabe_nome and mem.nome_aprendido then resposta = resposta:gsub("__nome_salvo__", mem.nome_aprendido)
-            else resposta = "( '.' ) — Não entendi seu nome... pode repetir?"
+            else resposta = "( '.') — Não entendi seu nome... pode repetir?"
             end
         end
         -- Marca tópico como já falado (para variação futura)
@@ -1121,10 +1121,10 @@ c.register_chatcommand("o", {
 local falas_espontaneas = {
     "(:o) — " .. S("The wind carries stories that no one else tells."),
     "(._.) — " .. S("You search so much... And then what?"),
-    "( '.' ) — " .. S("Is anyone listening to me now?"),
+    "( '.') — " .. S("Is anyone listening to me now?"),
     "(:o) — " .. S("Something has changed around here. I feel it..."),
     "(._.) — " .. S("Silence has weight. Did you know?"),
-    "( '.' ) — " .. S("Each block placed is a choice. Interesting."),
+    "( '.') — " .. S("Each block placed is a choice. Interesting."),
     "(:o) — " .. S("There's more here than meets the eye."),
     "(._.) — " .. S("Just give me an /o to talk to me, did you know?"),
 }

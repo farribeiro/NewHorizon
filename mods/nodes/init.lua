@@ -3326,10 +3326,12 @@ c.register_node("nh_nodes:crystal_light", {
 })
 
 c.register_node("nh_nodes:torch_flame", {
+    description = "Torch Flame",
     drawtype = "mesh",
-    mesh = "torchflame.obj", -- Você precisará criar esse mesh
+    mesh = "torchflame2.obj",
     tiles = {{name = "fire_basic_flame_animated.png", animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.0},}},
     stack_max = 1,               -- limita a 1 tocha acesa por slot
+    light_source = 10,
     paramtype = "light",
     paramtype2 = "facedir",     
     sunlight_propagates = true,
@@ -3376,9 +3378,7 @@ c.register_entity("nh_nodes:torch_flame_entity", {
     get_staticdata = function(self) return c.serialize({torch_pos = self._torch_pos}) end,
     -- Detecta quando é golpeado com tocha apagada
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-        if not puncher or not puncher:is_player() then
-            return
-        end
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         -- Verifica se está segurando uma tocha apagada
@@ -3397,11 +3397,7 @@ c.register_entity("nh_nodes:torch_flame_entity", {
                 end
             end
             -- Efeito sonoro
-            c.sound_play("fire_flint_and_steel", {
-                pos = self.object:get_pos(),
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", {pos = self.object:get_pos(), gain = 0.5, max_hear_distance = 8}, true)
             -- Partículas de faísca
             c.add_particlespawner({
                 amount = 5,
@@ -3629,11 +3625,11 @@ c.register_globalstep(function(dtime)
 end)
 
 c.register_node("nh_nodes:flame", {
+    description = "Flame",
     drawtype = "mesh",
     mesh = "flame.obj", -- Você precisará criar esse mesh
-    tiles = {{name = "fire_basic_flame_animated.png",
-            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1.0},
-    }},
+    tiles = {{name = "fire_basic_flame_animated.png", animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 1}}},
+    light_source = 14,
     paramtype = "light",
     paramtype2 = "facedir",      
     sunlight_propagates = true,
@@ -3648,7 +3644,7 @@ c.register_node("nh_nodes:flame", {
 })
 
 c.register_node("nh_nodes:torch3", {
-    description = S "Torch Extinguished",
+    description = S"Torch Extinguished",
     drawtype = "mesh",
     mesh = "torch.obj",
     tiles = { "torch3.png" },
@@ -4024,14 +4020,13 @@ c.register_node("nh_nodes:giantcrabstatue", {
     light_source = 7,
     collision_box = {type = "fixed", fixed = { -1.75, -0.5, -1.5, 1.75, 3.75, 1.5 }},
     selection_box = {type = "fixed", fixed = { -1.75, -0.5, -2.5, 1.75, 3.75, 1.5 }},
-
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
         local item = puncher:get_wielded_item()
         local item_name = item:get_name()
         -- Verifica se o item na mão é a esfera (qualquer variante)
         if item_name ~= "nh_nodes:sphere" and item_name ~= "nh_nodes:sphere_placed" then
-            c.chat_send_player(puncher:get_player_name(), S "This won't work... I need something more powerful")
+            c.chat_send_player(puncher:get_player_name(), S"This won't work... I need something more powerful")
             return
         end
         -- Efeito de partículas de destruição
@@ -4071,14 +4066,14 @@ c.register_node("nh_nodes:redcrystal", {
     description = S "Red Crystal" .. "\n" .. S "[Light/Air]" .. "\n" .. S "(Squat down to breathe)",
     drawtype = "mesh",
     mesh = "redcrystal.obj",
-    tiles = { "redcrystal.png" },
+    tiles = {"redcrystal.png"},
     sunlight_propagates = true,
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     light_source = 14,
-    collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
     on_punch = function(pos, node, puncher, pointed_thing)
         -- Efeito de partículas de destruição
         c.add_particlespawner({
@@ -4098,7 +4093,7 @@ c.register_node("nh_nodes:redcrystal", {
             texture = {name = "spark_particle.png^[colorize:#76008d:150"}, -- purpura
         })
         -- Som de destruição
-        c.sound_play("tnt_explode", {pos = pos, gain = 1.0, max_hear_distance = 16})
+        c.sound_play("tnt_explode", {pos = pos, gain = 1, max_hear_distance = 16})
     end,
 })
 
@@ -6554,13 +6549,13 @@ c.override_item("nh_items:feather", {
 -- Papeis
 -- Node para Página em branco
 c.register_node("nh_nodes:page", {
-    description = S "Paper",
+    description = S"Paper",
     drawtype = "mesh",
     mesh = "page.obj",
     tiles = { "page.png" },
     inventory_image = "page.png",
     wield_image = "page.png",
-    wield_scale = { x = 0.5, y = 0.5, z = 0.01 },
+    wield_scale = xyz(0.5, 0.5, 0.01),
     visual_scale = 1.0,
     paramtype = "light",
     paramtype2 = "wallmounted", -- MUDOU PARA WALLMOUNTED
@@ -6568,36 +6563,55 @@ c.register_node("nh_nodes:page", {
     walkable = false,
     use_texture_alpha = "clip",
     selection_box = {type = "wallmounted",
-        wall_top = { -0.31, -0.49, -0.44, 0.31, -0.45, 0.44 },
-        wall_bottom = { -0.31, 0.5, -0.44, 0.31, 0.49, 0.44 },
-        wall_side = { 0.5, -0.44, -0.31, 0.49, 0.44, 0.31 },
-    },
-    groups = {oddly_breakable_by_hand = 3, flammable = 3 },
+        wall_top = {-0.31, -0.49, -0.44, 0.31, -0.45, 0.44},
+        wall_bottom = {-0.31, 0.5, -0.44, 0.31, 0.49, 0.44},
+        wall_side = {0.5, -0.44, -0.31, 0.49, 0.44, 0.31}},
+    groups = {oddly_breakable_by_hand = 3, flammable = 3},
     drop = "",
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if not clicker or not clicker:is_player() then return end
         local player_name = clicker:get_player_name()
         local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
         if not has_feather or not has_ink then
-            local msg = S "I think I need "
-            if not has_feather and not has_ink then msg = msg .. S "a feather in the hotbar and an ink bottle in the inventory to write."
-            elseif not has_feather then msg = msg .. S "a feather in the hotbar to write."
-            else msg = msg .. S "an ink bottle in the inventory to write."
+            local msg = S"I think I need "
+            if not has_feather and not has_ink then msg = msg .. S"a feather in the hotbar and an ink bottle in the inventory to write."
+            elseif not has_feather then msg = msg .. S"a feather in the hotbar to write."
+            else msg = msg .. S"an ink bottle in the inventory to write."
             end
             c.chat_send_player(player_name, msg)
             return
         end
+        -- Lê rascunho do node primeiro, depois da sessão
+        local node_meta = c.get_meta(pos)
+        local node_draft = node_meta:get_string("text") or ""
+        local session = items.editing_pages[player_name]
+        local draft = (session and session.text ~= "" and session.text) or node_draft
+        -- Título dinâmico com Draft se houver rascunho
+        local subtitle_label = ""
+        if draft ~= "" then subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]") end
         c.show_formspec(player_name, "nh_nodes:page_writer:" .. c.pos_to_string(pos),
-            "size[10,13.5]" ..
-            "label[0.3,0;" .. S "Write on the Paper:" .. "]" ..
-            "textarea[0.3,0.5;10,14;page_text;;]" ..
-            "button_exit[3,12.5;2,1;save;" .. S "Save" .. "]" ..
-            "button_exit[5,12.5;2,1;cancel;" .. S "Discard" .. "]")
+            "size[10,14.5]" ..
+            "label[0.3,0;" .. S"Blank Paper" .. "]" ..
+            "label[0.3,0.3;" .. c.formspec_escape(subtitle_label) .. "]" ..
+            "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
+            "textarea[0.3,1;10,14;page_text;;" .. c.formspec_escape(draft) .. "]" ..
+            "button[3,13;2,1;save;" .. S"Save" .. "]" ..
+            "button_exit[5,13;2,1;finish;" .. S"Finish" .. "]" ..
+            "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]")
     end,
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         if digger and digger:is_player() then
             local inv = digger:get_inventory()
             local itemstack = ItemStack("nh_items:page")
+            local draft = oldmetadata.fields.text or ""
+            if draft ~= "" then
+                -- Guarda o rascunho na sessão do jogador ao pegar a página do chão
+                local player_name = digger:get_player_name()
+                items.editing_pages[player_name] = items.editing_pages[player_name] or {}
+                items.editing_pages[player_name].text = draft
+                local imeta = itemstack:get_meta()
+                imeta:set_string("description", S"Paper" .. "\n" .. c.colorize("#4af", "[" .. S"Draft" .. "]"))
+            end
             if inv:room_for_item("main", itemstack) then inv:add_item("main", itemstack)
             else c.add_item(pos, itemstack)
             end
@@ -6613,19 +6627,27 @@ c.override_item("nh_items:page", {
         if c.is_protected(above, placer:get_player_name()) then return itemstack end
         local node = c.get_node(above)
         if node.name ~= "air" then return itemstack end
-        -- Calcular wallmounted - MUITO MAIS SIMPLES
         local dir = vector.subtract(above, under)
         local wallmounted = c.dir_to_wallmounted(dir)
         c.set_node(above, { name = "nh_nodes:page", param2 = wallmounted })
-        c.sound_play("default_place_node", { pos = above, gain = 1.0 })
-        if not c.is_creative_enabled(placer:get_player_name()) then itemstack:take_item() end
+        -- Transfere o rascunho da sessão (ou da meta do item) para o node
+        local player_name = placer:get_player_name()
+        local session = items.editing_pages[player_name]
+        local draft = (session and session.text ~= "" and session.text) or itemstack:get_meta():get_string("text") or ""
+        if draft ~= "" then
+            local meta = c.get_meta(above)
+            meta:set_string("text", draft)
+            meta:set_string("infotext", S"Paper" .. " [" .. S"Draft" .. "]") -- aparece ao mirar
+        end
+        c.sound_play("default_place_node", {pos = above, gain = 1})
+        if not c.is_creative_enabled(player_name) then itemstack:take_item() end
         return itemstack
     end,
 })
 
 -- Node para Página escrita
 c.register_node("nh_nodes:writedpage", {
-    description = S "Writed Paper",
+    description = S"Written Paper",
     drawtype = "mesh",
     mesh = "page.obj",
     tiles = {"writedpage.png"},
@@ -6641,7 +6663,7 @@ c.register_node("nh_nodes:writedpage", {
         wall_top = {-0.31, -0.49, -0.44, 0.31, -0.45, 0.44},
         wall_bottom = {-0.31, 0.5, -0.44, 0.31, 0.49, 0.44},
         wall_side = {0.5, -0.44, -0.31, 0.49, 0.44, 0.31}},
-    groups = {oddly_breakable_by_hand = 3, flammable = 3, not_in_creative_inventory = 1 },
+    groups = {oddly_breakable_by_hand = 3, flammable = 3, not_in_creative_inventory = 1},
     drop = "",
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if not clicker or not clicker:is_player() then return end
@@ -6651,6 +6673,7 @@ c.register_node("nh_nodes:writedpage", {
         if text == "" then text = S "Blank Paper" end
         c.show_formspec(player_name, "nh_nodes:page_reader",
             "size[10,13.5]" ..
+            "label[0.3,0;" .. S"Written Paper" .. "]" ..
             "textarea[0.3,0.5;10,14;page_text;;" .. c.formspec_escape(text) .. "]" ..
             "button_exit[4,12.5;2,1;close;" .. S "Close" .. "]")
     end,
@@ -6689,7 +6712,7 @@ c.override_item("nh_items:writedpage", {
 if not nodes then nodes = {} end
 
 function nodes.place_written_page(pos, text, facedir)
-    c.set_node(pos, {name = "nh_nodes:writedpage_node", param2 = facedir})
+    c.set_node(pos, {name = "nh_nodes:writedpage", param2 = facedir})
     local meta = c.get_meta(pos)
     meta:set_string("text", text)
 end
@@ -6703,17 +6726,28 @@ c.register_on_player_receive_fields(function(player, formname, fields)
             local pos = c.string_to_pos(pos_str)
             if pos then
                 local node = c.get_node(pos)
-                if node.name == "nh_nodes:page_node" then
+                if node.name == "nh_nodes:page" then
                     -- Substituir por página escrita mantendo a rotação
-                    c.set_node(pos, {name = "nh_nodes:writedpage_node", param2 = node.param2})
+                    c.set_node(pos, {name = "nh_nodes:writedpage", param2 = node.param2})
                     local meta = c.get_meta(pos)
                     meta:set_string("text", fields.page_text)
+                    meta:set_string("infotext", S"Paper" .. " [" .. S"Draft" .. "]")
                     -- Consumir tinta (adapte conforme sua função)
                     if consume_ink then writing_utils.consume_ink(player) end
                     c.chat_send_player(player:get_player_name(), S "Text saved on the page!")
                 end
             end
         end
+	if fields.finish then
+	    local text = fields.page_text or ""
+	    if text == "" then c.chat_send_player(player_name, S("I didn't write anything!")) return end
+	    local node = c.get_node(pos)
+	    c.set_node(pos,{name = "nh_nodes:writedpage", param2 = node.param2})
+	    local meta = c.get_meta(pos)
+	    meta:set_string("text", text)
+	    writing_utils.consume_ink(player)
+	    c.chat_send_player(player_name, S"Paper written successfully!")
+	end 
     end
 end)
 
@@ -6721,22 +6755,16 @@ end)
 local MAX_PAGES = 8
 local editing_books = {}
 
--- ─── Sistema de entidades animadas para livros ─────────────────────────────
+-- Sistema de entidades animadas para livros
 -- Mapa: node_name → textura da entidade
 local BOOK_ENTITY_TEXTURES = {
     ["nh_nodes:book"]        = "blankbook.png",
     ["nh_nodes:writedbook"]  = "bookwritten.png",
-    ["nh_nodes:craftguide"]  = "manual.png",
-}
-
+    ["nh_nodes:craftguide"]  = "manual.png"}
 -- Guarda: player_name → {entity, node_pos, node_param2, node_name}
 local open_book_entities = {}
-
 -- Converte facedir → yaw (igual ao do Archion)
-local function facedir_to_yaw(param2)
-    local dir = c.facedir_to_dir(param2)
-    return math.atan2(-dir.x, dir.z)
-end
+local function facedir_to_yaw(param2) local dir = c.facedir_to_dir(param2) return math.atan2(-dir.x, dir.z) end
 
 -- Entidade genérica de livro animado
 c.register_entity("nh_nodes:book_entity", {
@@ -6747,8 +6775,7 @@ c.register_entity("nh_nodes:book_entity", {
         visual_size  = {x = 10, y = 10},
         collisionbox = {0, 0, 0, 0, 0, 0},
         physical     = false,
-        static_save  = false,
-    },
+        static_save  = false},
     on_activate = function(self, staticdata)
         -- Animação de abertura (igual ao Archion)
         self.object:set_animation({x = 0, y = 0.5}, 30, 0, false)
@@ -6774,31 +6801,22 @@ c.register_entity("nh_nodes:book_entity", {
 local function spawn_book_entity(pos, node_name, player_name)
     local node_param2 = c.get_node(pos).param2
     local texture     = BOOK_ENTITY_TEXTURES[node_name] or "blankbook.png"
-
     c.set_node(pos, {name = "air"})
-
     local obj = c.add_entity(pos, "nh_nodes:book_entity")
-    if not obj then
-        c.set_node(pos, {name = node_name, param2 = node_param2})
-        return nil
-    end
-
+    if not obj then c.set_node(pos, {name = node_name, param2 = node_param2}) return nil end
     -- Aplica a textura correta e a rotação do node
     obj:set_properties({textures = {texture}})
     obj:set_yaw(facedir_to_yaw(node_param2 % 4))
-
     local ent             = obj:get_luaentity()
     ent._node_pos         = vector.copy(pos)
     ent._node_param2      = node_param2
     ent._node_name        = node_name
     ent._player_name      = player_name
-
     open_book_entities[player_name] = {
         entity     = obj,
         node_pos   = vector.copy(pos),
         node_param2 = node_param2,
-        node_name  = node_name,
-    }
+        node_name  = node_name}
     return obj
 end
 
@@ -6806,14 +6824,12 @@ end
 local function close_book_entity(player_name)
     local data = open_book_entities[player_name]
     if not data then return end
-
     local obj = data.entity
     if not obj or not obj:get_pos() then
         c.set_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
         open_book_entities[player_name] = nil
         return
     end
-
     local ent = obj:get_luaentity()
     if not ent then
         obj:remove()
@@ -6821,20 +6837,17 @@ local function close_book_entity(player_name)
         open_book_entities[player_name] = nil
         return
     end
-
     -- Animação de fechamento (igual ao Archion)
     obj:set_animation({x = 0.5, y = 1}, 30, 0, false)
     ent._closing     = true
     ent._close_timer = 0
     -- on_step cuidará de remover a entidade e restaurar o node
-
     open_book_entities[player_name] = nil
 end
 
 -- Limpeza ao deslogar
 c.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
-
     -- Caso 1: entidade ainda registrada em open_book_entities (animação de abertura ou form aberto)
     local data = open_book_entities[name]
     if data then
@@ -6842,7 +6855,6 @@ c.register_on_leaveplayer(function(player)
         c.set_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
         open_book_entities[name] = nil
     end
-
     -- Caso 2: entidade em animação de FECHAMENTO (_closing = true).
     -- close_book_entity() já limpou open_book_entities, mas o on_step ainda não
     -- restaurou o node. Precisamos varrer entidades book_entity próximas ao player
@@ -6859,7 +6871,6 @@ c.register_on_leaveplayer(function(player)
             end
         end
     end
-
     -- Limpa sessão de edição pendente
     editing_books[name] = nil
 end)
@@ -6871,40 +6882,40 @@ local function book_formspec(title, title2, title3, pages, current, editable)
     local nav_next  = current < MAX_PAGES and "button[8.4,13;1.5,0.8;next;>]" or ""
     local page_label = S"Page" .. " " .. current .. "/" .. MAX_PAGES
 
-    if editable then
-        return "size[10,14.5]" ..
-               "label[0.3,-0.1;"  .. c.formspec_escape(title)      .. "]" ..
-               "label[0.3,0.2;"   .. c.formspec_escape(title2)     .. "]" ..
-               "label[4.1,1;"     .. page_label                    .. "]" ..
-               "field[2.5,0.3;5,0.8;title_input;;" .. c.formspec_escape(title3) .. "]" ..
-               "label[3.3,13.9;"  .. S"Save to avoid losing the draft" .. "]" ..
-               "textarea[0.3,1.5;10,13;page_text;;" .. c.formspec_escape(page_text) .. "]" ..
-               nav_prev ..
-               "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
-               "button[3,13;2,0.8;save;"   .. S"Save"   .. "]" ..
-               "button[5,13;2,0.8;finish;" .. S"Finish" .. "]" ..
-               nav_next
-    else
-        return "size[10,14]" ..
-               "label[0.3,-0.1;" .. c.formspec_escape(title)  .. "]" ..
-               "label[0.3,0.2;"  .. c.formspec_escape(title3) .. "]" ..
-               "label[4.1,0.3;"  .. page_label                .. "]" ..
-               "textarea[0.3,0.8;10,14;page_text;;" .. c.formspec_escape(page_text) .. "]" ..
-               nav_prev ..
-               "button_exit[4,13;2,0.8;close;" .. S"Close" .. "]" ..
-               nav_next
+    if editable then return
+        "size[10,14.5]" ..
+        "label[0.3,-0.1;"  .. c.formspec_escape(title)      .. "]" ..
+        "label[0.3,0.2;"   .. c.formspec_escape(title2)     .. "]" ..
+        "label[4.1,1;"     .. page_label                    .. "]" ..
+        "field[2.5,0.3;5,0.8;title_input;;" .. c.formspec_escape(title3) .. "]" ..
+        "label[3.3,13.9;"  .. S"Save to avoid losing the draft" .. "]" ..
+        "textarea[0.3,1.5;10,13;page_text;;" .. c.formspec_escape(page_text) .. "]" ..
+        nav_prev ..
+        "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
+        "button[3,13;2,0.8;save;"   .. S"Save"   .. "]" ..
+        "button[5,13;2,0.8;finish;" .. S"Finish" .. "]" ..
+        nav_next
+    else return
+        "size[10,14]" ..
+        "label[0.3,-0.1;" .. c.formspec_escape(title)  .. "]" ..
+        "label[0.3,0.2;"  .. c.formspec_escape(title3) .. "]" ..
+        "label[4.1,0.3;"  .. page_label                .. "]" ..
+        "textarea[0.3,0.8;10,14;page_text;;" .. c.formspec_escape(page_text) .. "]" ..
+        nav_prev ..
+        "button_exit[4,13;2,0.8;close;" .. S"Close" .. "]" ..
+        nav_next
     end
 end
 
-local function book_confirm_formspec()
-    return "size[6,3]" ..
-           "label[0.5,0.3;" .. c.formspec_escape(S"No title was given to this book.") .. "]" ..
-           "label[0.5,0.9;" .. c.formspec_escape(S"Continue without a title?")        .. "]" ..
-           "button[0.5,1.8;2,0.8;confirm_back;"   .. S"Return" .. "]" ..
-           "button_exit[3.5,1.8;2,0.8;confirm_finish;" .. S"Finish" .. "]"
+local function book_confirm_formspec() return 
+    "size[6,3]" ..
+    "label[0.5,0.3;" .. c.formspec_escape(S"No title was given to this book.") .. "]" ..
+    "label[0.5,0.9;" .. c.formspec_escape(S"Continue without a title?")        .. "]" ..
+    "button[0.5,1.8;2,0.8;confirm_back;"   .. S"Return" .. "]" ..
+    "button_exit[3.5,1.8;2,0.8;confirm_finish;" .. S"Finish" .. "]"
 end
 
--- ─── Serialização de páginas ────────────────────────────────────────────────
+-- Serialização de páginas
 local function pages_to_string(pages)
     local parts = {}
     for i = 1, MAX_PAGES do parts[i] = c.formspec_escape(pages[i] or "") end
@@ -6935,13 +6946,10 @@ end
 -- Centraliza a lógica de "fecha o anterior, spawna o novo, exibe o formspec"
 local function open_book_with_animation(pos, node_name, player, formname, title, title2, title3, pages, current, editable)
     local player_name = player:get_player_name()
-
     -- Fecha eventual entidade já aberta por este jogador
     close_book_entity(player_name)
-
     -- Spawna animação
     spawn_book_entity(pos, node_name, player_name)
-
     -- Salva sessão
     editing_books[player_name] = {
         pos     = vector.new(pos),
@@ -6951,7 +6959,6 @@ local function open_book_with_animation(pos, node_name, player, formname, title,
         title2  = title2,
         title3  = title3,
     }
-
     -- Exibe formspec
     c.show_formspec(player_name, formname .. ":" .. c.pos_to_string(pos),
         book_formspec(title, title2, title3, pages, current, editable))
@@ -6961,19 +6968,12 @@ end
 -- Captura o "quit" de QUALQUER formspec de livro para fechar a entidade
 c.register_on_player_receive_fields(function(player, formname, fields)
     local name = player:get_player_name()
-
     -- Detecta formspecs de livro (reader, writer, confirm)
-    local is_book_form = formname:find("^nh_nodes:book_reader:")
-                      or formname:find("^nh_nodes:book_writer:")
-                      or formname:find("^nh_nodes:book_confirm:")
-
-    if is_book_form and (fields.quit or fields.close) then
-        close_book_entity(name)
-    end
+    local is_book_form = formname:find("^nh_nodes:book_reader:") or formname:find("^nh_nodes:book_writer:") or formname:find("^nh_nodes:book_confirm:")
+    if is_book_form and (fields.quit or fields.close) then close_book_entity(name) end
 end)
 
--- ─── CAPA (bookcover) ───────────────────────────────────────────────────────
--- Sem animação: apenas decoração/ingrediente, sem formspec de páginas.
+-- CAPA (bookcover)
 c.register_node("nh_nodes:bookcover", {
     description           = S("Book Cover"),
     drawtype              = "mesh",
@@ -6989,8 +6989,8 @@ c.register_node("nh_nodes:bookcover", {
     offhand_bone_position = {pos = xyz(0.5, -1, -1.15), rot = xyz(-90, 0, 270)},
     collision_box         = {type = "fixed", fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}},
     selection_box         = {type = "fixed", fixed = {-0.375, -0.5, -0.5, 0.375, -0.25, 0.5}},
-    groups = {oddly_breakable_by_hand = 3, flammable = 3},
-    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+    groups                = {oddly_breakable_by_hand = 3, flammable = 3},
+    on_rightclick         = function(pos, node, clicker, itemstack, pointed_thing)
         if not clicker or not clicker:is_player() then return end
         c.chat_send_player(clicker:get_player_name(), S("Just a book cover..."))
     end,
@@ -7013,9 +7013,9 @@ c.register_node("nh_nodes:book", {
     offhand_bone_position = {pos = xyz(0.5, -1, -1.15), rot = xyz(-90, 0, 270)},
     collision_box         = {type = "fixed", fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}},
     selection_box         = {type = "fixed", fixed = {-0.375, -0.5, -0.5, 0.375, -0.25, 0.5}},
-    groups = {oddly_breakable_by_hand = 3, flammable = 3},
-    drop = "",
-    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+    groups                = {oddly_breakable_by_hand = 3, flammable = 3},
+    drop                  = "",
+    on_rightclick         = function(pos, node, clicker, itemstack, pointed_thing)
         if not clicker or not clicker:is_player() then return end
         local player_name = clicker:get_player_name()
         local meta        = c.get_meta(pos)
@@ -7054,7 +7054,7 @@ c.register_node("nh_nodes:book", {
             dmeta:set_string("title",    oldmetadata.fields.title or "")
             dmeta:set_string("subtitle", subtitle)
             dmeta:set_int   ("current_page", 1)
-            local desc = S("Blank Book")
+            local desc = S"Blank Book"
             if subtitle ~= "" then desc = desc .. "\n" .. c.colorize("#9f0", "[" .. S"Draft" .. "] " .. subtitle) end
             dmeta:set_string("description", desc)
             if inv:room_for_item("main", drop) then inv:add_item("main", drop)
@@ -7093,9 +7093,9 @@ c.register_node("nh_nodes:writedbook", {
     offhand_bone_position = {pos = xyz(0.5, -1, -1.15), rot = xyz(-90, 0, 270)},
     collision_box         = {type = "fixed", fixed = {-0.1, -0.5, -0.1, 0.1, -0.45, 0.1}},
     selection_box         = {type = "fixed", fixed = {-0.375, -0.5, -0.5, 0.375, -0.25, 0.5}},
-    groups = {oddly_breakable_by_hand = 3, flammable = 3},
-    drop = "",
-    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+    groups                = {oddly_breakable_by_hand = 3, flammable = 3},
+    drop                  = "",
+    on_rightclick         = function(pos, node, clicker, itemstack, pointed_thing)
         if not clicker or not clicker:is_player() then return end
         local player_name = clicker:get_player_name()
         local meta        = c.get_meta(pos)
@@ -7107,7 +7107,7 @@ c.register_node("nh_nodes:writedbook", {
         -- Leitura com animação
         open_book_with_animation(pos, "nh_nodes:writedbook", clicker, "nh_nodes:book_reader", title, title2, title3, pages, current, false)
     end,
-    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+    after_dig_node        = function(pos, oldnode, oldmetadata, digger)
         if digger and digger:is_player() then
             local inv      = digger:get_inventory()
             local drop     = ItemStack("nh_nodes:writedbook")
@@ -7141,7 +7141,7 @@ c.register_node("nh_nodes:writedbook", {
     end,
 })
 
--- ─── HANDLERS DE FORMSPEC DOS LIVROS ────────────────────────────────────────
+-- HANDLERS DE FORMSPEC DOS LIVROS
 c.register_on_player_receive_fields(function(player, formname, fields)
     -- ── Leitor genérico (writedbook + book sem ferramentas + craftguide) ──
     local reader_prefix = "nh_nodes:book_reader:"
@@ -7666,17 +7666,24 @@ function show_grimoire(player, page, search)
         for x = 0, GRID_W - 1 do
             if not items[i] then break end
             local offset = x >= half and gap or 0
+            local item_name = items[i]
+            local def       = c.registered_items[item_name]
+            -- Monta a descrição base já traduzida (ou o displayname como fallback)
+            local base_desc = (def and def.description) or item_name
+            local translated_desc = c.get_translated_string(lang_code, base_desc)
+            -- Acrescenta o nome técnico na última linha
+            local tooltip_text = translated_desc .. "\n" .. item_name
             table.insert(fs,
                 "item_image_button[" ..
                 (x0 + x * 1.1 + offset) .. "," ..
                 (y0 + y * 1.1) .. ";1.1,1.1;" ..
-                items[i] .. ";item_" .. i .. ";]")
-            i = i + 1
+                item_name .. ";item_" .. i .. ";]")
+            table.insert(fs, "tooltip[item_" .. i .. ";" .. c.formspec_escape(tooltip_text) .. "]")
+            i = i + 1 
         end
     end
-    if has_backchest then
-        -- Com backchest: mostra slots extras (8x2) + hotbar (8x1)
-        table.insert(fs, "list[current_player;main;0.3,7.9;8,2;8]")
+    if has_backchest then -- Com backchest: mostra slots extras (8x2) + hotbar (8x1)
+        table.insert(fs, "list[current_player;main;0.3,7.9;8,2;8]") 
         table.insert(fs, "list[current_player;main;0.3,10.4;8,1;]")
     else table.insert(fs, "list[current_player;main;0.3,8.2;8,1;]") -- Sem backchest: mostra apenas a hotbar (8x1)
     end
@@ -7794,6 +7801,7 @@ c.register_on_leaveplayer(function(player)
     end
     player_state[name] = nil
 end)
+
 c.register_on_newplayer(function(player)
     local inv = player:get_inventory()
     local page = ItemStack("nh_items:writedpage")
@@ -11402,7 +11410,7 @@ c.register_node("nh_nodes:shrimpclaw2", {
     on_use = function(itemstack, user, pointed_thing)
         if not user or not user:is_player() then return end
         local name = user:get_player_name()
-        if get_hunger(user) < 4 then c.chat_send_player(name, S("Estou sem energia suficiente para atirar...")) return itemstack end
+        if get_hunger(user) < 4 then c.chat_send_player(name, S"Estou sem energia suficiente para atirar...") return itemstack end
         restore_hunger(user, -4)
         local pos = user:get_pos()
         if not pos then return end

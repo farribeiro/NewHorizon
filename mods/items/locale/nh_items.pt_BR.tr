@@ -2,14 +2,15 @@
 
 Feather=Pena
 Paper=Papel
-Writed Paper=Papel Escrito
+Written Paper=Papel Escrito
 Blank Paper=Papel em Branco
 
-Write on the Paper:=Escrever no Papel:
 Save=Salvar
 Finish=Terminar
 Cancel=Cancelar
 Close=Fechar
+Save to avoid losing the draft=Salve para manter o rascunho
+Draft=Rascunho
 Draft saved!=Rascunho salvo!
 
 I didn't write anything!=Eu não escrevi nada!

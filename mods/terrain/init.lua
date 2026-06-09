@@ -1964,20 +1964,19 @@ end
 -- FUNÇÃO DE APLICAÇÃO DAS DECORAÇÕES
 local function apply_decorations(area, data, param2_data, decorations)
     local palm_leaf_rotations = {}
-
     -- Gera árvores
     for _, spawn_data in ipairs(decorations.trees) do
         if spawn_data.type == "tree" then
             spawn_tree(area, data, param2_data, spawn_data, spawn_data.wx, spawn_data.wz)
             local rng_page = PseudoRandom(spawn_data.wx * 31337 + spawn_data.wz * 13337)
             if rng_page:next(1, 15) == 1 then
-                local dirs = { { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 }, { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 }, }
+                local dirs = {xyz(1, 0, 0), xyz(-1, 0, 0), xyz(0, 0, 1), xyz(0, 0, -1)}
                 local dir = dirs[rng_page:next(1, 4)]
                 c.after(0.1, function()
                     local found_y = nil
                     for try_y = spawn_data.y + 2, spawn_data.y + 1, -1 do
-                        local trunk_pos  = { x = spawn_data.x, y = try_y, z = spawn_data.z }
-                        local side_pos   = { x = spawn_data.x + dir.x, y = try_y, z = spawn_data.z + dir.z }
+                        local trunk_pos  = xyz(spawn_data.x, try_y, spawn_data.z)
+                        local side_pos   = xyz(spawn_data.x + dir.x, try_y, spawn_data.z + dir.z)
                         local trunk_node = c.get_node(trunk_pos).name
                         local side_node  = c.get_node(side_pos).name
                         if trunk_node == "nh_nodes:oaktimber" and side_node == "air" then
@@ -1986,11 +1985,11 @@ local function apply_decorations(area, data, param2_data, decorations)
                         end
                     end
                     if found_y then
-                        local page_pos = { x = spawn_data.x + dir.x, y = found_y, z = spawn_data.z + dir.z, }
-                        local dir_to_param2 = { [1] = { [0] = 2 }, [-1] = { [0] = 3 }, [0] = { [1] = 4, [-1] = 5 }, }
+                        local page_pos = xyz(spawn_data.x + dir.x, found_y, spawn_data.z + dir.z)
+                        local dir_to_param2 = {[1] = {[0] = 2}, [-1] = {[0] = 3}, [0] = {[1] = 4, [-1] = 5}}
                         local param2 = dir_to_param2[dir.x] and dir_to_param2[dir.x][dir.z]
                         if param2 then
-                            c.set_node(page_pos, { name = "nh_nodes:writedpage_node", param2 = param2 })
+                            c.set_node(page_pos, {name = "nh_nodes:writedpage", param2 = param2})
                             local meta = c.get_meta(page_pos)
                             local list = page_texts.message
                             local text = list[rng_page:next(1, #list)]
@@ -2271,9 +2270,9 @@ c.register_on_generated(function(minp, maxp)
         for _, leaf_info in ipairs(palm_leaf_rotations) do
             local node = c.get_node(leaf_info.pos)
             if node.name == "nh_nodes:palmleaf" then
-                c.set_node(leaf_info.pos, { name = "nh_nodes:palmleaf", param2 = leaf_info.rotation })
+                c.set_node(leaf_info.pos, {name = "nh_nodes:palmleaf", param2 = leaf_info.rotation})
             elseif node.name == "nh_nodes:coconutlinked" then
-                c.set_node(leaf_info.pos, { name = "nh_nodes:coconutlinked", param2 = leaf_info.rotation })
+                c.set_node(leaf_info.pos, {name = "nh_nodes:coconutlinked", param2 = leaf_info.rotation})
             end
         end
         -- Inicializa baús do pebble

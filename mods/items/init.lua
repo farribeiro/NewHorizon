@@ -7,9 +7,9 @@ local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return
 -- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}
 -- Sessões de edição de página: player_name → { text = "" }
-local editing_pages = {}
+items.editing_pages = {}
 -- Limpa sessão ao deslogar
-c.register_on_leaveplayer(function(player) editing_pages[player:get_player_name()] = nil end)
+c.register_on_leaveplayer(function(player) items.editing_pages[player:get_player_name()] = nil end)
 -- Itens necessários para escrever
 c.register_craftitem("nh_items:feather", {
     description = S"Feather",
@@ -41,24 +41,27 @@ c.register_craftitem("nh_items:page", {
             return
         end
         -- Recupera rascunho da sessão, se existir
-        local session = editing_pages[player_name]
+        local session = items.editing_pages[player_name]
         local draft = session and session.text or ""
+        local draft_label = ""
+        if draft ~= "" then draft_label = c.colorize("#4af", "[" .. S"Draft" .. "]") end
         -- Mostrar formspec para escrever
         c.show_formspec(player_name, "nh_items:page_writer",
             "size[10,14.5]" ..
-            "label[0.3,0;" .. S"Write on the Paper:" .. "]" ..
+            "label[0.3,0;" .. S"Blank Paper" .. "]" ..
+            "label[0.3,0.3;" .. c.formspec_escape(draft_label) .. "]" ..
             "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
-            "textarea[0.3,1;10,14;page_text;;" .. c.formspec_escape(draft) .. "]" ..
+            "textarea[0.3,1;10,14;page_text;;" ..
+            c.formspec_escape(draft) .. "]" ..
             "button[3,13;2,1;save;" .. S"Save" .. "]" ..
             "button_exit[5,13;2,1;finish;" .. S"Finish" .. "]" ..
-            "label[3.3,13.9;"  .. S"Save to avoid losing the draft" .. "]"
-        )
+            "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]")
         return itemstack
     end,
 })
 -- Registro do item Página escrita
 c.register_craftitem("nh_items:writedpage", {
-    description = S("Writed Paper"),
+    description = S("Written Paper"),
     inventory_image = "writedpage.png",
     wield_image = "writedpage.png",
     wield_scale = xyz(0.5, 0.5, 0.01),
@@ -74,7 +77,8 @@ c.register_craftitem("nh_items:writedpage", {
         if text == "" then text = S("Blank Paper") end
         c.show_formspec(player_name, "nh_items:page_reader",
             "size[10,13.5]" ..
-            "textarea[0.3,0.3;10,14;page_text;;" ..
+            "label[0.3,0;" .. S"Written Paper" .. "]" ..
+            "textarea[0.3,0.5;10,14;page_text;;" ..
             c.formspec_escape(text) .. "]" ..
             "button_exit[4,12.5;2,1;close;" .. S"Close" .. "]")
         return itemstack
@@ -86,31 +90,32 @@ c.register_on_player_receive_fields(function(player, formname, fields)
     local player_name = player:get_player_name()
     -- Persiste o texto na sessão sempre que ele chegar (inclusive no quit)
     if fields.page_text ~= nil then
-        editing_pages[player_name] = editing_pages[player_name] or {}
-        editing_pages[player_name].text = fields.page_text
+        items.editing_pages[player_name] = items.editing_pages[player_name] or {}
+        items.editing_pages[player_name].text = fields.page_text
     end
     -- Fechar sem ação: preserva rascunho na sessão para a próxima abertura
     if fields.quit or fields.close then return end
     -- SAVE: salva o rascunho e reabre o formspec com o texto preservado (sem consumir nada)
     if fields.save then
-        local text = (editing_pages[player_name] and editing_pages[player_name].text) or ""
-        if text == "" then c.chat_send_player(player_name, S("I didn't write anything!")) return end
+        local text = (items.editing_pages[player_name] and items.editing_pages[player_name].text) or ""
+        local subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]")
+        if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
         -- Reabre o formspec mantendo o texto
         c.show_formspec(player_name, "nh_items:page_writer",
             "size[10,14.5]" ..
-            "label[0.3,0;" .. S"Write on the Paper:" .. "]" ..
+            "label[0.3,0;" .. S"Blank Paper" .. "]" ..
+            "label[0.3,0.3;" .. c.formspec_escape(subtitle_label) .. "]" ..
             "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
             "textarea[0.3,1;10,14;page_text;;" .. c.formspec_escape(text) .. "]" ..
             "button[3,13;2,1;save;" .. S"Save" .. "]" ..
             "button[5,13;2,1;finish;" .. S"Finish" .. "]" ..
-            "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]"
-        )
-        c.chat_send_player(player_name, S("Draft saved!"))
+            "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]")
+        c.chat_send_player(player_name, S"Draft saved!")
         return
     end
     -- FINISH: consome a página em branco e a tinta, cria a writedpage
     if fields.finish then
-        local text = (editing_pages[player_name] and editing_pages[player_name].text) or ""
+        local text = (items.editing_pages[player_name] and items.editing_pages[player_name].text) or ""
         if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
         -- Verificar novamente se tem os itens (para evitar exploits)
         local has_feather, has_ink = player_has_writing_tools(player)
@@ -126,7 +131,7 @@ c.register_on_player_receive_fields(function(player, formname, fields)
                 -- Criar página escrita
                 local written_page = items.create_page_with_text(text)
                 inv:add_item("main", written_page)
-                editing_pages[player_name] = nil -- Limpa o rascunho
+                items.editing_pages[player_name] = nil -- Limpa o rascunho
                 c.chat_send_player(player_name, S"Paper written successfully!")
                 return
             end
