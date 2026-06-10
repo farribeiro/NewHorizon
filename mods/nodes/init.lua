@@ -6443,9 +6443,8 @@ c.register_node("nh_nodes:bluelava_flowing", {
     liquid_alternative_flowing = "nh_nodes:bluelava_flowing",
     liquid_alternative_source = "nh_nodes:bluelava",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 255, g = 0, b = 0 },
-    groups = { lava = 1, liquid = 1, hot = 1, not_in_creative_inventory = 1 },
-
+    post_effect_color = {a = 64, r = 255, g = 0, b = 0},
+    groups = {lava = 1, liquid = 1, hot = 1, not_in_creative_inventory = 1},
 })
 
 -- ABM que verifica jogadores próximos ao nó de magma
@@ -6454,14 +6453,11 @@ c.register_abm({
     nodenames = { "nh_nodes:magma" },
     interval = 1.0, -- checa a cada 1 segundo
     chance = 1,     -- 100% de chance de executar
-
     action = function(pos, node)
         -- Pega todos os objetos em raio de 1 bloco (toca as faces)
         local objects = c.get_objects_inside_radius(pos, 1.1)
         for _, obj in ipairs(objects) do
-            if obj:is_player() then
-                obj:set_hp(obj:get_hp() - 2) -- tira 1 coração por segundo
-            end
+            if obj:is_player() then obj:set_hp(obj:get_hp() - 2) end -- tira 1 coração por segundo
         end
     end,
 })
@@ -6558,7 +6554,7 @@ c.register_node("nh_nodes:page", {
     wield_scale = xyz(0.5, 0.5, 0.01),
     visual_scale = 1.0,
     paramtype = "light",
-    paramtype2 = "wallmounted", -- MUDOU PARA WALLMOUNTED
+    paramtype2 = "wallmounted",
     sunlight_propagates = true,
     walkable = false,
     use_texture_alpha = "clip",
@@ -6566,11 +6562,18 @@ c.register_node("nh_nodes:page", {
         wall_top = {-0.31, -0.49, -0.44, 0.31, -0.45, 0.44},
         wall_bottom = {-0.31, 0.5, -0.44, 0.31, 0.49, 0.44},
         wall_side = {0.5, -0.44, -0.31, 0.49, 0.44, 0.31}},
-    groups = {oddly_breakable_by_hand = 3, flammable = 3},
+    groups = {oddly_breakable_by_hand = 3, flammable = 3, not_in_creative_inventory = 1},
     drop = "",
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         if not clicker or not clicker:is_player() then return end
         local player_name = clicker:get_player_name()
+        local node_meta = c.get_meta(pos)
+        local node_draft = node_meta:get_string("text") or ""
+        local pos_key = "node:" .. c.pos_to_string(pos)
+        local session = items.editing_pages[player_name]
+        -- Só reusa sessão se veio deste mesmo node
+        local draft = (session and session.source == pos_key and session.text ~= "" and session.text) or node_draft
+        items.editing_pages[player_name] = {text = draft, source = pos_key}
         local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
         if not has_feather or not has_ink then
             local msg = S"I think I need "
@@ -6581,12 +6584,14 @@ c.register_node("nh_nodes:page", {
             c.chat_send_player(player_name, msg)
             return
         end
-        -- Lê rascunho do node primeiro, depois da sessão
+        -- Lê rascunho: prioridade para a sessão (items.editing_pages), fallback para meta do node
         local node_meta = c.get_meta(pos)
         local node_draft = node_meta:get_string("text") or ""
         local session = items.editing_pages[player_name]
         local draft = (session and session.text ~= "" and session.text) or node_draft
-        -- Título dinâmico com Draft se houver rascunho
+        -- Sincroniza sessão com o rascunho mais recente ao abrir
+        items.editing_pages[player_name] = items.editing_pages[player_name] or {}
+        items.editing_pages[player_name].text = draft
         local subtitle_label = ""
         if draft ~= "" then subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]") end
         c.show_formspec(player_name, "nh_nodes:page_writer:" .. c.pos_to_string(pos),
@@ -6596,7 +6601,7 @@ c.register_node("nh_nodes:page", {
             "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
             "textarea[0.3,1;10,14;page_text;;" .. c.formspec_escape(draft) .. "]" ..
             "button[3,13;2,1;save;" .. S"Save" .. "]" ..
-            "button_exit[5,13;2,1;finish;" .. S"Finish" .. "]" ..
+            "button[5,13;2,1;finish;" .. S"Finish" .. "]" ..
             "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]")
     end,
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
@@ -6605,12 +6610,11 @@ c.register_node("nh_nodes:page", {
             local itemstack = ItemStack("nh_items:page")
             local draft = oldmetadata.fields.text or ""
             if draft ~= "" then
-                -- Guarda o rascunho na sessão do jogador ao pegar a página do chão
                 local player_name = digger:get_player_name()
-                items.editing_pages[player_name] = items.editing_pages[player_name] or {}
-                items.editing_pages[player_name].text = draft
-                local imeta = itemstack:get_meta()
-                imeta:set_string("description", S"Paper" .. "\n" .. c.colorize("#4af", "[" .. S"Draft" .. "]"))
+                -- Só sobrescreve a sessão se não houver rascunho mais recente nela
+                local session = items.editing_pages[player_name]
+                if not session or session.text == "" then items.editing_pages[player_name] = {text = draft, source = "item"} end
+                items.update_page_draft(itemstack, draft)
             end
             if inv:room_for_item("main", itemstack) then inv:add_item("main", itemstack)
             else c.add_item(pos, itemstack)
@@ -6618,7 +6622,80 @@ c.register_node("nh_nodes:page", {
         end
     end,
 })
--- Modificar os craftitems originais para colocar os nodes
+
+c.register_node("nh_nodes:page_floor", {
+    -- mesmas propriedades do nh_nodes:page...
+    description = S"Paper",
+    drawtype = "mesh",
+    mesh = "page.obj",
+    tiles = { "page.png" },
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    walkable = false,
+    use_texture_alpha = "clip",
+    selection_box = {type = "fixed", fixed = {-0.31, 0.5, -0.44, 0.31, 0.46, 0.44}},
+    groups = {oddly_breakable_by_hand = 3, flammable = 3, not_in_creative_inventory = 1},
+    drop = "",
+    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        if not clicker or not clicker:is_player() then return end
+        local player_name = clicker:get_player_name()
+        local node_meta = c.get_meta(pos)
+        local node_draft = node_meta:get_string("text") or ""
+        local pos_key = "node:" .. c.pos_to_string(pos)
+        local session = items.editing_pages[player_name]
+        -- Só reusa sessão se veio deste mesmo node
+        local draft = (session and session.source == pos_key and session.text ~= "" and session.text) or node_draft
+        items.editing_pages[player_name] = {text = draft, source = pos_key}
+        local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
+        if not has_feather or not has_ink then
+            local msg = S"I think I need "
+            if not has_feather and not has_ink then msg = msg .. S"a feather in the hotbar and an ink bottle in the inventory to write."
+            elseif not has_feather then msg = msg .. S"a feather in the hotbar to write."
+            else msg = msg .. S"an ink bottle in the inventory to write."
+            end
+            c.chat_send_player(player_name, msg)
+            return
+        end
+        -- Lê rascunho: prioridade para a sessão (items.editing_pages), fallback para meta do node
+        local node_meta = c.get_meta(pos)
+        local node_draft = node_meta:get_string("text") or ""
+        local session = items.editing_pages[player_name]
+        local draft = (session and session.text ~= "" and session.text) or node_draft
+        -- Sincroniza sessão com o rascunho mais recente ao abrir
+        items.editing_pages[player_name] = items.editing_pages[player_name] or {}
+        items.editing_pages[player_name].text = draft
+        local subtitle_label = ""
+        if draft ~= "" then subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]") end
+        c.show_formspec(player_name, "nh_nodes:page_writer:" .. c.pos_to_string(pos),
+            "size[10,14.5]" ..
+            "label[0.3,0;" .. S"Blank Paper" .. "]" ..
+            "label[0.3,0.3;" .. c.formspec_escape(subtitle_label) .. "]" ..
+            "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
+            "textarea[0.3,1;10,14;page_text;;" .. c.formspec_escape(draft) .. "]" ..
+            "button[3,13;2,1;save;" .. S"Save" .. "]" ..
+            "button[5,13;2,1;finish;" .. S"Finish" .. "]" ..
+            "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]")
+    end,
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        if digger and digger:is_player() then
+            local inv = digger:get_inventory()
+            local itemstack = ItemStack("nh_items:page")
+            local draft = oldmetadata.fields.text or ""
+            if draft ~= "" then
+                local player_name = digger:get_player_name()
+                -- Só sobrescreve a sessão se não houver rascunho mais recente nela
+                local session = items.editing_pages[player_name]
+                if not session or session.text == "" then items.editing_pages[player_name] = {text = draft, source = "item"} end
+                items.update_page_draft(itemstack, draft)
+            end
+            if inv:room_for_item("main", itemstack) then inv:add_item("main", itemstack)
+            else c.add_item(pos, itemstack)
+            end
+        end
+    end,
+})
+ 
 c.override_item("nh_items:page", {
     on_place = function(itemstack, placer, pointed_thing)
         if pointed_thing.type ~= "node" then return itemstack end
@@ -6629,23 +6706,32 @@ c.override_item("nh_items:page", {
         if node.name ~= "air" then return itemstack end
         local dir = vector.subtract(above, under)
         local wallmounted = c.dir_to_wallmounted(dir)
-        c.set_node(above, { name = "nh_nodes:page", param2 = wallmounted })
-        -- Transfere o rascunho da sessão (ou da meta do item) para o node
+        if wallmounted == 0 then
+            -- Chão: face top para cima (facedir face 5 = índice 20-23)
+            local yaw = placer:get_look_horizontal()
+            local rot = math.floor((yaw + math.pi / 4) / (math.pi / 2)) % 4
+            c.set_node(above, { name = "nh_nodes:page_floor", param2 = 20 + rot })
+        elseif wallmounted == 1 then
+            -- Teto: face bottom para baixo (facedir face 4 = índice 16-19)
+            local yaw = placer:get_look_horizontal()
+            local rot = math.floor((yaw + math.pi / 4) / (math.pi / 2)) % 4
+            c.set_node(above, { name = "nh_nodes:page_floor", param2 = 16 + rot })
+        else c.set_node(above, { name = "nh_nodes:page", param2 = wallmounted })
+        end
         local player_name = placer:get_player_name()
         local session = items.editing_pages[player_name]
         local draft = (session and session.text ~= "" and session.text) or itemstack:get_meta():get_string("text") or ""
         if draft ~= "" then
             local meta = c.get_meta(above)
             meta:set_string("text", draft)
-            meta:set_string("infotext", S"Paper" .. " [" .. S"Draft" .. "]") -- aparece ao mirar
+            meta:set_string("infotext", S"Paper" .. " [" .. S"Draft" .. "]")
         end
         c.sound_play("default_place_node", {pos = above, gain = 1})
         if not c.is_creative_enabled(player_name) then itemstack:take_item() end
         return itemstack
     end,
 })
-
--- Node para Página escrita
+ 
 c.register_node("nh_nodes:writedpage", {
     description = S"Written Paper",
     drawtype = "mesh",
@@ -6670,12 +6756,12 @@ c.register_node("nh_nodes:writedpage", {
         local player_name = clicker:get_player_name()
         local meta = c.get_meta(pos)
         local text = meta:get_string("text")
-        if text == "" then text = S "Blank Paper" end
+        if text == "" then text = S"Blank Paper" end
         c.show_formspec(player_name, "nh_nodes:page_reader",
             "size[10,13.5]" ..
             "label[0.3,0;" .. S"Written Paper" .. "]" ..
             "textarea[0.3,0.5;10,14;page_text;;" .. c.formspec_escape(text) .. "]" ..
-            "button_exit[4,12.5;2,1;close;" .. S "Close" .. "]")
+            "button_exit[4,12.5;2,1;close;" .. S"Close" .. "]")
     end,
     after_dig_node = function(pos, oldnode, oldmetadata, digger)
         if digger and digger:is_player() then
@@ -6689,6 +6775,46 @@ c.register_node("nh_nodes:writedpage", {
         end
     end,
 })
+
+c.register_node("nh_nodes:writedpage_floor", {
+    -- mesmas propriedades do nh_nodes:page...
+    description = S"Paper",
+    drawtype = "mesh",
+    mesh = "page.obj",
+    tiles = {"writedpage.png"},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    sunlight_propagates = true,
+    walkable = false,
+    use_texture_alpha = "clip",
+    selection_box = {type = "fixed", fixed = {-0.31, 0.5, -0.44, 0.31, 0.46, 0.44}},
+    groups = {oddly_breakable_by_hand = 3, flammable = 3, not_in_creative_inventory = 1},
+    drop = "",
+    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        if not clicker or not clicker:is_player() then return end
+        local player_name = clicker:get_player_name()
+        local meta = c.get_meta(pos)
+        local text = meta:get_string("text")
+        if text == "" then text = S"Blank Paper" end
+        c.show_formspec(player_name, "nh_nodes:page_reader",
+            "size[10,13.5]" ..
+            "label[0.3,0;" .. S"Written Paper" .. "]" ..
+            "textarea[0.3,0.5;10,14;page_text;;" .. c.formspec_escape(text) .. "]" ..
+            "button_exit[4,12.5;2,1;close;" .. S"Close" .. "]")
+    end,
+    after_dig_node = function(pos, oldnode, oldmetadata, digger)
+        if digger and digger:is_player() then
+            local inv = digger:get_inventory()
+            local itemstack = ItemStack("nh_items:writedpage")
+            local meta = itemstack:get_meta()
+            meta:set_string("text", oldmetadata.fields.text or "")
+            if inv:room_for_item("main", itemstack) then inv:add_item("main", itemstack)
+            else c.add_item(pos, itemstack)
+            end
+        end
+    end,
+})
+ 
 c.override_item("nh_items:writedpage", {
     on_place = function(itemstack, placer, pointed_thing)
         if pointed_thing.type ~= "node" then return itemstack end
@@ -6699,8 +6825,19 @@ c.override_item("nh_items:writedpage", {
         if node.name ~= "air" then return itemstack end
         local dir = vector.subtract(above, under)
         local wallmounted = c.dir_to_wallmounted(dir)
-        c.set_node(above, { name = "nh_nodes:writedpage", param2 = wallmounted })
-        c.sound_play("default_place_node", { pos = above, gain = 1.0 })
+        if wallmounted == 0 then
+            -- Chão: face top para cima (facedir face 5 = índice 20-23)
+            local yaw = placer:get_look_horizontal()
+            local rot = math.floor((yaw + math.pi / 4) / (math.pi / 2)) % 4
+            c.set_node(above, {name = "nh_nodes:writedpage_floor", param2 = 20 + rot})
+        elseif wallmounted == 1 then
+            -- Teto: face bottom para baixo (facedir face 4 = índice 16-19)
+            local yaw = placer:get_look_horizontal()
+            local rot = math.floor((yaw + math.pi / 4) / (math.pi / 2)) % 4
+            c.set_node(above, { name = "nh_nodes:writedpage_floor", param2 = 16 + rot })
+        else c.set_node(above, {name = "nh_nodes:writedpage", param2 = wallmounted})
+        end
+        c.sound_play("default_place_node", {pos = above, gain = 1})
         local item_meta = itemstack:get_meta()
         local node_meta = c.get_meta(above)
         node_meta:set_string("text", item_meta:get_string("text"))
@@ -6708,53 +6845,82 @@ c.override_item("nh_items:writedpage", {
         return itemstack
     end,
 })
-
+ 
 if not nodes then nodes = {} end
-
+ 
 function nodes.place_written_page(pos, text, facedir)
     c.set_node(pos, {name = "nh_nodes:writedpage", param2 = facedir})
     local meta = c.get_meta(pos)
     meta:set_string("text", text)
 end
-
--- Handler para salvar o texto
+ 
+-- Handler para o formspec do node nh_nodes:page
 c.register_on_player_receive_fields(function(player, formname, fields)
-    local prefix = "nh_items:page_writer:"
-    if formname:sub(1, #prefix) == "nh_items:page_writer:" then
-        if fields.save and fields.page_text then
-            local pos_str = formname:sub(#prefix + 1)
-            local pos = c.string_to_pos(pos_str)
-            if pos then
-                local node = c.get_node(pos)
-                if node.name == "nh_nodes:page" then
-                    -- Substituir por página escrita mantendo a rotação
-                    c.set_node(pos, {name = "nh_nodes:writedpage", param2 = node.param2})
-                    local meta = c.get_meta(pos)
-                    meta:set_string("text", fields.page_text)
-                    meta:set_string("infotext", S"Paper" .. " [" .. S"Draft" .. "]")
-                    -- Consumir tinta (adapte conforme sua função)
-                    if consume_ink then writing_utils.consume_ink(player) end
-                    c.chat_send_player(player:get_player_name(), S "Text saved on the page!")
-                end
+    local prefix = "nh_nodes:page_writer:"
+    if formname:sub(1, #prefix) ~= prefix then return end
+    local player_name = player:get_player_name()
+    local pos_str = formname:sub(#prefix + 1)
+    local pos = c.string_to_pos(pos_str)
+    -- Sempre sincroniza o texto digitado com a sessão compartilhada
+    if fields.page_text ~= nil then
+        local session = items.editing_pages[player_name] or {}
+        items.editing_pages[player_name] = {text = fields.page_text, source = session.source}
+    end
+    if fields.quit or fields.close then return end
+    -- SAVE: persiste o rascunho tanto na sessão quanto na meta do node
+    if fields.save then
+        local text = (items.editing_pages[player_name] and items.editing_pages[player_name].text) or ""
+        if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
+        if pos then
+            local node = c.get_node(pos)
+            if node.name == "nh_nodes:page" or node.name == "nh_nodes:page_floor" then
+                local meta = c.get_meta(pos)
+                meta:set_string("text", text)
+                meta:set_string("infotext", S"Paper" .. " [" .. S"Draft" .. "]")
             end
         end
-	if fields.finish then
-	    local text = fields.page_text or ""
-	    if text == "" then c.chat_send_player(player_name, S("I didn't write anything!")) return end
-	    local node = c.get_node(pos)
-	    c.set_node(pos,{name = "nh_nodes:writedpage", param2 = node.param2})
-	    local meta = c.get_meta(pos)
-	    meta:set_string("text", text)
-	    writing_utils.consume_ink(player)
-	    c.chat_send_player(player_name, S"Paper written successfully!")
-	end 
+        local subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]")
+        c.show_formspec(player_name, formname,
+            "size[10,14.5]" ..
+            "label[0.3,0;" .. S"Blank Paper" .. "]" ..
+            "label[0.3,0.3;" .. c.formspec_escape(subtitle_label) .. "]" ..
+            "button_exit[8,0.1;2,0.8;close;" .. S"Close" .. "]" ..
+            "textarea[0.3,1;10,14;page_text;;" .. c.formspec_escape(text) .. "]" ..
+            "button[3,13;2,1;save;" .. S"Save" .. "]" ..
+            "button_exit[5,13;2,1;finish;" .. S"Finish" .. "]" ..
+            "label[3.3,13.9;" .. S"Save to avoid losing the draft" .. "]")
+        c.chat_send_player(player_name, S"Draft saved!")
+        return
+    end
+    -- FINISH: converte o node nh_nodes:page em nh_nodes:writedpage definitivamente
+    if fields.finish then
+        local text = (items.editing_pages[player_name] and items.editing_pages[player_name].text) or ""
+        if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
+        local has_feather, has_ink = writing_utils.player_has_writing_tools(player)
+        if not has_feather or not has_ink then c.chat_send_player(player_name, S"I no longer have the necessary items!") return end
+        if not pos then return end
+        local node = c.get_node(pos)
+        local target_node = nil
+        if node.name == "nh_nodes:page" then target_node = "nh_nodes:writedpage"
+        elseif node.name == "nh_nodes:page_floor" then target_node = "nh_nodes:writedpage_floor"
+        end
+        if target_node then
+            c.set_node(pos, {name = target_node, param2 = node.param2})
+            local meta = c.get_meta(pos)
+            meta:set_string("text", text)
+            meta:set_string("infotext", "")
+            writing_utils.consume_ink(player)
+            items.editing_pages[player_name] = nil
+            c.chat_send_player(player_name, S"Paper written successfully!")
+        end
+        return
     end
 end)
+ 
 
 -- Helpers locais para livros
 local MAX_PAGES = 8
 local editing_books = {}
-
 -- Sistema de entidades animadas para livros
 -- Mapa: node_name → textura da entidade
 local BOOK_ENTITY_TEXTURES = {
@@ -6765,7 +6931,19 @@ local BOOK_ENTITY_TEXTURES = {
 local open_book_entities = {}
 -- Converte facedir → yaw (igual ao do Archion)
 local function facedir_to_yaw(param2) local dir = c.facedir_to_dir(param2) return math.atan2(-dir.x, dir.z) end
-
+c.register_node("nh_nodes:book_invisible", {
+    description    = "Invisible Book Placeholder",
+    drawtype       = "airlike",
+    paramtype      = "light",
+    paramtype2     = "facedir",
+    sunlight_propagates = true,
+    walkable       = false,
+    pointable      = false,
+    diggable       = false,
+    buildable_to   = false,
+    groups         = {not_in_creative_inventory = 1},
+    drop           = "",
+})
 -- Entidade genérica de livro animado
 c.register_entity("nh_nodes:book_entity", {
     initial_properties = {
@@ -6786,10 +6964,10 @@ c.register_entity("nh_nodes:book_entity", {
         self._close_timer = (self._close_timer or 0) + dtime
         if self._close_timer >= 0.6 then
             if self._node_pos and self._node_name then
-                -- Só restaura se o node ainda for air (evita sobrescrever algo colocado ali)
                 local current = c.get_node(self._node_pos)
-                if current.name == "air" then
-                    c.set_node(self._node_pos, {name = self._node_name, param2 = self._node_param2 or 0})
+                -- Só restaura se ainda for o placeholder invisível
+                if current.name == "nh_nodes:book_invisible" then
+                    c.swap_node(self._node_pos, {name = self._node_name, param2 = self._node_param2 or 0})
                 end
             end
             self.object:remove()
@@ -6797,81 +6975,77 @@ c.register_entity("nh_nodes:book_entity", {
     end,
 })
 
---- Spawna a entidade animada substituindo o node por air.
+--- Spawna a entidade animada sem substituir o node por air.
 local function spawn_book_entity(pos, node_name, player_name)
-    local node_param2 = c.get_node(pos).param2
-    local texture     = BOOK_ENTITY_TEXTURES[node_name] or "blankbook.png"
-    c.set_node(pos, {name = "air"})
+    local node      = c.get_node(pos)
+    local node_param2 = node.param2
+    local texture   = BOOK_ENTITY_TEXTURES[node_name] or "blankbook.png"
+    -- Troca para invisível SEM apagar a meta
+    c.swap_node(pos, {name = "nh_nodes:book_invisible", param2 = node_param2})
     local obj = c.add_entity(pos, "nh_nodes:book_entity")
-    if not obj then c.set_node(pos, {name = node_name, param2 = node_param2}) return nil end
-    -- Aplica a textura correta e a rotação do node
+    if not obj then c.swap_node(pos, {name = node_name, param2 = node_param2}) return nil end
     obj:set_properties({textures = {texture}})
     obj:set_yaw(facedir_to_yaw(node_param2 % 4))
-    local ent             = obj:get_luaentity()
-    ent._node_pos         = vector.copy(pos)
-    ent._node_param2      = node_param2
-    ent._node_name        = node_name
-    ent._player_name      = player_name
+    local ent         = obj:get_luaentity()
+    ent._node_pos     = vector.copy(pos)
+    ent._node_param2  = node_param2
+    ent._node_name    = node_name
+    ent._player_name  = player_name
     open_book_entities[player_name] = {
-        entity     = obj,
-        node_pos   = vector.copy(pos),
+        entity      = obj,
+        node_pos    = vector.copy(pos),
         node_param2 = node_param2,
-        node_name  = node_name}
+        node_name   = node_name,
+    }
     return obj
 end
+
 
 --- Fecha a entidade animada (animação de fechamento + restaura node).
 local function close_book_entity(player_name)
     local data = open_book_entities[player_name]
     if not data then return end
     local obj = data.entity
-    if not obj or not obj:get_pos() then
-        c.set_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
-        open_book_entities[player_name] = nil
-        return
+    if obj and obj:get_pos() then
+        local ent = obj:get_luaentity()
+        if ent then
+            obj:set_animation({x = 0.5, y = 1}, 30, 0, false)
+            ent._closing     = true
+            ent._close_timer = 0
+        else obj:remove()
+        end
     end
-    local ent = obj:get_luaentity()
-    if not ent then
-        obj:remove()
-        c.set_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
-        open_book_entities[player_name] = nil
-        return
-    end
-    -- Animação de fechamento (igual ao Archion)
-    obj:set_animation({x = 0.5, y = 1}, 30, 0, false)
-    ent._closing     = true
-    ent._close_timer = 0
-    -- on_step cuidará de remover a entidade e restaurar o node
     open_book_entities[player_name] = nil
 end
 
 -- Limpeza ao deslogar
 c.register_on_leaveplayer(function(player)
     local name = player:get_player_name()
-    -- Caso 1: entidade ainda registrada em open_book_entities (animação de abertura ou form aberto)
     local data = open_book_entities[name]
     if data then
         if data.entity and data.entity:get_pos() then data.entity:remove() end
-        c.set_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
+        -- Restaura se ainda for o placeholder
+        local current = c.get_node(data.node_pos)
+        if current.name == "nh_nodes:book_invisible" then
+            c.swap_node(data.node_pos, {name = data.node_name, param2 = data.node_param2})
+        end
         open_book_entities[name] = nil
     end
-    -- Caso 2: entidade em animação de FECHAMENTO (_closing = true).
-    -- close_book_entity() já limpou open_book_entities, mas o on_step ainda não
-    -- restaurou o node. Precisamos varrer entidades book_entity próximas ao player
-    -- e restaurar qualquer uma que pertença a este jogador.
     local pos = player:get_pos()
     if pos then
         for _, obj in ipairs(c.get_objects_inside_radius(pos, 10)) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:book_entity"
-               and ent._player_name == name
-               and ent._node_pos and ent._node_name then
-                c.set_node(ent._node_pos, {name = ent._node_name, param2 = ent._node_param2 or 0})
+            if ent and ent.name == "nh_nodes:book_entity" and ent._player_name == name then
+                if ent._node_pos and ent._node_name then
+                    local current = c.get_node(ent._node_pos)
+                    if current.name == "nh_nodes:book_invisible" then
+                        c.swap_node(ent._node_pos, {name = ent._node_name, param2 = ent._node_param2 or 0})
+                    end
+                end
                 obj:remove()
             end
         end
     end
-    -- Limpa sessão de edição pendente
     editing_books[name] = nil
 end)
 
@@ -6918,7 +7092,7 @@ end
 -- Serialização de páginas
 local function pages_to_string(pages)
     local parts = {}
-    for i = 1, MAX_PAGES do parts[i] = c.formspec_escape(pages[i] or "") end
+    for i = 1, MAX_PAGES do parts[i] = pages[i] or "" end
     return table.concat(parts, "\31")
 end
 
@@ -6996,7 +7170,7 @@ c.register_node("nh_nodes:bookcover", {
     end,
 })
 
--- ─── LIVRO EM BRANCO (book) ─────────────────────────────────────────────────
+-- LIVRO EM BRANCO (book)
 c.register_node("nh_nodes:book", {
     description           = S("Blank Book"),
     drawtype              = "mesh",
@@ -7119,7 +7293,7 @@ c.register_node("nh_nodes:writedbook", {
             dmeta:set_string("author",   oldmetadata.fields.author or "")
             dmeta:set_int   ("current_page", 1)
             local desc = S("Written Book")
-            if subtitle ~= "" then desc = desc .. "\n" .. c.colorize("#9f0", "[" .. S"Title" .. "] " .. subtitle) end
+            if subtitle ~= "" then desc = desc .. ":\n" .. c.colorize("#9f0", subtitle) end
             dmeta:set_string("description", desc)
             if inv:room_for_item("main", drop) then inv:add_item("main", drop)
             else c.add_item(pos, drop) end
@@ -7220,31 +7394,37 @@ c.register_on_player_receive_fields(function(player, formname, fields)
             editing_books[player_name] = nil
             return
         elseif fields.save then
+            -- Persiste o texto da página atual ANTES de tudo
+            if fields.page_text ~= nil then
+                session.pages[session.current] = fields.page_text
+            end
             if fields.title_input ~= nil then
                 session.title3 = fields.title_input
                 meta:set_string("subtitle", fields.title_input)
             end
+            -- Salva páginas na meta do node (que pode estar como air, mas a meta persiste)
+            meta:set_string("pages", pages_to_string(session.pages))
+            meta:set_int("current_page", session.current)
             local title2 = session.title2 or ""
             local title3 = session.title3 or ""
+            c.chat_send_player(player_name, S"Draft saved!")
             c.show_formspec(player_name, formname, book_formspec(session.title, title2, title3, session.pages, session.current, true))
         elseif fields.finish then
-            if fields.page_text    then session.pages[session.current] = fields.page_text end
+            if fields.page_text then session.pages[session.current] = fields.page_text end
             if fields.title_input ~= nil then session.title3 = fields.title_input end
-            meta:set_string("pages", pages_to_string(session.pages))
             local input_title = session.title3 or ""
             if input_title == "" or input_title == S"Title" then
+                -- Salva sessão na meta antes de trocar de formspec
+                meta:set_string("pages", pages_to_string(session.pages))
                 c.show_formspec(player_name, "nh_nodes:book_confirm:" .. c.pos_to_string(pos), book_confirm_formspec())
             else
-                local pages_data  = meta:get_string("pages")
-                -- Obtém param2 da entidade (o node está como air)
-                local data        = open_book_entities[player_name]
-                local param2      = data and data.node_param2 or 0
+                local data   = open_book_entities[player_name]
+                local param2 = data and data.node_param2 or 0
                 writing_utils.consume_ink(player)
-                -- Fecha entidade antes de colocar o novo node
                 close_book_entity(player_name)
                 c.set_node(pos, {name = "nh_nodes:writedbook", param2 = param2})
                 local new_meta = c.get_meta(pos)
-                new_meta:set_string("pages",    pages_data)
+                new_meta:set_string("pages",    pages_to_string(session.pages))  -- DA SESSÃO
                 new_meta:set_string("subtitle", input_title)
                 new_meta:set_string("author",   player_name)
                 new_meta:set_int   ("current_page", 1)
@@ -7287,20 +7467,21 @@ c.register_on_player_receive_fields(function(player, formname, fields)
         local meta = c.get_meta(pos)
         if fields.confirm_back then c.show_formspec(player_name, "nh_nodes:book_writer:" .. c.pos_to_string(pos),
             book_formspec(session.title, session.title2 or "", session.title3 or "", session.pages, session.current, true))
-        elseif fields.confirm_finish or fields.quit then
-            local final_title = (session.title3 == nil or session.title3 == "" or session.title3 == S("Title")) and "?" or session.title3
-            local pages_data  = meta:get_string("pages")
-            local data        = open_book_entities[player_name]
-            local param2      = data and data.node_param2 or 0
-            writing_utils.consume_ink(player)
-            close_book_entity(player_name)
-            c.set_node(pos, {name = "nh_nodes:writedbook", param2 = param2})
-            local new_meta = c.get_meta(pos)
-            new_meta:set_string("pages",    pages_data)
-            new_meta:set_string("subtitle", final_title)
-            new_meta:set_string("author",   player_name)
-            new_meta:set_int   ("current_page", 1)
-            editing_books[player_name] = nil
+elseif fields.confirm_finish or fields.quit then
+    local final_title = (session.title3 == nil or session.title3 == "" or session.title3 == S("Title")) and "?" or session.title3
+    -- USA A SESSÃO, não meta:get_string("pages") que pode estar corrompida
+    local pages_data  = pages_to_string(session.pages)
+    local data        = open_book_entities[player_name]
+    local param2      = data and data.node_param2 or 0
+    writing_utils.consume_ink(player)
+    close_book_entity(player_name)
+    c.set_node(pos, {name = "nh_nodes:writedbook", param2 = param2})
+    local new_meta = c.get_meta(pos)
+    new_meta:set_string("pages",    pages_data)
+    new_meta:set_string("subtitle", final_title)
+    new_meta:set_string("author",   player_name)
+    new_meta:set_int   ("current_page", 1)
+    editing_books[player_name] = nil
         end
         return
     end
@@ -7322,7 +7503,6 @@ local craftguide_pages = {
     "\n" .. S"PRODUCTION GUIDE"
     .. "\n\n" .. S"CRAFTING:"
     .. "\n" .. S"The recipes ahead do not depend on position in the grid. Only quantities and tools matter.",
- 
     -- Page 2
     "\n" .. S"1. GROUND CRAFTS"
     .. "\n\n" .. S"Hold E (or Aux1) and click the ground with the place button."
@@ -7334,7 +7514,6 @@ local craftguide_pages = {
     .. "\n" .. S"(1) Pebble + (1) Pickaxe Head    → Stone Hoe Head"
     .. "\n" .. S"(1) Pebble + (1) Hoe Head        → Stone Adze Head"
     .. "\n" .. S"(8) Pebble → Cobblestone",
- 
     -- Page 3
     "\n" .. S"3. GROUND CRAFTS"
     .. "\n\n" .. S"Basic Tools:"
@@ -7348,7 +7527,6 @@ local craftguide_pages = {
     .. "\n" .. S"(1) Palm Leaf + (1) Stick + (1) Oak Resin + (1) Grass Leaves → Torch"
     .. "\n" .. S"(1) Ink Sack + (1) Bottle → Bottle with Ink"
     .. "\n" .. S"(1) Writed Paper + (1) Bottle → Bottle with Message",
- 
     -- Page 4
     "\n" .. S"4. GROUND CRAFTS"
     .. "\n\n" .. S"(1) Oak Log → (16) Oak Firewood"
@@ -7356,7 +7534,6 @@ local craftguide_pages = {
     .. "\n" .. S"(1) Palm Log → (4) Palm Firewood"
     .. "\n" .. S"(1) Oak Log + (1) Stone Adze (TOOL) → Oak Wood"
     .. "\n" .. S"(1) Pine Log + (1) Stone Adze (TOOL) → Pine Wood",
- 
     -- Page 5
     "\n" .. S"5. GROUND CRAFTS"
     .. "\n\n" .. S"Worked Wood Items:"
@@ -7367,7 +7544,6 @@ local craftguide_pages = {
     .. "\n" .. S"(1) Oak Dowel + (1) Oak Board → Rowing"
     .. "\n" .. S"(8) Obsidian Blade + (1) Rowing (TOOL) → Obsidian Sword"
     .. "\n" .. S"(2) Dowel + (2) Board → Production Bench",
- 
     -- Page 6
     "\n" .. S"PRODUCTION BENCH"
     .. "\n" .. S"(also includes ground craft recipes)"
@@ -7392,7 +7568,6 @@ local craftguide_pages = {
     .. "\n" .. S"(5) Bull Fur → Leather Leggings"
     .. "\n" .. S"(7) Bull Fur → Leather Chestplate"
     .. "\n" .. S"(8) Cobblestone → Furnace",
- 
     -- Page 7
     "\n" .. S"CAMPFIRE"
     .. "\n" .. S"(Only works when lit)"
@@ -7405,7 +7580,6 @@ local craftguide_pages = {
     .. "\n" .. S"(1) Raw Chicken → Roast Chicken"
     .. "\n" .. S"(1) Raw Tuna    → Roast Tuna"
     .. "\n" .. S"(1) Raw Beef    → Roast Beef",
- 
     -- Page 8
     "\n" .. S"FURNACE"
     .. "\n\n" .. S"Direct Production:"
@@ -7431,7 +7605,6 @@ local craftguide_pages = {
     .. "\n" .. S"(8) Sand   → (8) Glass"
     .. "\n" .. S"(3) Glass + (1) Dowel → (6) Bottle"
     .. "\n" .. S"(4) Glass + (1) Chromium Ingot → (4) Mirror",
- 
 }
 
 c.register_node("nh_nodes:craftguide", {
@@ -7506,7 +7679,7 @@ local item_desc_index = {} -- [lang_code][item_name] = {desc_traduzida, desc_ori
 local function build_item_cache()
     if next(item_cache) then return end
     for name, def in pairs(c.registered_items) do
-        if name ~= "" then table.insert(item_cache, name) end
+        if name ~= "" and not ((def.groups or {}).not_in_creative_inventory == 1) then table.insert(item_cache, name) end
     end
     table.sort(item_cache)
 end
@@ -7575,11 +7748,12 @@ c.register_entity("nh_nodes:grimoire_entity", {
     on_step = function(self, dtime)
         if not self._closing then return end
         self._close_timer = (self._close_timer or 0) + dtime
-        -- Espera a animação de fechamento terminar (~0.5 s) e então limpa tudo
         if self._close_timer >= 0.6 then
-            local pos = self.object:get_pos()
-            -- Restaura o node original
-            if self._node_pos then c.set_node(self._node_pos, {name = "nh_nodes:archion", param2 = self._node_param2 or 0})
+            if self._node_pos then
+                local current = c.get_node(self._node_pos)
+                if current.name == "nh_nodes:book_invisible" then
+                    c.swap_node(self._node_pos, {name = "nh_nodes:archion", param2 = self._node_param2 or 0})
+                end
             end
             self.object:remove()
         end
@@ -7589,16 +7763,14 @@ c.register_entity("nh_nodes:grimoire_entity", {
 -- Guarda: player_name → {entity, node_pos, node_param2}
 local open_grimoires = {}
 local function spawn_grimoire_entity(pos, param2, player_name)
-    -- Esconde o node substituindo por air
     local node_param2 = c.get_node(pos).param2
-    c.set_node(pos, {name = "air"})
-    -- Spawna a entidade no mesmo lugar
+    -- swap em vez de set_node — preserva a meta
+    c.swap_node(pos, {name = "nh_nodes:book_invisible", param2 = node_param2})
     local obj = c.add_entity(pos, "nh_nodes:grimoire_entity")
-    if not obj then c.set_node(pos, {name = "nh_nodes:archion", param2 = node_param2}) return nil end -- Fallback: restaura o node se falhar
-    -- Aplica a mesma rotação do node (facedir → yaw)
+    if not obj then c.swap_node(pos, {name = "nh_nodes:archion", param2 = node_param2}) return nil end
     local function facedir_to_yaw(param2)
-        local dir = c.facedir_to_dir(param2) -- Pega o vetor de direção frontal do facedir
-        return math.atan2(-dir.x, dir.z) -- Converte o vetor XZ em yaw (atan2 com eixos do Luanti)
+        local dir = c.facedir_to_dir(param2)
+        return math.atan2(-dir.x, dir.z)
     end
     obj:set_yaw(facedir_to_yaw(param2 % 4))
     local ent                   = obj:get_luaentity()
@@ -7613,23 +7785,26 @@ local function close_grimoire_entity(player_name)
     if not data then return end
     local obj = data.entity
     if not obj or not obj:get_pos() then
-        -- Entidade já sumiu; só restaura o node
-        c.set_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        local current = c.get_node(data.node_pos)
+        if current.name == "nh_nodes:book_invisible" then
+            c.swap_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        end
         open_grimoires[player_name] = nil
         return
     end
     local ent = obj:get_luaentity()
     if not ent then
         obj:remove()
-        c.set_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        local current = c.get_node(data.node_pos)
+        if current.name == "nh_nodes:book_invisible" then
+            c.swap_node(data.node_pos, {name = "nh_nodes:archion", param2 = data.node_param2})
+        end
         open_grimoires[player_name] = nil
         return
     end
-    -- Animação de fechamento: frames 0.5 → 1 s  (ex.: 30 fps → frame 15 a 30)
     obj:set_animation({x = 0.5, y = 1}, 30, 0, false)
-    ent._closing                = true
-    ent._close_timer            = 0
-    -- on_step cuidará de remover a entidade e restaurar o node
+    ent._closing     = true
+    ent._close_timer = 0
     open_grimoires[player_name] = nil
 end
 -- Formspec
@@ -7792,8 +7967,8 @@ c.register_on_leaveplayer(function(player)
                and ent._player_name == name
                and ent._node_pos then
                 local current = c.get_node(ent._node_pos)
-                if current.name == "air" then
-                    c.set_node(ent._node_pos, {name = "nh_nodes:archion", param2 = ent._node_param2 or 0})
+                if current.name == "nh_nodes:book_invisible" then
+                    c.swap_node(ent._node_pos, {name = "nh_nodes:archion", param2 = ent._node_param2 or 0})
                 end
                 obj:remove()
             end
@@ -7807,7 +7982,7 @@ c.register_on_newplayer(function(player)
     local page = ItemStack("nh_items:writedpage")
     local meta = page:get_meta()
     meta:set_string("text",
-        S "--- THE NEW HORIZON ---" .. "\n\n" ..
+        S "THE NEW HORIZON" .. "\n\n" ..
         S "If you're reading this, it's because you've lost your memory or perhaps you've never experienced this before..." .. "\n\n" ..
         S "Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore." .. "\n" ..
         S "Anywhere you can also:" .. "\n" ..
@@ -7970,7 +8145,7 @@ c.register_node("nh_nodes:oak_chest_open", {
     paramtype2 = "facedir",
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
     collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
-    groups = { not_in_creative_inventory = 1 },
+    groups = {not_in_creative_inventory = 1},
     -- Quando clicar no baú aberto, mostrar inventário
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         local meta = c.get_meta(pos)
@@ -8111,9 +8286,9 @@ c.register_node("nh_nodes:oak_chest", {
         -- Criar inventário com 32 slots (8x4)
         inv:set_size("main", 8 * 2) -- O bau é quadrado escolhi 4x4, mas na forma do inventário 8x2
         -- Adiciona páginas com textos pré-definidos
-        local page1 = items.create_page_with_text(S "Day 1: I found this abandoned place. It seems someone lived here a long time ago.")
-        local page2 = items.create_page_with_text(S "Day 15: Supplies are running out. I need to find a way out before it's too late.")
-        local page3 = items.create_page_with_text(S "Day 30: I heard strange sounds during the night. I'm not alone here...")
+        local page1 = items.create_page_with_text(S"Day 1: I found this abandoned place. It seems someone lived here a long time ago.")
+        local page2 = items.create_page_with_text(S"Day 15: Supplies are running out. I need to find a way out before it's too late.")
+        local page3 = items.create_page_with_text(S"Day 30: I heard strange sounds during the night. I'm not alone here...")
         inv:set_stack("main", 1, page1)
         inv:set_stack("main", 2, page2)
         inv:set_stack("main", 3, page3)
@@ -8828,7 +9003,7 @@ c.register_node("nh_nodes:obsidianpebble", {
     drop = "nh_nodes:obsidianpebble_item",
     -- falling_node faz ele cair,
     -- attached_node previne ficar flutuando encostado
-    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1,},
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1, not_in_creative_inventory = 1},
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
 
@@ -9474,7 +9649,7 @@ c.register_node("nh_nodes:pebble", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1}, -- falling_node faz ele cair, attached_node previne ficar flutuando encostado
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1, not_in_creative_inventory = 1}, -- falling_node faz ele cair, attached_node previne ficar flutuando encostado
     collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
     drop = "nh_nodes:pebble_item",
@@ -10378,7 +10553,7 @@ c.register_node("nh_nodes:white_pebble", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-    groups = {snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1},
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1, not_in_creative_inventory = 1},
     node_box = {type = "fixed", fixed = {{ -0.15, -0.5, -0.2, 0.15, -0.4, 0.15 },},},
     selection_box = {type = "fixed", fixed = { -0.15, -0.5, -0.2, 0.15, -0.4, 0.15 },},
     drop = "nh_nodes:white_pebble_item",

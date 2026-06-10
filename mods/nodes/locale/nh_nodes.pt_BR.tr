@@ -148,6 +148,7 @@ I think I need =Acho que preciso de
 a feather in the hotbar and an ink bottle in the inventory to write.=uma pena na hotbar e um frasco de tinta no inventário para escrever.
 a feather in the hotbar to write.=uma pena na hotbar para escrever.
 an ink bottle in the inventory to write.=um frasco de tinta no inventário para escrever.
+
 Write on the Paper:=Escreva no Papel:
 Save=Salvar
 Discard=Descartar
@@ -165,6 +166,7 @@ The Survivor's Handbook=Manual do Sobrevivente
 Recipes & Crafting=Receitas e Produção
 Page=Página
 Draft=Rascunho
+Draft saved!=Rascunho salvo!
 Title=Título
 Book=Livro
 Save to avoid losing the draft=Salve para manter o rascunho
@@ -380,7 +382,7 @@ Grimoire of Materialization=Grimório de Materialização
 Complete Materialization Grimoire=Grimório Completo de Materialização
 Search=Buscar
 
---- THE NEW HORIZON ---=--- O NOVO HORIZONTE ---
+THE NEW HORIZON=O NOVO HORIZONTE
 If you're reading this, it's because you've lost your memory or perhaps you've never experienced this before...=Se você está lendo isso é porque perdeu a memória ou talvez nunca tenha passado por isso antes...
 Walk (directional keys / WASD), jump (hold ↑ / space) and sneak (hold ↓ / shift) to explore.=Ande (direcionais / WASD), pule (segure ↑ / espaço) e agache (segure ↓ / shift) para explorar.
 Anywhere you can also:=Em qualquer lugar você também consegue:
