@@ -200,7 +200,7 @@ function add_item_to_visible_slots(player, itemstack)
     -- DEBUG: mostra o tamanho real do inventário
     c.chat_send_player(name, "Tamanho main: " .. inv:get_size("main"))
     -- Primeiro tenta empilhar em slots existentes
-    for i = 1, 24 do
+    for i = 1, 8 do
         local slot = inv:get_stack("main", i)
         c.chat_send_player(name, "Slot " .. i .. ": '" .. slot:get_name() .. "' x" .. slot:get_count())
         if slot:get_name() == item_name and slot:get_count() < slot:get_stack_max() then
@@ -210,7 +210,7 @@ function add_item_to_visible_slots(player, itemstack)
         end
     end
     -- Depois tenta slots vazios
-    for i = 1, 24 do
+    for i = 1, 8 do
         local slot = inv:get_stack("main", i)
         if slot:is_empty() then inv:set_stack("main", i, itemstack) return true end
     end
@@ -219,9 +219,8 @@ function add_item_to_visible_slots(player, itemstack)
     return false
 end
 
------------------------------
+
 -- SISTEMA DE AUTO-PULO
------------------------------
 local auto_jump_cooldown = {}  -- Evita pulos repetidos muito rápidos
 -- Atualizar informações
 c.register_globalstep(function(dtime)

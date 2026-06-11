@@ -30,14 +30,27 @@ c.register_craftitem("nh_items:page", {
     on_use = function(itemstack, user, pointed_thing)
         if not user or not user:is_player() then return end
         local player_name = user:get_player_name()
-        local session = items.editing_pages[player_name]
-        -- Fallback para o meta do próprio item se a sessão não vier de um item
-        local item_draft = itemstack:get_meta():get_string("text") or ""
-        local draft = (session and session.source == "item" and session.text ~= "" and session.text) or item_draft
-        items.editing_pages[player_name] = {text = draft, source = "item"}
+        -- Descobre o slot exato que o jogador usou
+        local inv = user:get_inventory()
+        local used_slot = nil
+        for i = 1, inv:get_size("main") do
+            local stack = inv:get_stack("main", i)
+            if stack:get_name() == "nh_items:page" then
+                -- Compara o meta para achar o slot correto (mesmo texto de rascunho)
+                local this_draft = stack:get_meta():get_string("text") or ""
+                local item_draft = itemstack:get_meta():get_string("text") or ""
+                if this_draft == item_draft then
+                    used_slot = i
+                    break
+                end
+            end
+        end
+        -- O rascunho vem sempre do meta do item que foi clicado (cada slot é independente)
+        local draft = itemstack:get_meta():get_string("text") or ""
+        items.editing_pages[player_name] = {text = draft, source = "item", slot = used_slot}
         local has_feather, has_ink = writing_utils.player_has_writing_tools(user)
         if not has_feather or not has_ink then
-        local read_text = draft ~= "" and draft or S("Blank Paper")
+        local read_text = draft ~= "" and draft or ""
         local title = draft ~= "" and S"Paper" .. c.colorize("#4af", " [" .. S"Draft" .. "]") or S"Blank Paper"
         c.show_formspec(player_name, "nh_items:page_reader",
             "size[10,13.5]" ..
@@ -110,24 +123,25 @@ c.register_on_player_receive_fields(function(player, formname, fields)
     -- Persiste o texto na sessão sempre que ele chegar (inclusive no quit)
     if fields.page_text ~= nil then
         local session = items.editing_pages[player_name] or {}
-        items.editing_pages[player_name] = {text = fields.page_text, source = session.source}
+        items.editing_pages[player_name] = {text = fields.page_text, source = session.source, slot = session.slot}
     end
     -- Fechar sem ação: preserva rascunho na sessão para a próxima abertura
     if fields.quit or fields.close then return end
     -- SAVE: salva o rascunho e reabre o formspec com o texto preservado (sem consumir nada)
     if fields.save then
-        local text = (items.editing_pages[player_name] and items.editing_pages[player_name].text) or ""
-        local inv = player:get_inventory()
-        for i = 1, inv:get_size("main") do
-            local stack = inv:get_stack("main", i)
+        local session = items.editing_pages[player_name] or {}
+        local text = session.text or ""
+        local slot = session.slot
+        if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
+        if slot then
+            local inv = player:get_inventory()
+            local stack = inv:get_stack("main", slot)
             if stack:get_name() == "nh_items:page" then
                 items.update_page_draft(stack, text)
-                inv:set_stack("main", i, stack)
-                break
+                inv:set_stack("main", slot, stack)
             end
         end
         local subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]")
-        if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
         -- Reabre o formspec mantendo o texto
         c.show_formspec(player_name, "nh_items:page_writer",
             "size[10,14.5]" ..
@@ -141,30 +155,47 @@ c.register_on_player_receive_fields(function(player, formname, fields)
         c.chat_send_player(player_name, S"Draft saved!")
         return
     end
-    -- FINISH: consome a página em branco e a tinta, cria a writedpage
     if fields.finish then
-        local text = (items.editing_pages[player_name] and items.editing_pages[player_name].text) or ""
+        local session = items.editing_pages[player_name] or {}
+        local text = session.text or ""
+        local slot = session.slot
         if text == "" then c.chat_send_player(player_name, S"I didn't write anything!") return end
         -- Verificar novamente se tem os itens (para evitar exploits)
         local has_feather, has_ink = writing_utils.player_has_writing_tools(player)
         if not has_feather or not has_ink then c.chat_send_player(player_name, S"I no longer have the necessary items!") return end
         local inv = player:get_inventory()
-        -- Procurar e remover uma página em branco do inventário
-        for i = 1, inv:get_size("main") do
-            local stack = inv:get_stack("main", i)
+        -- Remover a página do slot rastreado
+        local removed = false
+        if slot then
+            local stack = inv:get_stack("main", slot)
             if stack:get_name() == "nh_items:page" then
                 stack:take_item(1)
-                inv:set_stack("main", i, stack)
-                writing_utils.consume_ink(player) -- Consumir tinta
-                -- Criar página escrita
-                local written_page = items.create_page_with_text(text)
-                inv:add_item("main", written_page)
-                items.editing_pages[player_name] = nil -- Limpa o rascunho
-                c.chat_send_player(player_name, S"Paper written successfully!")
-                return
+                inv:set_stack("main", slot, stack)
+                removed = true
             end
         end
-        c.chat_send_player(player_name, S"I don't have a blank sheet of paper...")
+        -- Fallback: procura qualquer página se o slot não for mais válido
+        if not removed then
+            for i = 1, inv:get_size("main") do
+                local stack = inv:get_stack("main", i)
+                if stack:get_name() == "nh_items:page" then
+                    stack:take_item(1)
+                    inv:set_stack("main", i, stack)
+                    removed = true
+                    break
+                end
+            end
+        end
+        if not removed then
+            c.chat_send_player(player_name, S"I don't have a blank sheet of paper...")
+            return
+        end
+        writing_utils.consume_ink(player) -- Consumir tinta
+        -- Criar página escrita
+        local written_page = items.create_page_with_text(text)
+        inv:add_item("main", written_page)
+        items.editing_pages[player_name] = nil -- Limpa o rascunho
+        c.chat_send_player(player_name, S"Paper written successfully!")
         return
     end
 end)

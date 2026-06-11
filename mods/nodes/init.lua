@@ -173,7 +173,7 @@ local function spawn_lava_burn_particles(pos)
         minsize            = 0.6,
         maxsize            = 1.4,
         texture            = "mobs_fire_particle.png",
-        animation          = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.4, },
+        animation          = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.4},
         glow               = 14,
         collisiondetection = false,
     })
@@ -194,11 +194,7 @@ c.register_globalstep(function(dtime)
                     local node_below = c.get_node(below)
                     if LAVA_NODES[node_below.name] then
                         -- Emite partículas antes de remover
-                        spawn_lava_burn_particles({
-                            x = below.x,
-                            y = below.y + 0.5, -- centro vertical do node
-                            z = below.z,
-                        })
+                        spawn_lava_burn_particles(xyz(below.x, below.y + 0.5, below.z))
                         obj:remove()
                     end
                 end
@@ -341,20 +337,25 @@ recipes_floor = {
     {ingredients = {["nh_nodes:pebble"] = 2},
         output = "nh_nodes:chippedstone"
     },
-    {ingredients = {["nh_nodes:pebble_item"] = 2},
-        output = "nh_nodes:chippedstone"
+    {ingredients = {["nh_nodes:pebble_item"] = 1},
+        output = "nh_nodes:chippedstone",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
-    {ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:chippedstone"] = 1},
-        output = "nh_nodes:stoneaxehead"
+    {ingredients = {["nh_nodes:chippedstone"] = 1},
+        output = "nh_nodes:stoneaxehead",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
-    {ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stoneaxehead"] = 1},
-        output = "nh_nodes:stonepickaxehead"
+    {ingredients = {["nh_nodes:stoneaxehead"] = 1},
+        output = "nh_nodes:stonepickaxehead",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
-    {ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonepickaxehead"] = 1},
-        output = "nh_nodes:stonehoehead"
+    {ingredients = {["nh_nodes:stonepickaxehead"] = 1},
+        output = "nh_nodes:stonehoehead",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
-    {ingredients = {["nh_nodes:pebble"] = 1, ["nh_nodes:stonehoehead"] = 1},
-        output = "nh_nodes:stoneadzehead"
+    {ingredients = {["nh_nodes:stonehoehead"] = 1},
+        output = "nh_nodes:stoneadzehead",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
     {ingredients = { ["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1 },
         output = "nh_nodes:rowing"
@@ -371,8 +372,9 @@ recipes_floor = {
     {ingredients = { ["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:stoneadze"
     },
-    {ingredients = { ["nh_nodes:pebble"] = 1, ["nh_nodes:obsidianpebble"] = 1 },
-        output = "nh_nodes:obsidianblade"
+    {ingredients = {["nh_nodes:obsidianpebble"] = 1 },
+        output = "nh_nodes:obsidianblade",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
     {ingredients = { ["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
         output = "nh_nodes:chippedstoneknife"
@@ -1393,12 +1395,12 @@ register_craft_station("nh_nodes:top_grass", {
     end,
     grid_size = 4,
     positions = {
-        {x = -0.2, y = 0.9, z = -0.2},
-        {x = 0.2, y = 0.9, z = -0.2},
-        {x = -0.2, y = 0.9, z = 0.2}, 
-        {x = 0.2, y = 0.9, z = 0.2}},
+        xyz(-0.2, 0.9, -0.2),
+        xyz(0.2, 0.9, -0.2),
+        xyz(-0.2, 0.9, 0.2), 
+        xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = {xyz(0, 1.4, 0)},
+    output_position = xyz(0, 1.4, 0),
     layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
@@ -1439,7 +1441,7 @@ register_craft_station("nh_nodes:top_grass2", {
         { x = -0.2, y = 0.9, z = 0.2 }, 
         { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
+    output_position = xyz(0, 1.4, 0),
     layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
     recipes = recipes_floor
 })
@@ -1593,7 +1595,7 @@ register_craft_station("nh_nodes:sand", {
     offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
     positions = { { x = -0.2, y = 0.9, z = -0.2 }, { x = 0.2, y = 0.9, z = -0.2 }, { x = -0.2, y = 0.9, z = 0.2 }, { x = 0.2, y = 0.9, z = 0.2 }, },
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
+    output_position = xyz(0, 1.4, 0),
     layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
@@ -1603,16 +1605,14 @@ register_craft_station("nh_nodes:wet_sand", {
     tiles = { "areia_molhada.png" },
     title = S "2x2 Craft on the Wet Sand", --       Campo obrigatório!
     groups = { crumbly = 2 },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     grid_size = 4,
     positions = {
-        {x = -0.2, y = 0.9, z = -0.2},
-        {x = 0.2, y = 0.9, z = -0.2},
-        {x = -0.2, y = 0.9, z = 0.2},
-        {x = 0.2, y = 0.9, z = 0.2}},
+        xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2),
+        xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = {x = 0, y = 1.4, z = 0},
+    output_position = xyz(0, 1.4, 0),
     layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
@@ -1620,26 +1620,24 @@ c.register_node("nh_nodes:saprolite", {
     description = S "Saprolite",
     tiles = { "saprolite.png" },
     groups = { cracky = 3 },
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 register_craft_station("nh_nodes:gneiss", {
     description = S "Gneiss",
     tiles = { "pedra.png" },
     groups = { cracky = 3 },
     drop = "nh_nodes:pebble_item 8",
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     title = S "2x2 Craft on the Gneiss", --       Campo obrigatório!
     grid_size = 4,
     positions = {
-        {x = -0.2, y = 0.9, z = -0.2 },
-        {x = 0.2, y = 0.9, z = -0.2 },
-        {x = -0.2, y = 0.9, z = 0.2 },
-        {x = 0.2, y = 0.9, z = 0.2 },},
+        xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2),
+        xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    output_position = xyz(0, 1.4, 0),
+    layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
 
@@ -1648,18 +1646,16 @@ register_craft_station("nh_nodes:cobblestone", {
     tiles = { "cobblestone.png" },
     groups = { cracky = 3 },
     drop = "nh_nodes:pebble_item 8",
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     title = "Produção 2x2 no Pedregulho", --       Campo obrigatório!
     grid_size = 4,
     positions = {
-        { x = -0.2, y = 0.9, z = -0.2 },
-        { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 },
-        { x = 0.2, y = 0.9, z = 0.2 }, },
+        xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2),
+        xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
-    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    output_position = xyz(0, 1.4, 0),
+    layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
 c.register_node("nh_nodes:charcoal", {
@@ -1668,20 +1664,19 @@ c.register_node("nh_nodes:charcoal", {
     groups = { choppy = 3, armor_head = 1 },
     stack_max = 1,
     drop = "nh_nodes:charcoalnugget 8",
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     paramtype = "light",
     paramtype2 = "wallmounted",
     selection_box = {type = "wallmounted",
-        wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, },
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
     node_box = {type = "wallmounted",
-        wall_top = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_bottom = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 },
-        wall_side = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }, },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
-    -- Som tocado ao bater
-    sounds = { dug = { name = "punchtimber", gain = 0.5 }, dig = { name = "punchtimber", gain = 0.5 }, },
+        wall_top = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_bottom = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5},
+        wall_side = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
+    sounds = {dug = {name = "punchtimber", gain = 0.5}, dig = {name = "punchtimber", gain = 0.5}},
 })
 c.register_node("nh_nodes:charcoal2", {
     description = S "Smaller Charcoal",
@@ -1692,7 +1687,7 @@ c.register_node("nh_nodes:charcoal2", {
     drop = "nh_nodes:charcoalnugget 2",
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, },
+    groups = { snappy = 3, oddly_breakable_by_hand = 1},
     paramtype = "light",
     paramtype2 = "wallmounted",
     selection_box = { type = "wallmounted",
@@ -1704,9 +1699,7 @@ c.register_node("nh_nodes:charcoal2", {
         wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
         wall_side = { -0.5, -0.25, -0.5, 0.5, 0.25, 0.5 }, },
     -- Som tocado ao bater no tronco medio (2)
-    sounds = {
-        dug = { name = "punchtimber2", gain = 0.5 },
-        dig = { name = "punchtimber2", gain = 0.5 }, }
+    sounds = {dug = {name = "punchtimber2", gain = 0.5}, dig = {name = "punchtimber2", gain = 0.5}}
 })
 
 c.register_node("nh_nodes:coal", {
@@ -1714,10 +1707,10 @@ c.register_node("nh_nodes:coal", {
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "coalore.png" },
-    groups = { cracky = 3 },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
-    drop = { items = { { items = { "nh_nodes:coalnugget 8" } }, }},
+    groups = {cracky = 3},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
+    drop = {items = {{items = {"nh_nodes:coalnugget 8"}}}},
 })
 
 c.register_node("nh_nodes:coalnugget", {
@@ -1728,8 +1721,8 @@ c.register_node("nh_nodes:coalnugget", {
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     paramtype = "light",
     walkable = false,
-    collision_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
-    selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
 })
 
 c.register_node("nh_nodes:charcoalnugget", {
@@ -1750,9 +1743,9 @@ c.register_node("nh_nodes:copper", {
     mesh = "copperore.obj",
     tiles = { "gneiss_copperore.png" },
     groups = {cracky = 3},
-    drop = {items = { { items = { "nh_nodes:coppernugget" } }, { items = { "nh_nodes:pebble 3" } }, }},
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    drop = {items = {{items = {"nh_nodes:coppernugget"}}, {items = {"nh_nodes:pebble 3"}}}},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:coppernugget", {
@@ -2412,8 +2405,8 @@ register_craft_station("nh_nodes:campfire", {
         { x = -0.4, y = 0.2, z = -0.25 }, { x = 0.4, y = 0.2, z = -0.25 },
         { x = -0.4, y = 0.2, z = 0.25 }, { x = 0.4, y = 0.2, z = 0.25 },},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
-    layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
+    output_position = xyz(0, 1.4, 0),
+    layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_campfire,
     -- Quando a fogueira é colocada, verifica se deve criar chama
     on_construct = function(pos)
@@ -2616,7 +2609,7 @@ register_craft_station("nh_nodes:pinecampfire", {
         { x = -0.4, y = 0.2, z = -0.25 }, { x = 0.4, y = 0.2, z = -0.25 },
         { x = -0.4, y = 0.2, z = 0.25 }, { x = 0.4, y = 0.2, z = 0.25 },},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
+    output_position = xyz(0, 1.4, 0),
     layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_campfire,
     -- Quando a fogueira é colocada, verifica se deve criar chama
@@ -2819,7 +2812,7 @@ register_craft_station("nh_nodes:palmcampfire", {
         { x = -0.4, y = 0.2, z = -0.25 }, { x = 0.4, y = 0.2, z = -0.25 },
         { x = -0.4, y = 0.2, z = 0.25 }, { x = 0.4, y = 0.2, z = 0.25 }},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
-    output_position = { x = 0, y = 1.4, z = 0 },
+    output_position = xyz(0, 1.4, 0),
     layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_campfire,
     -- Quando a fogueira é colocada, verifica se deve criar chama
@@ -3061,7 +3054,7 @@ register_craft_station("nh_nodes:craft_table", {
         { x = -0.2, y = 1.1, z = 0.2 }, { x = 0.2, y = 1.1, z = 0.2 },
     },
     tool_slot_pos = {x = 5.6, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = {x = 0, y = 1.7, z = 0},
+    output_position = xyz(0, 1.7, 0),
     layers = {
         {name = "Camada Inferior", x = 0.5, width = 2, height = 2, start_index = 0},
         {name = "Camada Superior", x = 3,   width = 2, height = 2, start_index = 4}},
@@ -3089,7 +3082,7 @@ register_craft_station("nh_nodes:furnace", {
         {x = -0.3, y = 0.9, z = 0.3}, {x = 0, y = 0.9, z = 0.3}, {x = 0.3, y = 0.9, z = 0.3},
     },
     tool_slot_pos = {x = 4.3, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = {x = 0, y = 1.2, z = 0},
+    output_position = xyz(0, 1.2, 0),
     layers = {{name = S "3x3 Grid", x = 0.5, width = 3, height = 3, start_index = 0}},
     recipes = recipes_furnace
 })
@@ -3106,7 +3099,7 @@ register_craft_station("nh_nodes:advanced_bench", {
         {x = -0.2, y = 0.9, z = 0.2 }, {x = 0.2, y = 0.9, z = 0.2},
     },
     tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = {x = 0, y = 1.4, z = 0},
+    output_position = xyz(0, 1.4, 0),
     layers = {{ name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 },},
     recipes = recipes_table
 })
@@ -4536,25 +4529,22 @@ c.register_node("nh_nodes:rawchicken", {
     drawtype = "mesh",
     mesh = "raw_chicken.obj",
     tiles = { "raw_chicken.png" },
-
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    max_stake = 1,
+    groups = {oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
-
     collision_box = {type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 }},
     selection_box = {type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 }},
     --visual_size = {x = 15, y = 15},
     --wield_scale = {x= 2, y= 2, z= 2},
-    -- Tornar comestível
+    -- Tornar comestível e derrubar o osso no chão se 8 slots estiverem cheios (os pegos por comando se amontoam)
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 4)
         itemstack:take_item()
         local bone = ItemStack("nh_nodes:bone 2")
         if itemstack:is_empty() then return bone
-        else
-            add_item_to_visible_slots(user, bone)
-            return itemstack
+        else add_item_to_visible_slots(user, bone) return itemstack
         end
     end,
 })
@@ -4566,20 +4556,19 @@ c.register_node("nh_nodes:roastchicken", {
     tiles = { "roastchicken.png" },
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { oddly_breakable_by_hand = 1 },
+    max_stake = 1,
+    groups = {oddly_breakable_by_hand = 1},
     --sounds = default.node_sound_wood_defaults(),
-    collision_box = { type = "fixed", fixed = { -0.25, 0, -0.25, 0.25, 0, 0.25 } },
-    selection_box = { type = "fixed", fixed = { -0.3, -0.5, -0.3, 0.3, 0, 0.3 } },
+    collision_box = {type = "fixed", fixed = {-0.25, 0, -0.25, 0.25, 0, 0.25}},
+    selection_box = {type = "fixed", fixed = {-0.3, -0.5, -0.3, 0.3, 0, 0.3}},
     visual_size = { x = 15, y = 15 },
-    -- Tornar comestível
+    -- Tornar comestível e derrubar o osso no chão se 24 slots estiverem cheios (os pegos por comando se amontoam)
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, 6)
         itemstack:take_item()
         local bone = ItemStack("nh_nodes:bone 2")
         if itemstack:is_empty() then return bone
-        else
-            add_item_to_visible_slots(user, bone)
-            return itemstack
+        else add_item_to_visible_slots(user, bone) return itemstack
         end
     end,
 })
@@ -5176,7 +5165,7 @@ function writing_utils.player_has_writing_tools(player)
     local inv = player:get_inventory()
     local has_feather = false
     local has_ink = false
-    for i = 1, 8 do
+    for i = 1, 8 do -- sem cinto deveria ser só 2
         local stack = inv:get_stack("main", i)
         if stack:get_name() == "nh_items:feather" then has_feather = true break end
     end
@@ -5195,7 +5184,7 @@ function player_has_writing_tools(player)
     local has_feather = false
     local has_ink = false
     -- Verificar se tem pena na hotbar (slots 1-8)
-    for i = 1, 8 do
+    for i = 1, 8 do -- sem cinto deveria ser só 2
         local stack = inv:get_stack("main", i)
         if stack:get_name() == "nh_items:feather" then has_feather = true break end
     end
@@ -6576,6 +6565,13 @@ c.register_node("nh_nodes:page", {
         items.editing_pages[player_name] = {text = draft, source = pos_key}
         local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
         if not has_feather or not has_ink then
+            local read_text = draft ~= "" and draft or ""
+            local title = draft ~= "" and S"Paper" .. c.colorize("#4af", " [" .. S"Draft" .. "]") or S"Blank Paper"
+            c.show_formspec(player_name, "nh_nodes:page_reader:" .. c.pos_to_string(pos),
+                "size[10,13.5]" ..
+                "label[0.3,0;" .. c.formspec_escape(title) .. "]" ..
+                "textarea[0.3,0.5;10,14;page_text;;" .. c.formspec_escape(read_text) .. "]" ..
+                "button_exit[4,12.5;2,1;close;" .. S"Close" .. "]")
             local msg = S"I think I need "
             if not has_feather and not has_ink then msg = msg .. S"a feather in the hotbar and an ink bottle in the inventory to write."
             elseif not has_feather then msg = msg .. S"a feather in the hotbar to write."
@@ -6584,13 +6580,7 @@ c.register_node("nh_nodes:page", {
             c.chat_send_player(player_name, msg)
             return
         end
-        -- Lê rascunho: prioridade para a sessão (items.editing_pages), fallback para meta do node
-        local node_meta = c.get_meta(pos)
-        local node_draft = node_meta:get_string("text") or ""
-        local session = items.editing_pages[player_name]
-        local draft = (session and session.text ~= "" and session.text) or node_draft
         -- Sincroniza sessão com o rascunho mais recente ao abrir
-        items.editing_pages[player_name] = items.editing_pages[player_name] or {}
         items.editing_pages[player_name].text = draft
         local subtitle_label = ""
         if draft ~= "" then subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]") end
@@ -6649,6 +6639,13 @@ c.register_node("nh_nodes:page_floor", {
         items.editing_pages[player_name] = {text = draft, source = pos_key}
         local has_feather, has_ink = writing_utils.player_has_writing_tools(clicker)
         if not has_feather or not has_ink then
+            local read_text = draft ~= "" and draft or ""
+            local title = draft ~= "" and S"Paper" .. c.colorize("#4af", " [" .. S"Draft" .. "]") or S"Blank Paper"
+            c.show_formspec(player_name, "nh_nodes:page_floor_reader:" .. c.pos_to_string(pos),
+                "size[10,13.5]" ..
+                "label[0.3,0;" .. c.formspec_escape(title) .. "]" ..
+                "textarea[0.3,0.5;10,14;page_text;;" .. c.formspec_escape(read_text) .. "]" ..
+                "button_exit[4,12.5;2,1;close;" .. S"Close" .. "]")
             local msg = S"I think I need "
             if not has_feather and not has_ink then msg = msg .. S"a feather in the hotbar and an ink bottle in the inventory to write."
             elseif not has_feather then msg = msg .. S"a feather in the hotbar to write."
@@ -6657,13 +6654,7 @@ c.register_node("nh_nodes:page_floor", {
             c.chat_send_player(player_name, msg)
             return
         end
-        -- Lê rascunho: prioridade para a sessão (items.editing_pages), fallback para meta do node
-        local node_meta = c.get_meta(pos)
-        local node_draft = node_meta:get_string("text") or ""
-        local session = items.editing_pages[player_name]
-        local draft = (session and session.text ~= "" and session.text) or node_draft
         -- Sincroniza sessão com o rascunho mais recente ao abrir
-        items.editing_pages[player_name] = items.editing_pages[player_name] or {}
         items.editing_pages[player_name].text = draft
         local subtitle_label = ""
         if draft ~= "" then subtitle_label = c.colorize("#4af", "[" .. S"Draft" .. "]") end
@@ -7507,13 +7498,13 @@ local craftguide_pages = {
     "\n" .. S"1. GROUND CRAFTS"
     .. "\n\n" .. S"Hold E (or Aux1) and click the ground with the place button."
     .. "\n\n" .. S"Production Items:"
-    .. "\n" .. S"(2) Pebble → Chipped Stone"
-    .. "\n" .. S"(1) Pebble + (1) Obsidian Pebble → Obsidian Blade"
-    .. "\n" .. S"(1) Pebble + (1) Chipped Stone   → Stone Axe Head"
-    .. "\n" .. S"(1) Pebble + (1) Axe Head        → Stone Pickaxe Head"
-    .. "\n" .. S"(1) Pebble + (1) Pickaxe Head    → Stone Hoe Head"
-    .. "\n" .. S"(1) Pebble + (1) Hoe Head        → Stone Adze Head"
-    .. "\n" .. S"(8) Pebble → Cobblestone",
+    .. "\n" .. S"(1) Gray Pebble [tool] + (1) Gray Pebble     → Chipped Stone"
+    .. "\n" .. S"(1) Gray Pebble [tool] + (1) Obsidian Pebble → Obsidian Blade"
+    .. "\n" .. S"(1) Gray Pebble [tool] + (1) Chipped Stone   → Stone Axe Head"
+    .. "\n" .. S"(1) Gray Pebble [tool] + (1) Axe Head        → Stone Pickaxe Head"
+    .. "\n" .. S"(1) Gray Pebble [tool] + (1) Pickaxe Head    → Stone Hoe Head"
+    .. "\n" .. S"(1) Gray Pebble [tool] + (1) Hoe Head        → Stone Adze Head"
+    .. "\n" .. S"(8) Gray Pebble → Cobblestone",
     -- Page 3
     "\n" .. S"3. GROUND CRAFTS"
     .. "\n\n" .. S"Basic Tools:"
@@ -7540,7 +7531,7 @@ local craftguide_pages = {
     .. "\n" .. S"(1) Oak Wood → (8) Oak Board"
     .. "\n" .. S"(2) Oak Wood → (4) Oak Plank"
     .. "\n" .. S"(1) Oak Board → (8) Oak Dowel"
-    .. "\n" .. S"(3) Board + (2) Dowel + (2) Pebble → Oak Door"
+    .. "\n" .. S"(3) Board + (2) Dowel + (2) Gray Pebble → Oak Door"
     .. "\n" .. S"(1) Oak Dowel + (1) Oak Board → Rowing"
     .. "\n" .. S"(8) Obsidian Blade + (1) Rowing (TOOL) → Obsidian Sword"
     .. "\n" .. S"(2) Dowel + (2) Board → Production Bench",
@@ -9587,7 +9578,7 @@ c.register_node("nh_nodes:pebble", {
     description = S "Pebble" .. "\n" .. S "Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",     --
-    tiles = { "seixo.png" }, -- tiles = {"pedra.png"},
+    tiles = {"seixo.png"}, -- tiles = {"pedra.png"},
     --inventory_image = "seixo.png",
     --wield_image = "seixo.png",
     paramtype = "light",

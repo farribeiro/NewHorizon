@@ -1465,9 +1465,7 @@ c.register_on_joinplayer(function(player)
         check_count = check_count + 1
         apply_custom_model(player)
         local props = player:get_properties()
-        if props.eye_height ~= 2.6 and check_count < max_checks then
-            c.after(0.2, verify_and_apply)
-        end
+        if props.eye_height ~= 2.6 and check_count < max_checks then c.after(0.2, verify_and_apply) end
     end
     -- Delay maior para garantir que o mundo carregou no cliente
     c.after(0.3, function()
@@ -1504,9 +1502,7 @@ c.register_on_leaveplayer(function(player)
     if bc_has_backchest(player) then
         bc_save(player)
         local inv = player:get_inventory()
-        for i = 1, BC_COUNT do
-            inv:set_stack("main", BC_OFFSET + i, ItemStack(""))
-        end
+        for i = 1, BC_COUNT do inv:set_stack("main", BC_OFFSET + i, ItemStack("")) end
     end
     player_states[player_name] = nil
     last_wielded[player_name] = nil
@@ -1573,4 +1569,119 @@ c.register_on_respawnplayer(function(player)
             create_player_body(player)
         end
     end)
+end)
+
+-- SISTEMA DE INVENTÁRIO: primeiros 8 slots + backchest
+-- Verifica se os 8 primeiros slots do inventário principal estão cheios
+local function main8_is_full(inv)
+    for i = 1, 8 do
+        local s = inv:get_stack("main", i)
+        if s:is_empty() then return false end
+        -- slot com item mas sem stack cheio também é espaço disponível
+        local item_def = c.registered_items[s:get_name()]
+        local max = (item_def and item_def.stack_max) or 99
+        if s:get_count() < max then return false end
+    end
+    return true
+end
+
+-- Tenta inserir um ItemStack nos 8 primeiros slots.
+-- Retorna o leftover (o que não coube).
+local function insert_into_main8(inv, stack)
+    local leftover = ItemStack(stack)
+    for i = 1, 8 do
+        if leftover:is_empty() then break end
+        local slot = inv:get_stack("main", i)
+        -- Slot vazio: coloca tudo que couber
+        if slot:is_empty() then
+            local max = leftover:get_definition().stack_max or 99
+            local to_add = math.min(leftover:get_count(), max)
+            local new_stack = ItemStack(leftover)
+            new_stack:set_count(to_add)
+            inv:set_stack("main", i, new_stack)
+            leftover:set_count(leftover:get_count() - to_add)
+        elseif slot:get_name() == leftover:get_name() then
+            -- Mesmo item: empilha
+            local max = slot:get_definition().stack_max or 99
+            local space = max - slot:get_count()
+            if space > 0 then
+                local to_add = math.min(leftover:get_count(), space)
+                slot:set_count(slot:get_count() + to_add)
+                inv:set_stack("main", i, slot)
+                leftover:set_count(leftover:get_count() - to_add)
+            end
+        end
+    end
+    return leftover
+end
+
+-- Item quebrado: dropa e avisa quando os 8 primeiros slots estão cheios
+-- Injeta `after_use` em todas as ferramentas após todos os mods carregarem.
+c.after(0, function()
+    -- Injeta after_use em todas as ferramentas para capturar quebra
+    for name, def in pairs(c.registered_tools) do
+        local original_after_use = def.after_use
+        c.override_item(name, {
+            after_use = function(itemstack, user, node, digparams)
+                -- Chama o after_use original se existir
+                if original_after_use then itemstack = original_after_use(itemstack, user, node, digparams) or itemstack
+                else itemstack:add_wear(digparams and digparams.wear or 0) -- Comportamento padrão: aplica desgaste
+                end
+                -- Se quebrou (stack vazio após desgaste)
+                if itemstack:is_empty() and user and user:is_player() then
+                    local inv = user:get_inventory()
+                    -- Verifica se os 8 primeiros slots estão cheios
+                    -- (se não estiverem, o motor devolve o item normalmente — não há nada a dropar)
+                    -- Quando a ferramenta quebra ela simplesmente some; não há item para dropar
+                    -- a menos que o jogo defina um `on_tool_broken`. Emitimos mensagem apenas.
+                    if main8_is_full(inv) then
+                        c.chat_send_player(user:get_player_name(), S"I pulled that off, but dropped it. There's no room to hold on to!")
+                    end
+                end
+                return itemstack
+            end
+        })
+    end
+end)
+
+-- Drop clicado no chão: controle de coleta
+c.register_on_item_pickup(function(itemstack, picker, pointed_thing, time_from_last_punch, ...)
+    if not picker or not picker:is_player() then return end
+    local inv = picker:get_inventory()
+    local player_name = picker:get_player_name()
+    local leftover = insert_into_main8(inv, itemstack) -- Tenta inserir nos 8 primeiros slots
+    if leftover:is_empty() then return ItemStack("") end -- Tudo coube nos 8 primeiros slots — coleta normal -- retorna stack vazio = item coletado
+    -- Não coube tudo nos 8 primeiros slots.
+    -- Verifica se há backchest equipada.
+    if bc_has_backchest(picker) then
+        -- Tenta colocar o restante nos slots da backchest (main[9..24])
+        local bc_leftover2 = ItemStack(leftover)
+        for i = BC_OFFSET + 1, BC_OFFSET + BC_COUNT do
+            if bc_leftover2:is_empty() then break end
+            local slot = inv:get_stack("main", i)
+            if slot:is_empty() then
+                local max = bc_leftover2:get_definition().stack_max or 99
+                local to_add = math.min(bc_leftover2:get_count(), max)
+                local ns = ItemStack(bc_leftover2)
+                ns:set_count(to_add)
+                inv:set_stack("main", i, ns)
+                bc_leftover2:set_count(bc_leftover2:get_count() - to_add)
+            elseif slot:get_name() == bc_leftover2:get_name() then
+                local max = slot:get_definition().stack_max or 99
+                local space = max - slot:get_count()
+                if space > 0 then
+                    local to_add = math.min(bc_leftover2:get_count(), space)
+                    slot:set_count(slot:get_count() + to_add)
+                    inv:set_stack("main", i, slot)
+                    bc_leftover2:set_count(bc_leftover2:get_count() - to_add)
+                end
+            end
+        end
+        bc_save(picker) -- persiste na backchest
+        if bc_leftover2:is_empty() then return ItemStack("") -- tudo coube (hotbar + backchest)
+        else c.chat_send_player(player_name, S"My pockets and backpack chest are full!") return bc_leftover2 -- devolve o que não coube
+        end -- Nem a backchest tinha espaço; deixa o que sobrou no chão
+    else c.chat_send_player(player_name, S"My pockets are full! I need some equipment to carry more.") -- Sem backchest: os 8 slots estão cheios, não coleta
+        return itemstack -- devolve o stack inteiro (não coleta nada)
+    end
 end)
