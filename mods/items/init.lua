@@ -78,10 +78,10 @@ function items.update_page_draft(itemstack, text)
 end
 -- Registro do item Página escrita
 c.register_craftitem("nh_items:writedpage", {
-    description = S("Written Paper"),
+    description = S"Written Paper",
     inventory_image = "writedpage.png",
     wield_image = "writedpage.png",
-    wield_scale = xyz(0.5, 0.5, 0.01),
+    wield_scale = xyz(0.5, 0.5, 0.005),
     wielded_bone_position = {pos = xyz(1.1, 0, 0.9), rot = xyz(90, 90, 0)}, -- Configuração mão direita
     wielded_visual_size = xyz(0.25),
     offhand_bone_position = {pos = xyz(1.1, -0.5, -0.1)},

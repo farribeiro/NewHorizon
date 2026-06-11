@@ -2291,18 +2291,14 @@ if not c.registered_nodes["nh_nodes:grass"] then c.log("warning", "[terrain] nh_
 
 --  FUNÇÕES AUXILIARES COMPARTILHADAS PELOS LBMs DE RAMPA
 local function clear_above(pos)
-    local above = { x = pos.x, y = pos.y + 1, z = pos.z }
-    if DECORATIONS[gcid(c.get_node(above).name)] then
-        c.set_node(above, { name = "air" })
-    end
+    local above = xyz(pos.x, pos.y + 1, pos.z)
+    if DECORATIONS[gcid(c.get_node(above).name)] then c.set_node(above, {name = "air"}) end
 end
 
 -- Converte o nó abaixo se for "nh_nodes:dirt" para `target`
 local function convert_below(pos, src, target)
-    local below = { x = pos.x, y = pos.y - 1, z = pos.z }
-    if c.get_node(below).name == src then
-        c.set_node(below, { name = target })
-    end
+    local below = xyz(pos.x, pos.y - 1, pos.z)
+    if c.get_node(below).name == src then c.set_node(below, {name = target}) end
 end
 
 --  REGISTRO DOS LBMs SIMPLIFICADOS

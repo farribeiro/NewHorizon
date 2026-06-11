@@ -16,6 +16,22 @@ local last_sneak = {}
 local last_backpack_state = {}
 local body_entities = {}
 
+-- Persistência em disco para backchest vestida
+local _bc_storage = core.get_mod_storage()
+local function bc_disk_save(chest_id, slots)
+    if not chest_id or chest_id == "" then return end
+    _bc_storage:set_string("bc_" .. chest_id, core.serialize(slots))
+end
+local function bc_disk_load(chest_id)
+    if not chest_id or chest_id == "" then return nil end
+    local raw = _bc_storage:get_string("bc_" .. chest_id)
+    if not raw or raw == "" then return nil end
+    return core.deserialize(raw)
+end
+local function bc_disk_delete(chest_id)
+    if not chest_id or chest_id == "" then return end
+    _bc_storage:set_string("bc_" .. chest_id, "")
+end
 -- BACKCHEST ↔ SLOTS main[9..24]
 local BC_OFFSET = 8   -- main[9] .. main[24]
 local BC_COUNT  = 16
@@ -46,9 +62,11 @@ local function bc_save(player)
     end
     if has then
         backchest_stored_items[chest_id] = slots
+        bc_disk_save(chest_id, slots)
         meta:set_string("description", "Backpack Chest\n(contains items)")
     else
         backchest_stored_items[chest_id] = nil
+        bc_disk_delete(chest_id)
         meta:set_string("description", "")
         meta:set_string("chest_id", "")
     end
@@ -63,6 +81,14 @@ local function bc_load(player)
     local stack = inv:get_stack("armor_back", 1)
     local chest_id = stack:get_meta():get_string("chest_id")
     local stored = (chest_id ~= "" and backchest_stored_items and backchest_stored_items[chest_id]) or {}
+    -- Tenta RAM primeiro, depois disco (recover após restart)
+    local stored = (chest_id ~= "" and backchest_stored_items and backchest_stored_items[chest_id]) or bc_disk_load(chest_id) or {}
+    -- Se veio do disco, repõe na RAM e limpa o disco
+    if chest_id ~= "" and not (backchest_stored_items and backchest_stored_items[chest_id]) and #stored > 0 then
+        backchest_stored_items = backchest_stored_items or {}
+        backchest_stored_items[chest_id] = stored
+        bc_disk_delete(chest_id)   -- agora vive na RAM / node, não precisa mais do disco
+    end
     for i = 1, BC_COUNT do inv:set_stack("main", BC_OFFSET + i, ItemStack(stored[i] or "")) end
     bc_sync_lock[player:get_player_name()] = false
 end
@@ -823,8 +849,8 @@ local function apply_custom_model(player) -- FUNÇÃO PARA APLICAR O MODELO INVI
         visual = "mesh",
         mesh = "character11.glb",
         textures = { "blank.png" }, -- textura vazia, invisivel
-        visual_size = { x = 1, y = 1, z = 1 },
-        collisionbox = { -0.45, 0.0, -0.45, 0.45, 2.7, 0.45 },
+        visual_size = xyz(1, 1, 1),
+        collisionbox = {-0.45, 0.0, -0.45, 0.45, 2.7, 0.45},
         stepheight = 0.6,
         eye_height = 2.3,
         -- shaded = true,
@@ -909,11 +935,11 @@ set_player_animation = function(player, anim)
     state.current_anim = anim
     local anim_data
     if anim == "idle" then
-        anim_data = { { x = 0, y = 1 }, 0.25, 0, true }
+        anim_data = {{x = 0, y = 1}, 0.25, 0, true}
     elseif anim == "jump" then
-        anim_data = { { x = 2.08, y = 2.63 }, 4, 0, false }
+        anim_data = {{x = 2.08, y = 2.63}, 4, 0, false}
     elseif anim == "climb" then
-        anim_data = { { x = 2.08, y = 2.63 }, 1, 0, true }
+        anim_data = {{x = 2.08, y = 2.63}, 1, 0, true}
     elseif anim == "walk" then
         anim_data = { { x = 1, y = 2 }, 2, 0, true }
     elseif anim == "walk_back" then
@@ -927,35 +953,35 @@ set_player_animation = function(player, anim)
     elseif anim == "sneak_walk" then
         anim_data = { { x = 2.91, y = 4.91 }, 0.8, 0, true }
     elseif anim == "sneak_walk_back" then
-        anim_data = { { x = 4.91, y = 2.91 }, 0.8, 0, true }
+        anim_data = {{x = 4.91, y = 2.91 }, 0.8, 0, true}
     elseif anim == "crawling" then
-        anim_data = { { x = 5.25, y = 5.5 }, 0.8, 5.5, false }
+        anim_data = {{x = 5.25, y = 5.5 }, 0.8, 5.5, false}
     elseif anim == "crawling_walk" then
-        anim_data = { { x = 5.58, y = 6.08 }, 0.8, 0, true }
+        anim_data = {{x = 5.58, y = 6.08}, 0.8, 0, true}
     elseif anim == "swimming" then
-        anim_data = { { x = 9, y = 9.5 }, 0.8, 0, true }
+        anim_data = {{x = 9, y = 9.5 }, 0.8, 0, true}
     elseif anim == "holding" then
-        anim_data = { { x = 9.54, y = 10.5 }, 7, 0, false }
+        anim_data = {{x = 9.54, y = 10.5}, 7, 0, false}
     elseif anim == "holding_punch" then
-        anim_data = { { x = 10.5, y = 11 }, 5, 0, false }
+        anim_data = {{x = 10.5, y = 11}, 5, 0, false}
     elseif anim == "punch" then
-        anim_data = { { x = 11.54, y = 12 }, 5, 0, false }
+        anim_data = {{x = 11.54, y = 12}, 5, 0, false}
     elseif anim == "sit_down" then
         -- Faixa 12~12.5s do GLB: animação de sentar (não loop, não repete)
-        anim_data = { { x = 12, y = 12.5 }, 1, 0, false }
+        anim_data = {{x = 12, y = 12.5}, 1, 0, false}
     elseif anim == "sit_idle" then
         -- Congela no frame 12.5s (pose sentado)
-        anim_data = { { x = 12.5, y = 12.5 }, 1, 0, false }
+        anim_data = {{x = 12.5, y = 12.5}, 1, 0, false}
     elseif anim == "lie_down" then
         -- Faixa 12.5~13s do GLB: animação de deitar (não loop, não repete)
-        anim_data = { { x = 12.5, y = 13 }, 1, 0, false }
+        anim_data = {{x = 12.5, y = 13}, 1, 0, false}
     elseif anim == "lie_idle" then
         -- Congela no frame 13s (pose deitado)
-        anim_data = { { x = 13, y = 13 }, 1, 0, false }
+        anim_data = {{x = 13, y = 13 }, 1, 0, false}
     elseif anim == "fly_idle" then
-        anim_data = { { x = 0, y = 0 }, 1, 0, false }
+        anim_data = {{x = 0, y = 0}, 1, 0, false}
     elseif anim == "fly_move" then
-        anim_data = { { x = 5.375, y = 5.375 }, 4, 0, true }
+        anim_data = {{x = 5.375, y = 5.375}, 4, 0, true}
     end
     if anim_data then
         player:set_animation(anim_data[1], anim_data[2], anim_data[3], anim_data[4]) -- Aplica animação no player invisível
@@ -1398,36 +1424,25 @@ c.register_globalstep(function(dtime)
                 else
                     player:set_properties({ collisionbox = {-0.45, 0.0, -0.45, 0.45, 2.7, 0.45 }})
                     if is_moving_back then
-                        if ctrl.sneak and speed >= 0.1 then
-                            setplayeranimation("sneak_walk_back")
-                        elseif ctrl.aux1 or speed >= 4 then
-                            setplayeranimation("run_back")
-                        elseif speed < 4 and speed > 0 then
-                            setplayeranimation("walk_back")
+                        if ctrl.sneak and speed >= 0.1 then setplayeranimation("sneak_walk_back")
+                        elseif ctrl.aux1 or speed >= 4 then setplayeranimation("run_back")
+                        elseif speed < 4 and speed > 0 then setplayeranimation("walk_back")
                         end
                     elseif is_moving then
-                        if ctrl.sneak and speed >= 0.1 then
-                            setplayeranimation("sneak_walk")
-                        elseif ctrl.aux1 or speed >= 4 then
-                            setplayeranimation("run")
-                        elseif speed < 4 and speed > 0 then
-                            setplayeranimation("walk")
+                        if ctrl.sneak and speed >= 0.1 then setplayeranimation("sneak_walk")
+                        elseif ctrl.aux1 or speed >= 4 then setplayeranimation("run")
+                        elseif speed < 4 and speed > 0 then setplayeranimation("walk")
                         end
-                    else
-                        if has_item then setplayeranimation("holding") else setplayeranimation("idle") end
-                    end
+                    else if has_item then setplayeranimation("holding") else setplayeranimation("idle") end end
                 end
-
+                if riding_players and riding_players[player:get_player_name()] then goto continue end
                 -- EYE OFFSET: definido uma única vez, após determinar o estado
                 local eye_offset_first
-                local eye_offset_third = {x=0, y=6, z=-7}
-                if is_crawling then
-                    eye_offset_first = {x=0, y =-0.7, z=7.5}
-                elseif ctrl.sneak then 
-                    eye_offset_first = {x=0, y=6, z=9}
-                else
-                    player:set_properties({eye_height = 2.3})
-                    eye_offset_first = {x=0, y=-0.2, z=3.5}
+                local eye_offset_third = xyz(0, 6, -7)
+                if is_crawling then eye_offset_first = xyz(0, -0.7, 7.5)
+                elseif ctrl.sneak then  eye_offset_first = xyz(0, 6, 9)
+                else player:set_properties({eye_height = 2.3})
+                    eye_offset_first = xyz(0, -0.2, 3.5)
                 end
                 player:set_eye_offset(eye_offset_first, eye_offset_third)
             end
