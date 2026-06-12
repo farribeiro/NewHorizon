@@ -369,9 +369,7 @@ c.register_globalstep(function(dtime)
     end
 end)
 
------------------------------
 -- SISTEMA DINÂMICO DE DANO POR QUEDA
------------------------------
 -- Tabela de absorção de impacto por material
 local surface_absorption = {
     ["nh_nodes:leaves"] = 0.85,      -- Folhas absorvem 85% do impacto

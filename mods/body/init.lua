@@ -15,6 +15,7 @@ local last_armor_items = {}
 local last_sneak = {}
 local last_backpack_state = {}
 local body_entities = {}
+local _dig_block_player = {}  -- flag: dignode esta gerenciando drops manualmente
 
 -- Persistência em disco para backchest vestida
 local _bc_storage = core.get_mod_storage()
@@ -577,6 +578,11 @@ local function update_player_formspec(player)
     player:set_inventory_formspec(get_armor_formspec(player_name))
 end
 c.register_allow_player_inventory_action(function(player, action, inventory, inventory_info)
+    -- Bloqueia insercao automatica do motor quando dignode ja tratou manualmente
+    if _dig_block_player[player:get_player_name()] and action == "put" then
+        local listname = inventory_info.listname or ""
+        if listname == "main" then return 0 end
+    end
     -- Bloqueia os slots main[9..24] quando não há backchest equipada
     local function is_bc_slot(list, idx)
         return list == "main" and idx >= BC_OFFSET + 1 and idx <= BC_OFFSET + BC_COUNT
@@ -1644,44 +1650,174 @@ c.after(0, function()
     end
 end)
 
--- Drop clicado no chão: controle de coleta
-c.register_on_item_pickup(function(itemstack, picker, pointed_thing, time_from_last_punch, ...)
-    if not picker or not picker:is_player() then return end
-    local inv = picker:get_inventory()
-    local player_name = picker:get_player_name()
-    local leftover = insert_into_main8(inv, itemstack) -- Tenta inserir nos 8 primeiros slots
-    if leftover:is_empty() then return ItemStack("") end -- Tudo coube nos 8 primeiros slots — coleta normal -- retorna stack vazio = item coletado
-    -- Não coube tudo nos 8 primeiros slots.
-    -- Verifica se há backchest equipada.
-    if bc_has_backchest(picker) then
-        -- Tenta colocar o restante nos slots da backchest (main[9..24])
-        local bc_leftover2 = ItemStack(leftover)
-        for i = BC_OFFSET + 1, BC_OFFSET + BC_COUNT do
-            if bc_leftover2:is_empty() then break end
-            local slot = inv:get_stack("main", i)
-            if slot:is_empty() then
-                local max = bc_leftover2:get_definition().stack_max or 99
-                local to_add = math.min(bc_leftover2:get_count(), max)
-                local ns = ItemStack(bc_leftover2)
-                ns:set_count(to_add)
-                inv:set_stack("main", i, ns)
-                bc_leftover2:set_count(bc_leftover2:get_count() - to_add)
-            elseif slot:get_name() == bc_leftover2:get_name() then
-                local max = slot:get_definition().stack_max or 99
-                local space = max - slot:get_count()
+-- ================================================================
+-- SISTEMA DE SLOTS: 8 principais + 16 backchest
+-- ================================================================
+
+-- Verifica espaco disponivel nos slots indicados (sem modificar o inv)
+local function count_space(inv, stack, slot_from, slot_to)
+    local space = 0
+    local item_name = stack:get_name()
+    local stack_max = stack:get_definition().stack_max or 99
+    for i = slot_from, slot_to do
+        local s = inv:get_stack("main", i)
+        if s:is_empty() then
+            space = space + stack_max
+        elseif s:get_name() == item_name then
+            space = space + math.max(0, stack_max - s:get_count())
+        end
+    end
+    return space
+end
+
+-- Insere stack nos slots indicados; retorna o leftover
+local function insert_into_slots(inv, stack, slot_from, slot_to)
+    local left = ItemStack(stack)
+    for i = slot_from, slot_to do
+        if left:is_empty() then break end
+        local s = inv:get_stack("main", i)
+        local stack_max = left:get_definition().stack_max or 99
+        if s:is_empty() then
+            local n = math.min(left:get_count(), stack_max)
+            local ns = ItemStack(left); ns:set_count(n)
+            inv:set_stack("main", i, ns)
+            left:set_count(left:get_count() - n)
+        elseif s:get_name() == left:get_name() then
+            local space = stack_max - s:get_count()
+            if space > 0 then
+                local n = math.min(left:get_count(), space)
+                s:set_count(s:get_count() + n)
+                inv:set_stack("main", i, s)
+                left:set_count(left:get_count() - n)
+            end
+        end
+    end
+    return left
+end
+
+-- Logica central: tenta encaixar um item respeitando a regra dos 8 slots + backchest.
+-- Retorna: "ok", "full_main" ou "full_all".
+-- Quando do_insert=true e retorna "ok", ja inseriu no inv e chamou bc_save se necessario.
+local function try_collect(player, stack, do_insert)
+    local inv    = player:get_inventory()
+    local has_bc = bc_has_backchest(player)
+    local count  = stack:get_count()
+    local space8 = count_space(inv, stack, 1, 8)
+
+    if space8 >= count then
+        if do_insert then insert_into_slots(inv, stack, 1, 8) end
+        return "ok"
+    end
+
+    if not has_bc then return "full_main" end
+
+    local fits_bc = count_space(inv, stack, BC_OFFSET + 1, BC_OFFSET + BC_COUNT)
+    if space8 + fits_bc >= count then
+        if do_insert then
+            local left = insert_into_slots(inv, stack, 1, 8)
+            if not left:is_empty() then
+                insert_into_slots(inv, left, BC_OFFSET + 1, BC_OFFSET + BC_COUNT)
+            end
+            bc_save(player)
+        end
+        return "ok"
+    end
+
+    return "full_all"
+end
+
+-- ── 1. Bloco cavado: dropa no chao se inv cheio ──────────────────────────────
+-- register_on_dignode roda APOS o bloco ser removido mas ANTES do motor
+-- distribuir os drops. Nao ha como cancelar o drop do motor aqui, entao
+-- usamos allow_player_inventory_action para bloquear a insercao automatica
+-- e register_on_dignode para criar os drops manualmente.
+
+-- Flag por jogador: ativo durante um dignode em que o inv esta cheio
+
+
+c.register_on_dignode(function(pos, oldnode, digger)
+    if not digger or not digger:is_player() then return end
+    local player_name = digger:get_player_name()
+    _dig_block_player[player_name] = nil  -- limpa flag anterior
+    local drops = c.get_node_drops(oldnode, digger:get_wielded_item():get_name())
+    if not drops or #drops == 0 then return end
+    local has_bc = bc_has_backchest(digger)
+    local any_overflow = false
+    -- Verifica se algum drop nao cabe (simulacao sem modificar inv)
+    -- Usamos uma copia do estado do inv para simular multiplos drops
+    local inv = digger:get_inventory()
+    local sim_inv = {}  -- [slot] = count simulado
+    for i = 1, (has_bc and BC_OFFSET + BC_COUNT or 8) do
+        local s = inv:get_stack("main", i)
+        sim_inv[i] = { name = s:get_name(), count = s:get_count(), max = s:get_definition().stack_max or 99 }
+    end
+    local function sim_insert(stack, from, to)
+        local left = stack:get_count()
+        local name = stack:get_name()
+        local smax = stack:get_definition().stack_max or 99
+        for i = from, to do
+            if left <= 0 then break end
+            local sl = sim_inv[i]
+            if sl.name == "" then
+                local n = math.min(left, smax)
+                sim_inv[i] = { name = name, count = n, max = smax }
+                left = left - n
+            elseif sl.name == name then
+                local space = sl.max - sl.count
                 if space > 0 then
-                    local to_add = math.min(bc_leftover2:get_count(), space)
-                    slot:set_count(slot:get_count() + to_add)
-                    inv:set_stack("main", i, slot)
-                    bc_leftover2:set_count(bc_leftover2:get_count() - to_add)
+                    local n = math.min(left, space)
+                    sim_inv[i].count = sim_inv[i].count + n
+                    left = left - n
                 end
             end
         end
-        bc_save(picker) -- persiste na backchest
-        if bc_leftover2:is_empty() then return ItemStack("") -- tudo coube (hotbar + backchest)
-        else c.chat_send_player(player_name, S"My pockets and backpack chest are full!") return bc_leftover2 -- devolve o que não coube
-        end -- Nem a backchest tinha espaço; deixa o que sobrou no chão
-    else c.chat_send_player(player_name, S"My pockets are full! I need some equipment to carry more.") -- Sem backchest: os 8 slots estão cheios, não coleta
-        return itemstack -- devolve o stack inteiro (não coleta nada)
+        return left  -- retorna o que nao coube
+    end
+    for _, drop in ipairs(drops) do
+        local drop_stack = ItemStack(drop)
+        if not drop_stack:is_empty() then
+            local leftover = sim_insert(drop_stack, 1, 8)
+            if leftover > 0 then
+                if has_bc then
+                    leftover = sim_insert(ItemStack({name=drop_stack:get_name(), count=leftover}), BC_OFFSET+1, BC_OFFSET+BC_COUNT)
+                end
+                if leftover > 0 then any_overflow = true break end
+            end
+        end
+    end
+    if not any_overflow then return end  -- tudo cabe, motor trata normalmente
+    -- Ha overflow: ativa flag para allow_player_inventory_action bloquear
+    -- a insercao automatica do motor, e cria os drops manualmente
+    _dig_block_player[player_name] = { pos = pos, drops = drops, has_bc = has_bc }
+    -- Insere manualmente o que couber e dropa o resto
+    local dropped_any = false
+    for _, drop in ipairs(drops) do
+        local drop_stack = ItemStack(drop)
+        if not drop_stack:is_empty() then
+            local result = try_collect(digger, drop_stack, true)
+            if result ~= "ok" then
+                c.add_item(pos, drop_stack)
+                dropped_any = true
+            end
+        end
+    end
+    if dropped_any then
+        if has_bc then c.chat_send_player(player_name, S("My pockets and backpack chest are full! I dropped this."))
+        else c.chat_send_player(player_name, S("My pockets are full! I dropped this."))
+        end
+    end
+    -- Limpa flag apos um tick (o allow roda no mesmo tick)
+    c.after(0, function() _dig_block_player[player_name] = nil end)
+end)
+-- 2. Drop clicado no chao: controle de coleta
+c.register_on_item_pickup(function(itemstack, picker, pointed_thing, time_from_last_punch, ...)
+    if not picker or not picker:is_player() then return end
+    local player_name = picker:get_player_name()
+    local result = try_collect(picker, itemstack, false)
+    if result == "ok" then try_collect(picker, itemstack, true) return ItemStack("")
+    elseif result == "full_main" then
+        c.chat_send_player(player_name, S"My pockets are full! I need some equipment to carry more.")
+        return itemstack
+    else c.chat_send_player(player_name, S"My pockets and backpack chest are full!") return itemstack
     end
 end)

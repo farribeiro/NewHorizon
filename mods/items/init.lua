@@ -4,10 +4,8 @@ c.log("action", "[items] init.lua loaded")
 local S = c.get_translator("nh_items")
  -- table_xyz and table x=y=z
 local function xyz(x, y, z) if y == nil and z == nil then y, z = x, x end return {x = x, y = y, z = z} end
--- Criar tabela namespace para o mod (no início do arquivo init.lua)
 items = {}
--- Sessões de edição de página: player_name → { text = "" }
-items.editing_pages = {}
+items.editing_pages = {} -- Sessões de edição de página: player_name → { text = "" }
 -- Limpa sessão ao deslogar
 c.register_on_leaveplayer(function(player) items.editing_pages[player:get_player_name()] = nil end)
 -- Itens necessários para escrever

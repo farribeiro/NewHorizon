@@ -357,79 +357,85 @@ recipes_floor = {
         output = "nh_nodes:stoneadzehead",
         required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
-    {ingredients = { ["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1 },
+    {ingredients = {["nh_nodes:oakdowel"] = 1, ["nh_nodes:oakboard"] = 1},
         output = "nh_nodes:rowing"
     },
-    {ingredients = { ["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:stoneaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:stoneaxe"
     },
-    {ingredients = { ["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:stonepickaxehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:stonepickaxe"
     },
-    {ingredients = { ["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:stonehoehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:stonehoe"
     },
-    {ingredients = { ["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:stoneadzehead"] = 1, ["nh_nodes:limb"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:stoneadze"
     },
-    {ingredients = {["nh_nodes:obsidianpebble"] = 1 },
+    {ingredients = {["nh_nodes:obsidianpebble"] = 1},
         output = "nh_nodes:obsidianblade",
         required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
     },
-    {ingredients = { ["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:obsidianpebble_item"] = 1},
+        output = "nh_nodes:obsidianblade",
+        required_tool = "nh_nodes:pebble_item", -- ← só faz com isso no slot
+    },
+    {ingredients = {["nh_nodes:chippedstone"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:chippedstoneknife"
     },
-    {ingredients = { ["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:obsidianblade"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:obsidianknife"
     },
-    {ingredients = { ["nh_nodes:pebble"] = 8 },
+    {ingredients = {["nh_nodes:pebble"] = 8},
         output = "nh_nodes:cobblestone"
     },
-    {ingredients = { ["nh_nodes:pebble_item"] = 8 },
+    {ingredients = {["nh_nodes:pebble_item"] = 8},
         output = "nh_nodes:cobblestone"
     },
-    {ingredients = { ["nh_nodes:cobblestone"] = 8 },
+    {ingredients = {["nh_nodes:cobblestone"] = 8},
         output = "nh_nodes:furnace"
     },
-    {ingredients = { ["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1 },
+    {ingredients = {["nh_nodes:stick"] = 1, ["nh_nodes:palmstraw"] = 1},
         output = "nh_nodes:campfiretinder"
     },
-    {ingredients = { ["nh_nodes:oaklog"] = 1 },
+    {ingredients = {["nh_nodes:oaklog"] = 1},
         output = "nh_nodes:oakwood",
         required_tool = "nh_nodes:stoneadze", -- ← só faz com isso no slot
+        tool_result = "nh_nodes:stoneadze",  -- ← devolve isso no slot tool
     },
-    {ingredients = { ["nh_nodes:oaklog"] = 1 },
+    {ingredients = {["nh_nodes:oaklog"] = 1},
         output = "nh_nodes:oaktimberslice 16",
     },
-    {ingredients = { ["nh_nodes:pinelog"] = 1 },
+    {ingredients = {["nh_nodes:pinelog"] = 1},
         output = "nh_nodes:pinewood",
         required_tool = "nh_nodes:stoneadze", -- ← só faz com isso no slot
+        tool_result = "nh_nodes:stoneadze",  -- ← devolve isso no slot tool
     },
-    {ingredients = { ["nh_nodes:pinelog"] = 1 },
+    {ingredients = {["nh_nodes:pinelog"] = 1},
         output = "nh_nodes:pinetimberslice 16",
     },
-    {ingredients = { ["nh_nodes:palmlog"] = 1 },
+    {ingredients = {["nh_nodes:palmlog"] = 1},
         output = "nh_nodes:palmtimberslice 4",
     },
-    {ingredients = { ["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1 },
+    {ingredients = {["nh_nodes:palmleaf"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:oakresin"] = 1, ["nh_nodes:grassleaves"] = 1},
         output = "nh_nodes:torch"
     },
-    {ingredients = { ["nh_nodes:oakwood"] = 1 },
+    {ingredients = {["nh_nodes:oakwood"] = 1},
         output = "nh_nodes:oakboard 8"
     },
-    {ingredients = { ["nh_nodes:oakwood"] = 2 },
+    {ingredients = {["nh_nodes:oakwood"] = 2},
         output = "nh_nodes:oakplank 4"
     },
-    {ingredients = { ["nh_nodes:oakboard"] = 1 },
+    {ingredients = {["nh_nodes:oakboard"] = 1},
         output = "nh_nodes:oakdowel 8"
     },
-    {ingredients = { ["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2 },
+    {ingredients = {["nh_nodes:oakdowel"] = 2, ["nh_nodes:oakboard"] = 2},
         output = "nh_nodes:craft_table"
     },
-    {ingredients = { ["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1 },
+    {ingredients = {["nh_nodes:inksac"] = 1, ["nh_nodes:bottle"] = 1},
         output = "nh_nodes:inkbottle"
     },
-    {ingredients = { ["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1 },
+    {ingredients = {["nh_items:writedpage"] = 1, ["nh_nodes:bottle"] = 1},
         output = "nh_nodes:messagebottle"
     },
 }
@@ -453,11 +459,21 @@ recipes_table = {
     },
     {ingredients = {["nh_nodes:rush"] = 6},
         output = "nh_items:page",
-        required_tool = "nh_nodes:bucketwater" -- ← só faz com isso no slot
+        required_tool = "nh_nodes:bucketwater", -- ← só faz com isso no slot
+        tool_result = "nh_nodes:bucket",  -- ← devolve isso no slot tool
+    },
+    {ingredients = {["nh_nodes:rush"] = 6},
+        output = "nh_items:page",
+        required_tool = "nh_nodes:bucketwater2", -- ← só faz com isso no slot
+        tool_result = "nh_nodes:bucket",  -- ← devolve isso no slot tool
+    },
+    {ingredients = {["nh_nodes:page"] = 8},
+        output = "nh_nodes:book",
+        required_tool = "nh_nodes:bookcover", -- ← só faz com isso no slot
     },
     {ingredients = {["nh_items:page"] = 8},
         output = "nh_nodes:book",
-        required_tool = "nh_nodes:bookcover" -- ← só faz com isso no slot
+        required_tool = "nh_nodes:bookcover", -- ← só faz com isso no slot
     },
     {ingredients = {["nh_nodes:book"] = 1, ["nh_nodes:redcrystal"] = 1},
         output = "nh_nodes:archion",
@@ -494,6 +510,15 @@ recipes_table = {
     },
     {ingredients = {["nh_nodes:oakboard"] = 3, ["nh_nodes:oakdowel"] = 2, ["nh_nodes:pebble"] = 2},
         output = "nh_nodes:oakdoor"
+    },
+    {ingredients = { ["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble_item"] = 1},
+        output = "nh_nodes:spinningtop"
+    },
+    {ingredients = { ["nh_nodes:palmlog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble_item"] = 1},
+        output = "nh_nodes:spinningtop2"
+    },
+    {ingredients = { ["nh_nodes:pinelog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble_item"] = 1},
+        output = "nh_nodes:spinningtop3"
     },
     {ingredients = { ["nh_nodes:oaklog"] = 1, ["nh_nodes:stick"] = 1, ["nh_nodes:white_pebble"] = 1},
         output = "nh_nodes:spinningtop"
@@ -589,6 +614,10 @@ recipes_furnace = {
     },
     {ingredients = {["nh_nodes:ironnugget"] = 3},
         output = "nh_nodes:ironingot",
+        required_tool = "nh_nodes:coalnugget", -- ← só faz com isso no slot
+    },
+    {ingredients = {["nh_nodes:ironingot"] = 3, ["nh_nodes:coalnugget"] = 1, ["nh_nodes:page"] = 1},
+        output = "nh_nodes:grenade",
         required_tool = "nh_nodes:coalnugget", -- ← só faz com isso no slot
     },
     {ingredients = {["nh_nodes:ironingot"] = 3, ["nh_nodes:coalnugget"] = 1, ["nh_items:page"] = 1},
@@ -782,7 +811,6 @@ local function show_craft_grid(player, pos, config)
             "list[nodemeta:" .. pos.x .. "," .. pos.y .. "," .. pos.z .. ";craft;" .. layer.x ..
             "," .. (y_offset + 0.5) .. ";" .. layer.width .. "," .. layer.height .. ";" .. layer.start_index .. "]"
     end
-
     -- Posição do slot de ferramenta: usa a config se definida, senão calcula automaticamente
     local tool_x, tool_y
     if config.tool_slot_pos then
@@ -934,40 +962,64 @@ function register_craft_station(node_name, config)
             local meta = c.get_meta(pos)
             local inv = meta:get_inventory()
             local player_inv = player:get_inventory()
-            -- Consome materiais do primeiro craft
-            consume_craft_materials(pos)
-            -- Tenta craftar em loop (funciona tanto para click normal quanto shift)
-            local max_crafts = 64
-            local crafted = 1
-            -- Pequeno delay para garantir que o primeiro item já foi movido
+            -- ► NOVO: verifica se a receita usada tem tool_result
+            local function get_active_recipe()
+                local tool_stack = inv:get_stack("tool", 1)
+                local tool_name = tool_stack:get_name()
+                for _, recipe in ipairs(config.recipes) do
+                    if recipe.required_tool then
+                        if tool_name ~= recipe.required_tool then goto continue end
+                    end
+                    if check_recipe(inv, recipe) then return recipe end
+                    ::continue::
+                end
+                -- Receita recém-consumida: ingredientes ainda estão lá no 1º take,
+                -- então tenta sem filtro de ferramenta para achar qual era
+                return nil
+            end
+            local function consume_and_return_tool()
+                -- Descobre a receita ANTES de consumir
+                local tool_stack = inv:get_stack("tool", 1)
+                local tool_name = tool_stack:get_name()
+                local matched_recipe = nil
+                for _, recipe in ipairs(config.recipes) do
+                    if recipe.required_tool then
+                        if tool_name ~= recipe.required_tool then goto skip end
+                    end
+                    if check_recipe(inv, recipe) then
+                        matched_recipe = recipe
+                        break
+                    end
+                    ::skip::
+                end
+                consume_craft_materials(pos)
+                -- Se a receita tinha tool_result, substitui o slot tool
+                if matched_recipe and matched_recipe.tool_result then
+                    inv:set_stack("tool", 1, ItemStack(matched_recipe.tool_result))
+                end
+            end
             c.after(0.05, function()
+                local max_crafts = 64
+                local crafted = 1
+                -- Primeiro craft (já tirado pelo jogador)
+                consume_and_return_tool()  -- ← substitui consume_craft_materials(pos)
                 while crafted < max_crafts do
                     local recipe_found = false
-                    -- Verifica se ainda há receita válida
                     for _, recipe in ipairs(config.recipes) do
                         if check_recipe(inv, recipe) then
                             recipe_found = true
-                            -- Verifica se o jogador tem espaço antes de craftar
                             local result_stack = ItemStack(recipe.output)
-                            -- Tenta adicionar ao inventário do jogador
                             local leftover = player_inv:add_item("main", result_stack)
-                            -- Se conseguiu adicionar completamente
                             if leftover:is_empty() then
-                                consume_craft_materials(pos)
+                                consume_and_return_tool()  -- ← substitui consume_craft_materials(pos)
                                 crafted = crafted + 1
-                            else
-                                -- Inventário cheio ou sem espaço suficiente
-                                -- Coloca de volta no output se sobrou algo
-                                if not leftover:is_empty() then inv:set_stack("output", 1, leftover) end
-                                break
+                            else if not leftover:is_empty() then inv:set_stack("output", 1, leftover) end break 
                             end
-                            break -- sai do loop de receitas
+                            break
                         end
                     end
-                    -- Se não encontrou receita válida, para
                     if not recipe_found then break end
                 end
-                -- Atualiza o crafting após o loop
                 check_and_craft(pos, config)
             end)
         end
@@ -5122,7 +5174,6 @@ c.register_node("nh_nodes:fireflybottle", {
     drawtype = "mesh",
     mesh = "bottlefirefly.obj",
     tiles = { "bottlefireflytexture.png" },
-
     paramtype = "light",
     light_source = 5,
     sunlight_propagates = true,
@@ -5133,75 +5184,12 @@ c.register_node("nh_nodes:fireflybottle", {
     groups = { snappy = 3, oddly_breakable_by_hand = 1 },
     collision_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
     selection_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.6, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    offhand_bone_position = {pos = { x = 1.6, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
+    wielded_bone_position = {pos = xyz(1.6, 0, 0)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.6, 0, 0)},
 })
-
-c.register_node("nh_nodes:inkbottle", {
-    description = S "Bottle with Ink",
-    inventory_image = "inkbottle.png",
-    drawtype = "mesh",
-    mesh = "bottle.obj",
-    tiles = { "inkbottletexture.png" },
-    paramtype = "light",
-    sunlight_propagates = true,
-    use_texture_alpha = "blend",
-    walkable = false,
-    paramtype2 = "facedir",
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
-    collision_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
-    selection_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
-})
-
-
--- Função auxiliar para verificar se o jogador tem os itens necessários
-writing_utils = {}
-function writing_utils.player_has_writing_tools(player)
-    local inv = player:get_inventory()
-    local has_feather = false
-    local has_ink = false
-    for i = 1, 8 do -- sem cinto deveria ser só 2
-        local stack = inv:get_stack("main", i)
-        if stack:get_name() == "nh_items:feather" then has_feather = true break end
-    end
-    if inv:contains_item("main", "nh_nodes:inkbottle") then has_ink = true end
-    return has_feather, has_ink
-end
-
-function writing_utils.consume_ink(player)
-    local inv = player:get_inventory()
-    inv:remove_item("main", "nh_nodes:inkbottle")
-    inv:add_item("main", "nh_nodes:bottle")
-end
-
-function player_has_writing_tools(player)
-    local inv = player:get_inventory()
-    local has_feather = false
-    local has_ink = false
-    -- Verificar se tem pena na hotbar (slots 1-8)
-    for i = 1, 8 do -- sem cinto deveria ser só 2
-        local stack = inv:get_stack("main", i)
-        if stack:get_name() == "nh_items:feather" then has_feather = true break end
-    end
-    -- Verificar se tem tinta em qualquer lugar do inventário
-    if inv:contains_item("main", "nh_nodes:inkbottle") then has_ink = true end
-    return has_feather, has_ink
-end
-
-function consume_ink(player)
-    local inv = player:get_inventory()
-    -- Remover um frasco de tinta e devolver frasco vazio
-    inv:remove_item("main", "nh_nodes:inkbottle")
-    inv:add_item("main", "nh_nodes:bottle")
-end
 
 c.register_node("nh_nodes:coconutlinked", {
-    description = S "Fixed Coconut",
+    description = S"Fixed Coconut",
     drawtype = "mesh",
     mesh = "coconutlinked.obj",
     tiles = { "CocoTexture.png" },
@@ -5210,21 +5198,21 @@ c.register_node("nh_nodes:coconutlinked", {
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1, falling_node = 1 },
+    groups = {snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1, falling_node = 1},
     --sounds = default.node_sound_wood_defaults(),
-    collision_box = {type = "fixed", fixed = { -0.25, 0, -0.5, 0.25, 0.5, 0 }},
-    selection_box = {type = "fixed", fixed = { -0.25, 0, -0.5, 0.25, 0.5, 0 } },
+    collision_box = {type = "fixed", fixed = { -0.25, 0, -0.5, 0.25, 0.5, 0}},
+    selection_box = {type = "fixed", fixed = { -0.25, 0, -0.5, 0.25, 0.5, 0}},
 })
 
 c.register_node("nh_nodes:coconut", {
-    description = S "Coconut" .. "\n" .. S "Nutrition: +3" .. "\n" .. S "Floating Item",
+    description = S"Coconut" .. "\n" .. S "Nutrition: +3" .. "\n" .. S "Floating Item",
     drawtype = "mesh",
     mesh = "coconut.obj",
-    tiles = { "CocoTexture.png" },
+    tiles = {"CocoTexture.png"},
     walkable = false,
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1, falling_node = 1 },
+    groups = {snappy = 3, tree_leaves = 1, oddly_breakable_by_hand = 1, falling_node = 1},
     --sounds = default.node_sound_wood_defaults(),
     collision_box = {type = "fixed", fixed = { -0.25, -0.5, -0.25, 0.25, 0, 0.25 }},
     selection_box = {type = "fixed", fixed = { -0.25, -0.5, -0.25, 0.25, 0, 0.25 }},
@@ -5247,7 +5235,6 @@ c.register_node("nh_nodes:coconut", {
             c.add_entity(pos, "nh_mob:coconut")
         end
     end,
-
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
         c.remove_node(pos)
@@ -5272,9 +5259,8 @@ c.register_node("nh_nodes:palmtimber", {
     sounds = {
         dug = { name = "punchtimber2", gain = 0.5 },
         dig = { name = "punchtimber2", gain = 0.5 },},
-
     after_dig_node = function(pos)
-        local below = { x = pos.x, y = pos.y - 1, z = pos.z }
+        local below = xyz(pos.x, pos.y - 1, pos.z)
         local below_node = c.get_node(below)
 
         if below_node.name == "air"
@@ -5283,11 +5269,7 @@ c.register_node("nh_nodes:palmtimber", {
             make_leaves_fall(pos)
         end
     end,
-
-    on_construct = function(pos)
-        c.get_node_timer(pos):start(0.5)
-    end,
-
+    on_construct = function(pos) c.get_node_timer(pos):start(0.5) end,
     on_timer = function(pos)
         if not has_solid_support(pos) then
             make_leaves_fall(pos)
@@ -5299,7 +5281,7 @@ c.register_node("nh_nodes:palmtimber", {
 
 
 c.register_node("nh_nodes:palmstraws", {
-    description = S "Palm Trunk with Straws",
+    description = S"Palm Trunk with Straws",
     drawtype = "mesh",
     mesh = "coconutstraws.obj",
     tiles = { "strawstimbertexture.png" },
@@ -5312,9 +5294,7 @@ c.register_node("nh_nodes:palmstraws", {
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },-- Porta na lateral quando aberta
     collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },-- Colisão fina na lateral
     -- Som tocado ao bater no tronco medio (2)
-    sounds = {
-        dug = { name = "punchtimber2", gain = 0.5 },
-        dig = { name = "punchtimber2", gain = 0.5 },},
+    sounds = {dug = {name = "punchtimber2", gain = 0.5}, dig = {name = "punchtimber2", gain = 0.5}},
 })
 
 c.register_node("nh_nodes:palmlog", {
@@ -5323,7 +5303,6 @@ c.register_node("nh_nodes:palmlog", {
     mesh = "palm_trunk.obj",
     tiles = { "coqueirotexture.png" },
     stack_max = 4,
-
     paramtype = "light",
     paramtype2 = "wallmounted",
     groups = {snappy = 3, oddly_breakable_by_hand = 1,
@@ -5331,13 +5310,13 @@ c.register_node("nh_nodes:palmlog", {
         --tree_trunk = 1
     },
     selection_box = {type = "wallmounted",
-        wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_side = { -0.5, -0.25, -0.25, 0.5, 0.25, 0.25 },},
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.25, 0.5, 0.25, 0.25}},
     node_box = {type = "wallmounted",
-        wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_side = { -0.5, -0.25, -0.25, 0.5, 0.25, 0.25 },},
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.25, 0.5, 0.25, 0.25}},
     -- Som tocado ao bater no tronco medio (2)
     sounds = {
         dug = { name = "punchtimber2", gain = 0.5 },
@@ -5384,35 +5363,26 @@ c.register_node("nh_nodes:palmleaf", {
     on_place = function(itemstack, placer, pointed_thing)
         -- Primeiro, fazer o placement normal
         local pos = c.item_place(itemstack, placer, pointed_thing)
-
         -- Se o placement foi bem-sucedido, iniciar o timer
         if pos then
             local timer = c.get_node_timer(pointed_thing.above)
             timer:start(60) -- 60 segundos = 1 minuto
         end
-
         return itemstack
     end,
-
     -- Quando o timer terminar
     on_timer = function(pos)
         -- Verificar se está sob luz do sol
         local light_level = c.get_node_light(pos, 0.5)
-
         if light_level and light_level >= 12 then -- 12+ é luz solar direta
-            -- Trocar para o node de palha
-            c.set_node(pos, { name = "nh_nodes:palmstraw" })
+            c.set_node(pos, {name = "nh_nodes:palmstraw"}) -- Trocar para o node de palha
             return false -- Não reiniciar o timer
-        else
-            -- Se não estiver no sol, reiniciar o timer
-            return true
+        else return true -- Se não estiver no sol, reiniciar o timer
         end
     end,
 })
 
----------------------------
 -- NODE DE PALHA COM CHAMAS
----------------------------
 c.register_node("nh_nodes:palmstraw", {
     description = S "Palm Straw",
     drawtype = "mesh",
@@ -5440,19 +5410,13 @@ c.register_node("nh_nodes:palmstraw", {
                 local has_flame = false
                 for _, obj in ipairs(objs) do
                     local ent = obj:get_luaentity()
-                    if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then
-                        has_flame = true
-                        break
-                    end
+                    if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then has_flame = true break end
                 end
-
                 if not has_flame then
                     local obj = c.add_entity(pos, "nh_nodes:palmstraw_flame_entity")
                     if obj then
                         local ent = obj:get_luaentity()
-                        if ent then
-                            ent._straw_pos = pos
-                        end
+                        if ent then ent._straw_pos = pos end
                     end
                 end
             end)
@@ -5461,39 +5425,24 @@ c.register_node("nh_nodes:palmstraw", {
 
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
-        if not puncher or not puncher:is_player() then
-            return
-        end
-
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
         local meta = c.get_meta(pos)
-
         -- Se já tem chama, não faz nada
-        if meta:get_int("has_flame") == 1 then
-            return
-        end
-
+        if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
             -- Marca que tem chama
             meta:set_int("has_flame", 1)
-
             -- Cria a entidade da chama
             local obj = c.add_entity(pos, "nh_nodes:palmstraw_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
-                if ent then
-                    ent._straw_pos = pos
-                end
+                if ent then ent._straw_pos = pos end
             end
-
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", {
-                pos = pos,
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
 
@@ -5502,22 +5451,18 @@ c.register_node("nh_nodes:palmstraw", {
         local objs = c.get_objects_inside_radius(pos, 0.5)
         for _, obj in ipairs(objs) do
             local ent = obj:get_luaentity()
-            if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then
-                obj:remove()
-            end
+            if ent and ent.name == "nh_nodes:palmstraw_flame_entity" then obj:remove() end
         end
     end,
 })
 
----------------------------
 -- ENTIDADE DA CHAMA DA PALHA
----------------------------
 c.register_entity("nh_nodes:palmstraw_flame_entity", {
     initial_properties = {
         physical = false,
         collide_with_objects = false,
-        selectionbox = { -0.3, -0.3, -0.3, 0.3, 0.3, 0.3 },
-        collisionbox = { -0.3, -0.3, -0.3, 0.3, 0.3, 0.3 },
+        selectionbox = {-0.3, -0.3, -0.3, 0.3, 0.3, 0.3},
+        collisionbox = {-0.3, -0.3, -0.3, 0.3, 0.3, 0.3},
         visual = "mesh",
         mesh = "flame.obj",
         textures = { "fire_basic_flame_animated.png" },
@@ -5526,49 +5471,29 @@ c.register_entity("nh_nodes:palmstraw_flame_entity", {
         pointable = true,
         glow = 14,
     },
-
     _straw_pos = nil,
     _timer = 0,
     _anim_timer = 0,
     _current_frame = 0,
-
     on_activate = function(self, staticdata)
         if staticdata ~= "" then
             local data = c.deserialize(staticdata)
-            if data and data.straw_pos then
-                self._straw_pos = data.straw_pos
-            end
+            if data and data.straw_pos then self._straw_pos = data.straw_pos end
         end
         self._timer = 0
-
-        self.object:set_sprite(
-            { x = 0, y = 0 },
-            1,
-            1.0,
-            false
-        )
-
+        self.object:set_sprite({x = 0, y = 0}, 1, 1.0, false)
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
-
-    get_staticdata = function(self)
-        return c.serialize({ straw_pos = self._straw_pos })
-    end,
-
+    get_staticdata = function(self) return c.serialize({straw_pos = self._straw_pos}) end,
     -- Detecta quando é golpeado para acender tochas
     on_punch = function(self, puncher, time_from_last_punch, tool_capabilities, dir)
-        if not puncher or not puncher:is_player() then
-            return
-        end
-
+        if not puncher or not puncher:is_player() then return end
         local wielded = puncher:get_wielded_item()
         local wielded_name = wielded:get_name()
-
         -- Verifica se está segurando uma tocha apagada
         if wielded_name == "nh_nodes:torch" then
             wielded:take_item()
             puncher:set_wielded_item(wielded)
-
             local inv = puncher:get_inventory()
             if inv then
                 local leftover = inv:add_item("main", "nh_nodes:torch2")
@@ -5577,53 +5502,31 @@ c.register_entity("nh_nodes:palmstraw_flame_entity", {
                     c.add_item(pos, leftover)
                 end
             end
-
-            c.sound_play("fire_flint_and_steel", {
-                pos = self.object:get_pos(),
-                gain = 0.5,
-                max_hear_distance = 8,
-            }, true)
+            c.sound_play("fire_flint_and_steel", {pos = self.object:get_pos(), gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
-
     on_step = function(self, dtime)
         self._timer = self._timer + dtime
         self._anim_timer = self._anim_timer + dtime
-
         -- Anima a textura
         if self._anim_timer > (1.0 / 8) then
             self._anim_timer = 0
             self._current_frame = (self._current_frame + 1) % 8
             self.object:set_texture_mod("^[verticalframe:8:" .. self._current_frame)
         end
-
         -- Verifica se a palha ainda existe
         if self._timer > 0.5 then
             self._timer = 0
-
-            if not self._straw_pos then
-                self.object:remove()
-                return
-            end
-
+            if not self._straw_pos then self.object:remove() return end
             local node = c.get_node(self._straw_pos)
-
             -- Se a palha foi removida, remove a chama
-            if node.name ~= "nh_nodes:palmstraw" then
-                self.object:remove()
-                return
-            end
-
+            if node.name ~= "nh_nodes:palmstraw" then self.object:remove() return end
             -- Verifica se ainda deve ter chama
             local meta = c.get_meta(self._straw_pos)
-            if meta:get_int("has_flame") ~= 1 then
-                self.object:remove()
-                return
-            end
+            if meta:get_int("has_flame") ~= 1 then self.object:remove() return end
         end
     end,
 })
-
 
 c.register_node("nh_nodes:fireice", {
     description = S "Fire Ice",
@@ -5639,14 +5542,14 @@ c.register_node("nh_nodes:snow_ramp", {
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_slope.obj",
-    tiles               = { "snow_slope.png" },
-    groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    tiles               = {"snow_slope.png"},
+    groups              = {cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:sand",
     sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },},
+        footstep = {name = "punchtimber3", gain = 0.5},
+        dug      = {name = "punchtimber3", gain = 0.5},
+        dig      = {name = "punchtimber3", gain = 0.5},
+        place    = {name = "punchtimber3", gain = 0.5}},
     sunlight_propagates = true,
     selection_box       = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
     collision_box       = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
@@ -5663,22 +5566,21 @@ c.register_node("nh_nodes:snow_corner", {
     drop                = "nh_nodes:sand",
     sunlight_propagates = true,
     sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },
+        footstep = {name = "punchtimber3", gain = 0.5},
+        dug      = {name = "punchtimber3", gain = 0.5},
+        dig      = {name = "punchtimber3", gain = 0.5},
+        place    = {name = "punchtimber3", gain = 0.5},
     },
     collision_box       = {type = "fixed", fixed = {
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo
-            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base principal
-            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 }, -- Base braço 1
-            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
-
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5}, -- Topo
+            {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5}, -- Base principal
+            {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0}, -- Base braço 1
+            {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5}}}, -- Base braço 2
     selection_box       = {type = "fixed", fixed = {
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- topo
-            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base principal
-            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 }, -- Base braço 1
-            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5}, -- topo
+            {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5}, -- Base principal
+            {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0}, -- Base braço 1
+            {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5}}}, -- Base braço 2
 })
 
 c.register_node("nh_nodes:snow_insidecorner", {
@@ -5691,29 +5593,29 @@ c.register_node("nh_nodes:snow_insidecorner", {
     groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
     sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },},
+        footstep = {name = "punchtimber3", gain = 0.5},
+        dug      = {name = "punchtimber3", gain = 0.5},
+        dig      = {name = "punchtimber3", gain = 0.5},
+        place    = {name = "punchtimber3", gain = 0.5}},
     sunlight_propagates = true,
     collision_box       = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo braço 1: faixa traseira (Z-) -- faixa Z-
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 }, -- Topo braço 1: faixa traseira (Z-)-- faixa Z-
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},}, -- Topo braço 2: faixa lateral (X-)-- faixa X-
+            {-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, -- Base completa (metade inferior)
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5}, -- Topo braço 1: faixa traseira (Z-) -- faixa Z-
+            {-0.5, 0.0,  -0.5, 0.0, 0.5, 0.0}, -- Topo braço 1: faixa traseira (Z-)-- faixa Z-
+            {0.5,  0.0,  0.0,  0.0, 0.5, 0.5}}}, -- Topo braço 2: faixa lateral (X-)-- faixa X-
         
     selection_box       = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},},
+            {-0.5, -0.5, -0.5, 0.5, 0.0, 0.5},
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5},
+            {-0.5, 0.0,  -0.5, 0.0, 0.5, 0.0},
+            {0.5,  0.0,  0.0,  0.0, 0.5, 0.5}}},
 })
 
 c.register_node("nh_nodes:snow", {
     description = S "Snow",
     tiles = {"neve.png"},
     drawtype = "normal",
-    groups = { crumbly = 3, falling_node = 1 }, -- como areia, mas sem fluir
+    groups = {crumbly = 3, falling_node = 1}, -- como areia, mas sem fluir
     sounds = {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug      = { name = "punchtimber3", gain = 0.5 },
@@ -5728,10 +5630,10 @@ c.register_node("nh_nodes:avalanche", {
     tiles = {"neve.png"},
     groups = {liquid = 3, crumbly = 3, falling_node = 1}, -- como areia e flui
     sounds = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },},
+        footstep = {name = "punchtimber3", gain = 0.5},
+        dug      = {name = "punchtimber3", gain = 0.5},
+        dig      = {name = "punchtimber3", gain = 0.5},
+        place    = {name = "punchtimber3", gain = 0.5}},
     walkable = false,
     pointable = false,
     buildable_to = true,
@@ -5747,12 +5649,12 @@ c.register_node("nh_nodes:avalanche_flowing", {
     description = S "Flowing Avalanche",
     liquidtype = "flowing",
     drawtype = "flowingliquid",
-    tiles = { "neve.png" },
-    groups = { liquid = 3, not_in_creative_inventory = 1 },
+    tiles = {"neve.png"},
+    groups = {liquid = 3, not_in_creative_inventory = 1},
     special_tiles = {{name = "neve_flowing_animated.png", backface_culling = false,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 }},
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0}},
         {name = "neve_flowing_animated.png", backface_culling = true,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 }},},
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0}}},
     --use_texture_alpha = "blend",
     paramtype = "light",
     walkable = false,
@@ -5770,8 +5672,7 @@ c.register_node("nh_nodes:water", {
     liquidtype = "source",
     tiles = { "agua.png" },
     tiles = {{name = "agua_animated.png", backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 10}},
-        "agua.png" }, -- resto das faces
+        animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 10}}, "agua.png"}, -- resto das faces
     paramtype = "light",
     waving = 3,
     liquid_renewable = false,
@@ -5783,14 +5684,14 @@ c.register_node("nh_nodes:water", {
     liquid_alternative_flowing = "nh_nodes:water_flowing",
     liquid_alternative_source = "nh_nodes:water",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 0, g = 0, b = 255 },
+    post_effect_color = {a = 64, r = 0, g = 0, b = 255},
     drowning = 1, -- ADICIONE ESTA LINHA (dano por segundo quando sem ar)
     groups = { water = 1, liquid = 1 },
     after_place_node = function(pos)
         local neighbors = {
-            { x = 1, y = 0, z = 0 }, { x = -1, y = 0, z = 0 },
-            { x = 0, y = 1, z = 0 }, { x = 0, y = -1, z = 0 },
-            { x = 0, y = 0, z = 1 }, { x = 0, y = 0, z = -1 },}
+            xyz(1, 0, 0), xyz(-1, 0, 0),
+            xyz(0, 1, 0), xyz(0, -1, 0),
+            xyz(0, 0, 1), xyz(0, 0, -1)}
         for _, d in ipairs(neighbors) do
             local npos = vector.add(pos, d)
             local node = c.get_node(npos)
@@ -5805,17 +5706,12 @@ c.register_node("nh_nodes:water_flowing", {
     drawtype = "flowingliquid",
     tiles = { "agua.png" },
     special_tiles = {
-        {
-            name = "agua_flowing_animated.png",
+        {name = "agua_flowing_animated.png",
             backface_culling = false,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
-        {
-            name = "agua_flowing_animated.png",
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9}},
+        {name = "agua_flowing_animated.png",
             backface_culling = true,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
-    },
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9}}},
     use_texture_alpha = "blend",
     paramtype = "light",
     walkable = false,
@@ -5827,7 +5723,7 @@ c.register_node("nh_nodes:water_flowing", {
     liquid_viscosity = 1,
     post_effect_color = { a = 64, r = 0, g = 0, b = 255 },
     drowning = 1, -- ADICIONEI ESSA LINHA
-    groups = { water = 1, liquid = 1, not_in_creative_inventory = 1 },
+    groups = {water = 1, liquid = 1, not_in_creative_inventory = 1},
 })
 
 c.register_node("nh_nodes:bucket", {
@@ -5870,9 +5766,8 @@ c.register_node("nh_nodes:bucketwater", {
     groups = { dig_immediate = 1, falling_node = 1 },
     collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
     selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    wielded_bone_position = {pos = xyz(0.5, -1.2, 0)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     pointabilities = {nodes = BUCKET_FLOWING},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
@@ -5900,16 +5795,15 @@ c.register_node("nh_nodes:bucketwater2", {
     description = S("Bucket with Fresh Water"),
     drawtype = "mesh",
     mesh = "bucket.obj",
-    tiles = { "bucketwater2.png" },
+    tiles = {"bucketwater2.png"},
     use_texture_alpha = "blend",
     paramtype = "light",
     stack_max = 1,
-    groups = { dig_immediate = 1, falling_node = 1 },
-    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
-    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }},
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    groups = {dig_immediate = 1, falling_node = 1},
+    collision_box = {type = "fixed", fixed = {-0.35, -0.5, -0.35, 0.35, 0.5, 0.35}},
+    selection_box = {type = "fixed", fixed = {-0.35, -0.5, -0.35, 0.35, 0.33, 0.35}},
+    wielded_bone_position = {pos = xyz(0.5, -1.2, 0)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     pointabilities = {nodes = BUCKET_FLOWING},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
@@ -5941,11 +5835,11 @@ c.register_node("nh_nodes:bucketsnow", {
     use_texture_alpha = "blend",
     paramtype = "light",
     stack_max = 1,
-    groups = { dig_immediate = 1, falling_node = 1 },
+    groups = {dig_immediate = 1, falling_node = 1},
     collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
     selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
-    wielded_bone_position = {pos = {x = 0.5, y = -1.2, z = 0}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}},
+    wielded_bone_position = {pos = xyz(0.5, -1.2, 0)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     pointabilities = {nodes = BUCKET_FLOWING},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
@@ -5970,15 +5864,14 @@ c.register_node("nh_nodes:bucketsnow", {
 })
 
 c.register_node("nh_nodes:barrier", {
-    description = S "Barrier",
+    description = S"Barrier",
     drawtype = "glasslike",
-    tiles = { "ice2.png" },
-    groups = { not_in_creative_inventory = 1 },
+    tiles = {"ice2.png"},
+    groups = {not_in_creative_inventory = 1},
     --is_ground_content = true,
     use_texture_alpha = "clip", --blend
     --alpha = 200,
     paramtype = "light",
-
     walkable = true,
     pointable = false,          -- não pode ser selecionado
     diggable = false,           -- inquebrável
@@ -5989,7 +5882,7 @@ c.register_node("nh_nodes:barrier", {
 })
 
 c.register_chatcommand("cleardome", {
-    privs = { server = true },
+    privs = {server = true},
     func = function(name)
         local player = c.get_player_by_name(name)
         local pos = player:get_pos()
@@ -5997,25 +5890,21 @@ c.register_chatcommand("cleardome", {
         for x = -80, 80 do
             for y = -80, 80 do
                 for z = -80, 80 do
-                    local p = {
-                        x = math.floor(pos.x + x),
-                        y = math.floor(pos.y + y),
-                        z = math.floor(pos.z + z)
-                    }
+                    local p = xyz(math.floor(pos.x + x), math.floor(pos.y + y), math.floor(pos.z + z))
                     if c.get_node(p).name == "nh_nodes:barrier" then
-                        c.set_node(p, { name = "air" })
+                        c.set_node(p, {name = "air"})
                         count = count + 1
                     end
                 end
             end
         end
-        return true, count .. " barriers removidos."
+        return true, count .. " " .. S"barriers removed."
     end
 })
 
 -- Gelo
 c.register_node("nh_nodes:ice", {
-    description = S "Ice",
+    description = S"Ice",
     drawtype = "glasslike",
     tiles = { "ice2.png" },
     groups = { cracky = 3, slippery = 3 },
@@ -6058,7 +5947,6 @@ c.register_node("nh_nodes:ice2", {
             c.add_entity(pos, "nh_mob:iceberg")
         end
     end,
-
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
         c.remove_node(pos)
@@ -6071,8 +5959,8 @@ c.register_node("nh_nodes:ice2ramp", {
     description = S "Ice Ramp",
     drawtype = "mesh",
     mesh = "grass_slope.obj",
-    tiles = { "ice2ramp.png" },
-    groups = { cracky = 3, slippery = 3 },
+    tiles = {"ice2ramp.png"},
+    groups = {cracky = 3, slippery = 3},
     walkable = true,
     --is_ground_content = true,
     use_texture_alpha = "blend", --blend
@@ -6082,16 +5970,14 @@ c.register_node("nh_nodes:ice2ramp", {
     sunlight_propagates = true, -- deixa a luz passar, como gelo real         -- não flui
     --post_effect_color = {a = 15, r = 15, g = 15, b = 15},
     --connects_to = {"nh_nodes:ice2"},
-    selection_box = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
-    collision_box = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    selection_box = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0,  0.0,  0.5, 0.5, 0.5}}},
+    collision_box = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0,  0.0,  0.5, 0.5, 0.5}}},
     pointabilities = {nodes = water_nodes},
     -- Quando o nó é colocado, verifica se está na água
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         if placer and placer:is_player() then
             local ctrl = placer:get_player_control()
-            if ctrl.sneak then
-                return
-            end
+            if ctrl.sneak then return end
         end
         -- Sem agachar: vira entidade normalmente
         if is_water_near(pos) then
@@ -6099,7 +5985,6 @@ c.register_node("nh_nodes:ice2ramp", {
             c.add_entity(pos, "nh_mob:iceberg")
         end
     end,
-
     -- Cobre o caso de água chegar até o nó depois que ele já está parado
     on_flood = function(pos, oldnode, newnode)
         c.remove_node(pos)
@@ -6126,9 +6011,9 @@ c.register_node("nh_nodes:water2", {
     liquid_alternative_flowing = "nh_nodes:water2_flowing",
     liquid_alternative_source = "nh_nodes:water2",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 0, g = 0, b = 255 },
+    post_effect_color = {a = 64, r = 0, g = 0, b = 255},
     drowning = 1, 
-    groups = { water = 1, liquid = 1 },
+    groups = {water = 1, liquid = 1},
 })
 
 c.register_node("nh_nodes:water2_flowing", {
@@ -6136,16 +6021,12 @@ c.register_node("nh_nodes:water2_flowing", {
     drawtype = "flowingliquid",
     tiles = { "water2.png" },
     special_tiles = {
-        {
-            name = "agua2_flowing_animated.png",
+        {name = "agua2_flowing_animated.png",
             backface_culling = false,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
-        {
-            name = "agua2_flowing_animated.png", -- Corrigido (estava agua_flowing)
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9}},
+        {name = "agua2_flowing_animated.png", -- Corrigido (estava agua_flowing)
             backface_culling = true,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9}},
     },
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -6166,15 +6047,8 @@ c.register_node("nh_nodes:basalt", {
     description = S "Basalt",
     tiles = { "basalt.png" },
     groups = { cracky = 3 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = xyz(0.25),
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:basalt_ramp", {
@@ -6186,28 +6060,19 @@ c.register_node("nh_nodes:basalt_ramp", {
     tiles       = { "basalt_slope.png" },
     groups      = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop        = "nh_nodes:basalt",
-
     sounds      = {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug      = { name = "punchtimber3", gain = 0.5 },
         dig      = { name = "punchtimber3", gain = 0.5 },
         place    = { name = "punchtimber3", gain = 0.5 },},
-
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,
-
-    selection_box = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
-    collision_box = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    selection_box = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5}}},
+    collision_box = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5}}},
 })
 
 c.register_node("nh_nodes:basalt_corner", {
     description         = S "Basalt Corner",
-    -- Mesmas texturas do top_grass: topo=grama, baixo=dirt, lados=dirt+grama
-
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -6224,15 +6089,15 @@ c.register_node("nh_nodes:basalt_corner", {
     --sounds = nh_nodes.sounds.dirt,
 
     collision_box       = {type = "fixed", fixed = {
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo
-            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base principal
-            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 }, -- Base braço 1
-            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5}, -- Topo
+            {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5}, -- Base principal
+            {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0}, -- Base braço 1
+            {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5}}}, -- Base braço 2
     selection_box       = {type = "fixed", fixed = {
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- topo
-            { -0.5, -0.5, 0.0,  0.0, 0.0, 0.5 }, -- Base principal
-            { -0.5, -0.5, -0.5, 0.0, 0.0, 0.0 }, -- Base braço 1
-            { 0.5,  -0.5, 0.0,  0.0, 0.0, 0.5 },},}, -- Base braço 2
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5}, -- topo
+            {-0.5, -0.5, 0.0,  0.0, 0.0, 0.5}, -- Base principal
+            {-0.5, -0.5, -0.5, 0.0, 0.0, 0.0}, -- Base braço 1
+            {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5}}}, -- Base braço 2
 })
 
 c.register_node("nh_nodes:basalt_insidecorner", {
@@ -6241,8 +6106,8 @@ c.register_node("nh_nodes:basalt_insidecorner", {
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grassinsidecorner.obj",
-    tiles               = { "basalt_slope.png" },
-    groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    tiles               = {"basalt_slope.png"},
+    groups              = {cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:basalt",
     sounds              = {
         footstep = { name = "punchtimber3", gain = 0.5 },
@@ -6251,32 +6116,24 @@ c.register_node("nh_nodes:basalt_insidecorner", {
         place    = { name = "punchtimber3", gain = 0.5 },},
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
-
     collision_box       = {type = "fixed", fixed = {
-            { -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, -- Base completa (metade inferior)
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 }, -- Topo braço 1: faixa traseira (Z-)
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 }, -- Topo braço 1: faixa traseira (Z-)
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},}, -- Topo braço 2: faixa lateral (X-)
+            {-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, -- Base completa (metade inferior)
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5}, -- Topo braço 1: faixa traseira (Z-)
+            {-0.5, 0.0,  -0.5, 0.0, 0.5, 0.0}, -- Topo braço 1: faixa traseira (Z-)
+            {0.5,  0.0,  0.0,  0.0, 0.5, 0.5}}}, -- Topo braço 2: faixa lateral (X-)
     selection_box       = {type = "fixed", fixed = {
-            {-0.5, -0.5, -0.5, 0.5, 0.0, 0.5 },
-            { -0.5, 0.0,  0.0,  0.0, 0.5, 0.5 },
-            { -0.5, 0.0,  -0.5, 0.0, 0.5, 0.0 },
-            { 0.5,  0.0,  0.0,  0.0, 0.5, 0.5 },},},
+            {-0.5, -0.5, -0.5, 0.5, 0.0, 0.5},
+            {-0.5, 0.0,  0.0,  0.0, 0.5, 0.5},
+            {-0.5, 0.0,  -0.5, 0.0, 0.5, 0.0},
+            {0.5,  0.0,  0.0,  0.0, 0.5, 0.5}}},
 })
 
 c.register_node("nh_nodes:magma", {
     description = S "Magma",
     tiles = { "magma.png" },
     groups = { cracky = 3, hot = 1 },
-    -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- Configuração mão esquerda
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }
-        --rot = {x = 0, y = 0, z = -110}
-    },
-    -- wielded_visual_size = xyz(0.25),
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
 -- ABM: Lava + água fluindo = basalto
@@ -6288,23 +6145,19 @@ c.register_abm({
     chance = 1,
     action = function(pos, node)
         local directions = {
-            { x = 0,  y = 1,  z = 0 },
-            { x = 0,  y = -1, z = 0 },
-            { x = 1,  y = 0,  z = 0 },
-            { x = -1, y = 0,  z = 0 },
-            { x = 0,  y = 0,  z = 1 },
-            { x = 0,  y = 0,  z = -1 },
-        }
-
+            {x = 0,  y = 1,  z = 0},
+            {x = 0,  y = -1, z = 0},
+            {x = 1,  y = 0,  z = 0},
+            {x = -1, y = 0,  z = 0},
+            {x = 0,  y = 0,  z = 1},
+            {x = 0,  y = 0,  z = -1}}
         local is_source = (node.name == "nh_nodes:lava" or node.name == "nh_nodes:bluelava")
         local is_flowing = (node.name == "nh_nodes:lava_flowing" or node.name == "nh_nodes:bluelava_flowing")
-
         for _, dir in ipairs(directions) do
             local neighbor_pos = vector.add(pos, dir)
             local neighbor = c.get_node(neighbor_pos)
             local is_water_source = (neighbor.name == "nh_nodes:water" or neighbor.name == "nh_nodes:water2")
             local is_water_flowing = (neighbor.name == "nh_nodes:water_flowing" or neighbor.name == "nh_nodes:water2_flowing")
-
             if is_source and is_water_source then
                 -- Lava/bluelava source + água source = obsidiana, água some
                 c.set_node(pos, { name = "nh_nodes:obsidian" })
@@ -6334,10 +6187,9 @@ c.register_node("nh_nodes:lava", {
     description = S "Lava",
     drawtype = "liquid",
     tiles = { "lava.png" },
-    tiles = { {
-        name = "lava_animated.png",
+    tiles = {{name = "lava_animated.png",
         backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0 }}, "lava.png" }, -- resto das faces
+        animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 2.0}}, "lava.png"}, -- resto das faces
     use_texture_alpha = "blend",
     paramtype = "light",
     light_source = 14,
@@ -6348,8 +6200,8 @@ c.register_node("nh_nodes:lava", {
     liquid_alternative_flowing = "nh_nodes:lava_flowing",
     liquid_alternative_source = "nh_nodes:lava",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 255, g = 0, b = 0 },
-    groups = { lava = 1, liquid = 1, hot = 1 },
+    post_effect_color = {a = 64, r = 255, g = 0, b = 0},
+    groups = {lava = 1, liquid = 1, hot = 1},
 })
 
 c.register_node("nh_nodes:lava_flowing", {
@@ -6357,16 +6209,12 @@ c.register_node("nh_nodes:lava_flowing", {
     drawtype = "flowingliquid",
     tiles = { "lava.png" },
     special_tiles = {
-        {
-            name = "lava_flowing_animated.png",
+        {name = "lava_flowing_animated.png",
             backface_culling = false,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
-        {
-            name = "lava_flowing_animated.png",
+            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }},
+        {name = "lava_flowing_animated.png",
             backface_culling = true,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
+            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }},
     },
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -6378,20 +6226,17 @@ c.register_node("nh_nodes:lava_flowing", {
     liquid_alternative_flowing = "nh_nodes:lava_flowing",
     liquid_alternative_source = "nh_nodes:lava",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 255, g = 0, b = 0 },
-    groups = { lava = 1, liquid = 1, hot = 1, not_in_creative_inventory = 1 },
+    post_effect_color = {a = 64, r = 255, g = 0, b = 0},
+    groups = {lava = 1, liquid = 1, hot = 1, not_in_creative_inventory = 1},
 })
 
 c.register_node("nh_nodes:bluelava", {
     description = S "Blue Lava",
     drawtype = "liquid",
     tiles = { "bluelava.png" },
-    tiles = { {
-        name = "bluelava_animated.png",
+    tiles = {{name = "bluelava_animated.png",
         backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 4.0 }
-    },
-        "bluelava.png" }, -- resto das faces
+        animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 4.0}}, "bluelava.png"}, -- resto das faces
     use_texture_alpha = "blend",
     paramtype = "light",
     light_source = 14,
@@ -6402,25 +6247,21 @@ c.register_node("nh_nodes:bluelava", {
     liquid_alternative_flowing = "nh_nodes:bluelava_flowing",
     liquid_alternative_source = "nh_nodes:bluelava",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 255, g = 0, b = 0 },
-    groups = { lava = 1, liquid = 1, hot = 1 },
+    post_effect_color = {a = 64, r = 255, g = 0, b = 0},
+    groups = {lava = 1, liquid = 1, hot = 1},
 })
 
 c.register_node("nh_nodes:bluelava_flowing", {
     description = S "Flowing Blue Lava",
     drawtype = "flowingliquid",
-    tiles = { "bluelava.png" },
+    tiles = {"bluelava.png"},
     special_tiles = {
-        {
-            name = "bluelava_flowing_animated.png",
+        {name = "bluelava_flowing_animated.png",
             backface_culling = false,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
-        {
-            name = "bluelava_flowing_animated.png",
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9}},
+        {name = "bluelava_flowing_animated.png",
             backface_culling = true,
-            animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9 }
-        },
+            animation = {type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 0.9}},
     },
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -6459,7 +6300,7 @@ end)
 
 c.register_abm({
     label = "Lava damage",
-    nodenames = { "nh_nodes:lava", "nh_nodes:lava_flowing" },
+    nodenames = {"nh_nodes:lava", "nh_nodes:lava_flowing"},
     interval = 1.0,
     chance = 1,
     action = function(pos, node)
@@ -6468,17 +6309,13 @@ c.register_abm({
             if obj:is_player() then
                 -- Evita double damage se já está dentro (coberto pelo globalstep)
                 local ppos = obj:get_pos()
-                local feet = c.get_node({ x = ppos.x, y = ppos.y, z = ppos.z })
-                local head = c.get_node({ x = ppos.x, y = ppos.y + 1, z = ppos.z })
-
+                local feet = c.get_node(xyz(ppos.x, ppos.y, ppos.z))
+                local head = c.get_node(xyz(ppos.x, ppos.y + 1, ppos.z))
                 local inside = feet.name == "nh_nodes:lava" or
                     feet.name == "nh_nodes:lava_flowing" or
                     head.name == "nh_nodes:lava" or
                     head.name == "nh_nodes:lava_flowing"
-
-                if not inside then
-                    obj:set_hp(obj:get_hp() - 11)
-                end
+                if not inside then obj:set_hp(obj:get_hp() - 11) end
             end
         end
     end,
@@ -6531,6 +6368,69 @@ c.override_item("nh_items:feather", {
     end,
 })
 
+c.register_node("nh_nodes:inkbottle", {
+    description = S "Bottle with Ink",
+    inventory_image = "inkbottle.png",
+    drawtype = "mesh",
+    mesh = "bottle.obj",
+    tiles = { "inkbottletexture.png" },
+    paramtype = "light",
+    sunlight_propagates = true,
+    use_texture_alpha = "blend",
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1},
+    collision_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
+    selection_box = {type = "fixed", fixed = { -0.18, -0.5, -0.18, 0.18, -0.05, 0.18 }},
+})
+
+-- Função auxiliar para verificar se o jogador tem os itens necessários
+-- Retorna quantos slots da hotbar estão ativos para este jogador
+local function get_active_hotbar_size(player)
+    local inv = player:get_inventory()
+    local waist_stack = inv:get_stack("armor_waist", 1)
+    local has_belt = not waist_stack:is_empty()
+    return has_belt and 8 or 2
+end
+writing_utils = {}
+function writing_utils.player_has_writing_tools(player)
+    local inv = player:get_inventory()
+    local has_feather = false
+    local has_ink = false
+    local slots = get_active_hotbar_size(player)
+    for i = 1, slots do
+        local stack = inv:get_stack("main", i)
+        if stack:get_name() == "nh_items:feather" then has_feather = true break end
+    end
+    if inv:contains_item("main", "nh_nodes:inkbottle") then has_ink = true end
+    return has_feather, has_ink
+end
+function writing_utils.consume_ink(player)
+    local inv = player:get_inventory()
+    inv:remove_item("main", "nh_nodes:inkbottle")
+    inv:add_item("main", "nh_nodes:bottle")
+end
+function player_has_writing_tools(player)
+    local inv = player:get_inventory()
+    local has_feather = false
+    local has_ink = false
+    local slots = get_active_hotbar_size(player)
+    -- Verifica se tem pena nos slots visíveis da hotbar
+    for i = 1, slots do
+        local stack = inv:get_stack("main", i)
+        if stack:get_name() == "nh_items:feather" then has_feather = true break end
+    end
+    -- Verifica se tem tinta em qualquer lugar do inventário
+    if inv:contains_item("main", "nh_nodes:inkbottle") then has_ink = true end
+    return has_feather, has_ink
+end
+function consume_ink(player)
+    local inv = player:get_inventory()
+    -- Remove um frasco de tinta e devolve frasco vazio
+    inv:remove_item("main", "nh_nodes:inkbottle")
+    inv:add_item("main", "nh_nodes:bottle")
+end
+
 -- Papeis
 -- Node para Página em branco
 c.register_node("nh_nodes:page", {
@@ -6573,8 +6473,8 @@ c.register_node("nh_nodes:page", {
                 "textarea[0.3,0.5;10,14;page_text;;" .. c.formspec_escape(read_text) .. "]" ..
                 "button_exit[4,12.5;2,1;close;" .. S"Close" .. "]")
             local msg = S"I think I need "
-            if not has_feather and not has_ink then msg = msg .. S"a feather in the hotbar and an ink bottle in the inventory to write."
-            elseif not has_feather then msg = msg .. S"a feather in the hotbar to write."
+            if not has_feather and not has_ink then msg = msg .. S"a feather in the main hotbar and an ink bottle in the inventory to write."
+            elseif not has_feather then msg = msg .. S"a feather in the main hotbar to write."
             else msg = msg .. S"an ink bottle in the inventory to write."
             end
             c.chat_send_player(player_name, msg)
@@ -9891,7 +9791,7 @@ c.register_node("nh_nodes:stoneaxe", {
     groups = {dig_immediate = 1, falling_node = 1}, -- falling_node faz ele cair,
     collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035}},
     selection_box = {type = "fixed", fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03}},
-    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}}, -- Configuração mão direita
+    wielded_bone_position = {pos = xyz(1.1, 0, 0.1)}, -- Configuração mão direita
     wielded_visual_size = xyz(0.25),
     tool_capabilities = {full_punch_interval = 2, max_drop_level = 1,
         groupcaps = {
@@ -9934,12 +9834,12 @@ c.register_node("nh_nodes:stonepickaxe", {
     wielded_visual_size = xyz(0.25),
     tool_capabilities = {full_punch_interval = 2, max_drop_level = 1,
         groupcaps = {
-            crumbly = { times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-            cracky = { times = { [1] = 20, [2] = 15, [3] = 10 }, uses = 10, maxlevel = 1 },
-            choppy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1}},
-        damage_groups = { fleshy = 4 },
+            crumbly = {times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1},
+            snappy = {times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
+            fleshy = {times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1},
+            cracky = {times = { [1] = 20, [2] = 15, [3] = 10 }, uses = 10, maxlevel = 1},
+            choppy = {times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 4},
     },
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -9971,12 +9871,11 @@ c.register_node("nh_nodes:stoneadze", {
         full_punch_interval = 2,
         max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 20, [2] = 15, [3] = 10.00 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.50, [2] = 1.10, [3] = 0.70 }, uses = 10, maxlevel = 1 },
-        },
-        damage_groups = { fleshy = 3 },
+            choppy = {times = {[1] = 20, [2] = 15, [3] = 10.00 }, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 1.50, [2] = 1.10, [3] = 0.70 }, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
     -- bater em node / transformar em terra arada
     node_placement_prediction = "",
@@ -9986,13 +9885,8 @@ c.register_node("nh_nodes:stoneadze", {
             if pointed_thing.type == "node" then
                 local pos = pointed_thing.under
                 local node = c.get_node(pos)
-
                 -- Mapeamento: tora -> madeira
-                local conversions = {
-                    ["nh_nodes:oaklog"]  = "nh_nodes:oakwood",
-                    ["nh_nodes:pinelog"] = "nh_nodes:pinewood",
-                }
-
+                local conversions = {["nh_nodes:oaklog"]  = "nh_nodes:oakwood", ["nh_nodes:pinelog"] = "nh_nodes:pinewood"}
                 local result = conversions[node.name]
                 if result then
                     c.set_node(pos, { name = result })
@@ -10001,8 +9895,7 @@ c.register_node("nh_nodes:stoneadze", {
                 end
             end
             return itemstack
-        else
-            return c.item_place(itemstack, puncher, pointed_thing)
+        else return c.item_place(itemstack, puncher, pointed_thing)
         end
     end,
     -- cavar node
@@ -10019,10 +9912,9 @@ c.register_node("nh_nodes:stoneadze", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-    collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.25, 0.035 },},},
-    selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.25, 0.03 },},
-    -- Configuração mão direita
-    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035}},
+    selection_box = {type = "fixed", fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03}},
+    wielded_bone_position = {pos = xyz(1.1, 0, 0.1)}, -- Configuração mão direita
     wielded_visual_size = xyz(0.25),
 })
 
@@ -10040,12 +9932,11 @@ c.register_node("nh_nodes:stonehoe", {
         full_punch_interval = 2,
         max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 20, [2] = 15, [3] = 10.00 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.50, [2] = 1.10, [3] = 0.70 }, uses = 10, maxlevel = 1 },
-        },
-        damage_groups = { fleshy = 3 },
+            choppy = {times = {[1] = 20, [2] = 15, [3] = 10.00}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 1.50, [2] = 1.10, [3] = 0.70}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
     -- bater em node / transformar em terra arada
     node_placement_prediction = "",
@@ -10084,10 +9975,9 @@ c.register_node("nh_nodes:stonehoe", {
     --     itemstack:set_wear(wear)
     --     return itemstack
     --end,
-    collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.25, 0.035 },},},
-    selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.25, 0.03 },},
-    -- Configuração mão direita
-    wielded_bone_position = { pos = { x = 1.1, y = 0, z = 0.1 }},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.035, 0.08, 0.25, 0.035}},
+    selection_box = {type = "fixed", fixed = {-0.075, -0.5, -0.03, 0.075, 0.25, 0.03}},
+    wielded_bone_position = { pos = xyz(1.1, 0, 0.1)}, -- Configuração mão direita
     wielded_visual_size = xyz(0.25),
 })
 
@@ -10109,11 +9999,10 @@ c.register_node("nh_nodes:chippedstoneknife", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = { times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
-        damage_groups = { fleshy = 3 },
+            snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -10129,10 +10018,10 @@ c.register_node("nh_nodes:chippedstoneknife", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-    collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.05, 0.035 },},},
-    selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.05, 0.03 },},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.035, 0.08, 0.05, 0.035}},
+    selection_box = {type = "fixed", fixed = {-0.075, -0.5, -0.03, 0.075, 0.05, 0.03}},
     -- Configuração mão direita
-    wielded_bone_position = {pos = {x = 1.1, y = 0, z = 0.1}},
+    wielded_bone_position = {pos = xyz(1.1, 0, 0.1)},
 })
 
 
@@ -10150,10 +10039,10 @@ c.register_node("nh_nodes:obsidianknife", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = { times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
-        damage_groups = { fleshy = 5 },
+            snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 5},
     },
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -10172,7 +10061,7 @@ c.register_node("nh_nodes:obsidianknife", {
     collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.05, 0.035 },},},
     selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.05, 0.03 },},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 1.1, y = 0, z = 0.1 }},
+    wielded_bone_position = {pos = xyz(1.1, 0, 0.1)},
 })
 
 -- FUNÇÃO DE ARREMESSO (SEIXO branco)
@@ -10183,7 +10072,7 @@ local function throw_white_pebble(itemstack, user)
     local obj = c.add_entity(pos, "nh_nodes:white_pebble_entity")
     if obj then
         obj:set_velocity(vector.multiply(dir, 13))
-        obj:set_acceleration({ x = 0, y = -9.81, z = 0 })
+        obj:set_acceleration(xyz(0, -9.81, 0))
         local ent = obj:get_luaentity()
         if ent then ent._shooter = user end
     end
@@ -10198,16 +10087,16 @@ c.register_craftitem("nh_nodes:white_pebble_item", {
     description = S "White Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "white_seixo_arremessavel.png", -- Use uma textura diferente
     wielded_bone_position = {pos = {x = 0.5, y = -0.25, z = 0}}, -- Configuração mão direita
-    wielded_visual_size = {x = 0.15, y = 0.15, z = 0.15},
+    wielded_visual_size = xyz(0.15),
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
-        damage_groups = { fleshy = 2 },
+            choppy = {times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 2},
     },
     on_place = function(itemstack, placer, pointed_thing) return throw_white_pebble(itemstack, placer) end,
     on_drop = function(itemstack, dropper, pos) return throw_white_pebble(itemstack, dropper) end,
@@ -10828,7 +10717,7 @@ c.register_node("nh_nodes:grassleavesmedium", {
                 if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", { pos = pos, gain = 0.5, max_hear_distance = 8, }, true)
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
     -- Quando a grama for removida, remove as chamas nela
@@ -10846,7 +10735,7 @@ c.register_node("nh_nodes:smallgrass", {
     description = S "Short Grass",
     drawtype = "mesh",
     mesh = "smallgrass.obj",
-    tiles = { "highgrass.png" },
+    tiles = {"highgrass.png"},
     --drawtype = "plantlike",
     --tiles = {"grassleavesbasic2.png"},
     waving = 1,
@@ -10854,8 +10743,8 @@ c.register_node("nh_nodes:smallgrass", {
     paramtype = "light",
     walkable = false,
     --buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 }},
+    groups = {snappy = 3, flammable = 2},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -10875,7 +10764,7 @@ c.register_node("nh_nodes:smallgrass", {
                 if ent then ent._grass_pos = pos end
             end
             -- Efeito sonoro (opcional)
-            c.sound_play("fire_flint_and_steel", { pos = pos, gain = 0.5, max_hear_distance = 8, }, true)
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
         end
     end,
     -- Quando a grama for removida, remove as chamas nela
@@ -10900,8 +10789,8 @@ c.register_node("nh_nodes:highgrass", {
     paramtype = "light",
     walkable = false,
     --buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 1.5, 0.5 }},
+    groups = {snappy = 3, flammable = 2},
+    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, 0.5 }},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -10945,7 +10834,7 @@ c.register_node("nh_nodes:dandelion", {
     walkable = false,
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    selection_box = {type = "fixed", fixed = {-0.3, -0.5, -0.3, 0.3, -0.1, 0.3}},
 })
 
 -- NODE DE JUNCO
@@ -10958,7 +10847,7 @@ c.register_node("nh_nodes:rush", {
     walkable = false,
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    selection_box = {type = "fixed", fixed = {-0.2, -0.5, -0.2, 0.2, 0, 0.2}},
 })
 
 -- NODE DO COGUMELO MICACEUS
@@ -10972,7 +10861,7 @@ c.register_node("nh_nodes:micaceusfungus", {
     walkable = false,
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    selection_box = {type = "fixed", fixed = {-0.06, -0.5, -0.06, 0.06, -0.19, 0.06}},
     -- Tornar não comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, -2)               -- retira 2 pontos de fome
@@ -10992,8 +10881,8 @@ c.register_node("nh_nodes:flyamanitafungus", {
     paramtype = "light",
     walkable = false,
     buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, flammable = 2},
+    selection_box = {type = "fixed", fixed = {-0.125, -0.5, -0.125, 0.125, -0.22, 0.125}},
     -- Tornar não comestível
     on_use = function(itemstack, user, pointed_thing)
         restore_hunger(user, -4)             -- retira 4 pontos de fome
@@ -11906,8 +11795,8 @@ c.register_node("nh_nodes:gravitywings", {
     -- Define posição customizada quando equipado
     armor_bone_position = {pos = xyz(-0.25, -0.5, 0), rot = xyz(0, -90, 0)},
     -- Configuração mão direita
-    wielded_bone_position = {pos = {x = -2, y = 0, z = 0}},
-    offhand_bone_position = {pos = {x = -2, y = 0, z = -0.25}},
+    wielded_bone_position = {pos = xyz(-2, 0, 0)},
+    offhand_bone_position = {pos = xyz(-2, 0, -0.25)},
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         -- Substitui o nó colocado pelo closedwings, mantendo o facedir
         local node = c.get_node(pos)
@@ -11984,8 +11873,8 @@ c.register_node("nh_nodes:oakdoor", {
     --sounds = default.node_sound_wood_defaults(),
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, -0.375}}, -- 3 blocos de altura, fina
     collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.3, 0.5, 2.5, 0.05}},
-    wielded_bone_position = {pos = {x = -2, y = -0.9, z = 1.35}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 3, y = -1, z = 0.7}, rot = {x = 0, y = 0, z = 90}}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(-2, -0.9, 1.35)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(3, -1, 0.7), rot = xyz(0, 0, 90)}, -- Configuração mão esquerda
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         c.set_node(pos, {name = "nh_nodes:oakdoor_open", param2 = node.param2}) -- Abre a porta
         c.sound_play("door_open", {pos = pos, gain = 0.3, max_hear_distance = 10})
@@ -12006,8 +11895,8 @@ c.register_node("nh_nodes:oakdoor_open", {
     walkable = false,
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.38, -0.375, 2.5, 0.63}}, -- Porta na lateral quando aberta
     collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.38, -0.375, 2.5, 0.63}}, -- Colisão fina na lateral
-    wielded_bone_position = {pos = {x = -2, y = -1, z = 1.35 }, rot = { x = 0, y = -90, z = -90}},  -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 3, y = -1, z = -1.4 }, rot = { x = 0, y = 90, z = 90}},  -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(-2, -1, 1.35), rot = xyz(0, -90, -90)},  -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(3, -1, -1.4), rot = xyz(0, 90, 90)},  -- Configuração mão esquerda
     -- wielded_visual_size = xyz(0.25),
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
         c.set_node(pos, {name = "nh_nodes:oakdoor", param2 = node.param2}) -- Fecha a porta
