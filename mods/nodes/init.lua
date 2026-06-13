@@ -1422,7 +1422,7 @@ register_craft_station("nh_nodes:top_grass", {
         footstep = {name = "GrassFootstep", gain = 0.5},
         dug = {name = "GrassDig", gain = 0.5},
         dig = {name = "GrassDig", gain = 0.5},
-        place = {name = "GrassDig", gain = 0.5},},
+        place = {name = "GrassDig", gain = 0.5}},
     title = S "2x2 Craft on the Grass",
     groups = {crumbly = 3, soil = 1},
     -- Quando a grama é bloqueada da luz, vira terra
@@ -10652,6 +10652,10 @@ c.register_node("nh_nodes:grassleaves", {
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    sounds = {
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -10698,6 +10702,10 @@ c.register_node("nh_nodes:grassleavesmedium", {
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    sounds = {
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -10745,6 +10753,10 @@ c.register_node("nh_nodes:smallgrass", {
     --buildable_to = true,
     groups = {snappy = 3, flammable = 2},
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
+    sounds = {
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -10755,8 +10767,7 @@ c.register_node("nh_nodes:smallgrass", {
         if meta:get_int("has_flame") == 1 then return end
         -- Verifica se está segurando uma tocha acesa
         if wielded_name == "nh_nodes:torch2" or wielded_name == "nh_nodes:flame" then
-            -- Marca que tem chama
-            meta:set_int("has_flame", 1)
+            meta:set_int("has_flame", 1) -- Marca que tem chama
             -- Cria a entidade da chama
             local obj = c.add_entity(pos, "nh_nodes:flame_entity")
             if obj then
@@ -10791,6 +10802,10 @@ c.register_node("nh_nodes:highgrass", {
     --buildable_to = true,
     groups = {snappy = 3, flammable = 2},
     selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, 0.5 }},
+    sounds = {
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -10835,6 +10850,10 @@ c.register_node("nh_nodes:dandelion", {
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = {-0.3, -0.5, -0.3, 0.3, -0.1, 0.3}},
+    sounds = {
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
 })
 
 -- NODE DE JUNCO
@@ -10848,6 +10867,10 @@ c.register_node("nh_nodes:rush", {
     buildable_to = true,
     groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
     selection_box = {type = "fixed", fixed = {-0.2, -0.5, -0.2, 0.2, 0, 0.2}},
+    sounds = {
+        dug = {name = "GrassDig", gain = 0.5},
+        dig = {name = "GrassDig", gain = 0.5},
+        place = {name = "GrassDig", gain = 0.5}},
 })
 
 -- NODE DO COGUMELO MICACEUS

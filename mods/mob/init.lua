@@ -1863,7 +1863,7 @@ mobs:register_mob("nh_mob:spider", {
     end
 end,
 })
--- Spawn do dopel (casas, blocos de madeiras)
+-- Spawn da aranha
 register_mob_spawn({
     name = "nh_mob:spider",
     nodes = { "air" },
@@ -1950,6 +1950,79 @@ register_mob_spawn({
 })
 --mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
 register_orb_egg("nh_mob:dopel", S("Orb with Dopel"))
+
+-- MOB 4: ? (Agressivo)
+mobs:register_mob("nh_mob:q", {
+    type = "monster",
+    passive = false,
+    reach = 1.75,
+    damage = 6,
+    -- attack_players = true,
+    attack_type = "dogfight",
+    description = "?",
+    hp_min = 20,
+    hp_max = 30,
+    armor = 100,
+    collisionbox = {-0.2, 0, -0.2, 0.2, 2.4, 0.2},
+    selectionbox = {-0.5, 0, -0.2, 0.5, 2.4, 0.2},
+    physical = true,
+    stepheight = 2, -- Consegue subir degraus para conseguir sair da agua (importante!)
+    fall_speed = -10,
+    fall_damage = 0,
+    floats = 3,
+    --pathfinding = true, -- se move em zig-zag
+    static_save = true,
+    despawn_by_day = false,
+    remove_far = false,
+    visual = "mesh",
+    mesh = "character11.glb",
+    textures = {"skinq.png"},
+    -- rotate = 180,
+    visual_size = {x = 1, y = 1},
+    -- BRILHO NOS OLHOS
+    glow = 14,  -- Intensidade de 0 a 14 (14 = mais brilhante)
+    -- IMPORTANTE: Propriedades para manter na água
+    -- fly = true,               -- Permite "voar" na água
+    -- fly_in = "air",   -- Voa no ar
+    walk_velocity = 1,
+    run_velocity = 10,
+    view_range = 20,
+    water_damage = 2,
+    lava_damage = 5,
+    light_damage = 0,
+    air_damage = 0,
+    animation = {speed_normal = 0.5, stand_start = 0, stand_end = 1.02, walk_start = 1, walk_end = 2, punch_start = 11.75, punch_end = 12},
+    -- RESPOSTA NO PRIMEIRO CLIQUE COM QUALQUER ITEM (exceto mão vazia)
+    on_rightclick = function(self, clicker)
+        if clicker:is_player() then
+            local item = clicker:get_wielded_item()
+            local name = item:get_name()
+            if name == "" then c.chat_send_player(clicker:get_player_name(), "...")
+            else c.chat_send_player(clicker:get_player_name(), "!!!")
+            end
+        end
+    end,
+    sounds = { random = "vulto_som", damage = "vulto_hurt", },
+    after_activate = function(self, staticdata, def, dtime) self.object:set_properties({ static_save = true }) end,
+    -- do_custom = function(self, dtime)
+    --     self.lifetimer = 20000
+    --     return true
+    -- end,
+})
+-- Spawn do ? 
+register_mob_spawn({
+    name = "nh_mob:q",
+    nodes = { "air" },
+    neighbors = {"nh_nodes:gneiss"},
+    max_light = 2,
+    interval = 300,
+    chance = 500,
+    active_object_count = 1,
+    min_height = 0,
+    max_height = 50
+})
+--mobs:register_egg("nh_mob:dopel", "Orbe com Dopel", "orbspawner.png", 0)
+register_orb_egg("nh_mob:q", S"Orb with ?")
 
 -- MOB: PHOENIX (Fênix)
 mobs:register_mob("nh_mob:phoenix", bird_def({
