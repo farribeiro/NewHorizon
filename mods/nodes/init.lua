@@ -1183,7 +1183,7 @@ c.register_node("nh_nodes:dirt_insidecorner", {
                 {0.5,  0.0,  0.0,  0.0, 0.5, 0.5}}},
 })
 register_craft_station("nh_nodes:dirt", {
-    description = S "Dirt",
+    description = S"Dirt",
     tiles = {"terra.png"},
     groups = {crumbly = 2},
     sounds = {
@@ -1424,9 +1424,8 @@ register_craft_station("nh_nodes:top_grass", {
         dig = {name = "GrassDig", gain = 0.5},
         place = {name = "GrassDig", gain = 0.5}},
     title = S "2x2 Craft on the Grass",
-    groups = {crumbly = 3, soil = 1},
-    -- Quando a grama é bloqueada da luz, vira terra
-    drop = "nh_nodes:dirt",
+    groups = {crumbly = 1, soil = 1},
+    drop = "nh_nodes:dirt",  -- Quando a grama quebrada vira terra
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     -- wielded_visual_size = xyz(0.25),
@@ -1466,9 +1465,9 @@ register_craft_station("nh_nodes:top_grass2", {
         dig = {name = "GrassDig", gain = 0.5},
         place = {name = "GrassDig", gain = 0.5}},
     title = S "2x2 Craft on the Grass",
-    groups = {crumbly = 3, soil = 1},
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}}, -- Configuração mão esquerda
+    groups = {crumbly = 1, soil = 1},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     -- Quando a grama é bloqueada da luz, vira terra
     drop = "nh_nodes:dirt",
     on_timer = function(pos, elapsed)
@@ -1488,20 +1487,20 @@ register_craft_station("nh_nodes:top_grass2", {
     end,
     grid_size = 4,
     positions = {
-        { x = -0.2, y = 0.9, z = -0.2 },
-        { x = 0.2, y = 0.9, z = -0.2 },
-        { x = -0.2, y = 0.9, z = 0.2 }, 
-        { x = 0.2, y = 0.9, z = 0.2 }, },
+        xyz(-0.2, 0.9, -0.2),
+        xyz(0.2, 0.9, 0.2),
+        xyz(-0.2, 0.9, 0.2), 
+        xyz(0.2, 0.9, 0.2)},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.4, 0),
-    layers = { { name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 }, },
+    layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
 
 register_craft_station("nh_nodes:grass", {
-    description = S "Lawn",
-    tiles = { "grama.png" },
-    groups = { crumbly = 3 },
+    description = S"Lawn",
+    tiles = {"grama.png"},
+    groups = {crumbly = 1},
     sunlight_propagates = false,
     drop = "nh_nodes:dirt",
     sounds = {
@@ -1532,9 +1531,9 @@ register_craft_station("nh_nodes:grass", {
         xyz(0.2, 0.9, -0.2),
         xyz(-0.2, 0.9, 0.2),
         xyz(0.2, 0.9, 0.2)},
-    tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
+    tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.4, 0),
-    layers = {{name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
+    layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
 })
 -- SISTEMA DE DETECÇÃO DE BLOCOS ACIMA DA GRAMA
@@ -1565,7 +1564,7 @@ c.register_node("nh_nodes:sand_ramp", {
     drawtype            = "mesh",
     mesh                = "grass_slope.obj",
     tiles               = { "sand_slope.png" },
-    groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    groups              = {crumbly = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
     sounds              = {
         footstep = { name = "punchtimber3", gain = 0.5 },
@@ -1584,7 +1583,7 @@ c.register_node("nh_nodes:sand_corner", {
     drawtype            = "mesh",
     mesh                = "grass_vertix.obj",
     tiles               = {"sand_slope.png"},
-    groups              = {cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
+    groups              = {crumbly = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:sand",
     sounds              = {
         footstep = { name = "punchtimber3", gain = 0.5},
@@ -1604,13 +1603,13 @@ c.register_node("nh_nodes:sand_corner", {
                 {0.5,  -0.5, 0.0,  0.0, 0.0, 0.5}}},     -- Base braço 2
 })
 c.register_node("nh_nodes:sand_insidecorner", {
-    description         = S "Sand Inside Corner",
+    description         = S"Sand Inside Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grassinsidecorner.obj",
-    tiles               = { "sand_slope.png" },
-    groups              = {cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
+    tiles               = {"sand_slope.png"},
+    groups              = {crumbly = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:sand",
     sounds = {
         footstep = { name = "punchtimber3", gain = 0.5 },
@@ -1637,7 +1636,7 @@ register_craft_station("nh_nodes:sand", {
     tiles = { "areia.png" },
     title = S "2x2 Craft on the Sand", -- Campo obrigatório!
     grid_size = 4,
-    groups = { crumbly = 2, falling_node = 1 },
+    groups = {crumbly = 3, falling_node = 1},
     sounds = {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug = { name = "punchtimber3", gain = 0.5 },
@@ -1656,7 +1655,7 @@ register_craft_station("nh_nodes:wet_sand", {
     description = S "Wet Sand",
     tiles = { "areia_molhada.png" },
     title = S "2x2 Craft on the Wet Sand", --       Campo obrigatório!
-    groups = { crumbly = 2 },
+    groups = { crumbly = 3 },
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     grid_size = 4,
@@ -1669,16 +1668,16 @@ register_craft_station("nh_nodes:wet_sand", {
     recipes = recipes_floor
 })
 c.register_node("nh_nodes:saprolite", {
-    description = S "Saprolite",
-    tiles = { "saprolite.png" },
-    groups = { cracky = 3 },
+    description = S"Saprolite",
+    tiles = {"saprolite.png"},
+    groups = {cracky = 3},
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 register_craft_station("nh_nodes:gneiss", {
     description = S "Gneiss",
-    tiles = { "pedra.png" },
-    groups = { cracky = 3 },
+    tiles = {"pedra.png"},
+    groups = {cracky = 1},
     drop = "nh_nodes:pebble_item 8",
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
@@ -1687,7 +1686,7 @@ register_craft_station("nh_nodes:gneiss", {
     positions = {
         xyz(-0.2, 0.9, -0.2), xyz(0.2, 0.9, -0.2),
         xyz(-0.2, 0.9, 0.2), xyz(0.2, 0.9, 0.2)},
-    tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
+    tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.4, 0),
     layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
     recipes = recipes_floor
@@ -1696,7 +1695,7 @@ register_craft_station("nh_nodes:gneiss", {
 register_craft_station("nh_nodes:cobblestone", {
     description = S "Cobblestone",
     tiles = { "cobblestone.png" },
-    groups = { cracky = 3 },
+    groups = {cracky = 2},
     drop = "nh_nodes:pebble_item 8",
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
@@ -1739,17 +1738,17 @@ c.register_node("nh_nodes:charcoal2", {
     drop = "nh_nodes:charcoalnugget 2",
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = { snappy = 3, oddly_breakable_by_hand = 1},
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     paramtype2 = "wallmounted",
-    selection_box = { type = "wallmounted",
-        wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_side = { -0.5, -0.25, -0.25, 0.5, 0.25, 0.25 }, },
+    selection_box = {type = "wallmounted",
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.25, 0.5, 0.25, 0.25}},
     node_box = { type = "wallmounted",
-        wall_top = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_bottom = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 },
-        wall_side = { -0.5, -0.25, -0.5, 0.5, 0.25, 0.5 }, },
+        wall_top = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_bottom = {-0.25, -0.5, -0.25, 0.25, 0.5, 0.25},
+        wall_side = {-0.5, -0.25, -0.5, 0.5, 0.25, 0.5}},
     -- Som tocado ao bater no tronco medio (2)
     sounds = {dug = {name = "punchtimber2", gain = 0.5}, dig = {name = "punchtimber2", gain = 0.5}}
 })
@@ -1759,18 +1758,18 @@ c.register_node("nh_nodes:coal", {
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "coalore.png" },
-    groups = {cracky = 3},
+    groups = {cracky = 2},
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     drop = {items = {{items = {"nh_nodes:coalnugget 8"}}}},
 })
 
 c.register_node("nh_nodes:coalnugget", {
-    description = S "Coal Nugget",
+    description = S"Coal Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "coalnugget.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
     collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
@@ -1782,7 +1781,7 @@ c.register_node("nh_nodes:charcoalnugget", {
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "charcoalnugget.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
     collision_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
@@ -1801,11 +1800,11 @@ c.register_node("nh_nodes:copper", {
 })
 
 c.register_node("nh_nodes:coppernugget", {
-    description = S "Copper Nugget",
+    description = S"Copper Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "coppernugget.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
     collision_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
@@ -1817,7 +1816,7 @@ c.register_node("nh_nodes:copperingot", {
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "copperingot.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
 })
@@ -1827,10 +1826,10 @@ c.register_node("nh_nodes:tin", {
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = { "gneiss_tinore.png" },
-    groups = { cracky = 3 },
+    groups = {cracky = 3},
     drop = {items = {{ items = {"nh_nodes:tinnugget"}}, { items = {"nh_nodes:pebble 3"}}, }},
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:tinnugget", {
@@ -1838,11 +1837,11 @@ c.register_node("nh_nodes:tinnugget", {
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "tinnugget.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
-    collision_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
-    selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
 })
 
 c.register_node("nh_nodes:tiningot", {
@@ -1850,7 +1849,7 @@ c.register_node("nh_nodes:tiningot", {
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "tiningot.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
 })
@@ -1859,19 +1858,19 @@ c.register_node("nh_nodes:iron", {
     description = S "Pyrite" .. "\n" .. S "[Iron Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
-    tiles = { "gneiss_ironore.png" },
-    groups = { cracky = 3 },
+    tiles = {"gneiss_ironore.png"},
+    groups = {cracky = 3},
     drop = {items = {{items = {"nh_nodes:ironnugget"}}, {items = {"nh_nodes:pebble 3"}}}},
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:ironnugget", {
     description = S "Iron Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
-    tiles = { "ironnugget.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    tiles = {"ironnugget.png"},
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
     collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
@@ -1883,7 +1882,7 @@ c.register_node("nh_nodes:ironingot", {
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "ironingot.png" },
-    groups = { snappy = 3, oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
 })
@@ -1892,30 +1891,30 @@ c.register_node("nh_nodes:nickel", {
     description = S "Garnierite" .. "\n" .. S "[Nickel Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
-    tiles = { "gneiss_nickelore.png" },
-    groups = { cracky = 3 },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},  -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
+    tiles = {"gneiss_nickelore.png"},
+    groups = {cracky = 3},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)},  -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:manganese", {
     description = S "Pyrolusite" .. "\n" .. S "[Manganese Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
-    tiles = { "gneiss_manganeseore.png" },
-    groups = { cracky = 3 },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    tiles = {"gneiss_manganeseore.png"},
+    groups = {cracky = 3},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:chromium", {
     description = S "Chromite" .. "\n" .. S "[Chromium Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
-    tiles = { "gneiss_chromeore.png" },
-    groups = { cracky = 3 },
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }},  -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},  -- Configuração mão esquerda
+    tiles = {"gneiss_chromeore.png"},
+    groups = {cracky = 3},
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)},  -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},  -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:chromiumnugget", {
@@ -1923,11 +1922,11 @@ c.register_node("nh_nodes:chromiumnugget", {
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = { "ironnugget.png" },
-    groups = {oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
-    collision_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
-    selection_box = {type = "fixed", fixed = { -0.08, -0.5, -0.08, 0.08, -0.35, 0.08 },},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
 })
 
 c.register_node("nh_nodes:chromiumingot", {
@@ -1935,9 +1934,10 @@ c.register_node("nh_nodes:chromiumingot", {
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "ironingot.png" },
-    groups = {oddly_breakable_by_hand = 1 },
+    groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
+    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
 })
 
 c.register_node("nh_nodes:peridotite", {
@@ -2046,11 +2046,11 @@ end
 c.register_node("nh_nodes:oaktimber", {
     description = S "Oak Timber",
     tiles = { "oaktimber.png" },
-    groups = { choppy = 3, falling_node = 1, armor_head = 1 },
+    groups = {choppy = 1, falling_node = 1, armor_head = 1},
     stack_max = 1,
     drop = "nh_nodes:oaklog",
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     -- wielded_visual_size = xyz(0.25),
     sounds = {
         dug = {name = "punchtimber", gain = 0.5},
@@ -2127,7 +2127,7 @@ c.register_node("nh_nodes:appletimber", {
     drawtype = "mesh",
     mesh = "appletimber.obj",
     tiles = { "appletimber.png" },
-    groups = { choppy = 3, falling_node = 1, armor_head = 1 },
+    groups = {choppy = 3, falling_node = 1, armor_head = 1},
     stack_max = 1,
     paramtype = "light",
     sunlight_propagates = true,
@@ -2165,7 +2165,7 @@ c.register_node("nh_nodes:appletimber", {
 c.register_node("nh_nodes:pinetimber", {
     description = S "Pine Timber",
     tiles = { "pinetimber.png" },
-    groups = { choppy = 3, falling_node = 1, armor_head = 1 },
+    groups = {choppy = 1, falling_node = 1, armor_head = 1},
     stack_max = 1,
     drop = "nh_nodes:pinelog",
     sounds = {
@@ -5253,7 +5253,7 @@ c.register_node("nh_nodes:palmtimber", {
     --waving = 2,
     paramtype = "light",
     paramtype2 = "facedir",
-    groups = {snappy = 3, oddly_breakable_by_hand = 1, falling_node = 1, tree_trunk = 1},
+    groups = {snappy = 2, oddly_breakable_by_hand = 1, falling_node = 1, tree_trunk = 1},
     collision_box = {type = "fixed", fixed = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 }},
     selection_box = {type = "fixed", fixed = { -0.25, -0.5, -0.25, 0.25, 0.5, 0.25 }},
     sounds = {
@@ -5262,7 +5262,6 @@ c.register_node("nh_nodes:palmtimber", {
     after_dig_node = function(pos)
         local below = xyz(pos.x, pos.y - 1, pos.z)
         local below_node = c.get_node(below)
-
         if below_node.name == "air"
             or c.get_item_group(below_node.name, "tree_trunk") > 0
             or c.get_item_group(below_node.name, "tree_leaves") > 0 then
@@ -5271,10 +5270,7 @@ c.register_node("nh_nodes:palmtimber", {
     end,
     on_construct = function(pos) c.get_node_timer(pos):start(0.5) end,
     on_timer = function(pos)
-        if not has_solid_support(pos) then
-            make_leaves_fall(pos)
-            return false
-        end
+        if not has_solid_support(pos) then make_leaves_fall(pos) return false end
         return true
     end,
 })
@@ -5395,10 +5391,9 @@ c.register_node("nh_nodes:palmstraw", {
     backface_culling = false,
     use_texture_alpha = "blend",
     paramtype2 = "facedir",
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, tree_leaves = 1, flammable = 3 },
-    collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.3, 0.5 }},
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.3, 0.5 }},
-
+    groups = {oddly_breakable_by_hand = 1, tree_leaves = 1, flammable = 3 },
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.3, 0.5}},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.3, 0.5}},
     -- Quando a palha é colocada, verifica se deve criar chama
     on_construct = function(pos)
         local meta = c.get_meta(pos)
@@ -5422,7 +5417,6 @@ c.register_node("nh_nodes:palmstraw", {
             end)
         end
     end,
-
     -- Quando a palha é atingida com tocha
     on_punch = function(pos, node, puncher, pointed_thing)
         if not puncher or not puncher:is_player() then return end
@@ -5465,8 +5459,8 @@ c.register_entity("nh_nodes:palmstraw_flame_entity", {
         collisionbox = {-0.3, -0.3, -0.3, 0.3, 0.3, 0.3},
         visual = "mesh",
         mesh = "flame.obj",
-        textures = { "fire_basic_flame_animated.png" },
-        visual_size = { x = 10, y = 10 }, -- Menor que a chama da grama
+        textures = {"fire_basic_flame_animated.png"},
+        visual_size = {x = 10, y = 10}, -- Menor que a chama da grama
         static_save = true,
         pointable = true,
         glow = 14,
@@ -5481,7 +5475,7 @@ c.register_entity("nh_nodes:palmstraw_flame_entity", {
             if data and data.straw_pos then self._straw_pos = data.straw_pos end
         end
         self._timer = 0
-        self.object:set_sprite({x = 0, y = 0}, 1, 1.0, false)
+        self.object:set_sprite({x = 0, y = 0}, 1, 1, false)
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
     get_staticdata = function(self) return c.serialize({straw_pos = self._straw_pos}) end,
@@ -5532,18 +5526,18 @@ c.register_node("nh_nodes:fireice", {
     description = S "Fire Ice",
     tiles = { "neve.png" },
     drawtype = "normal",
-    groups = { crumbly = 3, falling_node = 1 }, -- como areia, mas sem fluir
+    groups = {crumbly = 2, falling_node = 1}, -- como areia, mas sem fluir
     --sounds = default.node_sound_snow_defaults(),
 })
 
 c.register_node("nh_nodes:snow_ramp", {
-    description         = S "Snow Ramp",
+    description         = S"Snow Ramp",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_slope.obj",
     tiles               = {"snow_slope.png"},
-    groups              = {cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
+    groups              = {crumbly = 2, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:sand",
     sounds              = {
         footstep = {name = "punchtimber3", gain = 0.5},
@@ -5551,18 +5545,18 @@ c.register_node("nh_nodes:snow_ramp", {
         dig      = {name = "punchtimber3", gain = 0.5},
         place    = {name = "punchtimber3", gain = 0.5}},
     sunlight_propagates = true,
-    selection_box       = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
-    collision_box       = {type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0,  0.0,  0.5, 0.5, 0.5 },},},
+    selection_box       = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0,  0.0,  0.5, 0.5, 0.5}}},
+    collision_box       = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0,  0.0,  0.5, 0.5, 0.5}}},
 })
 
 c.register_node("nh_nodes:snow_corner", {
-    description         = S "Snow Corner",
+    description         = S"Snow Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_vertix.obj",
-    tiles               = { "snow_slope.png" },
-    groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    tiles               = {"snow_slope.png"},
+    groups              = {crumbly = 2, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop                = "nh_nodes:sand",
     sunlight_propagates = true,
     sounds              = {
@@ -5589,8 +5583,8 @@ c.register_node("nh_nodes:snow_insidecorner", {
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grassinsidecorner.obj",
-    tiles               = { "snow_slope.png" },
-    groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    tiles               = {"snow_slope.png"},
+    groups              = {crumbly = 2, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:sand",
     sounds              = {
         footstep = {name = "punchtimber3", gain = 0.5},
@@ -5615,7 +5609,7 @@ c.register_node("nh_nodes:snow", {
     description = S "Snow",
     tiles = {"neve.png"},
     drawtype = "normal",
-    groups = {crumbly = 3, falling_node = 1}, -- como areia, mas sem fluir
+    groups = {crumbly = 2, falling_node = 1}, -- como areia, mas sem fluir
     sounds = {
         footstep = { name = "punchtimber3", gain = 0.5 },
         dug      = { name = "punchtimber3", gain = 0.5 },
@@ -5628,7 +5622,7 @@ c.register_node("nh_nodes:avalanche", {
     liquidtype = "source",
     drawtype = "liquid",
     tiles = {"neve.png"},
-    groups = {liquid = 3, crumbly = 3, falling_node = 1}, -- como areia e flui
+    groups = {liquid = 3, crumbly = 2, falling_node = 1}, -- como areia e flui
     sounds = {
         footstep = {name = "punchtimber3", gain = 0.5},
         dug      = {name = "punchtimber3", gain = 0.5},
@@ -5688,10 +5682,7 @@ c.register_node("nh_nodes:water", {
     drowning = 1, -- ADICIONE ESTA LINHA (dano por segundo quando sem ar)
     groups = { water = 1, liquid = 1 },
     after_place_node = function(pos)
-        local neighbors = {
-            xyz(1, 0, 0), xyz(-1, 0, 0),
-            xyz(0, 1, 0), xyz(0, -1, 0),
-            xyz(0, 0, 1), xyz(0, 0, -1)}
+        local neighbors = {xyz(1, 0, 0), xyz(-1, 0, 0), xyz(0, 1, 0), xyz(0, -1, 0), xyz(0, 0, 1), xyz(0, 0, -1)}
         for _, d in ipairs(neighbors) do
             local npos = vector.add(pos, d)
             local node = c.get_node(npos)
@@ -5734,11 +5725,11 @@ c.register_node("nh_nodes:bucket", {
     use_texture_alpha = "blend",
     paramtype = "light",
     stack_max = 1,
-    groups = { dig_immediate = 1, falling_node = 1 },
+    groups = {dig_immediate = 1, falling_node = 1},
     collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
     selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
-    wielded_bone_position = {pos = { x = 0.5, y = -1.2, z = 0 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }},
+    wielded_bone_position = {pos = xyz(0.5, -1.2, 0)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     pointabilities = {nodes = WATER_FULLNODES},
     on_place = function(itemstack, placer, pointed_thing)
         if placer:get_player_control().sneak then return c.item_place(itemstack, placer, pointed_thing)
@@ -5763,9 +5754,9 @@ c.register_node("nh_nodes:bucketwater", {
     use_texture_alpha = "blend",
     paramtype = "light",
     stack_max = 1,
-    groups = { dig_immediate = 1, falling_node = 1 },
-    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
-    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
+    groups = {dig_immediate = 1, falling_node = 1},
+    collision_box = {type = "fixed", fixed = {-0.35, -0.5, -0.35, 0.35, 0.5, 0.35}},
+    selection_box = {type = "fixed", fixed = {-0.35, -0.5, -0.35, 0.35, 0.33, 0.35}},
     wielded_bone_position = {pos = xyz(0.5, -1.2, 0)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     pointabilities = {nodes = BUCKET_FLOWING},
@@ -5836,8 +5827,8 @@ c.register_node("nh_nodes:bucketsnow", {
     paramtype = "light",
     stack_max = 1,
     groups = {dig_immediate = 1, falling_node = 1},
-    collision_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.5, 0.35 } },
-    selection_box = { type = "fixed", fixed = { -0.35, -0.5, -0.35, 0.35, 0.33, 0.35 } },
+    collision_box = { type = "fixed", fixed = {-0.35, -0.5, -0.35, 0.35, 0.5, 0.35}},
+    selection_box = { type = "fixed", fixed = {-0.35, -0.5, -0.35, 0.35, 0.33, 0.35}},
     wielded_bone_position = {pos = xyz(0.5, -1.2, 0)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)},
     pointabilities = {nodes = BUCKET_FLOWING},
@@ -5923,7 +5914,7 @@ c.register_node("nh_nodes:ice2", {
     description = S "Ice",
     drawtype = "glasslike",
     tiles = { "ice.png" },
-    groups = { cracky = 3, slippery = 3 },
+    groups = {cracky = 3, slippery = 3},
     walkable = true,
     --is_ground_content = true,
     use_texture_alpha = "blend", --blend
@@ -5937,9 +5928,7 @@ c.register_node("nh_nodes:ice2", {
     after_place_node = function(pos, placer, itemstack, pointed_thing)
         if placer and placer:is_player() then
             local ctrl = placer:get_player_control()
-            if ctrl.sneak then
-                return
-            end
+            if ctrl.sneak then return end
         end
         -- Sem agachar: vira entidade normalmente
         if is_water_near(pos) then
@@ -5997,10 +5986,9 @@ c.register_node("nh_nodes:water2", {
     description = S "Fresh Water",
     drawtype = "liquid",
     tiles = { "water2.png" },
-    tiles = { {
-        name = "water2_animated.png",
+    tiles = {{name = "water2_animated.png",
         backface_culling = false,
-        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 4 }}, "water2.png" },
+        animation = { type = "vertical_frames", aspect_w = 16, aspect_h = 16, length = 4 }}, "water2.png"},
     --special_tiles = {{name = "agua2_animated.png", animation = {type="vertical_frames", aspect_w=16, aspect_h=16, length=0.9}},},
     use_texture_alpha = "blend",
     paramtype = "light",
@@ -6037,16 +6025,16 @@ c.register_node("nh_nodes:water2_flowing", {
     liquid_alternative_flowing = "nh_nodes:water2_flowing",
     liquid_alternative_source = "nh_nodes:water2",
     liquid_viscosity = 1,
-    post_effect_color = { a = 64, r = 0, g = 0, b = 255 },
+    post_effect_color = {a = 64, r = 0, g = 0, b = 255},
     drowning = 1, 
-    groups = { water = 1, liquid = 1, not_in_creative_inventory = 1 },
+    groups = {water = 1, liquid = 1, not_in_creative_inventory = 1},
 })
 
 
 c.register_node("nh_nodes:basalt", {
     description = S "Basalt",
     tiles = { "basalt.png" },
-    groups = { cracky = 3 },
+    groups = {cracky = 2},
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
@@ -6058,7 +6046,7 @@ c.register_node("nh_nodes:basalt_ramp", {
     drawtype    = "mesh",
     mesh        = "grass_slope.obj",
     tiles       = { "basalt_slope.png" },
-    groups      = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    groups      = {cracky = 2, soil = 1, falling_node = 1, not_blocking_trains = 1 },
     drop        = "nh_nodes:basalt",
     sounds      = {
         footstep = { name = "punchtimber3", gain = 0.5 },
@@ -6072,13 +6060,13 @@ c.register_node("nh_nodes:basalt_ramp", {
 })
 
 c.register_node("nh_nodes:basalt_corner", {
-    description         = S "Basalt Corner",
+    description         = S"Basalt Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_vertix.obj",
-    tiles               = { "basalt_slope.png" },
-    groups              = { cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1 },
+    tiles               = {"basalt_slope.png"},
+    groups              = {cracky = 2, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:basalt",
     sounds              = {
         footstep = { name = "punchtimber3", gain = 0.5 },
@@ -6110,10 +6098,10 @@ c.register_node("nh_nodes:basalt_insidecorner", {
     groups              = {cracky = 3, soil = 1, falling_node = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:basalt",
     sounds              = {
-        footstep = { name = "punchtimber3", gain = 0.5 },
-        dug      = { name = "punchtimber3", gain = 0.5 },
-        dig      = { name = "punchtimber3", gain = 0.5 },
-        place    = { name = "punchtimber3", gain = 0.5 },},
+        footstep = {name = "punchtimber3", gain = 0.5},
+        dug      = {name = "punchtimber3", gain = 0.5},
+        dig      = {name = "punchtimber3", gain = 0.5},
+        place    = {name = "punchtimber3", gain = 0.5}},
     sunlight_propagates = true,
     --sounds = nh_nodes.sounds.dirt,  -- ajuste para o som correto do seu mod
     collision_box       = {type = "fixed", fixed = {
@@ -6131,7 +6119,7 @@ c.register_node("nh_nodes:basalt_insidecorner", {
 c.register_node("nh_nodes:magma", {
     description = S "Magma",
     tiles = { "magma.png" },
-    groups = { cracky = 3, hot = 1 },
+    groups = {cracky = 1, hot = 1},
     wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
@@ -6145,12 +6133,8 @@ c.register_abm({
     chance = 1,
     action = function(pos, node)
         local directions = {
-            {x = 0,  y = 1,  z = 0},
-            {x = 0,  y = -1, z = 0},
-            {x = 1,  y = 0,  z = 0},
-            {x = -1, y = 0,  z = 0},
-            {x = 0,  y = 0,  z = 1},
-            {x = 0,  y = 0,  z = -1}}
+            xyz(0, 1,  0), xyz(1,  0, 0), xyz(0, 0, 1),
+            xyz(0, -1, 0), xyz(-1, 0, 0), xyz(0, 0, -1)}
         local is_source = (node.name == "nh_nodes:lava" or node.name == "nh_nodes:bluelava")
         local is_flowing = (node.name == "nh_nodes:lava_flowing" or node.name == "nh_nodes:bluelava_flowing")
         for _, dir in ipairs(directions) do
@@ -8542,27 +8526,18 @@ end
 
 -- FUNÇÃO DE ARREMESSO
 local function throw_pebble(itemstack, placer)
-    if not placer or not placer:is_player() then
-        return itemstack
-    end
-
+    if not placer or not placer:is_player() then return itemstack end
     local pos = placer:get_pos()
     pos.y = pos.y + 1.5 -- altura dos olhos
-
     local dir = placer:get_look_dir()
     local obj = c.add_entity(pos, "nh_nodes:pebble_entity")
-
     if obj then
         obj:set_velocity(vector.multiply(dir, 18))
-        obj:set_acceleration({ x = 0, y = -10, z = 0 })
-
-        --       Define o atirador para não se machucar
+        obj:set_acceleration(xyz(0, -10, 0))
+        -- Define o atirador para não se machucar
         local ent = obj:get_luaentity()
-        if ent then
-            ent._shooter = placer
-        end
+        if ent then ent._shooter = placer end
     end
-
     -- Remove 1 item do stack
     itemstack:take_item(1)
     return itemstack
@@ -8571,13 +8546,8 @@ end
 -- ITEM SEIXO ARREMESSÁVEL
 local function update_neighbors(pos)
     local offsets = {
-        { x = 0,  y = 1,  z = 0 },
-        { x = 0,  y = -1, z = 0 },
-        { x = 1,  y = 0,  z = 0 },
-        { x = -1, y = 0,  z = 0 },
-        { x = 0,  y = 0,  z = 1 },
-        { x = 0,  y = 0,  z = -1 },
-    }
+        xyz(0,  1,  0), xyz(1,  0,  0), xyz(0,  0,  1),
+        xyz(0,  -1, 0), xyz(-1, 0,  0), xyz(0,  0,  -1)}
     for _, off in ipairs(offsets) do
         local npos = vector.add(pos, off)
         -- Dispara física de falling_node (areia, cascalho, neve, etc.)
@@ -8586,91 +8556,67 @@ local function update_neighbors(pos)
 end
 
 c.register_craftitem("nh_nodes:pebble_item", {
-    description = S "Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
+    description = S"Pebble" .. "\n" .. S"[Throwable]" .. "\n" .. S"Damage: +1" .. "\n" .. S"(Throw: Q / drop)",
     inventory_image = "seixoarremessavel.png",
     wield_image = "seixoarremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = -0.25, z = 0 }},
-    wielded_visual_size = { x = 0.15, y = 0.15, z = 0.15 },
-    tool_capabilities = {
-        full_punch_interval = 1.5,
-        max_drop_level = 1,
+    wielded_bone_position = {pos = xyz(0.5, -0.25, 0)},
+    wielded_visual_size = xyz(0.15),
+    tool_capabilities = {full_punch_interval = 1.5, max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
-        damage_groups = { fleshy = 2 },
-    },
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 2.50, [2] = 2, [3] = 1}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 2}},
     -- Botão direito = arremessa
     on_place = function(itemstack, placer, pointed_thing) return throw_pebble(itemstack, placer) end,
     -- Ao soltar = arremessa
     on_drop = function(itemstack, dropper, pos) return throw_pebble(itemstack, dropper) end
 })
 
----------------------------
 -- ENTIDADE DO PROJÉTIL
----------------------------
 c.register_entity("nh_nodes:pebble_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
-        collisionbox = { -0.1, -0.1, -0.1, 0.1, 0.1, 0.1 },
+        collisionbox = {-0.1, -0.1, -0.1, 0.1, 0.1, 0.1},
         visual = "wielditem",
-        visual_size = { x = 0.5, y = 0.5 },
-        textures = { "nh_nodes:pebble" },
+        visual_size = {x = 0.5, y = 0.5},
+        textures = {"nh_nodes:pebble"},
     },
-
     _stuck = false,
     _timer = 0,
     _stuck_timer = 0,
     _last_pos = nil,
     _shooter = nil, --       Declarado aqui para ficar visível
-
     on_activate = function(self, staticdata)
         self._timer = 0
         self._stuck = false
         self._stuck_timer = 0
         self._shooter = nil
     end,
-
     on_step = function(self, dtime)
         local pos = self.object:get_pos()
-        if not pos then
-            self.object:remove()
-            return
-        end
-
+        if not pos then self.object:remove() return end
         -- Timer geral para remover após muito tempo
         self._timer = self._timer + dtime
-        if self._timer > 60 then
-            self.object:remove()
-            return
-        end
-
+        if self._timer > 60 then self.object:remove() return end
         -- Se já está grudado
         if self._stuck then
             self._stuck_timer = self._stuck_timer + dtime
-
             -- Após 0.1 segundo grudado, vira node
             if self._stuck_timer >= 0.1 then
                 local node_pos = vector.round(pos)
                 local node = c.get_node(node_pos)
-
                 if node.name == "air" or not c.registered_nodes[node.name].walkable then
                     c.set_node(node_pos, { name = "nh_nodes:pebble" })
                     update_neighbors(node_pos)
                 else
                     local offsets = {
-                        { x = 0,  y = 1,  z = 0 },
-                        { x = 0,  y = -1, z = 0 },
-                        { x = 1,  y = 0,  z = 0 },
-                        { x = -1, y = 0,  z = 0 },
-                        { x = 0,  y = 0,  z = 1 },
-                        { x = 0,  y = 0,  z = -1 },
+                        xyz(0,  1,  0), xyz(1,  0,  0), xyz(0,  0,  1),
+                        xyz(0,  -1, 0), xyz(-1, 0,  0), xyz(0,  0,  -1),
                     }
-
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
@@ -8682,25 +8628,15 @@ c.register_entity("nh_nodes:pebble_entity", {
                             break
                         end
                     end
-
-                    if not placed then
-                        c.add_item(pos, "nh_nodes:pebble_item")
-                    end
+                    if not placed then c.add_item(pos, "nh_nodes:pebble_item") end
                 end
-
                 self.object:remove()
             end
             return
         end
-
         local vel = self.object:get_velocity()
-        if not vel then
-            self.object:remove()
-            return
-        end
-
+        if not vel then self.object:remove() return end
         local speed = vector.length(vel)
-
         -- Se a velocidade é muito baixa (parou de se mover)
         if speed < 0.5 then
             self._stuck = true
@@ -8708,16 +8644,13 @@ c.register_entity("nh_nodes:pebble_entity", {
             self.object:set_acceleration((xyz(0)))
             return
         end
-
         -- Verifica colisão com blocos sólidos via raycast manual
         local step_dir = vector.normalize(vel)
         local check_distance = math.min(speed * dtime * 2, 1)
         local steps = math.ceil(check_distance / 0.2)
-
         for i = 1, steps do
             local check_pos = vector.add(pos, vector.multiply(step_dir, i * 0.2))
             local node = c.get_node(check_pos)
-
             if node and node.name and c.registered_nodes[node.name] then
                 if c.registered_nodes[node.name].walkable then
                     self._stuck = true
@@ -8727,15 +8660,15 @@ c.register_entity("nh_nodes:pebble_entity", {
                     return
                 end
                 if node.name == "nh_nodes:coconutlinked" then
-                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    c.set_node(check_pos, { name = "nh_nodes:coconut" })
+                    c.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    c.set_node(check_pos, {name = "nh_nodes:coconut"})
                     update_neighbors(check_pos)
                     return
                 end
                 if node.name == "nh_nodes:leaves_nut" then
-                    c.sound_play("default_dig_cracky", { pos = check_pos, gain = 0.5 })
-                    c.set_node(check_pos, { name = "nh_nodes:fallenstick" })
-                    c.add_item(check_pos, { name = "nh_nodes:nut" })
+                    c.sound_play("default_dig_cracky", {pos = check_pos, gain = 0.5})
+                    c.set_node(check_pos, {name = "nh_nodes:fallenstick"})
+                    c.add_item(check_pos, {name = "nh_nodes:nut"})
                     update_neighbors(check_pos)
                     return
                 end
@@ -8788,52 +8721,41 @@ c.register_entity("nh_nodes:pebble_entity", {
                     -- Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
                     if ent and ent.name ~= "nh_nodes:pebble_entity" then
                         local hp = obj:get_hp()
-                        if hp and hp > 0 then
-                            is_target = true
-                        end
+                        if hp and hp > 0 then is_target = true end
                     end
                 end
-
                 if is_target then
                     c.log("action", "[Seixo] Acertou alvo em " .. c.pos_to_string(pos))
-
                     c.sound_play("default_dig_cracky", { pos = pos, gain = 0.5 })
-
-                    obj:punch(self.object, 1.0, {
-                        full_punch_interval = 1.0,
-                        damage_groups = { fleshy = 2 },
-                    }, vel)
-
+                    obj:punch(self.object, 1, {full_punch_interval = 1, damage_groups = { fleshy = 2 }}, vel)
                     c.add_item(pos, "nh_nodes:pebble_item")
                     self.object:remove()
                     return
                 end
             end
         end
-
         self._last_pos = pos
     end,
 })
 
 c.register_node("nh_nodes:limb", {
-    description = S "Limb" .. "\n" .. S "Reach: +2" .. "\n" .. S "Damage: +2" .. "\n" .. S "Uses: 10",
+    description = S"Limb" .. "\n" .. S"Reach: +2" .. "\n" .. S"Damage: +2" .. "\n" .. S"Uses: 10",
     drawtype = "mesh",
     mesh = "branch.obj",
     tiles = { "branchtex.png" }, --oaktimber.png
     paramtype = "light",
     range = 5, -- AUMENTA O ALCANCE
-    groups = {oddly_breakable_by_hand = 3, falling_node = 1,},
+    collision_box = {type = "fixed", fixed = {-0.06, -0.5, -0.12, 0.06, 1.05, 0.07}},
+    selection_box = {type = "fixed", fixed = {-0.06, -0.5, -0.12, 0.06, 1.05, 0.07}},
+    groups = {oddly_breakable_by_hand = 3, falling_node = 1},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = { times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
-        damage_groups = { fleshy = 3 },
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
-
     -- desgasta ao cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8841,20 +8763,18 @@ c.register_node("nh_nodes:limb", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-    collision_box = {type = "fixed", fixed = { -0.06, -0.5, -0.12, 0.06, 1.05, 0.07 },},
-    selection_box = {type = "fixed", fixed = { -0.06, -0.5, -0.12, 0.06, 1.05, 0.07 },},
 })
 
 c.register_node("nh_nodes:stick", {
     description = S "Stick" .. "\n" .. S "Reach: +1" .. "\n" .. S "Uses: 5",
     drawtype = "mesh",
     mesh = "stick.obj",
-    tiles = { "stick.png" },
+    tiles = {"stick.png"},
     range = 4,
-    groups = { oddly_breakable_by_hand = 1, flammable = 2, falling_node = 1 },
+    groups = {dig_immediate = 1, flammable = 2, falling_node = 1},
     paramtype = "light",
-    collision_box = {type = "fixed", fixed = { -0.04, -0.5, -0.12, 0.04, 0.5, 0.07 },},
-    selection_box = {type = "fixed", fixed = { -0.04, -0.5, -0.12, 0.04, 0.5, 0.07 },},
+    collision_box = {type = "fixed", fixed = {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07}},
+    selection_box = {type = "fixed", fixed = {-0.04, -0.5, -0.12, 0.04, 0.5, 0.07}},
     -- desgasta ao cavar node
     after_use = function(itemstack, user, node, digparams)
         local wear = itemstack:get_wear()
@@ -8872,17 +8792,14 @@ c.register_node("nh_nodes:fallenstick", {
     drop = "nh_nodes:stick",
     paramtype = "light",
     walkable = false,
-    groups = { oddly_breakable_by_hand = 1, flammable = 2, falling_node = 1 },
-    collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.12, 0.5, -0.435, 0.065 },},
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.12, 0.5, -0.435, 0.065 },},
+    groups = {oddly_breakable_by_hand = 1, flammable = 2, falling_node = 1},
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.12, 0.5, -0.435, 0.065}},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.12, 0.5, -0.435, 0.065}},
 })
 
-
----------------------------
 -- NODE DO SEIXO DE OBSIDIANA
----------------------------
 c.register_node("nh_nodes:obsidianpebble", {
-    description = S "Obsidian Pebble" .. "\n" .. S "Damage: +1",
+    description = S"Obsidian Pebble" .. "\n" .. S"Damage: +1",
     drawtype = "mesh",
     mesh = "pebble.obj",         --
     tiles = { "obsidiana.png" }, -- tiles = {"pedra.png"},
@@ -8892,28 +8809,20 @@ c.register_node("nh_nodes:obsidianpebble", {
     sunlight_propagates = true,
     walkable = false,
     drop = "nh_nodes:obsidianpebble_item",
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
     groups = {oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1, not_in_creative_inventory = 1},
-    collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
-    selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
-
+    collision_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095}},
+    selection_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095}},
     -- FAZ O SEIXO CAIR SOZINHO
-    on_construct = function(pos)
-        c.check_for_falling(pos)
-    end,
-    after_place_node = function(pos)
-        c.check_for_falling(pos)
-    end,
+    on_construct = function(pos) c.check_for_falling(pos) end,
+    after_place_node = function(pos) c.check_for_falling(pos) end,
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
-        damage_groups = { fleshy = 2 },},
+            fleshy = {times = {[1] = 1.3, [2] = 0.9, [3] = 0.5}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 2.5, [2] = 2, [3] = 1.5}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 2}},
 })
 
 ---------------------------
@@ -8927,7 +8836,7 @@ local function throw_pebble(itemstack, placer)
     local obj = c.add_entity(pos, "nh_nodes:obsidianpebble_entity")
     if obj then
         obj:set_velocity(vector.multiply(dir, 18))
-        obj:set_acceleration({ x = 0, y = -10, z = 0 })
+        obj:set_acceleration(xyz(0, -10, 0))
         -- Define o atirador para não se machucar
         local ent = obj:get_luaentity()
         if ent then ent._shooter = placer end
@@ -8937,27 +8846,23 @@ local function throw_pebble(itemstack, placer)
     return itemstack
 end
 
----------------------------
 -- ITEM
----------------------------
 c.register_craftitem("nh_nodes:obsidianpebble_item", {
     description = S "Obsidian Pebble" .. "\n" .. S "[Throwable]" .. "\n" .. S "Damage: +1" .. "\n" .. S "(Throw: Q / drop)",
     inventory_image = "obsidiana_seixo_arremessavel.png",
     wield_image = "obsidiana_seixo_arremessavel.png",
     --wield_scale = {x = 0.5, y = 0.5, z = 0.5},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = 0.5, y = -0.25, z = 0 }},
-    wielded_visual_size = { x = 0.15, y = 0.15, z = 0.15 },
+    wielded_bone_position = {pos = xyz(0.5, -0.25, 0)},
+    wielded_visual_size = xyz(0.15),
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },},
-        damage_groups = { fleshy = 2 },
-    },
+            fleshy = {times = {[1] = 1.3, [2] = 0.9, [3] = 0.5}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 2.5, [2] = 2, [3] = 1.5}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 2}},
     -- Botão direito = arremessa
     on_place = function(itemstack, placer, pointed_thing) return throw_pebble(itemstack, placer) end,
     -- Ao soltar = arremessa
@@ -8965,17 +8870,15 @@ c.register_craftitem("nh_nodes:obsidianpebble_item", {
 })
 
 
----------------------------
 -- ENTIDADE DO PROJÉTIL
----------------------------
 c.register_entity("nh_nodes:obsidianpebble_entity", {
     initial_properties = {
         physical = true,
         collide_with_objects = true,
-        collisionbox = { -0.1, -0.1, -0.1, 0.1, 0.1, 0.1 },
+        collisionbox = {-0.1, -0.1, -0.1, 0.1, 0.1, 0.1},
         visual = "wielditem",
-        visual_size = { x = 0.5, y = 0.5 },
-        textures = { "nh_nodes:obsidianpebble" },
+        visual_size = {x = 0.5, y = 0.5 },
+        textures = {"nh_nodes:obsidianpebble"},
     },
     _stuck = false,
     _timer = 0,
@@ -9005,12 +8908,8 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
                     c.set_node(node_pos, { name = "nh_nodes:obsidianpebble" })
                 else
                     local offsets = {
-                        { x = 0,  y = 1,  z = 0 },
-                        { x = 0,  y = -1, z = 0 },
-                        { x = 1,  y = 0,  z = 0 },
-                        { x = -1, y = 0,  z = 0 },
-                        { x = 0,  y = 0,  z = 1 },
-                        { x = 0,  y = 0,  z = -1 },}
+                        xyz(0, 1,  0), xyz(1,  0, 0), xyz(0,  0,  1),
+                        xyz(0, -1, 0), xyz(-1, 0, 0), xyz(0,  0, -1)}
                     local placed = false
                     for _, offset in ipairs(offsets) do
                         local try_pos = vector.add(node_pos, offset)
@@ -9111,7 +9010,7 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
                 local is_target = obj:is_player()
                 if not is_target then
                     local ent = obj:get_luaentity()
-                    --       Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
+                    -- Usa get_hp() no lugar de ent.hp_max, compatível com MobsRedo
                     if ent and ent.name ~= "nh_nodes:obsidianpebble_entity" then
                         local hp = obj:get_hp()
                         if hp and hp > 0 then is_target = true end
@@ -9131,12 +9030,9 @@ c.register_entity("nh_nodes:obsidianpebble_entity", {
     end,
 })
 
-
----------------------------
 -- NODE DO SEIXO DE OBSIDIANA
----------------------------
 c.register_node("nh_nodes:obsidianblade", {
-    description = S "Obsidian Blade",
+    description = S"Obsidian Blade",
     drawtype = "mesh",
     mesh = "obsidianblade.obj",  --
     tiles = { "obsidiana.png" }, -- tiles = {"pedra.png"},
@@ -9145,11 +9041,9 @@ c.register_node("nh_nodes:obsidianblade", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {snappy = 3, oddly_breakable_by_hand = 3, falling_node = 1, attached_node = 1,},
-    collision_box = {type = "fixed", fixed = {{ -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},},
-    selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.095, 0.125, -0.435, 0.095 },},
+    groups = {dig_immediate = 1, falling_node = 1, attached_node = 1},
+    collision_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095}},
+    selection_box = {type = "fixed", fixed = {-0.125, -0.5, -0.095, 0.125, -0.435, 0.095}},
     -- FAZ O SEIXO CAIR SOZINHO
     on_construct = function(pos) c.check_for_falling(pos) end,
     after_place_node = function(pos) c.check_for_falling(pos) end,
@@ -9175,7 +9069,7 @@ c.register_node("nh_nodes:rowing", {
         max_drop_level = 1,
         groupcaps = {
             fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1}},
+            crumbly = {times = {[1] = 4, [2] = 3, [3] = 2}, uses = 0, maxlevel = 1}},
         damage_groups = {fleshy = 2},
     },
     -- cavar node
@@ -9450,8 +9344,7 @@ c.register_node("nh_nodes:obsidiansword", {
         max_drop_level = 1,
         groupcaps = {
             snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40}, uses = 10, maxlevel = 1},
-            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1}},
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 7}},
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -9496,9 +9389,9 @@ c.register_node("nh_nodes:pebble", {
         c.check_for_falling(pos)
     end,
     sounds = {
-        dug = { name = "punchtimber", gain = 0.5 },
-        dig = { name = "punchtimber", gain = 0.5 },
-        place = { name = "punchtimber", gain = 0.5 },},
+        dug = {name = "punchtimber", gain = 0.5},
+        dig = {name = "punchtimber", gain = 0.5},
+        place = {name = "punchtimber", gain = 0.5}},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
@@ -9531,8 +9424,7 @@ c.register_node("nh_nodes:chippedstone", {
         groupcaps = {
             snappy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
-        },
+            crumbly = {times = {[1] = 7, [2] = 5, [3] = 3}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 3},
     },
 
@@ -9572,10 +9464,10 @@ c.register_node("nh_nodes:stoneaxehead", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },},
-        damage_groups = { fleshy = 3 },
+            snappy = {times = {[1] = 2, [2] = 2, [3] = 2}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -9610,19 +9502,14 @@ c.register_node("nh_nodes:stonepickaxehead", {
     paramtype = "light",
     sunlight_propagates = true,
     walkable = false,
-    -- falling_node faz ele cair,
-    -- attached_node previne ficar flutuando encostado
-    groups = {dig_immediate = 1, falling_node = 1,},
-
+    groups = {dig_immediate = 1, falling_node = 1},
     tool_capabilities = {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-        },
-        damage_groups = { fleshy = 3 },
+            fleshy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 6, [2] = 4, [3] = 2}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -9664,9 +9551,8 @@ c.register_node("nh_nodes:stonehoehead", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1}},
+            crumbly = {times = {[1] = 7, [2] = 5, [3] = 3}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 3},
     },
     -- cavar node
@@ -9710,10 +9596,9 @@ c.register_node("nh_nodes:stoneadzehead", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1 }},
-        damage_groups = { fleshy = 3 },
+            fleshy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 3},
     },
     -- cavar node
     after_use = function(itemstack, user, node, digparams)
@@ -9754,9 +9639,9 @@ c.register_node("nh_nodes:rustironsword", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1},
-            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1}},
+            snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 5},
     },
     -- cavar node
@@ -9795,10 +9680,10 @@ c.register_node("nh_nodes:stoneaxe", {
     wielded_visual_size = xyz(0.25),
     tool_capabilities = {full_punch_interval = 2, max_drop_level = 1,
         groupcaps = {
-            choppy = {times = { [1] = 1, [2] = 2.5, [3] = 5}, uses = 10, maxlevel = 1},
-            snappy = {times = { [1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
-            fleshy = {times = { [1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1},
-            crumbly = {times = { [1] = 1.50, [2] = 1.10, [3] = 0.70}, uses = 10, maxlevel = 1}},
+            choppy = {times = {[1] = 5, [2] = 2.5, [3] = 1}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 7, [3] = 6}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 4},
     },
     -- cavar node
@@ -9834,11 +9719,11 @@ c.register_node("nh_nodes:stonepickaxe", {
     wielded_visual_size = xyz(0.25),
     tool_capabilities = {full_punch_interval = 2, max_drop_level = 1,
         groupcaps = {
-            crumbly = {times = { [1] = 1.20, [2] = 0.80, [3] = 0.40 }, uses = 10, maxlevel = 1},
-            snappy = {times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
-            fleshy = {times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1},
-            cracky = {times = { [1] = 20, [2] = 15, [3] = 10 }, uses = 10, maxlevel = 1},
-            choppy = {times = { [1] = 30, [2] = 25, [3] = 20 }, uses = 10, maxlevel = 1}},
+            snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 6, [2] = 3, [3] = 2}, uses = 10, maxlevel = 1},
+            fleshy = {times = {[1] = 15, [2] = 10, [3] = 5}, uses = 10, maxlevel = 1},
+            cracky = {times = {[1] = 20, [2] = 15, [3] = 10}, uses = 10, maxlevel = 1},
+            choppy = {times = {[1] = 30, [2] = 25, [3] = 20}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 4},
     },
     -- cavar node
@@ -9874,7 +9759,7 @@ c.register_node("nh_nodes:stoneadze", {
             choppy = {times = {[1] = 20, [2] = 15, [3] = 10.00 }, uses = 10, maxlevel = 1},
             snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
             fleshy = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.50, [2] = 1.10, [3] = 0.70 }, uses = 10, maxlevel = 1}},
+            crumbly = {times = {[1] = 7, [2] = 5, [3] = 3}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 3},
     },
     -- bater em node / transformar em terra arada
@@ -9932,10 +9817,10 @@ c.register_node("nh_nodes:stonehoe", {
         full_punch_interval = 2,
         max_drop_level = 1,
         groupcaps = {
-            choppy = {times = {[1] = 20, [2] = 15, [3] = 10.00}, uses = 10, maxlevel = 1},
             snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.50, [2] = 1.10, [3] = 0.70}, uses = 10, maxlevel = 1}},
+            choppy = {times = {[1] = 20, [2] = 15, [3] = 10.00}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 6, [2] = 3, [3] = 2}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 3},
     },
     -- bater em node / transformar em terra arada
@@ -10001,7 +9886,7 @@ c.register_node("nh_nodes:chippedstoneknife", {
         groupcaps = {
             snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1}},
+            crumbly = {times = {[1] = 7, [2] = 5, [3] = 3}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 3},
     },
     -- cavar node
@@ -10041,7 +9926,7 @@ c.register_node("nh_nodes:obsidianknife", {
         groupcaps = {
             snappy = {times = {[1] = 1.20, [2] = 0.80, [3] = 0.40}, uses = 10, maxlevel = 1},
             fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60}, uses = 10, maxlevel = 1}},
+            crumbly = {times = {[1] = 7, [2] = 5, [3] = 3}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 5},
     },
     -- cavar node
@@ -10058,8 +9943,8 @@ c.register_node("nh_nodes:obsidianknife", {
         itemstack:set_wear(wear)
         return itemstack
     end,
-    collision_box = {type = "fixed", fixed = {{ -0.08, -0.5, -0.035, 0.08, 0.05, 0.035 },},},
-    selection_box = {type = "fixed", fixed = { -0.075, -0.5, -0.03, 0.075, 0.05, 0.03 },},
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.035, 0.08, 0.05, 0.035}},
+    selection_box = {type = "fixed", fixed = {-0.075, -0.5, -0.03, 0.075, 0.05, 0.03}},
     -- Configuração mão direita
     wielded_bone_position = {pos = xyz(1.1, 0, 0.1)},
 })
@@ -10092,10 +9977,9 @@ c.register_craftitem("nh_nodes:white_pebble_item", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            choppy = {times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1},
-            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
-            snappy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1},
-            crumbly = {times = {[1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1}},
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 2.50, [2] = 2, [3] = 1}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
         damage_groups = {fleshy = 2},
     },
     on_place = function(itemstack, placer, pointed_thing) return throw_white_pebble(itemstack, placer) end,
@@ -10362,12 +10246,10 @@ c.register_node("nh_nodes:white_pebble", {
         full_punch_interval = 1.5,
         max_drop_level = 1,
         groupcaps = {
-            choppy = { times = { [1] = 25, [2] = 20, [3] = 15 }, uses = 10, maxlevel = 1 },
-            fleshy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            snappy = { times = { [1] = 1.30, [2] = 0.90, [3] = 0.50 }, uses = 10, maxlevel = 1 },
-            crumbly = { times = { [1] = 1.40, [2] = 1.00, [3] = 0.60 }, uses = 10, maxlevel = 1 },
-        },
-        damage_groups = { fleshy = 2 },
+            fleshy = {times = {[1] = 1.30, [2] = 0.90, [3] = 0.50}, uses = 10, maxlevel = 1},
+            snappy = {times = {[1] = 2.50, [2] = 2, [3] = 1}, uses = 10, maxlevel = 1},
+            crumbly = {times = {[1] = 8, [2] = 6, [3] = 4}, uses = 10, maxlevel = 1}},
+        damage_groups = {fleshy = 2},
     },
     sounds = {
         dug = { name = "punchtimber", gain = 0.5 },
@@ -10650,8 +10532,8 @@ c.register_node("nh_nodes:grassleaves", {
     paramtype = "light",
     walkable = false,
     buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    groups = {snappy = 3, flammable = 2},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.4, 0.5}},
     sounds = {
         dug = {name = "GrassDig", gain = 0.5},
         dig = {name = "GrassDig", gain = 0.5},
@@ -10700,8 +10582,8 @@ c.register_node("nh_nodes:grassleavesmedium", {
     paramtype = "light",
     walkable = false,
     buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.4, 0.5 }},
+    groups = {snappy = 3, flammable = 2},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.4, 0.5}},
     sounds = {
         dug = {name = "GrassDig", gain = 0.5},
         dig = {name = "GrassDig", gain = 0.5},
@@ -10740,7 +10622,7 @@ c.register_node("nh_nodes:grassleavesmedium", {
 
 -- FOLHAS DE GRAMA - BAIXA
 c.register_node("nh_nodes:smallgrass", {
-    description = S "Short Grass",
+    description = S"Short Grass",
     drawtype = "mesh",
     mesh = "smallgrass.obj",
     tiles = {"highgrass.png"},
@@ -10751,7 +10633,7 @@ c.register_node("nh_nodes:smallgrass", {
     paramtype = "light",
     walkable = false,
     --buildable_to = true,
-    groups = {snappy = 3, flammable = 2},
+    groups = {snappy = 2, flammable = 2},
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},
     sounds = {
         dug = {name = "GrassDig", gain = 0.5},
@@ -10800,8 +10682,8 @@ c.register_node("nh_nodes:highgrass", {
     paramtype = "light",
     walkable = false,
     --buildable_to = true,
-    groups = {snappy = 3, flammable = 2},
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 2.5, 0.5 }},
+    groups = {snappy = 2, flammable = 2},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}},
     sounds = {
         dug = {name = "GrassDig", gain = 0.5},
         dig = {name = "GrassDig", gain = 0.5},
@@ -10848,7 +10730,7 @@ c.register_node("nh_nodes:dandelion", {
     paramtype = "light",
     walkable = false,
     buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
+    groups = {snappy = 2, flammable = 2 },
     selection_box = {type = "fixed", fixed = {-0.3, -0.5, -0.3, 0.3, -0.1, 0.3}},
     sounds = {
         dug = {name = "GrassDig", gain = 0.5},
@@ -10865,7 +10747,7 @@ c.register_node("nh_nodes:rush", {
     paramtype = "light",
     walkable = false,
     buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
+    groups = {snappy = 1, flammable = 2},
     selection_box = {type = "fixed", fixed = {-0.2, -0.5, -0.2, 0.2, 0, 0.2}},
     sounds = {
         dug = {name = "GrassDig", gain = 0.5},
@@ -10883,7 +10765,7 @@ c.register_node("nh_nodes:micaceusfungus", {
     paramtype = "light",
     walkable = false,
     buildable_to = true,
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, flammable = 2 },
+    groups = {snappy = 3, oddly_breakable_by_hand = 1, flammable = 2},
     selection_box = {type = "fixed", fixed = {-0.06, -0.5, -0.06, 0.06, -0.19, 0.06}},
     -- Tornar não comestível
     on_use = function(itemstack, user, pointed_thing)
@@ -10899,7 +10781,7 @@ c.register_node("nh_nodes:flyamanitafungus", {
     description = S "Fly Agaric Fungus",
     drawtype = "mesh",
     mesh = "flyagaricfungus.obj",
-    tiles = { "flyagaricfungus.png" },
+    tiles = {"flyagaricfungus.png"},
     --waving = 1,
     paramtype = "light",
     walkable = false,
@@ -10923,27 +10805,22 @@ c.register_node("nh_nodes:belt", {
     drawtype = "mesh",
     mesh = "belt.obj",
     tiles = { "belt_overlay.png" },
-    groups = { oddly_breakable_by_hand = 1, armor_waist = 1 },
+    groups = {oddly_breakable_by_hand = 1, armor_waist = 1},
     stack_max = 1, -- limita a 1 por slot
     paramtype = "light",
     paramtype2 = "facedir",
-    node_box = {type = "fixed", fixed = {{ -0.28, -0.5, -0.18, 0.28, -0.32, 0.18 },},},
-    selection_box = {type = "fixed", fixed = { -0.28, -0.5, -0.18, 0.28, -0.32, 0.18 },},
-    wielded_bone_position = {pos = { x = 0, y = 1, z = 0.6 }, rot = { x = 0, y = 180, z = 0 },}, -- Configuração mão direita
-    wielded_visual_size = { x = 0.2, y = 0.2, z = 0.2 },
-    offhand_bone_position = {pos = { x = 0, y = -0.8, z = -1.6 }, rot = { x = -90, y = 0, z = 90 },},
+    node_box = {type = "fixed", fixed = {{-0.28, -0.5, -0.18, 0.28, -0.32, 0.18}}},
+    selection_box = {type = "fixed", fixed = {-0.28, -0.5, -0.18, 0.28, -0.32, 0.18}},
+    wielded_bone_position = {pos = xyz(0, 1, 0.6), rot = xyz(0, 180, 0)}, -- Configuração mão direita
+    wielded_visual_size = xyz(0.2, 0.2, 0.2),
+    offhand_bone_position = {pos = xyz(0, -0.8, -1.6), rot = xyz(-90, 0, 90)},
 })
 
 -- Mochila: BACKCHEST – funciona exatamente como o oakchest
 -- Tabela global: armazena conteúdo de backchests quebrados
 -- Chave: ID único (string) gravado no meta do item dropado
 backchest_stored_items = backchest_stored_items or {}
-
-local function backchest_new_id()
-    -- ID baseado em tempo + número aleatório para ser único
-    return tostring(os.time()) .. "_" .. tostring(math.random(1, 999999))
-end
-
+local function backchest_new_id() return tostring(os.time()) .. "_" .. tostring(math.random(1, 999999)) end -- ID baseado em tempo + número aleatório para ser único
 local function backchest_save_inv(pos)
     local meta  = c.get_meta(pos)
     local inv   = meta:get_inventory()
@@ -11172,7 +11049,7 @@ c.register_node("nh_nodes:backchest", {
     pointable             = true,
     paramtype             = "light",
     paramtype2            = "facedir",
-    groups                = { snappy = 3, oddly_breakable_by_hand = 1, armor_back = 1 },
+    groups                = {oddly_breakable_by_hand = 1, armor_back = 1 },
     stack_max             = 1,
     -- Configuração mão direita
     wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.7 }},

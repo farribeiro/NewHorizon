@@ -2927,12 +2927,12 @@ c.register_chatcommand("local_vulcan2", {
 -- COMANDO PARA IR ATÉ O MAR DE AR
 c.register_chatcommand("airsea", {
     description = S("Teleport to the air sea"),
-    privs = { teleport = true },
+    privs = {teleport = true},
     func = function(name)
         local player = c.get_player_by_name(name)
         if not player then return false, S("Player not found") end
         -- Teleporta 2 blocos acima da estátua
-        local tp_pos = { x = -700, y = 1, z = 700 }
+        local tp_pos = {x = -700, y = 1, z = 700}
         player:set_pos(tp_pos)
         return true, S("Teleported to the air sea at X: -700, Y = 1, Z = 700") end,
 })
@@ -2945,7 +2945,7 @@ c.register_chatcommand("flyisland", {
         local player = c.get_player_by_name(name)
         if not player then return false, S("Player not found") end
         if not lowest_island_pos then return false, S("The flying island hasn't been generated yet. Explore the sky of the Air Sea first") end
-        local tp_pos = { x = lowest_island_pos.x, y = lowest_island_pos.y + 2, z = lowest_island_pos.z }
+        local tp_pos = xyz(lowest_island_pos.x, lowest_island_pos.y + 2, lowest_island_pos.z)
         player:set_pos(tp_pos)
         return true, S("Teleported to the fly island at X:") .. lowest_island_pos.x .. " Y:" .. lowest_island_pos.y .. " Z:" .. lowest_island_pos.z end,
 })

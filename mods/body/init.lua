@@ -331,14 +331,14 @@ local hand_capabilities = {
     full_punch_interval = 0.9,
     max_drop_level = 0,
     groupcaps = {
-        crumbly = { times = { [2] = 2.00, [3] = 0.70 }, uses = 0, maxlevel = 1 },
-        cracky = { times = { [3] = 4.00, [6] = 8.00 }, uses = 0, maxlevel = 1 },
-        snappy = { times = { [3] = 0.40 }, uses = 0, maxlevel = 1 },
+        dig_immediate = {times = {[1] = 0}, uses = 0},
+        oddly_breakable_by_hand = {times = {[1] = 3.50, [2] = 2.00, [3] = 0.70}, uses = 0},
+        snappy = {times = {[1] = 3, [2] = 3, [3] = 3}, uses = 0, maxlevel = 1},
+        crumbly = {times = {[1] = 9, [2] = 7, [3] = 5}, uses = 0, maxlevel = 1},
         -- choppy = {times = {[3] = 2.5}, uses = 0, maxlevel = 1},
-        oddly_breakable_by_hand = { times = { [1] = 3.50, [2] = 2.00, [3] = 0.70 }, uses = 0 },
-        dig_immediate = { times = { [1] = 0 }, uses = 0 },
+        --cracky = { times = { [3] = 4.00, [6] = 8.00 }, uses = 0, maxlevel = 1 },  
     },
-    damage_groups = { fleshy = 1 },
+    damage_groups = {fleshy = 1},
 }
 -- REGISTRA O ITEM DA MÃO (SEM IMAGEM VISÍVEL)
 -- c.register_craftitem(":",
