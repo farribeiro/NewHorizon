@@ -220,7 +220,7 @@ local intencoes = {
     }},
     -- ·· idioma ··
     {id = "language",
-        words = {"english", "spanish", "french", "language", "speak", "say", "understand", "know", "can", "you"},
+        words = {"english", "spanish", "french", "language", "understand me"},
         humor_delta = 8,
         responses = {
             cold    = { "(-_-) — Portuguese only, please.",
@@ -228,10 +228,10 @@ local intencoes = {
                         "(-_-) — No." },
             neutral  = { "(:o) — I'm better at speaking Portuguese.",
                         "( '.') — I don't know much English.",
-                        "(:o) — The book is on the table." },
+                        "(:o) — 'The book is on the table'." },
             hot  = { "(:D) — Portuguese!",
                      "(^-^) — Can you speak Portuguese?",
-                     "(:D) — Try speaking to me in Portuguese!" },
+                     "(:D) — Try speaking to me in Portuguese!"},
     }},
     {id = "linguagem",
         words = {"inglés", "español", "espanol", "francés", "lengua", "habla", "dice", "entiende", "sabes", "puede", "tú", "usted"},

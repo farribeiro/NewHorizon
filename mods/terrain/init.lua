@@ -85,6 +85,7 @@ local C           = {
     water              = gcid "nh_nodes:water",
     water2             = gcid "nh_nodes:water2",
     lava               = gcid "nh_nodes:lava",
+    bluelava           = gcid "nh_nodes:bluelava",
     obsidian           = gcid "nh_nodes:obsidian",
     fireice            = gcid "nh_nodes:fireice",
     snow               = gcid "nh_nodes:snow",
@@ -217,18 +218,19 @@ local function slope_get_below(x, z)
     return C.ignore
 end
 local entity_positions = {}
-local tent_generated = false
 local TENT_SEARCH_RADIUS = 256
-local ship_generated = false
+local tent_generated = false
+local tent_pos = nil
 local SHIP_SEARCH_RADIUS = 256
-local house_generated = false
+local ship_generated = false
+local ship_pos = nil
 local HOUSE_SEARCH_RADIUS = 256
+local house_generated = false
+local house_pos = nil
 local statue_spawned = false
 local statue_pos = nil
 local sentinel_pos = nil
 local lowest_island_pos = nil
-local ship_pos = nil
-local house_pos = nil
 -- NOISES (mantidos para compatibilidade com funções antigas)
 local function populate_Pall(names)
     local father = {}
@@ -1081,7 +1083,7 @@ local function spawn_tent(area, data, base_pos)
     local depth = 5
     local trunk_height = 3
     local roof_y = base_pos.y + trunk_height
-    local corners = { { 0, 0 }, { 3, 0 }, { 0, 4 }, { 3, 4 }, }
+    local corners = {{0, 0}, {3, 0}, {0, 4}, {3, 4}}
     -- troncos
     for _, c in ipairs(corners) do
         for y = 0, trunk_height - 1 do
@@ -1641,6 +1643,85 @@ local function generate_volcano(area, data, minp, maxp, volcano_pos)
         end
     end
 end
+
+--  VULCÃO 2 (azul) – posição oposta ao principal
+local VOLCANO2_POS = nil
+local function find_volcano2_position()
+    if VOLCANO2_POS then return VOLCANO2_POS end
+    -- Garante que o vulcão principal já foi posicionado
+    local vp = find_volcano_position()
+    if not vp then return nil end
+    -- Espelha a posição e adiciona variabilidade (±15% do raio máximo)
+    local MAX_RADIUS = (SIZE / 2) * 0.85
+    local jitter = MAX_RADIUS * 0.15
+    VOLCANO2_POS = {
+        x = -vp.x + math.random(-jitter, jitter),
+        z = -vp.z + math.random(-jitter, jitter),
+    }
+    c.log("action", "[terrain] Volcano2 generated in: x=" .. VOLCANO2_POS.x .. ", z=" .. VOLCANO2_POS.z)
+    return VOLCANO2_POS
+end
+local function generate_volcano2(area, data, minp, maxp, volcano_pos)
+    local SEA_LEVEL = 0
+    for z = minp.z, maxp.z do
+        for x = minp.x, maxp.x do
+            local dx = x - volcano_pos.x
+            local dz = z - volcano_pos.z
+            local dist_sq = dx * dx + dz * dz
+            local dist = math.sqrt(dist_sq)
+            local VOLCANO_RADIUS_SQ = VOLCANO_RADIUS * VOLCANO_RADIUS
+            local rng_volcano = PseudoRandom(x * 13579 + z * 24680)
+            if dist_sq <= VOLCANO_RADIUS_SQ then
+                local height_factor = 1.0 - (dist_sq / VOLCANO_RADIUS_SQ)
+                local base_height = math.floor(height_factor ^ 3 * VOLCANO_HEIGHT)
+                local noise_x = x * 0.1
+                local noise_z = z * 0.1
+                local roughness = (P.roughness:get_2d({ x = noise_x, y = noise_z }) + 1) * 2
+                local volcano_height = SEA_LEVEL + base_height + math.floor(roughness)
+                local is_beach_zone = dist >= VOLCANO_RADIUS - BEACH_WIDTH
+                local ocean_floor_here = SEA_LEVEL
+                for y = SEA_LEVEL, minp.y, -1 do
+                    if area:contains(x, y, z) then
+                        local vi = area:index(x, y, z)
+                        if data[vi] ~= C.water and data[vi] ~= C.air then
+                            ocean_floor_here = y
+                            break
+                        end
+                    end
+                end
+                local total_cone_height = volcano_height - ocean_floor_here
+                local in_crater = dist <= CRATER_RADIUS
+                local crater_factor = 1 - (dist / CRATER_RADIUS)
+                if crater_factor < 0 then crater_factor = 0 end
+                local crater_depth_here = (crater_factor ^ 3) * CRATER_DEPTH
+                local crater_floor = volcano_height - crater_depth_here
+                for y = math.max(minp.y, ocean_floor_here), math.min(maxp.y, volcano_height + 10) do
+                    if not area:contains(x, y, z) then goto continue_y2 end
+                    local vi = area:index(x, y, z)
+                    local height_from_base = y - ocean_floor_here
+                    local progress = height_from_base / total_cone_height
+                    local cone_radius_at_y = VOLCANO_RADIUS * (height_factor ^ 2) * (1.0 - progress ^ 1.5)
+                    local inside_cone = dist <= cone_radius_at_y
+                    if in_crater and y >= crater_floor and y <= volcano_height then
+                        local crater_center_floor = volcano_height - CRATER_DEPTH
+                        local lava_level = crater_center_floor + 55
+                        -- ✦ ÚNICA DIFERENÇA: bluelava no lugar de lava
+                        if y <= lava_level then data[vi] = C.bluelava else data[vi] = C.air end
+                    elseif inside_cone and y < volcano_height - 3 then
+                        if is_beach_zone and y <= SEA_LEVEL then data[vi] = C.sand else data[vi] = C.basalt end
+                    elseif inside_cone and y <= volcano_height then
+                        if is_beach_zone and y <= SEA_LEVEL + 3 then
+                            data[vi] = C.sand
+                        else
+                            if rng_volcano:next(1, 1000) <= 700 then data[vi] = C.basalt else data[vi] = C.magma end
+                        end
+                    end
+                    ::continue_y2::
+                end
+            end
+        end
+    end
+end
 -- SPAWN ÚNICO DA ESTÁTUA DO CARANGUEJO (próxima ao vulcão)
 local function try_spawn_crab_statue(minp, maxp, volcano_pos)
     if statue_spawned then return end
@@ -1858,8 +1939,7 @@ local function generate_floating_islands(area, data, minp, maxp)
         if sx >= minp.x and sx <= maxp.x and sz >= minp.z and sz <= maxp.z and statue_y >= minp.y and statue_y <= maxp.y and area:contains(sx, statue_y, sz) then
             local vi = area:index(sx, statue_y, sz)
             data[vi] = C.sentinelstatue
-            -- Salva a posição da estátua do sentinela
-            sentinel_pos = { x = sx, y = statue_y, z = sz } -- ADICIONE ESTA LINHA
+            sentinel_pos = xyz(sx, statue_y, sz) -- Salva a posição da estátua do sentinela
         end
     end
     -- Salva o topo da ilha mais BAIXA para o comando /lowisland
@@ -1874,7 +1954,7 @@ local function generate_floating_islands(area, data, minp, maxp)
         local top_variation = math.floor(get_top_variation(lx, lz))
         local low_y = lowest.base_y + top_variation + 1
         if lx >= minp.x and lx <= maxp.x and lz >= minp.z and lz <= maxp.z and low_y >= minp.y and low_y <= maxp.y and area:contains(lx, low_y, lz) then
-            lowest_island_pos = { x = lx, y = low_y, z = lz }
+            lowest_island_pos = xyz(lx, low_y, lz)
         end
     end
 end
@@ -2115,10 +2195,11 @@ local function try_spawn_tent(area, data, minp, maxp)
         for x = minp.x, maxp.x do
             if (x * x + z * z) <= (TENT_SEARCH_RADIUS * TENT_SEARCH_RADIUS) then
                 for y = SEA_LEVEL + 1, SEA_LEVEL + 6 do
-                    local base_pos = { x = x, y = y, z = z }
-                    if area:contains(x, y, z) and can_spawn_tent(area, data, base_pos) then
-                        spawn_tent(area, data, base_pos)
-                        place_tent_chest(area, data, base_pos)
+                    local candidate = xyz(x, y, z)   -- ← local, só para teste
+                    if area:contains(x, y, z) and can_spawn_tent(area, data, candidate) then
+                        spawn_tent(area, data, candidate)
+                        place_tent_chest(area, data, candidate)
+                        tent_pos = candidate          -- ← só salva se realmente gerou
                         tent_generated = true
                         return true
                     end
@@ -2219,10 +2300,21 @@ c.register_on_generated(function(minp, maxp)
     -- Ilhas flutuantes
     generate_floating_islands(area, data, minp, maxp)
     -- Gera ilha vulcânica se o chunk estiver próximo
-    if chunk_near_volcano then
-        generate_volcano(area, data, minp, maxp, volcano_pos)
+    if chunk_near_volcano then generate_volcano(area, data, minp, maxp, volcano_pos)
         --add_eruption_effects(area, data, minp, maxp, volcano_pos)
     end
+    -- Encontra/define posição do vulcão 2
+    local volcano2_pos = find_volcano2_position()
+    -- Verifica se este chunk está próximo do vulcão 2
+    local chunk_near_volcano2 = false
+    if volcano2_pos then
+        local chunk_center_x = (minp.x + maxp.x) / 2
+        local chunk_center_z = (minp.z + maxp.z) / 2
+        local dist2 = math.sqrt((chunk_center_x - volcano2_pos.x) ^ 2 + (chunk_center_z - volcano2_pos.z) ^ 2)
+        chunk_near_volcano2 = dist2 < (VOLCANO_RADIUS + 80)
+    end
+    -- Gera vulcão 2 se o chunk estiver próximo
+    if chunk_near_volcano2 then generate_volcano2(area, data, minp, maxp, volcano2_pos) end
     -- Gera decorações (árvores, arbustos, etc)
     local decorations = generate_decorations(minp, maxp, heights, biome_factors, noise_maps)
     local palm_leaf_rotations, pebble_positions = apply_decorations(area, data, param2_data, decorations)
@@ -2434,46 +2526,38 @@ local function make_slope_lbm(cfg)
     local function is_passthrough(p)
         local cid = get_cid(p)
         if not passable[cid] then return false end
-        return solid[get_cid({ x = p.x, y = p.y - 1, z = p.z })] == true
+        return solid[get_cid(xyz(p.x, p.y - 1, p.z))] == true
     end
 
     local function action(pos)
-        if req_air and c.get_node({ x = pos.x, y = pos.y + 1, z = pos.z }).name ~= "air" then return end
-
+        if req_air and c.get_node(xyz(pos.x, pos.y + 1, pos.z)).name ~= "air" then return end
         local x, y, z = pos.x, pos.y, pos.z
-
         local b = {
             north = is_edge(xyz(x, y, z - 1)),
             south = is_edge(xyz(x, y, z + 1)),
             east  = is_edge(xyz(x + 1, y, z)),
-            west  = is_edge({ x = x - 1, y = y, z = z }),
-        }
+            west  = is_edge(xyz(x - 1, y, z))}
         local s = {
             north = is_solid(xyz(x, y, z - 1)),
             south = is_solid(xyz(x, y, z + 1)),
             east  = is_solid(xyz(x + 1, y, z)),
-            west  = is_solid(xyz(x - 1, y, z)),
-        }
-
+            west  = is_solid(xyz(x - 1, y, z))}
         local drops = {}
         if b.north then drops[#drops + 1] = "south" end
         if b.south then drops[#drops + 1] = "north" end
         if b.east then drops[#drops + 1] = "west" end
         if b.west then drops[#drops + 1] = "east" end
-
         local any_below = b.north or b.south or b.east or b.west
-
         -- PRIORIDADE 1: INSIDE CORNER
         if not any_below then
             local ic_cases = {
-                { s.south and s.west, xyz(x - 1, y, z + 1), 2 },
-                { s.west and s.north, xyz(x - 1, y, z - 1), 1 },
-                { s.north and s.east, xyz(x + 1, y, z - 1), 0 },
-                { s.east and s.south, xyz(x + 1, y, z + 1), 3 },
-            }
+                {s.south and s.west, xyz(x - 1, y, z + 1), 2},
+                {s.west and s.north, xyz(x - 1, y, z - 1), 1},
+                {s.north and s.east, xyz(x + 1, y, z - 1), 0},
+                {s.east and s.south, xyz(x + 1, y, z + 1), 3}}
             for _, ic in ipairs(ic_cases) do
                 if ic[1] and is_passthrough(ic[2]) then
-                    c.set_node(pos, { name = nodes.insidecorner, param2 = ic[3] })
+                    c.set_node(pos, {name = nodes.insidecorner, param2 = ic[3]})
                     if do_clear then clear_above(pos) end
                     if on_ic then on_ic(pos) end
                     return
@@ -2600,71 +2684,63 @@ make_slope_lbm({
 
 c.register_abm({
     name = "nh_terrain:grass_conversion2",
-    nodenames = { "nh_nodes:top_grass2" },
+    nodenames = {"nh_nodes:top_grass2"},
     interval = 1,
     chance = 2,
     catch_up = true,
     action = function(pos, node)
         local x, y, z = pos.x, pos.y, pos.z
         local current = c.get_node(pos).name
-
         local function is_solid_below(p)
-            return SOLID_GRASS[gcid(c.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)] == true
+            return SOLID_GRASS[gcid(c.get_node(xyz(p.x, p.y - 1, p.z)).name)] == true
         end
         local function is_solid_same(p)
             return SOLID_GRASS[gcid(c.get_node(p).name)] == true
         end
-
         local function is_passthrough(p)
             local cid = gcid(c.get_node(p).name)
             if not PASSABLE[cid] then return false end
-
-            local below_diag = gcid(c.get_node({ x = p.x, y = p.y - 1, z = p.z }).name)
+            local below_diag = gcid(c.get_node(xyz(p.x, p.y - 1, p.z)).name)
             return SOLID_GRASS[below_diag] == true
         end
-
         local below = {
-            north = is_solid_below({ x = x, y = y, z = z - 1 }),
-            south = is_solid_below({ x = x, y = y, z = z + 1 }),
-            east  = is_solid_below({ x = x + 1, y = y, z = z }),
-            west  = is_solid_below({ x = x - 1, y = y, z = z }),
+            north = is_solid_below(xyz(x, y, z - 1)),
+            south = is_solid_below(xyz(x, y, z + 1)),
+            east  = is_solid_below(xyz(x + 1, y, z)),
+            west  = is_solid_below(xyz(x - 1, y, z)),
         }
-
         local same = {
-            north = is_solid_same({ x = x, y = y, z = z - 1 }),
-            south = is_solid_same({ x = x, y = y, z = z + 1 }),
-            east  = is_solid_same({ x = x + 1, y = y, z = z }),
-            west  = is_solid_same({ x = x - 1, y = y, z = z }),
+            north = is_solid_same(xyz(x, y, z - 1)),
+            south = is_solid_same(xyz(x, y, z + 1)),
+            east  = is_solid_same(xyz(x + 1, y, z)),
+            west  = is_solid_same(xyz(x - 1, y, z)),
         }
-
         local drops = {}
         if below.north then table.insert(drops, "south") end
         if below.south then table.insert(drops, "north") end
         if below.east then table.insert(drops, "west") end
         if below.west then table.insert(drops, "east") end
-
         local any_below = below.north or below.south or below.east or below.west
-
         -- PRIORIDADE 1: INSIDE CORNER
         -- Roda para top_grass e grass
         if not any_below then
-            if same.south and same.west and is_passthrough({ x = x - 1, y = y, z = z + 1 }) then
-                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 2 })
+            if same.south and same.west and is_passthrough(xyz(x - 1, y, z + 1)) then
+                c.set_node(pos, {name = "nh_nodes:top_grass_insidecorner", param2 = 2})
                 clear_above(pos)
                 return
             end
-            if same.west and same.north and is_passthrough({ x = x - 1, y = y, z = z - 1 }) then
-                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 1 })
+            if same.west and same.north and is_passthrough(xyz(x - 1, y, z - 1)) then
+                c.set_node(pos, {name = "nh_nodes:top_grass_insidecorner", param2 = 1})
                 clear_above(pos)
                 return
             end
-            if same.north and same.east and is_passthrough({ x = x + 1, y = y, z = z - 1 }) then
-                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 0 })
+            if same.north and same.east and is_passthrough(xyz(x + 1, y, z - 1)) then
+                c.set_node(pos, {name = "nh_nodes:top_grass_insidecorner", param2 = 0})
                 clear_above(pos)
                 return
             end
-            if same.east and same.south and is_passthrough({ x = x + 1, y = y, z = z + 1 }) then
-                c.set_node(pos, { name = "nh_nodes:top_grass_insidecorner", param2 = 3 })
+            if same.east and same.south and is_passthrough(xyz(x + 1, y, z + 1)) then
+                c.set_node(pos, {name = "nh_nodes:top_grass_insidecorner", param2 = 3})
                 clear_above(pos)
                 return
             end
@@ -2702,9 +2778,7 @@ c.register_abm({
 -- Pré-geração da área
 c.after(1, function()
     c.log("action", "[terrain] Pre-generating spawn area...")
-    c.emerge_area(
-        { x = -48, y = -16, z = -48 },
-        { x = 48, y = 80, z = 48 },
+    c.emerge_area(xyz(-48, -16, -48), xyz(48, 80, 48),
         function(blockpos, action, calls_remaining)
             if calls_remaining == 0 then c.log("action", "[terrain] Spawn area successfully pre-generated") end
         end)
@@ -2718,15 +2792,37 @@ c.register_chatcommand("origin", {
         local player = c.get_player_by_name(name)
         if not player then return false, S("Player not found") end 
         -- Teleporta 2 blocos acima da estátua
-        local tp_pos = { x = 0, y = 50, z = 0 }
+        local tp_pos = xyz(0, 50, 0)
         player:set_pos(tp_pos)
         return true, S("Teleported to the origin at X: 0 Y: 50 Z: 0") end,
+})
+
+-- COMANDO PARA IR ATÉ A TENDA
+c.register_chatcommand("tent", {
+    description = S"Teleport to the tent",
+    privs = { teleport = true },
+    func = function(name)
+        local player = c.get_player_by_name(name)
+        if not player then return false, S"Player not found" end
+        if not tent_pos then return false, S"The tent has not yet been generated. Explore the area near spawn first" end
+        local tp = xyz(tent_pos.x + 3, tent_pos.y, tent_pos.z + 3)
+        player:set_pos(tp)
+        return true, S"Teleported to the tent at X:" .. tp.x .. " Y:" .. tp.y .. " Z:" .. tp.z
+    end,
+})
+-- Comando para só ver as coordenadas sem teleportar
+c.register_chatcommand("local_tent", {
+    description = S"Shows the coordinates of the tent",
+    func = function(name)
+        if not tent_pos then return false, S("The tent has not yet been generated. Explore the area near spawn first") end
+        return true, S"Tent at X:" .. tent_pos.x .. " Y:" .. tent_pos.y .. " Z:" .. tent_pos.z
+    end,
 })
 
 -- COMANDO PARA IR ATÉ A CASA
 c.register_chatcommand("house", {
     description = S("Teleport to the house"),
-    privs = { teleport = true },
+    privs = {teleport = true},
     func = function(name)
         local player = c.get_player_by_name(name)
         if not player then return false, S("Player not found") end
@@ -2763,21 +2859,17 @@ c.register_chatcommand("local_ship", {
 
 -- COMANDO PARA ENCONTRAR O VULCÃO
 c.register_chatcommand("vulcan", {
-    description = S("Teleport to the volcanic island"),
-    privs = { teleport = true }, -- Requer privilégio de teleporte
+    description = S"Teleport to the volcanic island",
+    privs = {teleport = true}, -- Requer privilégio de teleporte
     func = function(name)
         local player = c.get_player_by_name(name)
-        if not player then return false, S("Player not found") end
+        if not player then return false, S"Player not found" end
         local volcano_pos = find_volcano_position()
-        if not volcano_pos then return false, S("The volcano has not yet been generated. Please wait a moment") end
+        if not volcano_pos then return false, S"The volcano has not yet been generated. Please wait a moment" end
         -- Teleporta para o topo do vulcão
-        local tp_pos = {
-            x = volcano_pos.x - 8,
-            y = VOLCANO_HEIGHT - 1, -- Pouco abaixo da altura da cratera
-            z = volcano_pos.z - 8
-        }
+        local tp_pos = xyz(volcano_pos.x - 8, VOLCANO_HEIGHT - 1, volcano_pos.z - 8)
         player:set_pos(tp_pos)
-        return true, S("Teleported to the volcano in X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z) end,
+        return true, S"Teleported to the volcano in X:" .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z) end,
 })
 -- Comando alternativo sem necessidade de privilégios (para testes)
 c.register_chatcommand("local_vulcan", {
@@ -2807,6 +2899,29 @@ c.register_chatcommand("local_crab", {
     func = function(name)
         if not statue_pos then return false, S("The crab statue has not yet been generated. Explore the volcano area first") end
         return true, S("Giant crab statue at X:") .. statue_pos.x .. " Y:" .. statue_pos.y .. " Z:" .. statue_pos.z end,
+})
+
+-- COMANDO PARA ENCONTRAR O VULCÃO
+c.register_chatcommand("vulcan2", {
+    description = S"Teleport to the volcanic island",
+    privs = {teleport = true}, -- Requer privilégio de teleporte
+    func = function(name)
+        local player = c.get_player_by_name(name)
+        if not player then return false, S"Player not found" end
+        local volcano_pos = find_volcano2_position()
+        if not volcano_pos then return false, S"The volcano has not yet been generated. Please wait a moment" end
+        -- Teleporta para o topo do vulcão
+        local tp_pos = xyz(volcano_pos.x - 8, VOLCANO_HEIGHT - 1, volcano_pos.z - 8)
+        player:set_pos(tp_pos)
+        return true, S"Teleported to the volcano in X:" .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z) end,
+})
+-- Comando alternativo sem necessidade de privilégios (para testes)
+c.register_chatcommand("local_vulcan2", {
+    description = S("Shows the coordinates of the volcanic island"),
+    func = function(name)
+        local volcano_pos = find_volcano2_position()
+        if not volcano_pos then return false, S("The volcano has not yet been generated. Please wait a moment") end
+        return true, S("Volcanic island at X:") .. math.floor(volcano_pos.x) .. " Z:" .. math.floor(volcano_pos.z) end,
 })
 
 -- COMANDO PARA IR ATÉ O MAR DE AR

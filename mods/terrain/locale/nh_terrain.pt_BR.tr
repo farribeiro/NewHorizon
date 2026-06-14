@@ -4,6 +4,12 @@ Teleport to the origin=Teleporta para a origem
 Player not found=Jogador não encontrado
 Teleported to the origin at X: 0 Y: 50 Z: 0=Teleportado para a origem em X: 0 Y: 50 Z: 0
 
+Teleport to the tent=Teleporta para a tenda
+The tent has not yet been generated. Explore the area near spawn first=A casa ainda não foi gerada. Explore primeiro a área próxima ao ponto de partida
+Teleported to the tent at X:=Teleportado para a casa em X:
+Shows the coordinates of the tent=Mostra coordenadas para a casa
+House at X:=Tenda em X:
+
 Teleport to the house=Teleporta para a casa
 Shows the coordinates of the house=Mostra coordenadas para a casa
 The house has not yet been generated. Explore the area near spawn first=A casa ainda não foi gerada. Explore primeiro a área próxima ao ponto de partida
