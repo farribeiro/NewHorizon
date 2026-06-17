@@ -4988,8 +4988,209 @@ c.register_node("nh_nodes:cowhide", {
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.3, 0.5}},
 })
 
+-- ESTADO E FUNÇÕES AUXILIARES
+local sleeping_players = {} -- [player_name] = {pos = {x,y,z}} - Tabela para a posição da cama de cada jogador
+local dreaming_players = {} -- [player_name] = true enquanto está no sonho
+local saved_privs = {}      -- privilégios originais, para restaurar depois
+--4995
+-- BLOQUEIOS GLOBAIS (registrar uma única vez no mod)
+-- Impede quebrar blocos durante o sonho
+c.register_on_dignode(function(pos, oldnode, digger)
+    if digger and digger:is_player() and dreaming_players[digger:get_player_name()] then c.set_node(pos, oldnode) -- repõe o node, anulando a escavação
+        return false
+    end
+end)
+-- Impede colocar blocos durante o sonho
+c.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
+    if placer and placer:is_player() and dreaming_players[placer:get_player_name()] then c.set_node(pos, oldnode) -- desfaz a colocação
+        return true -- true = trata como recusado, não consome o item
+    end
+end)
+-- Impede dropar itens durante o sonho.
+-- Não existe core.register_on_dropitem na engine: o drop é feito pelo
+-- callback on_drop de cada item, cujo padrão é core.item_drop.
+-- A forma robusta de bloquear globalmente é sobrescrever essa função builtin.
+local original_item_drop = c.item_drop
+c.item_drop = function(itemstack, dropper, pos)
+    if dropper and dropper:is_player() and dreaming_players[dropper:get_player_name()] then return itemstack end -- devolve o item intacto, sem soltar nada no mundo
+    return original_item_drop(itemstack, dropper, pos)
+end
+-- Impede coletar (pickup) itens dropados no mundo durante o sonho
+c.register_on_item_pickup(function(itemstack, picker)
+    if picker and picker:is_player() and dreaming_players[picker:get_player_name()] then return ItemStack("") end -- não coleta nada
+end)
+-- FUNÇÕES PARA ENTRAR/SAIR DO MODO SONHO
+local function enter_dream_mode(player)
+    local player_name = player:get_player_name()
+    dreaming_players[player_name] = true
+    -- Salva os privilégios atuais para restaurar depois
+    saved_privs[player_name] = c.get_player_privs(player_name)
+    -- Concede fly (e noclip, opcional) temporariamente
+    local privs = c.get_player_privs(player_name)
+    privs.fly = true
+    privs.noclip = true -- remova esta linha se não quiser atravessar blocos
+    c.set_player_privs(player_name, privs)
+    -- Remove a gravidade (o privilégio fly + gravity = 0 já permite voar)
+    player:set_physics_override({speed = 1, jump = 1, gravity = 0})
+    -- Visual de sonho: saturação estourada + aspecto leitoso/embaçado
+    player:set_lighting({
+        saturation = 5,           -- cores ainda bem vivas
+        shadows = {intensity = 2}, -- sem sombras escuras, para não "sujar" o efeito leitoso
+        exposure = {
+            luminance_min = -5.0, -- força a imagem para um tom mais claro
+            luminance_max = -5.0,
+            exposure_correction = 0.6, -- clareia a exposição geral (valores positivos = mais claro)
+        },
+        bloom = {
+            intensity = 10,      -- principal responsável pelo efeito "leitoso"/embaçado
+            strength_factor = 3.0, -- intensifica o vazamento de luz sobre a cena
+            radius = 3.0,          -- espalha o brilho por uma área maior, suavizando contornos
+        },
+    })
+end
+local function exit_dream_mode(player_name)
+    dreaming_players[player_name] = nil
+    local player = c.get_player_by_name(player_name)
+    if not player then saved_privs[player_name] = nil return end
+    if saved_privs[player_name] then
+        c.set_player_privs(player_name, saved_privs[player_name])
+        saved_privs[player_name] = nil
+    end
+    player:set_physics_override({speed = 1, jump = 1, gravity = 1})
+    player:set_lighting(nil)  -- Restaura a iluminação/contraste padrão
+end
+
+-- Função auxiliar para criar/atualizar o fade da tela
+local function sleep_fade(player_name, step, total_steps, callback)
+    local player = c.get_player_by_name(player_name)
+    if not player then return end
+    local meta = player:get_meta()
+    local hud_id = meta:get_int("sleepingbag_hud_id")
+    local alpha = math.floor((step / total_steps) * 255)
+    if step == 0 then
+        hud_id = player:hud_add({
+            hud_elem_type = "image",
+            position = {x = 0, y = 0},
+            offset = {x = 0, y = 0},
+            alignment = {x = 1, y = 1},
+            scale = {x = -100, y = -100},
+            text = "fade_black.png^[opacity:" .. alpha,
+            z_index = 1000,
+        })
+        meta:set_int("sleepingbag_hud_id", hud_id)
+    else player:hud_change(hud_id, "text", "fade_black.png^[opacity:" .. alpha)
+    end
+    if step >= total_steps then callback(player)
+    else c.after(0.1, function() sleep_fade(player_name, step + 1, total_steps, callback) end)
+    end
+end
+
+-- Fade reverso (de preto para transparente) - usado ao "acordar"
+local function sleep_fade_out(player_name, step, total_steps, callback)
+    local player = c.get_player_by_name(player_name)
+    if not player then return end
+    local meta = player:get_meta()
+    local hud_id = meta:get_int("sleepingbag_hud_id")
+    local alpha = math.floor(((total_steps - step) / total_steps) * 255)
+    if hud_id and hud_id ~= 0 then player:hud_change(hud_id, "text", "fade_black.png^[opacity:" .. alpha) end
+    if step >= total_steps then if callback then callback(player) end
+    else c.after(0.1, function() sleep_fade_out(player_name, step + 1, total_steps, callback) end)
+    end
+end
+
+-- Remove o HUD e restaura os controles do jogador
+local function sleep_wake_up(player)
+    if not player then return end
+    local meta = player:get_meta()
+    local hud_id = meta:get_int("sleepingbag_hud_id")
+    if hud_id and hud_id ~= 0 then
+        player:hud_remove(hud_id)
+        meta:set_int("sleepingbag_hud_id", 0)
+    end
+    player:set_physics_override({speed = 1, jump = 1, gravity = 1})
+end
+
+-- Formspec do menu de escolha
+local function show_sleep_menu(player)
+    local formspec = "formspec_version[4]" ..
+        "size[6,3.2]" ..
+        "label[0.5,0.6;" .. c.formspec_escape(S"I think I'll go to sleep...") .. "]" ..
+        "button_exit[0.3,1.4;1.8,0.8;sleep_cancel;" .. c.formspec_escape(S("Cancel")) .. "]" ..
+        "button[2.1,1.4;1.8,0.8;sleep_sleep;" .. c.formspec_escape(S"Sleep") .. "]" ..
+        "button[3.9,1.4;1.8,0.8;sleep_dream;" .. c.formspec_escape(S"Dream") .. "]"
+    c.show_formspec(player:get_player_name(), "nh_nodes:sleep_menu", formspec)
+end
+-- AÇÕES DE CADA BOTÃO
+-- Cancelar: sai da cama sem dormir, restaura tudo
+local function action_cancel(player_name)
+    local player = c.get_player_by_name(player_name)
+    if not player then return end
+    player:set_physics_override({speed = 1, jump = 1, gravity = 1})
+    sleeping_players[player_name] = nil
+end
+local function close_sleep_menu(player_name) c.show_formspec(player_name, "nh_nodes:sleep_menu", "") end
+-- Dormir: fade normal + pula o tempo
+local function action_sleep(player_name)
+    close_sleep_menu(player_name)
+    sleep_fade(player_name, 0, 30, function(player)
+        c.set_timeofday(0.25)
+        c.chat_send_player(player_name, S"I slept and it's already dawn!")
+        c.after(0.5, function()
+            sleep_wake_up(c.get_player_by_name(player_name))
+            sleeping_players[player_name] = nil
+        end)
+    end)
+end
+-- Sonhar: fade + tp para 0,0,0, libera movimento, depois de 1 minuto volta para a cama
+local function action_dream(player_name)
+    close_sleep_menu(player_name)
+    local bed_pos = sleeping_players[player_name] and sleeping_players[player_name].pos
+    sleep_fade(player_name, 0, 30, function(player)
+        if not player then return end
+        -- Entra no modo espectador/sonho: voa, sem gravidade, sem minerar/colocar/dropar/coletar
+        enter_dream_mode(player)
+        player:set_pos({x = 0, y = 50, z = 0})
+        c.chat_send_player(player_name, S("This is a dream?..."))
+        -- Faz o fade voltar ao normal (revela o cenário do sonho)
+        sleep_fade_out(player_name, 0, 10, function()
+            -- Depois de 1 minuto, retorna o jogador para a cama
+            c.after(60, function()
+                local p = c.get_player_by_name(player_name)
+                if not p then
+                    sleeping_players[player_name] = nil
+                    exit_dream_mode(player_name)
+                    return
+                end
+                -- Fade para preto antes de voltar
+                sleep_fade(player_name, 0, 20, function(pl)
+                    if not pl then return end
+                    -- Sai do modo sonho ANTES de teleportar de volta
+                    exit_dream_mode(player_name)
+                    if bed_pos then pl:set_pos(xyz(bed_pos.x, bed_pos.y, bed_pos.z)) end
+                    c.set_timeofday(0.25)
+                    c.chat_send_player(player_name, S"I wake up from the dream. It's already dawn!")
+                    c.after(0.5, function()
+                        sleep_wake_up(c.get_player_by_name(player_name))
+                        sleeping_players[player_name] = nil
+                    end)
+                end)
+            end)
+        end)
+    end)
+end
+-- CALLBACK DO FORMSPEC
+c.register_on_player_receive_fields(function(player, formname, fields)
+    if formname ~= "nh_nodes:sleep_menu" then return end
+    local player_name = player:get_player_name()
+    if not sleeping_players[player_name] then return end
+    if fields.sleep_cancel or fields.quit then action_cancel(player_name)
+    elseif fields.sleep_sleep then action_sleep(player_name)
+    elseif fields.sleep_dream then action_dream(player_name) end
+end)
+
+-- NODE
 c.register_node("nh_nodes:sleepingbag", {
-    description = S("Sleeping Bag"),
+    description = S"Sleeping Bag",
     drawtype = "mesh",
     mesh = "sleepingbag.obj",
     tiles = {"sleepingbag.png"},
@@ -5000,11 +5201,28 @@ c.register_node("nh_nodes:sleepingbag", {
     collision_box = {type = "fixed", fixed = {-0.5, -0.5, -1.5, 0.5, -0.35, 1.5}},
     selection_box = {type = "fixed", fixed = {-0.5, -0.5, -1.5, 0.5, -0.35, 1.5}},
     on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
-        local time = minetest.get_timeofday()
-        local is_night = time > 0.75 or time < 0.25 -- Noite: depois das 18h (0.75) ou antes das 6h (0.25)
-        if not is_night then core.chat_send_player(clicker:get_player_name(), "I'll only be able to sleep at night!") return itemstack end
-        core.set_timeofday(0.25) -- Avança o tempo para o amanhecer (6h da manhã = 0.25)
-        core.chat_send_player(clicker:get_player_name(), "I slept and it's already dawn!")
+        local time = c.get_timeofday()
+        local is_night = time > 0.75 or time < 0.25
+        if not is_night then c.chat_send_player(clicker:get_player_name(), S("I'll only be able to sleep at night!"))
+            return itemstack
+        end
+        -- Teleporta o jogador para a posição do saco de dormir
+        clicker:set_pos(xyz(pos.x, pos.y, pos.z))
+        -- Calcula a direção do facedir e aplica a rotação ao jogador
+        local dir = c.facedir_to_dir(node.param2)
+        local yaw = c.dir_to_yaw(dir)
+        clicker:set_look_horizontal(yaw)
+        -- Congela o movimento do jogador
+        clicker:set_physics_override({speed = 0, jump = 0, gravity = 0})
+        local player_name = clicker:get_player_name()
+        -- Guarda a posição da cama para uso posterior (ex: retorno do sonho)
+        sleeping_players[player_name] = {pos = xyz(pos.x, pos.y, pos.z)}
+        -- Pausa inicial de 0.5s antes de mostrar o menu
+        c.after(0.5, function()
+            local player = c.get_player_by_name(player_name)
+            if not player then sleeping_players[player_name] = nil return end
+            show_sleep_menu(player)
+        end)
         return itemstack
     end,
 })
