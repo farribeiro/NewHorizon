@@ -334,8 +334,9 @@ c.register_on_leaveplayer(function(player)
 end)
 -- RECEITAS BASICAS (2x2) - Nodes do chão
 recipes_floor = {
-    {ingredients = {["nh_nodes:pebble"] = 2},
-        output = "nh_nodes:chippedstone"
+    {ingredients = {["nh_nodes:pebble"] = 1},
+        output = "nh_nodes:chippedstone",
+        required_tool = "nh_nodes:pebble" -- ← só faz com isso no slot
     },
     {ingredients = {["nh_nodes:pebble_item"] = 1},
         output = "nh_nodes:chippedstone",
@@ -533,9 +534,19 @@ recipes_table = {
         output = "nh_nodes:obsidiansword",
         required_tool = "nh_nodes:rowing" -- ← só faz com isso no slot
     },
+    {ingredients = {["nh_nodes:oakdowel"] = 4, ["nh_nodes:oakboard"] = 2},
+        output = "nh_nodes:advanced_bench"
+    },
 }
 -- Injeta as receitas do floor no início das recitas da mesa
 for i, r in ipairs(recipes_floor) do table.insert(recipes_table, i, r) end
+-- RECEITAS DA advanced bench
+recipes_table2 = {
+    {ingredients = {["nh_nodes:cowhide"] = 6, ["nh_nodes:palmstraw"] = 3},
+        output = "nh_nodes:sleepingbag"
+    },
+}
+for _, r in ipairs(recipes_table) do table.insert(recipes_table2, r) end
 -- RECEITAS DA FOGUEIRA (2x2)
 -- Inclui: alimentos assados
 recipes_campfire = {
@@ -648,24 +659,35 @@ local craft_stations = {}
 -- Registra a entidade de display (compartilhada por todas as estações)
 c.register_entity("nh_nodes:display_item", {
     initial_properties = {
-        visual = "wielditem", visual_size = { x = 0.25, y = 0.25 },
+        visual = "wielditem", visual_size = {x = 0.25, y = 0.25},
         physical = false, collide_with_objects = false,
-        pointable = false, static_save = true, -- Salva entre sessões
+        pointable = false, static_save = true,
         is_visible = true,
     },
     itemstring = "",
     station_pos = nil,
+    item_visual_size = nil,  -- ← campo novo
     on_activate = function(self, staticdata)
         if staticdata and staticdata ~= "" then
             local data = c.deserialize(staticdata)
             if data then
                 self.itemstring = data.itemstring or ""
                 self.station_pos = data.station_pos
-                self.object:set_properties({ wield_item = self.itemstring })
+                self.item_visual_size = data.item_visual_size  -- ← restaura tamanho
+                local props = { wield_item = self.itemstring }
+                if self.item_visual_size then props.visual_size = self.item_visual_size  -- ← aplica tamanho ao recarregar
+                end
+                self.object:set_properties(props)
             end
         end
     end,
-    get_staticdata = function(self) return c.serialize({itemstring = self.itemstring, station_pos = self.station_pos}) end,
+    get_staticdata = function(self)
+        return c.serialize({
+            itemstring = self.itemstring,
+            station_pos = self.station_pos,
+            item_visual_size = self.item_visual_size,  -- ← salva tamanho
+        })
+    end,
     on_step = function(self, dtime)
         self.object:set_velocity(xyz(0))
         self.object:set_acceleration(xyz(0))
@@ -691,28 +713,49 @@ end
 local function update_item_entities(pos, config)
     local meta = c.get_meta(pos)
     local inv = meta:get_inventory()
-    if not inv or inv:get_size("craft") == 0 then return end -- Verifica se o inventário existe antes de continuar
+    if not inv or inv:get_size("craft") == 0 then return end
     remove_item_entities(pos)
     local craft_list = inv:get_list("craft")
     local output_list = inv:get_list("output")
-    if not craft_list or not output_list then return end -- Proteção adicional
-    -- Cria entidades para os slots de craft
+    if not craft_list or not output_list then return end
+    -- Entidades dos slots de craft (sem mudança)
     for i = 1, config.grid_size do
         local stack = craft_list[i]
         if not stack:is_empty() then
             local item_pos = vector.add(pos, config.positions[i])
+            local item_size = config.item_visual_size or {x = 0.25, y = 0.25}
             local obj = c.add_entity(item_pos, "nh_nodes:display_item")
             if obj then
                 local entity = obj:get_luaentity()
                 if entity then
                     entity.itemstring = stack:get_name()
-                    entity.station_pos = pos -- Marca a estação dona
-                    obj:set_properties({ wield_item = stack:get_name() })
+                    entity.station_pos = pos
+                    entity.item_visual_size = item_size  -- ← salva tamanho no campo da entidade
+                    obj:set_properties({wield_item = stack:get_name(), visual_size = item_size})
                 end
             end
         end
     end
-    -- Cria entidade para o resultado
+    -- Entidade do slot de ferramenta (opcional)
+    if config.show_tool_display and config.tool_position then
+        local tool_stack = inv:get_stack("tool", 1)
+        if tool_stack and not tool_stack:is_empty() then
+            local tool_pos = vector.add(pos, config.tool_position)
+            local obj = c.add_entity(tool_pos, "nh_nodes:display_item")
+            if obj then
+                local entity = obj:get_luaentity()
+                if entity then
+                    entity.itemstring = tool_stack:get_name()
+                    entity.station_pos = pos
+                    obj:set_properties({
+                        wield_item = tool_stack:get_name(),
+                        visual_size = {x = 0.3, y = 0.3},
+                    })
+                end
+            end
+        end
+    end
+    -- Entidade do output (sem mudança)
     local output_stack = output_list[1]
     if output_stack and not output_stack:is_empty() then
         local output_pos = vector.add(pos, config.output_position)
@@ -721,8 +764,12 @@ local function update_item_entities(pos, config)
             local entity = obj:get_luaentity()
             if entity then
                 entity.itemstring = output_stack:get_name()
-                entity.station_pos = pos -- Marca a estação dona
-                obj:set_properties({wield_item = output_stack:get_name(), visual_size = { x = 0.35, y = 0.35 }, glow = 1})
+                entity.station_pos = pos
+                obj:set_properties({
+                    wield_item = output_stack:get_name(),
+                    visual_size = { x = 0.35, y = 0.35 },
+                    glow = 1
+                })
             end
         end
     end
@@ -1111,13 +1158,13 @@ local function apply_poison_damage(player, damage_per_tick, total_damage, interv
 end
 
 c.register_node("nh_nodes:dirt_ramp", {
-    description         = "Dirt Ramp",
+    description         = S"Dirt Ramp",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
     mesh                = "grass_slope.obj",
-    tiles               = { "dirt_slope.png" },
-    groups              = { cracky = 3, soil = 1, not_blocking_trains = 1 },
+    tiles               = {"dirt_slope.png"},
+    groups              = {cracky = 3, soil = 1, not_blocking_trains = 1},
     drop                = "nh_nodes:dirt",
     sunlight_propagates = true,
     sounds              = {
@@ -1125,11 +1172,11 @@ c.register_node("nh_nodes:dirt_ramp", {
         dug = {name = "punchtimber3", gain = 0.5}, 
         dig = {name = "punchtimber3", gain = 0.5}, 
         place = {name = "punchtimber3", gain = 0.5}},
-    selection_box       = { type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }}},
-    collision_box       = { type = "fixed", fixed = {{ -0.5, -0.5, -0.5, 0.5, 0.0, 0.5 }, { -0.5, 0.0, 0.0, 0.5, 0.5, 0.5 }}},
+    selection_box       = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5}}},
+    collision_box       = {type = "fixed", fixed = {{-0.5, -0.5, -0.5, 0.5, 0.0, 0.5}, {-0.5, 0.0, 0.0, 0.5, 0.5, 0.5}}},
 })
 c.register_node("nh_nodes:dirt_corner", {
-    description         = S "Dirt Corner",
+    description         = S"Dirt Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1157,7 +1204,7 @@ c.register_node("nh_nodes:dirt_corner", {
 })
 
 c.register_node("nh_nodes:dirt_insidecorner", {
-    description         = S "Dirt Inside Corner",
+    description         = S"Dirt Inside Corner",
     paramtype           = "light",
     paramtype2          = "facedir",
     drawtype            = "mesh",
@@ -1815,10 +1862,12 @@ c.register_node("nh_nodes:copperingot", {
     description = S "Copper Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
-    tiles = { "copperingot.png" },
+    tiles = {"copperingot.png"},
     groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
+    paramtype2 = "facedir",
     walkable = false,
+    selection_box = {type = "fixed", fixed = {-0.186, -0.5, -0.061, 0.186, -0.375, 0.061}},
 })
 
 c.register_node("nh_nodes:tin", {
@@ -1833,10 +1882,10 @@ c.register_node("nh_nodes:tin", {
 })
 
 c.register_node("nh_nodes:tinnugget", {
-    description = S "Tin Nugget",
+    description = S"Tin Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
-    tiles = { "tinnugget.png" },
+    tiles = {"tinnugget.png"},
     groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
@@ -1845,17 +1894,19 @@ c.register_node("nh_nodes:tinnugget", {
 })
 
 c.register_node("nh_nodes:tiningot", {
-    description = S "Tin Ingot",
+    description = S"Tin Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
     tiles = { "tiningot.png" },
     groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
+    paramtype2 = "facedir",
     walkable = false,
+    selection_box = {type = "fixed", fixed = {-0.186, -0.5, -0.061, 0.186, -0.375, 0.061}},
 })
 
 c.register_node("nh_nodes:iron", {
-    description = S "Pyrite" .. "\n" .. S "[Iron Ore]",
+    description = S"Pyrite" .. "\n" .. S"[Iron Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = {"gneiss_ironore.png"},
@@ -1866,7 +1917,7 @@ c.register_node("nh_nodes:iron", {
 })
 
 c.register_node("nh_nodes:ironnugget", {
-    description = S "Iron Nugget",
+    description = S"Iron Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
     tiles = {"ironnugget.png"},
@@ -1878,17 +1929,19 @@ c.register_node("nh_nodes:ironnugget", {
 })
 
 c.register_node("nh_nodes:ironingot", {
-    description = S "Iron Ingot",
+    description = S"Iron Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
-    tiles = { "ironingot.png" },
+    tiles = {"ironingot.png"},
     groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
+    paramtype2 = "facedir",
     walkable = false,
+    selection_box = {type = "fixed", fixed = {-0.186, -0.5, -0.061, 0.186, -0.375, 0.061}},
 })
 
 c.register_node("nh_nodes:nickel", {
-    description = S "Garnierite" .. "\n" .. S "[Nickel Ore]",
+    description = S"Garnierite" .. "\n" .. S"[Nickel Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = {"gneiss_nickelore.png"},
@@ -1897,8 +1950,32 @@ c.register_node("nh_nodes:nickel", {
     offhand_bone_position = {pos = xyz(1.5, 0, 0)},  -- Configuração mão esquerda
 })
 
+c.register_node("nh_nodes:nickelnugget", {
+    description = S"Nickel Nugget",
+    drawtype = "mesh",
+    mesh = "metalnugget.obj",
+    tiles = {"nickelnugget.png"},
+    groups = {oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+})
+
+c.register_node("nh_nodes:nickelingot", {
+    description = S"Nickel Ingot",
+    drawtype = "mesh",
+    mesh = "metalingot.obj",
+    tiles = {"nickelingot.png"},
+    groups = {oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    selection_box = {type = "fixed", fixed = {-0.186, -0.5, -0.061, 0.186, -0.375, 0.061}},
+})
+
 c.register_node("nh_nodes:manganese", {
-    description = S "Pyrolusite" .. "\n" .. S "[Manganese Ore]",
+    description = S"Pyrolusite" .. "\n" .. S"[Manganese Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = {"gneiss_manganeseore.png"},
@@ -1907,8 +1984,32 @@ c.register_node("nh_nodes:manganese", {
     offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
+c.register_node("nh_nodes:manganesenugget", {
+    description = S"Manganese Nugget",
+    drawtype = "mesh",
+    mesh = "metalnugget.obj",
+    tiles = {"manganesenugget.png"},
+    groups = {oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    walkable = false,
+    collision_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+})
+
+c.register_node("nh_nodes:manganeseingot", {
+    description = S"Manganese Ingot",
+    drawtype = "mesh",
+    mesh = "metalingot.obj",
+    tiles = {"manganeseingot.png"},
+    groups = {oddly_breakable_by_hand = 1},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    walkable = false,
+    selection_box = {type = "fixed", fixed = {-0.186, -0.5, -0.061, 0.186, -0.375, 0.061}},
+})
+
 c.register_node("nh_nodes:chromium", {
-    description = S "Chromite" .. "\n" .. S "[Chromium Ore]",
+    description = S"Chromite" .. "\n" .. S"[Chromium Ore]",
     drawtype = "mesh",
     mesh = "copperore.obj",
     tiles = {"gneiss_chromeore.png"},
@@ -1918,10 +2019,10 @@ c.register_node("nh_nodes:chromium", {
 })
 
 c.register_node("nh_nodes:chromiumnugget", {
-    description = S "Chromium Nugget",
+    description = S"Chromium Nugget",
     drawtype = "mesh",
     mesh = "metalnugget.obj",
-    tiles = { "ironnugget.png" },
+    tiles = {"chromiumnugget.png"},
     groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
     walkable = false,
@@ -1933,19 +2034,20 @@ c.register_node("nh_nodes:chromiumingot", {
     description = S "Chromium Ingot",
     drawtype = "mesh",
     mesh = "metalingot.obj",
-    tiles = { "ironingot.png" },
+    tiles = { "chromiumingot.png" },
     groups = {oddly_breakable_by_hand = 1},
     paramtype = "light",
+    paramtype2 = "facedir",
     walkable = false,
-    selection_box = {type = "fixed", fixed = {-0.08, -0.5, -0.08, 0.08, -0.35, 0.08}},
+    selection_box = {type = "fixed", fixed = {-0.186, -0.5, -0.061, 0.186, -0.375, 0.061}},
 })
 
 c.register_node("nh_nodes:peridotite", {
     description = S "Peridotite",
     tiles = {"peridotite.png"},
     groups = {cracky = 3},
-    wielded_bone_position = {pos = { x = 0.5, y = 0.5, z = 1.65 }}, -- Configuração mão direita
-    offhand_bone_position = {pos = { x = 1.5, y = 0, z = 0 }}, -- Configuração mão esquerda
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
 })
 
 c.register_node("nh_nodes:redrock", {
@@ -2454,8 +2556,8 @@ register_craft_station("nh_nodes:campfire", {
     title = "Produção 2x2 na Fogueira", -- Campo obrigatório!
     grid_size = 4,
     positions = {
-        { x = -0.4, y = 0.2, z = -0.25 }, { x = 0.4, y = 0.2, z = -0.25 },
-        { x = -0.4, y = 0.2, z = 0.25 }, { x = 0.4, y = 0.2, z = 0.25 },},
+        xyz(-0.4, 0.2, -0.25), xyz(0.4, 0.2, -0.25),
+        xyz(-0.4, 0.2,  0.25), xyz(0.4, 0.2,  0.25)},
     tool_slot_pos = { x = 3.1, y = 1 }, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.4, 0),
     layers = {{name = S"2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0}},
@@ -3072,7 +3174,7 @@ c.register_node("nh_nodes:spinningtop3", {
     collision_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     selection_box = {type = "fixed", fixed = { -0.125, -0.5, -0.125, 0.125, -0.25, 0.125 }},
     -- Configuração mão direita
-    wielded_bone_position = {pos = { x = -0.25, y = 0.5, z = 0 }, rot = { x = 0, y = 0, z = 45 },},
+    wielded_bone_position = {pos = xyz(-0.25, 0.5, 0), rot = xyz(0, 0, 45)},
     wielded_visual_size = xyz(0.25),
     -- Spawna o mob ao colocar o node no chão
     on_place = function(itemstack, placer, pointed_thing)
@@ -3094,17 +3196,20 @@ register_craft_station("nh_nodes:craft_table", {
     description = S "Production Bench",
     drawtype = "mesh",
     mesh = "craft_table.obj",
-    tiles = { "craft_table.png" },
+    tiles = {"craft_table.png"},
     title = "Bancada de Produção 2x2x2",
     grid_size = 8,
-    wielded_bone_position = {pos = {x = 0.5, y = 0.5, z = 1.65}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = 1.5, y = 0, z = 0}}, -- Configuração mão esquerda
+    paramtype = "light",
+    paramtype2 = "facedir",
+    wielded_bone_position = {pos = xyz(0.5, 0.5, 1.65)}, -- Configuração mão direita
+    offhand_bone_position = {pos = xyz(1.5, 0, 0)}, -- Configuração mão esquerda
     positions = {
-        { x = -0.2, y = 0.7, z = -0.2 }, { x = 0.2, y = 0.7, z = -0.2 },
-        { x = -0.2, y = 0.7, z = 0.2 }, { x = 0.2, y = 0.7, z = 0.2 },
-        { x = -0.2, y = 1.1, z = -0.2 }, { x = 0.2, y = 1.1, z = -0.2 },
-        { x = -0.2, y = 1.1, z = 0.2 }, { x = 0.2, y = 1.1, z = 0.2 },
-    },
+        xyz(-0.2, 0.7, -0.2), xyz(0.2, 0.7, -0.2),
+        xyz(-0.2, 0.7,  0.2), xyz(0.2, 0.7,  0.2),
+        xyz(-0.2, 1.1, -0.2), xyz(0.2, 1.1, -0.2),
+        xyz(-0.2, 1.1,  0.2), xyz(0.2, 1.1,  0.2)},
+    show_tool_display = true,         -- false para não exibir (padrão: não exibe)
+    tool_position = xyz(0, 0, 0),     -- posição relativa ao node
     tool_slot_pos = {x = 5.6, y = 1}, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.7, 0),
     layers = {
@@ -3113,47 +3218,168 @@ register_craft_station("nh_nodes:craft_table", {
     recipes = recipes_table
 })
 
--- Fornalha 3x3 simples
-register_craft_station("nh_nodes:furnace", {
-    description = S "Furnace",
-    title = S "3x3 Furnace",
+-- Bancada Avançada 3x3x3 simples
+register_craft_station("nh_nodes:advanced_bench", {
+    description = S"Advanced Bench",
     drawtype = "mesh",
-    mesh = "furnace.obj",
-    tiles = { "stonefurnace.png" }, --cobblestone.png
-    paramtype = "light",            -- Necessário para iluminação correta
-    paramtype2 = "facedir",         -- IMPORTANTE: paramtype2, não paramtype
-    -- Caixas de colisão e seleção
-    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}},
-    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}},
-    wielded_bone_position = {pos = {x = -2.5, y = -1, z = 0}}, -- Configuração mão direita
-    offhand_bone_position = {pos = {x = -1.5, y = -1, z = 0}}, -- Configuração mão esquerda
+    mesh = "craft_table.obj",
+    tiles = {"craft_table2.png"},
+    title = S"3x3 Advanced Bench",
     grid_size = 9,
+    paramtype = "light",
+    paramtype2 = "facedir",
+    item_visual_size = {x = 0.15, y = 0.15},
     positions = {
-        {x = -0.3, y = 0.9, z = -0.3}, {x = 0, y = 0.9, z = -0.3}, {x = 0.3, y = 0.9, z = -0.3},
-        {x = -0.3, y = 0.9, z = 0}, {x = 0, y = 0.9, z = 0}, {x = 0.3, y = 0.9, z = 0},
-        {x = -0.3, y = 0.9, z = 0.3}, {x = 0, y = 0.9, z = 0.3}, {x = 0.3, y = 0.9, z = 0.3},
-    },
+        xyz(-0.25, 0.61, -0.25), xyz(0, 0.61, -0.25), xyz(0.25, 0.61, -0.25),
+        xyz(-0.25, 0.61, 0),     xyz(0, 0.61, 0),     xyz(0.25, 0.61, 0),
+        xyz(-0.25, 0.61, 0.25),  xyz(0, 0.61, 0.25),  xyz(0.25, 0.61, 0.25)},
+    show_tool_display = true,         -- false para não exibir (padrão: não exibe)
+    tool_position = xyz(0, 0, 0),     -- posição relativa ao node
     tool_slot_pos = {x = 4.3, y = 1}, -- ajusta x e y até ficar no lugar certo
     output_position = xyz(0, 1.2, 0),
-    layers = {{name = S "3x3 Grid", x = 0.5, width = 3, height = 3, start_index = 0}},
-    recipes = recipes_furnace
+    layers = {{name = S"3x3 Grid", x = 0.5, width = 3, height = 3, start_index = 0}},
+    recipes = recipes_table2
 })
 
--- Bancada Avançada 3x3x3 simples (SEM mesh)
-register_craft_station("nh_nodes:advanced_bench", {
-    description = S "Advanced Bench",
-    -- mesh = nil,  -- Opcional
-    tiles = { "" }, --advanced_bench.png
-    title = S "3x3x3 Advanced Bench",
-    grid_size = 4,
-    positions = {
-        {x = -0.2, y = 0.9, z = -0.2 }, {x = 0.2, y = 0.9, z = -0.2},
-        {x = -0.2, y = 0.9, z = 0.2 }, {x = 0.2, y = 0.9, z = 0.2},
+c.register_entity("nh_nodes:furnace_flame_entity", {
+    initial_properties = {
+        physical = false,
+        collide_with_objects = false,
+        selectionbox = { -0.3, -0.5, -0.3, 0.3, 0.5, 0.3 },
+        collisionbox = { -0.3, -0.5, -0.3, 0.3, 0.5, 0.3 },
+        visual = "mesh",
+        mesh = "torchflame.obj",      -- reutiliza a mesh da tocha, troca se tiver uma específica
+        textures = {"fire_basic_flame_animated.png"},
+        visual_size = {x = 20, y = 5},
+        static_save = true,
+        pointable = false,
+        glow = 14,
     },
-    tool_slot_pos = {x = 3.1, y = 1}, -- ajusta x e y até ficar no lugar certo
-    output_position = xyz(0, 1.4, 0),
-    layers = {{ name = S "2x2 Grid", x = 0.5, width = 2, height = 2, start_index = 0 },},
-    recipes = recipes_table
+    _furnace_pos = nil,
+    _timer = 0,
+    _anim_timer = 0,
+    _current_frame = 0,
+    on_activate = function(self, staticdata)
+        if staticdata ~= "" then
+            local data = c.deserialize(staticdata)
+            if data and data.furnace_pos then self._furnace_pos = data.furnace_pos end
+        end
+        self._timer = 0
+        self.object:set_texture_mod("^[verticalframe:8:0")
+    end,
+    get_staticdata = function(self) return c.serialize({furnace_pos = self._furnace_pos}) end,
+    on_step = function(self, dtime)
+        self._timer = self._timer + dtime
+        self._anim_timer = self._anim_timer + dtime
+        if self._anim_timer > (1.0 / 8) then
+            self._anim_timer = 0
+            self._current_frame = (self._current_frame + 1) % 8
+            self.object:set_texture_mod("^[verticalframe:8:" .. self._current_frame)
+        end
+        if self._timer > 0.5 then
+            self._timer = 0
+            if not self._furnace_pos then self.object:remove() return end
+            local node = c.get_node(self._furnace_pos)
+            if node.name ~= "nh_nodes:furnace" then self.object:remove() return end
+            -- Verifica combustível no slot tool
+            local meta = c.get_meta(self._furnace_pos)
+            local inv = meta:get_inventory()
+            local fuel = inv:get_stack("tool", 1):get_name()
+            if fuel ~= "nh_nodes:coalnugget" and fuel ~= "nh_nodes:charcoalnugget" then
+                meta:set_int("has_flame", 0)  -- apaga o estado também
+                self.object:remove()
+                return
+            end
+        end
+    end,
+})
+
+-- Fornalha 3x3 simples
+register_craft_station("nh_nodes:furnace", {
+    description = S"Furnace",
+    title = S"3x3 Furnace",
+    drawtype = "mesh",
+    mesh = "furnace.obj",
+    tiles = {"cobblestone_furnace.png"},
+    paramtype = "light",
+    paramtype2 = "facedir",
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 2.5, 0.5}},
+    wielded_bone_position = {pos = xyz(-2.5, -1, 0)},
+    offhand_bone_position = {pos = xyz(-1.5, -1, 0)},
+    grid_size = 9,
+    positions = {
+        xyz(-0.3, 0.9, -0.3), xyz(0, 0.9, -0.3), xyz(0.3, 0.9, -0.3),
+        xyz(-0.3, 0.9, 0),    xyz(0, 0.9, 0),    xyz(0.3, 0.9, 0),
+        xyz(-0.3, 0.9, 0.3),  xyz(0, 0.9, 0.3),  xyz(0.3, 0.9, 0.3)},
+    show_tool_display = true,
+    tool_position = xyz(0, 0.8, 0),
+    tool_slot_pos = {x = 4.3, y = 1},
+    output_position = xyz(0, 1.2, 0),
+    layers = {{name = S"3x3 Grid", x = 0.5, width = 3, height = 3, start_index = 0}},
+    recipes = recipes_furnace,
+    -- Recria a chama ao carregar o chunk se já estava acesa
+    on_construct = function(pos)
+        local meta = c.get_meta(pos)
+        if meta:get_int("has_flame") == 1 then
+            c.after(0.1, function()
+                local objs = c.get_objects_inside_radius(pos, 1)
+                local has_flame = false
+                for _, obj in ipairs(objs) do
+                    local ent = obj:get_luaentity()
+                    if ent and ent.name == "nh_nodes:furnace_flame_entity" then has_flame = true break end
+                end
+                if not has_flame then
+                    local obj = c.add_entity(pos, "nh_nodes:furnace_flame_entity")
+                    if obj then
+                        local ent = obj:get_luaentity()
+                        if ent then ent._furnace_pos = pos end
+                    end
+                end
+            end)
+        end
+    end,
+    -- Acende com nh_nodes:torch2 (clicando na fornalha com a tocha na mão)
+    on_punch = function(pos, node, puncher, pointed_thing)
+        if not puncher or not puncher:is_player() then return end
+        local meta = c.get_meta(pos)
+        -- Se já está acesa, não faz nada
+        if meta:get_int("has_flame") == 1 then return end
+        local wielded = puncher:get_wielded_item()
+        if wielded:get_name() == "nh_nodes:torch2" then
+            meta:set_int("has_flame", 1)
+            -- Posiciona a chama na boca da fornalha (ajuste o offset conforme o modelo)
+            local flame_pos = vector.add(pos, xyz(0, 0.9, 0))
+            local obj = c.add_entity(flame_pos, "nh_nodes:furnace_flame_entity")
+            if obj then
+                local ent = obj:get_luaentity()
+                if ent then ent._furnace_pos = pos end
+            end
+            c.sound_play("fire_flint_and_steel", {pos = pos, gain = 0.5, max_hear_distance = 8}, true)
+        end
+    end,
+    -- Bloqueia o output se não tiver chama OU se o slot tool estiver vazio/errado
+    can_craft = function(pos)
+        local meta = c.get_meta(pos)
+        -- Verifica chama
+        if meta:get_int("has_flame") ~= 1 then return false, S"The furnace needs to be lit with a torch first..." end
+        -- Verifica combustível no slot tool
+        local inv = meta:get_inventory()
+        local tool_stack = inv:get_stack("tool", 1)
+        local fuel = tool_stack:get_name()
+        if fuel ~= "nh_nodes:coalnugget" and fuel ~= "nh_nodes:charcoalnugget" then
+            return false, S"The furnace needs coal nuggets or charcoal nuggets as fuel..."
+        end
+        return true
+    end,
+    -- Remove a chama ao destruir a fornalha
+    on_destruct = function(pos)
+        local objs = c.get_objects_inside_radius(pos, 1)
+        for _, obj in ipairs(objs) do
+            local ent = obj:get_luaentity()
+            if ent and ent.name == "nh_nodes:furnace_flame_entity" then obj:remove() end
+        end
+    end,
 })
 
 -- Prancha
@@ -3272,7 +3498,7 @@ c.register_node("nh_nodes:torch", {
             -- Troca para tocha acesa mantendo a orientação
             c.set_node(pos, {name = "nh_nodes:torch2", param2 = param2})
             -- Adiciona a chama como entidade (mesmo código do after_place_node)
-            local flame_pos = { x = pos.x, y = pos.y + 1, z = pos.z }
+            local flame_pos = xyz(pos.x, pos.y + 1, pos.z)
             local obj = c.add_entity(flame_pos, "nh_nodes:torch_flame_entity")
             if obj then
                 local ent = obj:get_luaentity()
@@ -3284,12 +3510,12 @@ c.register_node("nh_nodes:torch", {
             c.add_particlespawner({
                 amount = 5,
                 time = 0.1,
-                minpos = vector.subtract(pos, { x = 0.1, y = 0.1, z = 0.1 }),
-                maxpos = vector.add(pos, { x = 0.1, y = 0.3, z = 0.1 }),
-                minvel = { x = -0.5, y = 0.5, z = -0.5 },
-                maxvel = { x = 0.5, y = 1.5, z = 0.5 },
-                minacc = { x = 0, y = -2, z = 0 },
-                maxacc = { x = 0, y = -1, z = 0 },
+                minpos = vector.subtract(pos, xyz(0.1)),
+                maxpos = vector.add(pos, xyz(0.1, 0.3, 0.1)),
+                minvel = xyz(-0.5, 0.5, -0.5),
+                maxvel = xyz(0.5, 1.5, 0.5),
+                minacc = xyz(0, -2, 0),
+                maxacc = xyz(0, -1, 0),
                 minexptime = 0.1,
                 maxexptime = 0.3,
                 minsize = 0.5,
@@ -3396,12 +3622,12 @@ c.register_entity("nh_nodes:torch_flame_entity", {
         physical = false,
         collide_with_objects = false,
         -- Selection box maior e melhor posicionada
-        selectionbox = { -0.2, -0.7, -0.2, 0.2, -0.3, 0.2 },
-        collisionbox = { -0.2, -0.7, -0.2, 0.2, -0.3, 0.2 },
+        selectionbox = {-0.2, -0.7, -0.2, 0.2, -0.3, 0.2},
+        collisionbox = {-0.2, -0.7, -0.2, 0.2, -0.3, 0.2},
         visual = "mesh",
         mesh = "torchflame.obj",
-        textures = { "fire_basic_flame_animated.png" },
-        visual_size = { x = 10, y = 10 },
+        textures = {"fire_basic_flame_animated.png"},
+        visual_size = {x = 10, y = 10},
         static_save = true,
         pointable = true,
         glow = 14,
@@ -3417,7 +3643,7 @@ c.register_entity("nh_nodes:torch_flame_entity", {
         end
         self._timer = 0
         -- Configura a animação da textura
-        self.object:set_sprite({ x = 0, y = 0 }, 1, 1.0, false)
+        self.object:set_sprite({x = 0, y = 0}, 1, 1.0, false)
         self.object:set_texture_mod("^[verticalframe:8:0")
     end,
     get_staticdata = function(self) return c.serialize({torch_pos = self._torch_pos}) end,
@@ -4750,34 +4976,55 @@ c.register_node("nh_nodes:roastbeef", {
 })
 
 c.register_node("nh_nodes:cowhide", {
-    description = S "Bull Fur",
+    description = S"Bull Fur",
     drawtype = "mesh",
     mesh = "cowleather.obj",
     tiles = { "cowleather.png" },
     paramtype = "light",
     walkable = false,
     paramtype2 = "facedir",
-    groups = { snappy = 3, oddly_breakable_by_hand = 1, armor_head = 1 },
-    collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.3, 0.5 }},
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, -0.3, 0.5 }},
+    groups = {oddly_breakable_by_hand = 1},
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.3, 0.5}},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, -0.3, 0.5}},
 })
 
-c.register_node("nh_nodes:inksac", {
-    description = S "Ink Sack" .. "\n" .. S "Portion: 1",
+c.register_node("nh_nodes:sleepingbag", {
+    description = S("Sleeping Bag"),
     drawtype = "mesh",
-    mesh = "inksac.obj",
-    tiles = { "inksac.png" },
+    mesh = "sleepingbag.obj",
+    tiles = {"sleepingbag.png"},
     paramtype = "light",
     walkable = false,
     paramtype2 = "facedir",
-    groups = { oddly_breakable_by_hand = 1 },
-    collision_box = {type = "fixed", fixed = { -0.15, -0.5, -0.25, 0.15, -0.375, 0.25 }},
-    selection_box = {type = "fixed", fixed = { -0.15, -0.5, -0.25, 0.15, -0.375, 0.25 }},
+    groups = {oddly_breakable_by_hand = 1},
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -1.5, 0.5, -0.35, 1.5}},
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -1.5, 0.5, -0.35, 1.5}},
+    on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+        local time = minetest.get_timeofday()
+        local is_night = time > 0.75 or time < 0.25 -- Noite: depois das 18h (0.75) ou antes das 6h (0.25)
+        if not is_night then core.chat_send_player(clicker:get_player_name(), "I'll only be able to sleep at night!") return itemstack end
+        core.set_timeofday(0.25) -- Avança o tempo para o amanhecer (6h da manhã = 0.25)
+        core.chat_send_player(clicker:get_player_name(), "I slept and it's already dawn!")
+        return itemstack
+    end,
+})
+
+c.register_node("nh_nodes:inksac", {
+    description = S"Ink Sack" .. "\n" .. S"Portion: 1",
+    drawtype = "mesh",
+    mesh = "inksac.obj",
+    tiles = {"inksac.png"},
+    paramtype = "light",
+    walkable = false,
+    paramtype2 = "facedir",
+    groups = {oddly_breakable_by_hand = 1},
+    collision_box = {type = "fixed", fixed = {-0.15, -0.5, -0.25, 0.15, -0.375, 0.25}},
+    selection_box = {type = "fixed", fixed = {-0.15, -0.5, -0.25, 0.15, -0.375, 0.25}},
 })
 
 -- VIDRO
 c.register_node("nh_nodes:glass", {
-    description = S "Glass",
+    description = S"Glass",
     drawtype = "glasslike",
     tiles = {"glass.png"},
     groups = {cracky = 3},
@@ -4794,14 +5041,13 @@ c.register_node("nh_nodes:glass", {
 -- Calcula posição da entidade na frente do espelho
 local function get_surface_pos(mirror_pos, param2)
     local dir = facedir_to_dir[param2 % 4] or facedir_to_dir[0]
-    -- 0.44 para ficar colado na face frontal do mesh
-    return vector.add(mirror_pos, vector.multiply(dir, -0.435))
+    return vector.add(mirror_pos, vector.multiply(dir, -0.435)) -- 0.435 para ficar colado na face frontal do mesh
 end
 
 -- Busca o node sólido mais próximo abaixo
 local function get_node_below(pos)
     for dy = 1, 16 do
-        local candidate_pos = vector.new(pos.x, pos.y - dy, pos.z)
+        local candidate_pos = xyz(pos.x, pos.y - dy, pos.z)
         local node = c.get_node(candidate_pos)
         if node.name ~= "air"
             and node.name ~= "ignore"
@@ -4926,10 +5172,10 @@ c.register_node("nh_nodes:mirror", {
                     -- Checa se algum espelho vizinho reivindica esta entidade
                     local claimed_by_neighbor = false
                     local neighbors = {
-                        vector.new(pos.x + 1, pos.y, pos.z),
-                        vector.new(pos.x - 1, pos.y, pos.z),
-                        vector.new(pos.x, pos.y, pos.z + 1),
-                        vector.new(pos.x, pos.y, pos.z - 1),
+                        xyz(pos.x + 1, pos.y, pos.z),
+                        xyz(pos.x - 1, pos.y, pos.z),
+                        xyz(pos.x, pos.y, pos.z + 1),
+                        xyz(pos.x, pos.y, pos.z - 1),
                     }
                     for _, npos in ipairs(neighbors) do
                         local nnode = c.get_node(npos)
@@ -5018,7 +5264,7 @@ end
 
 -- Posição onde a entidade fica: topo da ulexita (y + 0.501, levemente acima)
 local function ulexite_surface_pos(ulexite_pos)
-    return vector.new(ulexite_pos.x, ulexite_pos.y + 0.501, ulexite_pos.z)
+    return xyz(ulexite_pos.x, ulexite_pos.y + 0.501, ulexite_pos.z)
 end
 
 -- Verifica se já existe uma entidade de superfície sobre esta ulexita
@@ -5283,12 +5529,12 @@ c.register_node("nh_nodes:palmstraws", {
     tiles = { "strawstimbertexture.png" },
     stack_max = 4,
     waving = 2,
-    drop = {items = { { items = { "nh_nodes:palmtimber" } }, { items = { "nh_nodes:palmstraw 4" }}, }},
+    drop = {items = {{items = {"nh_nodes:palmtimber"}}, {items = {"nh_nodes:palmstraw 4"}}}},
     paramtype = "light",
     paramtype2 = "facedir",
     groups = {choppy = 3, falling_node = 1, tree_trunk = 1},
-    selection_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },-- Porta na lateral quando aberta
-    collision_box = {type = "fixed", fixed = { -0.5, -0.5, -0.5, 0.5, 0.5, 0.5 } },-- Colisão fina na lateral
+    selection_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},-- Porta na lateral quando aberta
+    collision_box = {type = "fixed", fixed = {-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}},-- Colisão fina na lateral
     -- Som tocado ao bater no tronco medio (2)
     sounds = {dug = {name = "punchtimber2", gain = 0.5}, dig = {name = "punchtimber2", gain = 0.5}},
 })

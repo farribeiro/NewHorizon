@@ -16,7 +16,9 @@ All=Todos
 2x2 Craft on the Gneiss=Produção 2x2 no Gnaisse
 
 3x3 Furnace=Fornalha 3x3
-3x3x3 Advanced Bench=Bancada Avançada 3x3x3
+3x3 Advanced Bench=Bancada Avançada 3x3
+The furnace needs to be lit with a torch first...=Primeiro, é preciso acender a fornalha com uma tocha...
+The furnace needs coal nuggets or charcoal nuggets as fuel...=A fornalha precisa de pepitas de carvão mineral ou vegetal como combustível...
 
 Water=Água
 Flowing Water=Água Corrente
@@ -305,6 +307,10 @@ Raw Beef=Bife Cru
 Nutrition: +3=Nutrição: +3
 Roast Beef=Bife Assado
 Bull Fur=Pele de Touro
+
+Sleeping Bag=Saco de Dormir
+I'll only be able to sleep at night!=Só vou conseguir dormir à noite!
+I slept and it's already dawn!=Dormi e já amanheceu!
 
 Ink Sack=Bolsa de Tinta
 Portion: 1=Porção: 1
