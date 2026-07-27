@@ -371,9 +371,9 @@ local function update_wielded_item(player)
     if item_name == "" or item_name == ":" then return end
     local item_def = c.registered_items[item_name]
     -- VALORES PADRÃO
-    local default_pos = { x = 1.5, y = 0, z = 0 }
-    local default_rot = { x = 0, y = 0, z = -90 }
-    local default_size = { x = 0.15, y = 0.15, z = 0.15 }
+    local default_pos = xyz(1.5, 0, 0)
+    local default_rot = xyz(0, 0, -90)
+    local default_size = xyz(0.15)
     -- VALORES FINAIS (podem ser sobrescritos)
     local final_pos = default_pos
     local final_rot = default_rot
@@ -1206,11 +1206,9 @@ c.register_globalstep(function(dtime)
                     local eye_first, eye_third = player:get_eye_offset()
                     local first_str = c.serialize(eye_first)
                     local third_str = c.serialize(eye_third)
-                    --c.log(player_name, "[SITTING DEBUG] " .. " eye_offset_1st=" .. first_str .. " eye_offset_3rd=" .. third_str) 
 
             -- ── Estado: sentado (pose congelada) ─────────────────────────
             if ss == "sitting" then
-                --c.log(player_name, "IN sitting | sneak_now=" .. tostring(sneak_now) .. " sneak_press=" .. tostring(sneak_press) .. " movement=" .. tostring(movement_key) .. " jump=" .. tostring(ctrl.jump)) -- aqui
                 -- Sai APENAS por: movimento, pulo, ou nova pressão de sneak
                 -- (segurar sneak continuamente desde antes NÃO cancela)
                 if movement_key or ctrl.jump or sneak_press then

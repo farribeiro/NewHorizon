@@ -2416,7 +2416,7 @@ c.register_node("nh_nodes:campfiretinder", {
 
 -- Tronco de carvalho fatiado
 c.register_node("nh_nodes:oaktimberslice", {
-    description = S "Oak Firewood",
+    description = S"Oak Firewood",
     drawtype = "mesh",
     mesh = "oaktimberslice.obj",
     tiles = { "oaktimber.png" },
@@ -6125,7 +6125,7 @@ c.register_node("nh_nodes:avalanche_flowing", {
 })
 
 c.register_node("nh_nodes:water", {
-    description = S "Water",
+    description = S"Water",
     drawtype = "liquid",
     liquidtype = "source",
     tiles = { "agua.png" },
